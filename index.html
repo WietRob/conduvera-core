@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Matrix OS</title>
+    <link rel="stylesheet" href="./node_modules/@xterm/xterm/css/xterm.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000000;
+            color: #00ff00;
+            font-family: monospace;
+        }
+        #matrix-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        #terminal {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            width: 400px;
+            height: 300px;
+            z-index: 2;
+        }
+        #debug-panel {
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            width: 300px;
+            height: 500px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            overflow-y: auto;
+            z-index: 3;
+        }
+        #taskbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 4;
+            display: flex;
+            gap: 10px;
+            padding: 5px;
+        }
+        .taskbar-button {
+            background-color: #00ff00;
+            color: #000000;
+            border: none;
+            padding: 5px 10px;
+            font-family: monospace;
+            cursor: pointer;
+        }
+        .taskbar-button:hover {
+            background-color: #00cc00;
+        }
+        .window {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #00ff00;
+            font-family: monospace;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            z-index: 5;
+            display: none;
+        }
+        .window-header {
+            display: flex;
+            justify-content: space-between;
+            background-color: #00ff00;
+            color: #000000;
+            padding: 5px;
+            font-size: 12px;
+        }
+        .window-content {
+            margin-top: 10px;
+        }
+        .window input, .window textarea, .window button {
+            background-color: #000000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            font-family: monospace;
+            margin: 5px 0;
+            padding: 5px;
+        }
+        .window textarea {
+            width: 100%;
+            height: 100px;
+            resize: none;
+        }
+        .window button {
+            cursor: pointer;
+        }
+        .loading {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <div id="taskbar">
+        <button id="terminal-button" class="taskbar-button">Terminal</button>
+        <button id="cursor-button" class="taskbar-button">Cursor CLI</button>
+        <button id="crypto-button" class="taskbar-button">Crypto</button>
+        <button id="network-button" class="taskbar-button">Network</button>
+        <button id="hacking-button" class="taskbar-button">Hacking</button>
+        <button id="monitoring-button" class="taskbar-button">Monitoring</button>
+    </div>
+    <div id="terminal"></div>
+    <div id="debug-panel">Debug panel initialized</div>
+    <script>console.log('Inline: Script loaded');</script>
+    <script src="renderer.js"></script>
+</body>
+</html>
