@@ -1,0 +1,84 @@
+matrix_os:
+  # Application settings
+  app:
+    title: "Matrix OS - Development Environment"
+    theme: "matrix_green"
+    debug: false
+    auto_save: true
+
+  # Display settings
+  display:
+    fps: 30
+    unicode: true
+    true_color: true
+    mouse_support: true
+
+  # Matrix effects
+  effects:
+    rain:
+      enabled: true
+      density: 0.05  # Probability of new drop per column per second
+      speed_min: 0.5
+      speed_max: 2.0
+      char_set: "katakana_mixed"  # katakana, ascii, mixed, custom
+      fade_length: 15  # Characters to fade
+
+    glitch:
+      enabled: false
+      intensity: 0.3
+      frequency: 0.1
+
+    scanline:
+      enabled: false
+      speed: 1.0
+
+  # Window management
+  windows:
+    default_width: 80
+    default_height: 24
+    border_style: "heavy"  # solid, heavy, double, rounded
+    shadow: true
+    transparency: false
+
+  # Terminal settings
+  terminal:
+    shell: "/bin/bash"
+    scrollback: 10000
+    cursor_blink: true
+    font_size: 14
+
+  # File browser
+  file_browser:
+    show_hidden: false
+    sort_by: "name"  # name, size, date, type
+    reverse_sort: false
+    icons: true
+
+  # Code editor
+  editor:
+    theme: "monokai"
+    tab_size: 4
+    use_spaces: true
+    line_numbers: true
+    syntax_highlighting: true
+    auto_indent: true
+
+  # Keybindings
+  keybindings:
+    quit: "ctrl+q"
+    toggle_rain: "f1"
+    new_window: "ctrl+n"
+    close_window: "ctrl+w"
+    next_window: "ctrl+tab"
+    prev_window: "ctrl+shift+tab"
+    terminal: "ctrl+t"
+    file_browser: "ctrl+f"
+    process_monitor: "ctrl+p"
+    help: "f1"
+
+  # Plugins
+  plugins:
+    enabled: []
+    search_paths:
+      - "~/.config/matrix-os/plugins"
+      - "./plugins"

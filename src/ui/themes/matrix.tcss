@@ -1,0 +1,299 @@
+/* Matrix OS Theme - Green */
+
+Screen {
+    background: $panel-darken-3;
+}
+
+/* Header and Footer */
+Header {
+    dock: top;
+    background: $success-darken-2;
+    color: $text;
+    text-style: bold;
+}
+
+Footer {
+    dock: bottom;
+    background: $panel-darken-1;
+}
+
+/* Windows */
+.window {
+    border: heavy $success;
+    background: $surface;
+    padding: 1 2;
+}
+
+.window-title {
+    background: $success;
+    color: $text;
+    text-style: bold;
+    padding: 0 1;
+}
+
+.window:focus {
+    border: heavy $success-lighten-2;
+}
+
+.window-focused {
+    border: heavy $success-lighten-1;
+}
+
+/* Containers */
+Container {
+    background: $panel;
+    border: solid $success-darken-1;
+}
+
+Horizontal {
+    height: auto;
+}
+
+Vertical {
+    width: auto;
+}
+
+/* Widgets */
+MatrixRain {
+    background: #000000;
+    border: none;
+}
+
+Static {
+    background: $panel;
+    color: $text;
+    padding: 1;
+}
+
+.status-panel {
+    background: $panel-darken-1;
+    border: solid $success;
+    padding: 1;
+    margin: 1;
+}
+
+/* Buttons */
+Button {
+    background: $success-darken-1;
+    color: $text;
+    border: solid $success;
+    margin: 1;
+    min-width: 16;
+}
+
+Button:hover {
+    background: $success;
+    text-style: bold;
+    border: heavy $success-lighten-1;
+}
+
+Button:focus {
+    background: $success;
+    border: heavy $success-lighten-2;
+}
+
+Button.-primary {
+    background: $success;
+    text-style: bold;
+}
+
+/* Input */
+Input {
+    background: $surface;
+    border: solid $success-darken-1;
+    color: $text;
+    margin: 1 0;
+}
+
+Input:focus {
+    border: solid $success;
+}
+
+Input.-invalid {
+    border: solid $error;
+}
+
+/* Labels */
+Label {
+    background: transparent;
+    color: $text;
+    padding: 0 1;
+}
+
+.label-success {
+    color: $success;
+    text-style: bold;
+}
+
+.label-error {
+    color: $error;
+    text-style: bold;
+}
+
+.label-warning {
+    color: $warning;
+    text-style: bold;
+}
+
+/* Tree (File Browser) */
+Tree {
+    background: $panel;
+    color: $text;
+    border: solid $success;
+    scrollbar-background: $panel-darken-1;
+    scrollbar-color: $success;
+}
+
+Tree:focus {
+    border: solid $success-lighten-1;
+}
+
+Tree > .tree--guides {
+    color: $success-darken-1;
+}
+
+Tree > .tree--cursor {
+    background: $success-darken-2;
+    text-style: bold;
+}
+
+/* DataTable (Process Monitor) */
+DataTable {
+    background: $panel;
+    color: $text;
+    border: solid $success;
+}
+
+DataTable:focus {
+    border: solid $success-lighten-1;
+}
+
+DataTable > .datatable--header {
+    background: $success-darken-1;
+    color: $text;
+    text-style: bold;
+}
+
+DataTable > .datatable--cursor {
+    background: $success-darken-2;
+}
+
+/* RichLog (Terminal) */
+RichLog {
+    background: #000000;
+    color: #00FF00;
+    border: solid $success;
+    padding: 1;
+    scrollbar-background: $panel-darken-1;
+    scrollbar-color: $success;
+}
+
+RichLog:focus {
+    border: solid $success-lighten-1;
+}
+
+/* TextArea (Code Editor) */
+TextArea {
+    background: $surface;
+    color: $text;
+    border: solid $success;
+    padding: 0 1;
+}
+
+TextArea:focus {
+    border: solid $success-lighten-1;
+}
+
+TextArea > .text-area--cursor {
+    background: $success;
+    color: $surface;
+}
+
+/* Tabs */
+Tabs {
+    background: $panel;
+    border: solid $success-darken-1;
+}
+
+Tab {
+    background: $panel-darken-1;
+    color: $text;
+}
+
+Tab:hover {
+    background: $success-darken-2;
+}
+
+Tab.-active {
+    background: $success-darken-1;
+    text-style: bold;
+}
+
+/* Progress Bar */
+ProgressBar {
+    background: $panel;
+    color: $success;
+    bar-color: $success;
+}
+
+ProgressBar > .bar--complete {
+    background: $success;
+}
+
+ProgressBar > .bar--indeterminate {
+    background: $success;
+}
+
+/* Loading Indicator */
+LoadingIndicator {
+    background: transparent;
+    color: $success;
+}
+
+/* Placeholder */
+Placeholder {
+    background: $panel-darken-2;
+    color: $success-darken-1;
+    border: dashed $success-darken-2;
+}
+
+/* Scrollbars */
+Scrollbar {
+    background: $panel-darken-1;
+    color: $success;
+}
+
+Scrollbar:hover {
+    background: $panel;
+}
+
+/* Tooltips */
+Tooltip {
+    background: $panel;
+    color: $text;
+    border: solid $success;
+    padding: 1;
+}
+
+/* Specific widget overrides */
+#main-container {
+    background: $panel-darken-3;
+}
+
+#sidebar {
+    background: $panel-darken-1;
+    border-right: solid $success;
+    width: 30;
+}
+
+#content-area {
+    background: $panel-darken-2;
+}
+
+#status-bar {
+    dock: bottom;
+    background: $success-darken-2;
+    color: $text;
+    height: 1;
+    padding: 0 1;
+}
