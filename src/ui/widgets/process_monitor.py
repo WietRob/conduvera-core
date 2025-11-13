@@ -20,23 +20,26 @@ class ProcessMonitor(DataTable):
 
     DEFAULT_CSS = """
     ProcessMonitor {
-        background: $panel;
-        color: $text;
-        border: solid $success;
+        background: rgba(0, 20, 0, 0.8);
+        color: #00FF00;
+        border: round #00FF00;
     }
 
     ProcessMonitor:focus {
-        border: solid $success-lighten-1;
+        border: heavy #00FF00;
+        background: rgba(0, 30, 0, 0.9);
     }
 
     ProcessMonitor > .datatable--header {
-        background: $success-darken-1;
-        color: $text;
+        background: rgba(0, 100, 0, 0.8);
+        color: #FFFFFF;
         text-style: bold;
     }
 
     ProcessMonitor > .datatable--cursor {
-        background: $success-darken-2;
+        background: rgba(0, 150, 0, 0.8);
+        color: #FFFFFF;
+        text-style: bold;
     }
     """
 

@@ -19,24 +19,26 @@ class FileBrowser(Tree):
 
     DEFAULT_CSS = """
     FileBrowser {
-        background: $panel;
-        color: $text;
-        border: solid $success;
-        scrollbar-background: $panel-darken-1;
-        scrollbar-color: $success;
+        background: rgba(0, 20, 0, 0.8);
+        color: #00FF00;
+        border: round #00FF00;
+        scrollbar-background: rgba(0, 10, 0, 0.5);
+        scrollbar-color: #00FF00;
         padding: 1;
     }
 
     FileBrowser:focus {
-        border: solid $success-lighten-1;
+        border: heavy #00FF00;
+        background: rgba(0, 30, 0, 0.9);
     }
 
     FileBrowser > .tree--guides {
-        color: $success-darken-1;
+        color: #00AA00;
     }
 
     FileBrowser > .tree--cursor {
-        background: $success-darken-2;
+        background: rgba(0, 150, 0, 0.8);
+        color: #FFFFFF;
         text-style: bold;
     }
     """

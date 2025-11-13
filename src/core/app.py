@@ -11,6 +11,9 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.ui.widgets.matrix_rain import MatrixRain
+from src.ui.widgets.file_browser import FileBrowser
+from src.ui.widgets.process_monitor import ProcessMonitor
+from src.ui.widgets.system_info import SystemInfoPanel
 from src.utils.config import get_config
 from src.utils.logger import logger
 
@@ -109,6 +112,7 @@ class MatrixOS(App):
             yield Sidebar()
 
             with Vertical(id="content-area"):
+                # Matrix rain background
                 if self.show_rain:
                     yield MatrixRain(
                         char_set=self.config.get("matrix_os.effects.rain.char_set", "mixed"),
@@ -118,24 +122,27 @@ class MatrixOS(App):
                         id="matrix-rain",
                     )
 
-                yield Container(
-                    Label(
-                        "[bold bright_green]╔═══════════════════════════════════════════╗[/]\n"
-                        "[bold bright_green]║        Welcome to MATRIX OS v0.1         ║[/]\n"
-                        "[bold bright_green]╚═══════════════════════════════════════════╝[/]\n\n"
-                        "[bright_green]⚡ A Matrix-themed development environment[/]\n"
-                        "[dim green]Built with Python & Textual[/]\n\n"
-                        "[bold cyan]🎮 Quick Start:[/]\n"
-                        "[green]  • F1[/] [dim]- Toggle Matrix rain effect[/]\n"
-                        "[green]  • Ctrl+Q[/] [dim]- Quit application[/]\n"
-                        "[green]  • Sidebar[/] [dim]- Navigate features[/]\n\n"
-                        "[bold yellow]📊 System Status:[/] [bold green]● ONLINE[/]\n"
-                        "[dim green]Matrix rain active • All systems operational[/]",
-                        id="welcome-message",
-                    ),
-                    id="welcome-container",
-                    classes="status-panel",
-                )
+                # Main content container (switchable views)
+                with Container(id="view-container"):
+                    # Welcome view (default)
+                    yield Container(
+                        Label(
+                            "[bold bright_green]╔═══════════════════════════════════════════╗[/]\n"
+                            "[bold bright_green]║        Welcome to MATRIX OS v0.1         ║[/]\n"
+                            "[bold bright_green]╚═══════════════════════════════════════════╝[/]\n\n"
+                            "[bright_green]⚡ A Matrix-themed development environment[/]\n"
+                            "[dim green]Built with Python & Textual[/]\n\n"
+                            "[bold cyan]🎮 Quick Start:[/]\n"
+                            "[green]  • F1[/] [dim]- Toggle Matrix rain effect[/]\n"
+                            "[green]  • Ctrl+Q[/] [dim]- Quit application[/]\n"
+                            "[green]  • Sidebar[/] [dim]- Navigate features[/]\n\n"
+                            "[bold yellow]📊 System Status:[/] [bold green]● ONLINE[/]\n"
+                            "[dim green]Matrix rain active • All systems operational[/]",
+                            id="welcome-message",
+                        ),
+                        id="welcome-view",
+                        classes="view status-panel",
+                    )
 
         yield StatusBar()
         yield Footer()
@@ -176,20 +183,90 @@ class MatrixOS(App):
         """Show help information."""
         self.update_status("❓ [bold cyan]Help:[/] Use sidebar buttons or keyboard shortcuts (F1, Ctrl+Q)")
 
+    def switch_view(self, view_name: str, widget=None) -> None:
+        """
+        Switch to a different view.
+
+        Args:
+            view_name: Name of the view to switch to
+            widget: Optional widget to mount (if None, creates from view_name)
+        """
+        try:
+            # Get the view container
+            view_container = self.query_one("#view-container")
+
+            # Remove all current views
+            for child in view_container.children:
+                child.remove()
+
+            # Add new view
+            if widget is None:
+                widget = self._create_view_widget(view_name)
+
+            if widget:
+                view_container.mount(widget)
+                self.current_view = view_name
+                logger.info(f"Switched to view: {view_name}")
+
+        except Exception as e:
+            logger.error(f"Failed to switch view to {view_name}: {e}")
+            self.update_status(f"[bold red]⚠️  Error switching view: {e}[/]")
+
+    def _create_view_widget(self, view_name: str):
+        """Create widget for specified view."""
+        widgets = {
+            "files": lambda: FileBrowser(
+                root_path=Path.cwd(),
+                label="📁 File Browser",
+                id="file-browser-view",
+                classes="view"
+            ),
+            "processes": lambda: ProcessMonitor(
+                refresh_interval=2.0,
+                max_processes=50,
+                id="process-monitor-view",
+                classes="view"
+            ),
+            "sysinfo": lambda: SystemInfoPanel(
+                id="system-info-view",
+                classes="view"
+            ),
+            "welcome": lambda: Container(
+                Label(
+                    "[bold bright_green]╔═══════════════════════════════════════════╗[/]\n"
+                    "[bold bright_green]║        Welcome to MATRIX OS v0.1         ║[/]\n"
+                    "[bold bright_green]╚═══════════════════════════════════════════╝[/]\n\n"
+                    "[bright_green]⚡ A Matrix-themed development environment[/]\n"
+                    "[dim green]Built with Python & Textual[/]\n\n"
+                    "[bold cyan]🎮 Quick Start:[/]\n"
+                    "[green]  • F1[/] [dim]- Toggle Matrix rain effect[/]\n"
+                    "[green]  • Ctrl+Q[/] [dim]- Quit application[/]\n"
+                    "[green]  • Sidebar[/] [dim]- Navigate features[/]\n\n"
+                    "[bold yellow]📊 System Status:[/] [bold green]● ONLINE[/]\n"
+                    "[dim green]Matrix rain active • All systems operational[/]",
+                ),
+                id="welcome-view",
+                classes="view status-panel",
+            ),
+        }
+
+        creator = widgets.get(view_name)
+        return creator() if creator else None
+
     def action_show_terminal(self) -> None:
         """Show terminal view."""
         self.current_view = "terminal"
-        self.update_status("💻 [bold green]Loading terminal view[/] - Full PTY support (Coming soon)")
+        self.update_status("💻 [bold green]Terminal view[/] - Full PTY support (Coming soon)")
 
     def action_show_files(self) -> None:
         """Show file browser view."""
-        self.current_view = "files"
-        self.update_status("📁 [bold green]Loading file browser[/] - Tree view navigation (Coming soon)")
+        self.switch_view("files")
+        self.update_status("📁 [bold green]File Browser loaded[/] - Navigate with arrow keys, Enter to expand")
 
     def action_show_processes(self) -> None:
         """Show process monitor view."""
-        self.current_view = "processes"
-        self.update_status("📊 [bold green]Loading process monitor[/] - Real-time system stats (Coming soon)")
+        self.switch_view("processes")
+        self.update_status("📊 [bold green]Process Monitor loaded[/] - Auto-refreshing every 2 seconds")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button press events."""
@@ -203,7 +280,10 @@ class MatrixOS(App):
             "btn_effects": lambda: self.action_toggle_rain(),
             "btn_plugins": lambda: self.update_status("🔌 Plugin manager (Coming soon)"),
             "btn_settings": lambda: self.update_status("⚙️  Settings panel (Coming soon)"),
-            "btn_sysinfo": lambda: self.update_status("📊 System info dashboard (Coming soon)"),
+            "btn_sysinfo": lambda: (
+                self.switch_view("sysinfo"),
+                self.update_status("📊 [bold green]System Info loaded[/] - Real-time metrics")
+            ),
             "btn_help": lambda: self.action_help(),
             "btn_exit": lambda: self.action_quit(),
         }
