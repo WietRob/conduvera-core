@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
-const pty = require('node-pty');
 const si = require('systeminformation');
 const portscanner = require('portscanner');
 const crypto = require('crypto-js');
@@ -82,22 +81,24 @@ app.on('window-all-closed', () => {
 ipcMain.handle('terminal-create', (event, id) => {
     log.info(`Creating terminal with ID: ${id}`);
     try {
-        const shell = process.platform === 'win32' ? 'powershell.exe' : '/bin/bash';
-        const ptyProcess = pty.spawn(shell, [], {
-            name: 'xterm-color',
-            cols: 80,
-            rows: 30,
+        const shell = process.platform === 'win32' ? 'cmd.exe' : '/bin/bash';
+        const shellProcess = spawn(shell, [], {
+            stdio: ['pipe', 'pipe', 'pipe'],
             cwd: process.env.HOME,
             env: process.env
         });
 
-        terminals[id] = ptyProcess;
+        terminals[id] = shellProcess;
 
-        ptyProcess.onData(data => {
-            mainWindow.webContents.send('terminal-data-' + id, data);
+        shellProcess.stdout.on('data', data => {
+            mainWindow.webContents.send('terminal-data-' + id, data.toString());
         });
 
-        ptyProcess.onExit(() => {
+        shellProcess.stderr.on('data', data => {
+            mainWindow.webContents.send('terminal-data-' + id, data.toString());
+        });
+
+        shellProcess.on('exit', () => {
             delete terminals[id];
             log.info(`Terminal ${id} closed`);
         });
@@ -105,23 +106,25 @@ ipcMain.handle('terminal-create', (event, id) => {
         return id;
     } catch (error) {
         log.error(`Failed to create terminal ${id}: ${error.message}`);
-        throw error;
+        throw new Error(`Failed to create terminal: ${error.message}`);
     }
 });
 
 ipcMain.handle('terminal-write', (event, id, data) => {
     if (terminals[id]) {
-        terminals[id].write(data);
+        terminals[id].stdin.write(data);
     } else {
         log.error(`Terminal ${id} not found`);
+        throw new Error(`Terminal ${id} not found`);
     }
 });
 
 ipcMain.handle('terminal-resize', (event, id, cols, rows) => {
     if (terminals[id]) {
-        terminals[id].resize(cols, rows);
+        log.info(`Resize requested for terminal ${id}: ${cols}x${rows}`);
     } else {
         log.error(`Terminal ${id} not found`);
+        throw new Error(`Terminal ${id} not found`);
     }
 });
 
@@ -137,9 +140,9 @@ ipcMain.handle('terminal-kill', (event, id) => {
 ipcMain.handle('cursor-execute', async (event, command) => {
     log.info(`Executing cursor command: ${command}`);
     return new Promise((resolve, reject) => {
-        const cursorProcess = spawn('cursor', command.split(' '), {
+        const cursorProcess = spawn('python', ['matrix_os/cli.py', ...command.split(' ')], {
             shell: true,
-            cwd: process.cwd()
+            cwd: path.join(__dirname)
         });
 
         let output = '';
@@ -198,7 +201,7 @@ ipcMain.handle('port-scan', async (event, host, startPort, endPort) => {
 
     for (let port = startPort; port <= endPort; port++) {
         try {
-            const status = await portscanner.checkPortStatus(port, host);
+            const status = await portscanner.checkPortStatus(port, host, { timeout: 1000 });
             if (status === 'open') {
                 openPorts.push({
                     port,
@@ -212,7 +215,7 @@ ipcMain.handle('port-scan', async (event, host, startPort, endPort) => {
                 found: openPorts.length
             });
         } catch (error) {
-            log.error(`Error scanning port ${port}: ${error}`);
+            log.warn(`Error scanning port ${port}: ${error.message}`);
         }
     }
 
