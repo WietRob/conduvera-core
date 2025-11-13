@@ -362,3 +362,32 @@ SystemInfoPanel {
     border: round #00FF00;
     padding: 2;
 }
+
+#terminal-view {
+    background: #000000;
+}
+
+#editor-view {
+    background: rgba(0, 15, 0, 0.9);
+}
+
+#ai-assistant-view {
+    background: rgba(0, 20, 0, 0.8);
+}
+
+Terminal {
+    background: #000000;
+    color: #00FF00;
+    border: round #00FF00;
+}
+
+CodeEditor {
+    background: rgba(0, 15, 0, 0.9);
+    color: #00FF00;
+    border: round #00FF00;
+}
+
+AIAssistant {
+    background: rgba(0, 20, 0, 0.8);
+    border: round #00FF00;
+}

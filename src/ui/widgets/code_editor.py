@@ -22,19 +22,20 @@ class CodeEditor(TextArea):
 
     DEFAULT_CSS = """
     CodeEditor {
-        background: $surface;
-        color: $text;
-        border: solid $success;
+        background: rgba(0, 15, 0, 0.9);
+        color: #00FF00;
+        border: round #00FF00;
         padding: 0 1;
     }
 
     CodeEditor:focus {
-        border: solid $success-lighten-1;
+        border: heavy #00FF00;
+        background: rgba(0, 20, 0, 0.95);
     }
 
     CodeEditor > .text-area--cursor {
-        background: $success;
-        color: $surface;
+        background: #00FF00;
+        color: #000000;
     }
     """
 

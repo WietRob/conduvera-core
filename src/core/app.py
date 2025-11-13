@@ -14,6 +14,9 @@ from src.ui.widgets.matrix_rain import MatrixRain
 from src.ui.widgets.file_browser import FileBrowser
 from src.ui.widgets.process_monitor import ProcessMonitor
 from src.ui.widgets.system_info import SystemInfoPanel
+from src.ui.widgets.terminal import Terminal
+from src.ui.widgets.code_editor import CodeEditor
+from src.ui.widgets.ai_assistant import AIAssistant
 from src.utils.config import get_config
 from src.utils.logger import logger
 
@@ -63,8 +66,9 @@ class Sidebar(VerticalScroll):
         # Main navigation with icons
         yield Button("📁 File Browser", id="btn_files", variant="primary")
         yield Button("💻 Terminal", id="btn_terminal")
-        yield Button("📊 Process Monitor", id="btn_processes")
         yield Button("✏️  Code Editor", id="btn_editor")
+        yield Button("🤖 AI Assistant", id="btn_ai")
+        yield Button("📊 Process Monitor", id="btn_processes")
         yield Button("🎨 Matrix Effects", id="btn_effects")
         yield Button("🔌 Plugins", id="btn_plugins")
 
@@ -91,8 +95,10 @@ class MatrixOS(App):
         Binding("ctrl+q", "quit", "Quit", show=True),
         Binding("f1", "toggle_rain", "Toggle Rain", show=True),
         Binding("f2", "help", "Help", show=False),
-        Binding("ctrl+t", "show_terminal", "Terminal", show=False),
+        Binding("ctrl+t", "show_terminal", "Terminal", show=True),
         Binding("ctrl+f", "show_files", "Files", show=False),
+        Binding("ctrl+e", "show_editor", "Editor", show=True),
+        Binding("ctrl+a", "show_ai", "AI Assistant", show=True),
         Binding("ctrl+p", "show_processes", "Processes", show=False),
     ]
 
@@ -221,6 +227,20 @@ class MatrixOS(App):
                 id="file-browser-view",
                 classes="view"
             ),
+            "terminal": lambda: Terminal(
+                shell="/bin/bash",
+                id="terminal-view",
+                classes="view"
+            ),
+            "editor": lambda: CodeEditor(
+                language="python",
+                id="editor-view",
+                classes="view"
+            ),
+            "ai": lambda: AIAssistant(
+                id="ai-assistant-view",
+                classes="view"
+            ),
             "processes": lambda: ProcessMonitor(
                 refresh_interval=2.0,
                 max_processes=50,
@@ -255,8 +275,8 @@ class MatrixOS(App):
 
     def action_show_terminal(self) -> None:
         """Show terminal view."""
-        self.current_view = "terminal"
-        self.update_status("💻 [bold green]Terminal view[/] - Full PTY support (Coming soon)")
+        self.switch_view("terminal")
+        self.update_status("💻 [bold green]Terminal loaded[/] - Full PTY shell access | Type commands")
 
     def action_show_files(self) -> None:
         """Show file browser view."""
@@ -268,6 +288,16 @@ class MatrixOS(App):
         self.switch_view("processes")
         self.update_status("📊 [bold green]Process Monitor loaded[/] - Auto-refreshing every 2 seconds")
 
+    def action_show_editor(self) -> None:
+        """Show code editor view."""
+        self.switch_view("editor")
+        self.update_status("✏️  [bold green]Code Editor loaded[/] - Syntax highlighting enabled | Ctrl+S to save")
+
+    def action_show_ai(self) -> None:
+        """Show AI assistant view."""
+        self.switch_view("ai")
+        self.update_status("🤖 [bold green]Neo's AI Assistant ready[/] - Ask questions, get code help!")
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button press events."""
         button_id = event.button.id
@@ -275,8 +305,15 @@ class MatrixOS(App):
         actions = {
             "btn_files": lambda: self.action_show_files(),
             "btn_terminal": lambda: self.action_show_terminal(),
+            "btn_editor": lambda: (
+                self.switch_view("editor"),
+                self.update_status("✏️  [bold green]Code Editor loaded[/] - Syntax highlighting enabled")
+            ),
+            "btn_ai": lambda: (
+                self.switch_view("ai"),
+                self.update_status("🤖 [bold green]Neo's AI Assistant ready[/] - Ask me anything!")
+            ),
             "btn_processes": lambda: self.action_show_processes(),
-            "btn_editor": lambda: self.update_status("✏️  Code editor (Coming soon)"),
             "btn_effects": lambda: self.action_toggle_rain(),
             "btn_plugins": lambda: self.update_status("🔌 Plugin manager (Coming soon)"),
             "btn_settings": lambda: self.update_status("⚙️  Settings panel (Coming soon)"),
