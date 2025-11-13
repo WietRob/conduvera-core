@@ -51,17 +51,29 @@ class Sidebar(VerticalScroll):
 
     def compose(self) -> ComposeResult:
         """Create sidebar widgets."""
-        yield Label("[bold green]🟢 Matrix OS[/]", classes="sidebar-title")
-        yield Static("─" * 26)
+        # Rich-inspired header with box drawing
+        yield Label("[bold bright_green]╔═══════════════════════╗[/]", classes="sidebar-border")
+        yield Label("[bold bright_green]║   🟢 MATRIX OS  v0.1 ║[/]", classes="sidebar-title")
+        yield Label("[bold bright_green]╚═══════════════════════╝[/]", classes="sidebar-border")
+        yield Static("")
+
+        # Main navigation with icons
         yield Button("📁 File Browser", id="btn_files", variant="primary")
         yield Button("💻 Terminal", id="btn_terminal")
-        yield Button("📊 Processes", id="btn_processes")
+        yield Button("📊 Process Monitor", id="btn_processes")
         yield Button("✏️  Code Editor", id="btn_editor")
+        yield Button("🎨 Matrix Effects", id="btn_effects")
         yield Button("🔌 Plugins", id="btn_plugins")
-        yield Static("─" * 26)
+
+        yield Static("")
+        yield Label("[dim green]─────────────────────[/]")
+        yield Static("")
+
+        # System controls
         yield Button("⚙️  Settings", id="btn_settings")
+        yield Button("📊 System Info", id="btn_sysinfo")
         yield Button("❓ Help", id="btn_help")
-        yield Button("🚪 Exit", id="btn_exit")
+        yield Button("🚪 Exit", id="btn_exit", variant="error")
 
 
 class MatrixOS(App):
@@ -108,11 +120,17 @@ class MatrixOS(App):
 
                 yield Container(
                     Label(
-                        "[bold green]Welcome to Matrix OS[/]\n\n"
-                        "A Matrix-themed development environment built with Python & Textual.\n\n"
-                        "[dim]Press F1 to toggle rain effect[/]\n"
-                        "[dim]Press Ctrl+Q to quit[/]\n"
-                        "[dim]Use sidebar to navigate[/]",
+                        "[bold bright_green]╔═══════════════════════════════════════════╗[/]\n"
+                        "[bold bright_green]║        Welcome to MATRIX OS v0.1         ║[/]\n"
+                        "[bold bright_green]╚═══════════════════════════════════════════╝[/]\n\n"
+                        "[bright_green]⚡ A Matrix-themed development environment[/]\n"
+                        "[dim green]Built with Python & Textual[/]\n\n"
+                        "[bold cyan]🎮 Quick Start:[/]\n"
+                        "[green]  • F1[/] [dim]- Toggle Matrix rain effect[/]\n"
+                        "[green]  • Ctrl+Q[/] [dim]- Quit application[/]\n"
+                        "[green]  • Sidebar[/] [dim]- Navigate features[/]\n\n"
+                        "[bold yellow]📊 System Status:[/] [bold green]● ONLINE[/]\n"
+                        "[dim green]Matrix rain active • All systems operational[/]",
                         id="welcome-message",
                     ),
                     id="welcome-container",
@@ -125,7 +143,7 @@ class MatrixOS(App):
     def on_mount(self) -> None:
         """Called when app is mounted."""
         logger.info("Matrix OS mounted successfully")
-        self.update_status("Matrix OS initialized - Ready for action")
+        self.update_status("🟢 [bold green]Matrix OS v0.1[/] initialized - [bold bright_green]● ONLINE[/] | Press F1 for rain")
 
     def update_status(self, message: str) -> None:
         """Update status bar message."""
@@ -145,30 +163,33 @@ class MatrixOS(App):
         try:
             rain_widget = self.query_one("#matrix-rain", MatrixRain)
             rain_widget.rain_active = not rain_widget.rain_active
-            status = "enabled" if rain_widget.rain_active else "disabled"
-            self.update_status(f"Matrix rain {status}")
-            logger.info(f"Matrix rain {status}")
+            if rain_widget.rain_active:
+                self.update_status("🌧️  Matrix rain [bold green]ENABLED[/] - Digital rain active")
+            else:
+                self.update_status("🌧️  Matrix rain [bold yellow]DISABLED[/] - Effect paused")
+            logger.info(f"Matrix rain {'enabled' if rain_widget.rain_active else 'disabled'}")
         except Exception as e:
+            self.update_status("[bold red]⚠️  Error: Matrix rain widget not found[/]")
             logger.warning(f"Matrix rain widget not found: {e}")
 
     def action_help(self) -> None:
         """Show help information."""
-        self.update_status("Help: Use sidebar buttons or keyboard shortcuts")
+        self.update_status("❓ [bold cyan]Help:[/] Use sidebar buttons or keyboard shortcuts (F1, Ctrl+Q)")
 
     def action_show_terminal(self) -> None:
         """Show terminal view."""
         self.current_view = "terminal"
-        self.update_status("Terminal view (Coming soon)")
+        self.update_status("💻 [bold green]Loading terminal view[/] - Full PTY support (Coming soon)")
 
     def action_show_files(self) -> None:
         """Show file browser view."""
         self.current_view = "files"
-        self.update_status("File browser view (Coming soon)")
+        self.update_status("📁 [bold green]Loading file browser[/] - Tree view navigation (Coming soon)")
 
     def action_show_processes(self) -> None:
         """Show process monitor view."""
         self.current_view = "processes"
-        self.update_status("Process monitor view (Coming soon)")
+        self.update_status("📊 [bold green]Loading process monitor[/] - Real-time system stats (Coming soon)")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button press events."""
@@ -178,9 +199,11 @@ class MatrixOS(App):
             "btn_files": lambda: self.action_show_files(),
             "btn_terminal": lambda: self.action_show_terminal(),
             "btn_processes": lambda: self.action_show_processes(),
-            "btn_editor": lambda: self.update_status("Code editor (Coming soon)"),
-            "btn_plugins": lambda: self.update_status("Plugin manager (Coming soon)"),
-            "btn_settings": lambda: self.update_status("Settings (Coming soon)"),
+            "btn_editor": lambda: self.update_status("✏️  Code editor (Coming soon)"),
+            "btn_effects": lambda: self.action_toggle_rain(),
+            "btn_plugins": lambda: self.update_status("🔌 Plugin manager (Coming soon)"),
+            "btn_settings": lambda: self.update_status("⚙️  Settings panel (Coming soon)"),
+            "btn_sysinfo": lambda: self.update_status("📊 System info dashboard (Coming soon)"),
             "btn_help": lambda: self.action_help(),
             "btn_exit": lambda: self.action_quit(),
         }

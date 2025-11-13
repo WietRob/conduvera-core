@@ -89,12 +89,18 @@ class MatrixRain(Widget):
         for col in self.columns:
             col["next_drop"] -= dt
 
-            # Start new drop
+            # Start new drop with cinematic length variation
             if col["next_drop"] <= 0:
+                # More varied drop lengths for cinematic effect
+                drop_length = random.choice([
+                    random.randint(8, 15),   # Short drops (common)
+                    random.randint(15, 25),  # Medium drops (common)
+                    random.randint(25, 40),  # Long drops (occasional)
+                ])
                 col["drops"].append(
                     {
                         "y": 0.0,
-                        "chars": [self.random_char() for _ in range(random.randint(5, 20))],
+                        "chars": [self.random_char() for _ in range(drop_length)],
                         "head_brightness": 1.0,
                     }
                 )
@@ -113,6 +119,7 @@ class MatrixRain(Widget):
     def get_color_style(self, brightness: float) -> Style:
         """
         Get Rich Style based on brightness level.
+        Enhanced cinematic gradient like in The Matrix movie.
 
         Args:
             brightness: Value from 0.0 (darkest) to 1.0 (brightest)
@@ -120,24 +127,36 @@ class MatrixRain(Widget):
         Returns:
             Rich Style object
         """
-        if brightness > 0.9:
-            # Head - bright white/green
+        if brightness >= 0.95:
+            # Head - ultra bright white (like the movie)
             return Style(color="#FFFFFF", bold=True)
-        elif brightness > 0.7:
-            # Near head - bright green
+        elif brightness >= 0.85:
+            # Near head - bright white-green transition
+            return Style(color="#CCFFCC", bold=True)
+        elif brightness >= 0.70:
+            # Bright green - iconic Matrix green
             return Style(color="#00FF00", bold=True)
-        elif brightness > 0.5:
+        elif brightness >= 0.55:
+            # Upper middle - bright lime green
+            return Style(color="#00EE00", bold=False)
+        elif brightness >= 0.40:
             # Middle - medium green
-            return Style(color="#00DD00")
-        elif brightness > 0.3:
-            # Fading - darker green
+            return Style(color="#00CC00")
+        elif brightness >= 0.25:
+            # Lower middle - darker green
             return Style(color="#00AA00")
-        elif brightness > 0.1:
-            # Tail - dark green
-            return Style(color="#006600")
-        else:
-            # Very faint
+        elif brightness >= 0.15:
+            # Fading - dark green
+            return Style(color="#007700")
+        elif brightness >= 0.08:
+            # Tail - very dark green
+            return Style(color="#005500")
+        elif brightness >= 0.03:
+            # Deep tail - almost invisible
             return Style(color="#003300", dim=True)
+        else:
+            # Barely visible
+            return Style(color="#001100", dim=True)
 
     def render(self) -> Text:
         """Render the matrix rain effect."""

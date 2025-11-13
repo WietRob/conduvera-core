@@ -1,48 +1,52 @@
-/* Matrix OS Theme - Green */
+/* Matrix OS Theme - Enhanced Rich Style */
 
 Screen {
-    background: $panel-darken-3;
+    background: #000000;  /* Pure black like Electron version */
 }
 
 /* Header and Footer */
 Header {
     dock: top;
-    background: $success-darken-2;
-    color: $text;
+    background: #000000;
+    color: #00FF00;
     text-style: bold;
+    border: round #00FF00;
 }
 
 Footer {
     dock: bottom;
-    background: $panel-darken-1;
+    background: #000000;
+    color: #00FF00;
+    border: round #00FF00;
 }
 
-/* Windows */
+/* Windows - Rich-inspired panels */
 .window {
-    border: heavy $success;
-    background: $surface;
+    border: round #00FF00;  /* Rounded corners like Rich */
+    background: rgba(0, 20, 0, 0.8);
     padding: 1 2;
 }
 
 .window-title {
-    background: $success;
-    color: $text;
+    background: #00FF00;
+    color: #000000;
     text-style: bold;
     padding: 0 1;
 }
 
 .window:focus {
-    border: heavy $success-lighten-2;
+    border: round #00FF00;
+    background: rgba(0, 30, 0, 0.9);
 }
 
 .window-focused {
-    border: heavy $success-lighten-1;
+    border: heavy #00FF00;
 }
 
-/* Containers */
+/* Containers - Rich-style panels */
 Container {
-    background: $panel;
-    border: solid $success-darken-1;
+    background: rgba(0, 0, 0, 0.5);
+    border: round #00AA00;
 }
 
 Horizontal {
@@ -66,35 +70,40 @@ Static {
 }
 
 .status-panel {
-    background: $panel-darken-1;
-    border: solid $success;
+    background: rgba(0, 20, 0, 0.7);
+    border: round #00FF00;  /* Rich-style rounded borders */
     padding: 1;
     margin: 1;
 }
 
-/* Buttons */
+/* Buttons - Rich-inspired with emojis */
 Button {
-    background: $success-darken-1;
-    color: $text;
-    border: solid $success;
+    background: rgba(0, 100, 0, 0.5);
+    color: #00FF00;
+    border: round #00AA00;
     margin: 1;
     min-width: 16;
+    text-style: bold;
 }
 
 Button:hover {
-    background: $success;
+    background: #00FF00;
+    color: #000000;
     text-style: bold;
-    border: heavy $success-lighten-1;
+    border: heavy #00FF00;
 }
 
 Button:focus {
-    background: $success;
-    border: heavy $success-lighten-2;
+    background: rgba(0, 150, 0, 0.8);
+    color: #FFFFFF;
+    border: heavy #00FF00;
 }
 
 Button.-primary {
-    background: $success;
+    background: #00DD00;
+    color: #000000;
     text-style: bold;
+    border: heavy #00FF00;
 }
 
 /* Input */
@@ -275,25 +284,50 @@ Tooltip {
     padding: 1;
 }
 
-/* Specific widget overrides */
+/* Specific widget overrides - Enhanced Matrix Style */
 #main-container {
-    background: $panel-darken-3;
+    background: #000000;  /* Pure black background */
 }
 
 #sidebar {
-    background: $panel-darken-1;
-    border-right: solid $success;
+    background: rgba(0, 20, 0, 0.6);
+    border-right: heavy #00FF00;  /* Prominent border like Rich */
     width: 30;
 }
 
+Sidebar {
+    background: rgba(0, 20, 0, 0.6);
+    border-right: heavy #00FF00;
+    padding: 1;
+}
+
+.sidebar-title {
+    background: transparent;
+    color: #00FF00;
+    text-style: bold;
+    padding: 1 0;
+}
+
 #content-area {
-    background: $panel-darken-2;
+    background: #000000;  /* Pure black for Matrix rain effect */
+}
+
+#welcome-container {
+    background: rgba(0, 30, 0, 0.8);
+    border: round #00FF00;
+    padding: 2;
+    margin: 2;
+}
+
+#welcome-message {
+    color: #00FF00;
+    text-align: center;
 }
 
 #status-bar {
     dock: bottom;
-    background: $success-darken-2;
-    color: $text;
+    background: rgba(0, 100, 0, 0.8);
+    color: #00FF00;
     height: 1;
     padding: 0 1;
 }
