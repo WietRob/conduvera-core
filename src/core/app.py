@@ -17,6 +17,9 @@ from src.ui.widgets.system_info import SystemInfoPanel
 from src.ui.widgets.terminal import Terminal
 from src.ui.widgets.code_editor import CodeEditor
 from src.ui.widgets.ai_assistant import AIAssistant
+from src.ui.widgets.docker_manager import DockerManager
+from src.ui.widgets.api_client import APIClient
+from src.ui.widgets.database_browser import DatabaseBrowser
 from src.utils.config import get_config
 from src.utils.logger import logger
 
@@ -68,17 +71,25 @@ class Sidebar(VerticalScroll):
         yield Button("💻 Terminal", id="btn_terminal")
         yield Button("✏️  Code Editor", id="btn_editor")
         yield Button("🤖 AI Assistant", id="btn_ai")
-        yield Button("📊 Process Monitor", id="btn_processes")
-        yield Button("🎨 Matrix Effects", id="btn_effects")
-        yield Button("🔌 Plugins", id="btn_plugins")
 
         yield Static("")
-        yield Label("[dim green]─────────────────────[/]")
+        yield Label("[dim green]── Dev Tools ──────────[/]")
+        yield Static("")
+
+        # Dev tools
+        yield Button("🐳 Docker", id="btn_docker")
+        yield Button("🌐 API Client", id="btn_api")
+        yield Button("🗄️  Database", id="btn_database")
+        yield Button("📊 Process Monitor", id="btn_processes")
+
+        yield Static("")
+        yield Label("[dim green]── System ─────────────[/]")
         yield Static("")
 
         # System controls
-        yield Button("⚙️  Settings", id="btn_settings")
+        yield Button("🎨 Matrix Effects", id="btn_effects")
         yield Button("📊 System Info", id="btn_sysinfo")
+        yield Button("⚙️  Settings", id="btn_settings")
         yield Button("❓ Help", id="btn_help")
         yield Button("🚪 Exit", id="btn_exit", variant="error")
 
@@ -99,6 +110,9 @@ class MatrixOS(App):
         Binding("ctrl+f", "show_files", "Files", show=False),
         Binding("ctrl+e", "show_editor", "Editor", show=True),
         Binding("ctrl+a", "show_ai", "AI Assistant", show=True),
+        Binding("ctrl+d", "show_docker", "Docker", show=True),
+        Binding("ctrl+r", "show_api", "API Client", show=True),
+        Binding("ctrl+b", "show_database", "Database", show=True),
         Binding("ctrl+p", "show_processes", "Processes", show=False),
     ]
 
@@ -241,6 +255,19 @@ class MatrixOS(App):
                 id="ai-assistant-view",
                 classes="view"
             ),
+            "docker": lambda: DockerManager(
+                refresh_interval=5.0,
+                id="docker-manager-view",
+                classes="view"
+            ),
+            "api": lambda: APIClient(
+                id="api-client-view",
+                classes="view"
+            ),
+            "database": lambda: DatabaseBrowser(
+                id="database-browser-view",
+                classes="view"
+            ),
             "processes": lambda: ProcessMonitor(
                 refresh_interval=2.0,
                 max_processes=50,
@@ -298,6 +325,21 @@ class MatrixOS(App):
         self.switch_view("ai")
         self.update_status("🤖 [bold green]Neo's AI Assistant ready[/] - Ask questions, get code help!")
 
+    def action_show_docker(self) -> None:
+        """Show Docker manager view."""
+        self.switch_view("docker")
+        self.update_status("🐳 [bold green]Docker Manager loaded[/] - Container control & monitoring")
+
+    def action_show_api(self) -> None:
+        """Show API client view."""
+        self.switch_view("api")
+        self.update_status("🌐 [bold green]API Client ready[/] - Test REST APIs Postman-style")
+
+    def action_show_database(self) -> None:
+        """Show database browser view."""
+        self.switch_view("database")
+        self.update_status("🗄️  [bold green]Database Browser loaded[/] - PostgreSQL, MySQL, SQLite support")
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button press events."""
         button_id = event.button.id
@@ -313,9 +355,20 @@ class MatrixOS(App):
                 self.switch_view("ai"),
                 self.update_status("🤖 [bold green]Neo's AI Assistant ready[/] - Ask me anything!")
             ),
+            "btn_docker": lambda: (
+                self.switch_view("docker"),
+                self.update_status("🐳 [bold green]Docker Manager loaded[/] - Container control & monitoring")
+            ),
+            "btn_api": lambda: (
+                self.switch_view("api"),
+                self.update_status("🌐 [bold green]API Client ready[/] - Test REST APIs Postman-style")
+            ),
+            "btn_database": lambda: (
+                self.switch_view("database"),
+                self.update_status("🗄️  [bold green]Database Browser loaded[/] - PostgreSQL, MySQL, SQLite support")
+            ),
             "btn_processes": lambda: self.action_show_processes(),
             "btn_effects": lambda: self.action_toggle_rain(),
-            "btn_plugins": lambda: self.update_status("🔌 Plugin manager (Coming soon)"),
             "btn_settings": lambda: self.update_status("⚙️  Settings panel (Coming soon)"),
             "btn_sysinfo": lambda: (
                 self.switch_view("sysinfo"),

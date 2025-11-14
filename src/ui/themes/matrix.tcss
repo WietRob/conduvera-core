@@ -391,3 +391,31 @@ AIAssistant {
     background: rgba(0, 20, 0, 0.8);
     border: round #00FF00;
 }
+
+/* Phase 4 Views - Docker, API, Database */
+#docker-manager-view {
+    background: rgba(0, 20, 0, 0.8);
+}
+
+#api-client-view {
+    background: rgba(0, 20, 0, 0.8);
+}
+
+#database-browser-view {
+    background: rgba(0, 20, 0, 0.8);
+}
+
+DockerManager {
+    background: rgba(0, 20, 0, 0.8);
+    border: round #00FF00;
+}
+
+APIClient {
+    background: rgba(0, 20, 0, 0.8);
+    border: round #00FF00;
+}
+
+DatabaseBrowser {
+    background: rgba(0, 20, 0, 0.8);
+    border: round #00FF00;
+}
