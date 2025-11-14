@@ -20,6 +20,9 @@ from src.ui.widgets.ai_assistant import AIAssistant
 from src.ui.widgets.docker_manager import DockerManager
 from src.ui.widgets.api_client import APIClient
 from src.ui.widgets.database_browser import DatabaseBrowser
+from src.ui.widgets.git_manager import GitManager
+from src.ui.widgets.split_pane import SplitPane, EditorTerminalSplit
+from src.ui.widgets.monitoring_dashboard import MonitoringDashboard
 from src.utils.config import get_config
 from src.utils.logger import logger
 
@@ -70,6 +73,7 @@ class Sidebar(VerticalScroll):
         yield Button("📁 File Browser", id="btn_files", variant="primary")
         yield Button("💻 Terminal", id="btn_terminal")
         yield Button("✏️  Code Editor", id="btn_editor")
+        yield Button("🔀 Split View", id="btn_split")
         yield Button("🤖 AI Assistant", id="btn_ai")
 
         yield Static("")
@@ -77,6 +81,7 @@ class Sidebar(VerticalScroll):
         yield Static("")
 
         # Dev tools
+        yield Button("🔧 Git", id="btn_git")
         yield Button("🐳 Docker", id="btn_docker")
         yield Button("🌐 API Client", id="btn_api")
         yield Button("🗄️  Database", id="btn_database")
@@ -89,6 +94,7 @@ class Sidebar(VerticalScroll):
         # System controls
         yield Button("🎨 Matrix Effects", id="btn_effects")
         yield Button("📊 System Info", id="btn_sysinfo")
+        yield Button("📈 Monitoring", id="btn_monitoring")
         yield Button("⚙️  Settings", id="btn_settings")
         yield Button("❓ Help", id="btn_help")
         yield Button("🚪 Exit", id="btn_exit", variant="error")
@@ -106,10 +112,13 @@ class MatrixOS(App):
         Binding("ctrl+q", "quit", "Quit", show=True),
         Binding("f1", "toggle_rain", "Toggle Rain", show=True),
         Binding("f2", "help", "Help", show=False),
+        Binding("f3", "show_split_view", "Split View", show=True),
+        Binding("f4", "show_monitoring", "Monitor", show=True),
         Binding("ctrl+t", "show_terminal", "Terminal", show=True),
         Binding("ctrl+f", "show_files", "Files", show=False),
         Binding("ctrl+e", "show_editor", "Editor", show=True),
         Binding("ctrl+a", "show_ai", "AI Assistant", show=True),
+        Binding("ctrl+g", "show_git", "Git", show=True),
         Binding("ctrl+d", "show_docker", "Docker", show=True),
         Binding("ctrl+r", "show_api", "API Client", show=True),
         Binding("ctrl+b", "show_database", "Database", show=True),
@@ -251,8 +260,19 @@ class MatrixOS(App):
                 id="editor-view",
                 classes="view"
             ),
+            "split": lambda: EditorTerminalSplit(
+                editor_widget=CodeEditor(language="python"),
+                terminal_widget=Terminal(shell="/bin/bash"),
+                id="split-view",
+                classes="view"
+            ),
             "ai": lambda: AIAssistant(
                 id="ai-assistant-view",
+                classes="view"
+            ),
+            "git": lambda: GitManager(
+                repo_path=Path.cwd(),
+                id="git-manager-view",
                 classes="view"
             ),
             "docker": lambda: DockerManager(
@@ -276,6 +296,10 @@ class MatrixOS(App):
             ),
             "sysinfo": lambda: SystemInfoPanel(
                 id="system-info-view",
+                classes="view"
+            ),
+            "monitoring": lambda: MonitoringDashboard(
+                id="monitoring-dashboard-view",
                 classes="view"
             ),
             "welcome": lambda: Container(
@@ -320,10 +344,20 @@ class MatrixOS(App):
         self.switch_view("editor")
         self.update_status("✏️  [bold green]Code Editor loaded[/] - Syntax highlighting enabled | Ctrl+S to save")
 
+    def action_show_split_view(self) -> None:
+        """Show split view (Editor + Terminal)."""
+        self.switch_view("split")
+        self.update_status("🔀 [bold green]Split View loaded[/] - Editor + Terminal side-by-side | F3 to toggle")
+
     def action_show_ai(self) -> None:
         """Show AI assistant view."""
         self.switch_view("ai")
         self.update_status("🤖 [bold green]Neo's AI Assistant ready[/] - Ask questions, get code help!")
+
+    def action_show_git(self) -> None:
+        """Show Git manager view."""
+        self.switch_view("git")
+        self.update_status("🔧 [bold green]Git Matrix loaded[/] - Visual git interface with diff viewer")
 
     def action_show_docker(self) -> None:
         """Show Docker manager view."""
@@ -340,6 +374,11 @@ class MatrixOS(App):
         self.switch_view("database")
         self.update_status("🗄️  [bold green]Database Browser loaded[/] - PostgreSQL, MySQL, SQLite support")
 
+    def action_show_monitoring(self) -> None:
+        """Show monitoring dashboard view."""
+        self.switch_view("monitoring")
+        self.update_status("📈 [bold green]Monitoring Dashboard loaded[/] - Unified system, docker, and process monitoring")
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button press events."""
         button_id = event.button.id
@@ -351,9 +390,17 @@ class MatrixOS(App):
                 self.switch_view("editor"),
                 self.update_status("✏️  [bold green]Code Editor loaded[/] - Syntax highlighting enabled")
             ),
+            "btn_split": lambda: (
+                self.switch_view("split"),
+                self.update_status("🔀 [bold green]Split View loaded[/] - Editor + Terminal side-by-side")
+            ),
             "btn_ai": lambda: (
                 self.switch_view("ai"),
                 self.update_status("🤖 [bold green]Neo's AI Assistant ready[/] - Ask me anything!")
+            ),
+            "btn_git": lambda: (
+                self.switch_view("git"),
+                self.update_status("🔧 [bold green]Git Matrix loaded[/] - Visual git interface with diff viewer")
             ),
             "btn_docker": lambda: (
                 self.switch_view("docker"),
@@ -373,6 +420,10 @@ class MatrixOS(App):
             "btn_sysinfo": lambda: (
                 self.switch_view("sysinfo"),
                 self.update_status("📊 [bold green]System Info loaded[/] - Real-time metrics")
+            ),
+            "btn_monitoring": lambda: (
+                self.switch_view("monitoring"),
+                self.update_status("📈 [bold green]Monitoring Dashboard loaded[/] - Unified monitoring")
             ),
             "btn_help": lambda: self.action_help(),
             "btn_exit": lambda: self.action_quit(),

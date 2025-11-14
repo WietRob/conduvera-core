@@ -419,3 +419,46 @@ DatabaseBrowser {
     background: rgba(0, 20, 0, 0.8);
     border: round #00FF00;
 }
+
+/* Phase 5 Views - Git Integration + Split Panes */
+#git-manager-view {
+    background: rgba(0, 20, 0, 0.8);
+}
+
+GitManager {
+    background: rgba(0, 20, 0, 0.8);
+    border: round #00FF00;
+}
+
+#split-view {
+    background: rgba(0, 20, 0, 0.8);
+}
+
+SplitPane {
+    background: rgba(0, 20, 0, 0.8);
+    border: round #00FF00;
+}
+
+EditorTerminalSplit {
+    background: rgba(0, 20, 0, 0.8);
+    border: round #00FF00;
+}
+
+TriplePane {
+    background: rgba(0, 20, 0, 0.8);
+    border: round #00FF00;
+}
+
+QuadPane {
+    background: rgba(0, 20, 0, 0.8);
+    border: round #00FF00;
+}
+
+#monitoring-dashboard-view {
+    background: rgba(0, 20, 0, 0.8);
+}
+
+MonitoringDashboard {
+    background: rgba(0, 20, 0, 0.8);
+    border: round #00FF00;
+}
