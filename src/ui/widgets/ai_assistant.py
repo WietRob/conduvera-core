@@ -1,4 +1,4 @@
-"""AI Assistant widget with Claude CLI integration."""
+"""AI Assistant widget with Smart Router integration."""
 from textual.widgets import Static
 from textual.containers import VerticalScroll, Horizontal
 from textual.reactive import reactive
@@ -9,6 +9,7 @@ from pathlib import Path
 import subprocess
 from typing import Optional
 from src.utils.logger import logger
+from src.utils.ai_router import SmartAIRouter
 
 
 class AIAssistant(VerticalScroll):
@@ -58,6 +59,33 @@ class AIAssistant(VerticalScroll):
         color: #FF0000;
         text-style: bold;
     }
+
+    AIAssistant .ai-routing-info {
+        background: rgba(0, 50, 0, 0.6);
+        border: round #00AA00;
+        color: #00FFAA;
+        padding: 1;
+        margin: 1 0;
+    }
+
+    AIAssistant .ai-budget-warning {
+        background: rgba(100, 50, 0, 0.8);
+        border: round #FFAA00;
+        color: #FFFF00;
+        padding: 1;
+        margin: 1 0;
+        text-style: bold;
+    }
+
+    AIAssistant .model-ollama {
+        color: #00FF00;
+        text-style: bold;
+    }
+
+    AIAssistant .model-claude {
+        color: #FFD700;
+        text-style: bold;
+    }
     """
 
     class ResponseReceived(Message):
@@ -70,24 +98,80 @@ class AIAssistant(VerticalScroll):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.conversation_history = []
+        self.router = SmartAIRouter()
+        self.use_router = True  # Toggle for enabling/disabling smart routing
 
     def compose(self):
         """Create child widgets."""
         yield Static(
             "[bold bright_green]╔═══════════════════════════════════════════╗[/]\n"
-            "[bold bright_green]║      🤖 Neo's AI Assistant (Claude)      ║[/]\n"
+            "[bold bright_green]║   🤖 Neo's AI Assistant (Smart Router)   ║[/]\n"
             "[bold bright_green]╚═══════════════════════════════════════════╝[/]",
             classes="ai-header"
         )
+
+        # Show budget status
+        budget_status = self.router.get_budget_status()
+        budget_pct = budget_status["percentage_used"]
+        budget_color = "green" if budget_pct < 70 else ("yellow" if budget_pct < 90 else "red")
+        budget_bar = self.get_budget_bar(budget_pct)
+
         yield Static(
-            "[dim green]Ask me anything about your code![/]\n"
-            "[cyan]Commands:[/]\n"
-            "[green]  • /explain <file>[/] - Explain code\n"
-            "[green]  • /fix <file>[/] - Find and fix bugs\n"
-            "[green]  • /refactor <file>[/] - Suggest improvements\n"
-            "[green]  • /test <file>[/] - Generate tests\n",
+            f"[dim green]Smart routing between Ollama (free) and Claude (paid)[/]\n\n"
+            f"[cyan]💰 Budget Status:[/] [{budget_color}]${budget_status['spent']:.2f}[/] / "
+            f"[green]${budget_status['budget']:.2f}[/] ({budget_pct:.1f}%)\n"
+            f"[{budget_color}]{budget_bar}[/]\n"
+            f"[dim]Ollama: {budget_status['ollama_requests']} | "
+            f"Claude: {budget_status['claude_requests']}[/]\n\n"
+            f"[cyan]Commands:[/]\n"
+            f"[green]  • /explain <file>[/] - Explain code\n"
+            f"[green]  • /fix <file>[/] - Find and fix bugs\n"
+            f"[green]  • /refactor <file>[/] - Suggest improvements\n"
+            f"[green]  • /test <file>[/] - Generate tests\n",
             id="ai-help"
         )
+
+    def get_budget_bar(self, percentage: float, width: int = 20) -> str:
+        """Create text-based budget progress bar."""
+        filled = int((percentage / 100) * width)
+        empty = width - filled
+        return "█" * filled + "░" * empty
+
+    def show_routing_info(self, model: str, cost: float, reason: str) -> None:
+        """Show routing decision info."""
+        model_emoji = "🟢" if "ollama" in model.lower() else "🟡"
+        model_class = "model-ollama" if "ollama" in model.lower() else "model-claude"
+
+        self.mount(
+            Static(
+                f"{model_emoji} [bold]Routed to:[/] [{model_class}]{model}[/] "
+                f"[dim]Cost: ${cost:.4f}[/]\n"
+                f"[dim]Reason: {reason}[/]",
+                classes="ai-routing-info"
+            )
+        )
+
+    def check_budget_warning(self):
+        """Check and display budget warnings."""
+        budget_status = self.router.get_budget_status()
+        if budget_status["percentage_used"] >= 80 and budget_status["remaining"] > 0:
+            self.mount(
+                Static(
+                    f"⚠️ [bold]BUDGET WARNING[/]\n"
+                    f"You've used {budget_status['percentage_used']:.1f}% of your ${budget_status['budget']:.2f} monthly budget.\n"
+                    f"Remaining: ${budget_status['remaining']:.2f}",
+                    classes="ai-budget-warning"
+                )
+            )
+        elif budget_status["remaining"] <= 0:
+            self.mount(
+                Static(
+                    f"🚫 [bold]BUDGET EXHAUSTED[/]\n"
+                    f"Monthly budget of ${budget_status['budget']:.2f} fully used.\n"
+                    f"Falling back to Ollama only until next month.",
+                    classes="ai-budget-warning"
+                )
+            )
 
     def check_claude_cli(self) -> bool:
         """
@@ -114,76 +198,104 @@ class AIAssistant(VerticalScroll):
         file_path: Optional[Path] = None
     ) -> str:
         """
-        Ask Claude CLI for assistance.
+        Ask AI for assistance (routed through SmartAIRouter).
 
         Args:
-            prompt: Question/instruction for Claude
+            prompt: Question/instruction
             code: Optional code snippet to analyze
             file_path: Optional file to analyze
 
         Returns:
-            Claude's response
+            AI response
         """
-        if not self.check_claude_cli():
-            error_msg = (
-                "❌ Claude CLI not found!\n\n"
-                "Install it with: pip install claude-cli\n"
-                "Or visit: https://docs.anthropic.com/claude/docs/cli"
-            )
-            self.show_error(error_msg)
-            return error_msg
-
         try:
             self.is_thinking = True
             self.show_thinking()
 
-            # Build command
+            # Build full prompt
             full_prompt = prompt
 
             if file_path and file_path.exists():
-                # Read file and include in prompt
                 with open(file_path, "r") as f:
                     file_content = f.read()
                 full_prompt = f"{prompt}\n\nFile: {file_path}\n```\n{file_content}\n```"
             elif code:
                 full_prompt = f"{prompt}\n\n```\n{code}\n```"
 
-            # Call Claude CLI
-            result = subprocess.run(
-                ["claude", "-p", full_prompt],
-                capture_output=True,
-                text=True,
-                timeout=30
+            # Get routing decision
+            routing_info = self.router.get_routing_info(full_prompt)
+            should_use_claude = routing_info["should_use_claude"]
+
+            # Show routing decision
+            self.show_routing_info(
+                model=routing_info["recommended_model"],
+                cost=routing_info["estimated_cost"],
+                reason=routing_info["reason"]
             )
 
-            if result.returncode == 0:
-                response = result.stdout.strip()
-                self.last_response = response
-                self.show_response(response)
-                self.conversation_history.append({
-                    "prompt": prompt,
-                    "response": response
-                })
-                self.post_message(self.ResponseReceived(response))
-                logger.info("Received Claude response")
-                return response
-            else:
-                error = result.stderr or "Unknown error"
-                self.show_error(f"Claude CLI error: {error}")
-                logger.error(f"Claude CLI error: {error}")
-                return f"Error: {error}"
+            # Check budget warnings
+            self.check_budget_warning()
 
-        except subprocess.TimeoutExpired:
-            error = "Claude CLI timeout (30s)"
-            self.show_error(error)
-            return error
+            # Route to appropriate model
+            if should_use_claude and self.use_router:
+                response = await self._call_claude_cli(full_prompt)
+                cost = routing_info["estimated_cost"]
+                model = "claude"
+            else:
+                # Use Ollama
+                result = self.router.call_ollama(full_prompt)
+                if result["success"]:
+                    response = result["response"]
+                    cost = 0.0
+                    model = "ollama/mistral"
+                else:
+                    # Fallback to Claude if Ollama fails
+                    logger.warning(f"Ollama failed: {result.get('error')}. Falling back to Claude.")
+                    response = await self._call_claude_cli(full_prompt)
+                    cost = routing_info["estimated_cost"]
+                    model = "claude (fallback)"
+
+            # Update budget tracking
+            self.router.update_budget(cost, model)
+
+            # Store and display response
+            self.last_response = response
+            self.show_response(response)
+            self.conversation_history.append({
+                "prompt": prompt,
+                "response": response,
+                "model": model,
+                "cost": cost
+            })
+            self.post_message(self.ResponseReceived(response))
+            logger.info(f"Received response from {model}, cost: ${cost:.4f}")
+            return response
+
         except Exception as e:
             error = f"Unexpected error: {e}"
             self.show_error(error)
-            logger.error(f"Error calling Claude: {e}")
+            logger.error(f"Error in AI request: {e}")
             return error
         finally:
             self.is_thinking = False
+
+    async def _call_claude_cli(self, prompt: str) -> str:
+        """Internal: Call Claude CLI directly."""
+        if not self.check_claude_cli():
+            raise Exception("Claude CLI not available")
+
+        result = subprocess.run(
+            ["claude", "-p", prompt],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        if result.returncode == 0:
+            return result.stdout.strip()
+        else:
+            error = result.stderr or "Unknown error"
+            raise Exception(f"Claude CLI error: {error}")
 
     def show_thinking(self) -> None:
         """Show thinking indicator."""

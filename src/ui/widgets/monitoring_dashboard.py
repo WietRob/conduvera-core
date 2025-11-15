@@ -1,4 +1,4 @@
-"""Advanced Monitoring Dashboard - Unified system, docker, and process monitoring."""
+"""Advanced Monitoring Dashboard - Unified system, docker, process, and AI budget monitoring."""
 from textual.widgets import Static, DataTable
 from textual.containers import VerticalScroll, Horizontal, Vertical, Container
 from textual.reactive import reactive
@@ -11,6 +11,7 @@ import subprocess
 import json
 from datetime import datetime
 from src.utils.logger import logger
+from src.utils.ai_router import SmartAIRouter
 
 
 class MonitoringDashboard(VerticalScroll):
@@ -88,6 +89,7 @@ class MonitoringDashboard(VerticalScroll):
         super().__init__(**kwargs)
         self.last_update = None
         self.metrics_history = []
+        self.router = SmartAIRouter()
 
     def compose(self):
         """Create dashboard widgets."""
@@ -119,6 +121,7 @@ class MonitoringDashboard(VerticalScroll):
                 "docker": self.get_docker_metrics(),
                 "processes": self.get_process_metrics(),
                 "network": self.get_network_metrics(),
+                "ai_budget": self.get_ai_budget_metrics(),
                 "timestamp": datetime.now().isoformat()
             }
 
@@ -138,6 +141,7 @@ class MonitoringDashboard(VerticalScroll):
             self.display_docker_metrics(metrics["docker"])
             self.display_process_metrics(metrics["processes"])
             self.display_network_metrics(metrics["network"])
+            self.display_ai_budget(metrics["ai_budget"])
 
             self.post_message(self.MetricsUpdated(metrics))
 
@@ -401,6 +405,74 @@ class MonitoringDashboard(VerticalScroll):
         """Toggle auto-refresh."""
         self.auto_refresh = not self.auto_refresh
         logger.info(f"Dashboard auto-refresh: {self.auto_refresh}")
+
+    def get_ai_budget_metrics(self) -> Dict[str, Any]:
+        """Get AI budget metrics."""
+        try:
+            budget_status = self.router.get_budget_status()
+            monthly_stats = self.router.get_monthly_stats()
+
+            return {
+                "current_month": budget_status["current_month"],
+                "spent": budget_status["spent"],
+                "budget": budget_status["budget"],
+                "remaining": budget_status["remaining"],
+                "percentage_used": budget_status["percentage_used"],
+                "requests": budget_status["requests"],
+                "ollama_requests": budget_status["ollama_requests"],
+                "claude_requests": budget_status["claude_requests"],
+                "monthly_stats": monthly_stats[:3]  # Last 3 months
+            }
+        except Exception as e:
+            logger.error(f"Error getting AI budget metrics: {e}")
+            return {}
+
+    def display_ai_budget(self, metrics: Dict[str, Any]) -> None:
+        """Display AI budget section."""
+        if not metrics:
+            text = (
+                "[bold cyan]🧠 AI BUDGET[/]\n\n"
+                "[dim yellow]AI Router not configured[/]"
+            )
+        else:
+            spent = metrics.get("spent", 0.0)
+            budget = metrics.get("budget", 5.0)
+            remaining = metrics.get("remaining", 0.0)
+            percentage = metrics.get("percentage_used", 0.0)
+            ollama = metrics.get("ollama_requests", 0)
+            claude = metrics.get("claude_requests", 0)
+            total_requests = metrics.get("requests", 0)
+
+            # Color coding
+            budget_color = self.get_metric_color(percentage)
+
+            # Calculate percentages
+            ollama_pct = (ollama / total_requests * 100) if total_requests > 0 else 0
+            claude_pct = (claude / total_requests * 100) if total_requests > 0 else 0
+
+            text = (
+                f"[bold cyan]🧠 AI BUDGET ({metrics['current_month']})[/]\n\n"
+                f"[bold]Spent:[/] [{budget_color}]${spent:.2f}[/] / [green]${budget:.2f}[/] "
+                f"[dim]({percentage:.1f}%)[/]\n"
+                f"[{budget_color}]{self.get_bar(percentage)}[/]\n"
+                f"[bold]Remaining:[/] [green]${remaining:.2f}[/]\n\n"
+                f"[bold]Requests:[/] [green]{total_requests}[/] total\n"
+                f"  [green]🟢 Ollama:[/] {ollama} [dim]({ollama_pct:.1f}%) - $0.00[/]\n"
+                f"  [yellow]🟡 Claude:[/] {claude} [dim]({claude_pct:.1f}%) - ${spent:.2f}[/]"
+            )
+
+            # Add monthly history if available
+            monthly_stats = metrics.get("monthly_stats", [])
+            if monthly_stats:
+                text += "\n\n[bold]Recent Months:[/]\n"
+                for stat in monthly_stats:
+                    month = stat["month"]
+                    spent_month = stat["spent"]
+                    requests_month = stat["requests"]
+                    avg_cost = stat.get("avg_cost_per_request", 0.0)
+                    text += f"  [dim]{month}:[/] ${spent_month:.2f} [dim]({requests_month} req, ${avg_cost:.4f}/req)[/]\n"
+
+        self.mount(Static(text, classes="dashboard-section"))
 
     def get_summary(self) -> Dict[str, Any]:
         """Get dashboard summary."""
