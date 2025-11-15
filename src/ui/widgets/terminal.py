@@ -28,14 +28,15 @@ class Terminal(RichLog):
     Terminal {
         background: #000000;
         color: #00FF00;
-        border: solid $success;
+        border: round #00FF00;
         padding: 1;
-        scrollbar-background: $panel-darken-1;
-        scrollbar-color: $success;
+        scrollbar-background: rgba(0, 10, 0, 0.5);
+        scrollbar-color: #00FF00;
     }
 
     Terminal:focus {
-        border: solid $success-lighten-1;
+        border: heavy #00FF00;
+        background: rgba(0, 10, 0, 0.3);
     }
     """
 
