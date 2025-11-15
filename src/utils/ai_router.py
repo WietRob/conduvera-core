@@ -2,6 +2,8 @@
 """
 Smart AI Router - Budget-based routing between Ollama and Claude
 Adapted for Matrix OS from ai-router-system
+
+Version 6.1: Improved with tiktoken and weighted keyword scoring
 """
 
 import os
@@ -13,6 +15,16 @@ from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# Try to import tiktoken for better token estimation
+try:
+    import tiktoken
+    TIKTOKEN_AVAILABLE = True
+    # Use cl100k_base encoding (used by GPT-4, similar to Claude)
+    TIKTOKEN_ENCODING = tiktoken.get_encoding("cl100k_base")
+except ImportError:
+    TIKTOKEN_AVAILABLE = False
+    logger.warning("tiktoken not available - falling back to character-based estimation")
 
 
 class SmartAIRouter:
@@ -41,15 +53,24 @@ class SmartAIRouter:
             "ollama_base_url": "http://localhost:11434",
             "monthly_budget": 5.0,
             "warning_threshold": 4.0,
-            "escalation_keywords": [
-                "architecture", "design", "system", "complex", "aspice",
-                "compliance", "review", "analysis", "strategy", "planning",
-                "microservices", "scalability", "infrastructure"
+            # High-complexity keywords (weight: +3)
+            "high_complexity_keywords": [
+                "architecture", "design", "microservices", "scalability",
+                "infrastructure", "distributed", "system design"
             ],
-            "ollama_keywords": [
+            # Medium-complexity keywords (weight: +2)
+            "medium_complexity_keywords": [
+                "strategy", "planning", "analysis", "review", "compliance",
+                "aspice", "security", "performance optimization"
+            ],
+            # Low-complexity keywords (weight: -2, favors Ollama)
+            "low_complexity_keywords": [
                 "code", "refactor", "test", "debug", "simple", "function",
-                "fix", "error", "variable", "loop", "class", "syntax",
-                "implement", "write", "create"
+                "fix", "error", "syntax", "bug", "typo", "format"
+            ],
+            # Code indicators (weight: -1, slightly favors Ollama)
+            "code_indicators": [
+                "variable", "loop", "class", "implement", "write", "create"
             ],
             "cost_per_input_token": 0.000003,  # Claude Sonnet pricing
             "cost_per_output_token": 0.000015,
@@ -157,38 +178,108 @@ class SmartAIRouter:
             logger.error(f"Error updating budget: {e}")
 
     def should_escalate_to_claude(self, prompt: str) -> Tuple[bool, str]:
-        """Decide if Claude API is needed."""
+        """
+        Decide if Claude API is needed using weighted scoring.
+
+        Complexity score calculation:
+        - High complexity keywords: +3 each
+        - Medium complexity keywords: +2 each
+        - Low complexity keywords: -2 each
+        - Code indicators: -1 each
+        - Long prompt (>500 chars): +1
+        - Code blocks present: -1
+        - Threshold: score >= 3 → Claude, score < 3 → Ollama
+        """
         budget_status = self.get_budget_status()
 
-        # Budget check
+        # Budget check (hard limit)
         if budget_status["remaining"] <= 0:
             return False, "Budget exhausted - Fallback to Ollama"
 
         prompt_lower = prompt.lower()
+        complexity_score = 0
+        reasons = []
 
-        # Keyword-based routing
-        escalation_count = sum(1 for kw in self.config["escalation_keywords"] if kw in prompt_lower)
-        ollama_count = sum(1 for kw in self.config["ollama_keywords"] if kw in prompt_lower)
+        # High complexity keywords (+3 each)
+        high_matches = [kw for kw in self.config.get("high_complexity_keywords", []) if kw in prompt_lower]
+        if high_matches:
+            complexity_score += len(high_matches) * 3
+            reasons.append(f"+{len(high_matches)*3} (high: {', '.join(high_matches[:2])})")
 
-        # Complex task indicators
-        if escalation_count > 2:
-            return True, f"Complex task detected ({escalation_count} escalation keywords)"
+        # Medium complexity keywords (+2 each)
+        medium_matches = [kw for kw in self.config.get("medium_complexity_keywords", []) if kw in prompt_lower]
+        if medium_matches:
+            complexity_score += len(medium_matches) * 2
+            reasons.append(f"+{len(medium_matches)*2} (medium: {', '.join(medium_matches[:2])})")
 
-        # Simple task indicators
-        if ollama_count > 2:
-            return False, f"Simple task detected ({ollama_count} ollama keywords)"
+        # Low complexity keywords (-2 each)
+        low_matches = [kw for kw in self.config.get("low_complexity_keywords", []) if kw in prompt_lower]
+        if low_matches:
+            complexity_score -= len(low_matches) * 2
+            reasons.append(f"-{len(low_matches)*2} (simple: {', '.join(low_matches[:2])})")
+
+        # Code indicators (-1 each)
+        code_matches = [kw for kw in self.config.get("code_indicators", []) if kw in prompt_lower]
+        if code_matches:
+            complexity_score -= len(code_matches)
+            reasons.append(f"-{len(code_matches)} (code)")
 
         # Prompt length check
-        if len(prompt) > self.config["prompt_length_threshold"]:
-            # Long prompts might be complex
-            if escalation_count > 0:
-                return True, "Long prompt with complexity keywords"
+        if len(prompt) > self.config.get("prompt_length_threshold", 500):
+            complexity_score += 1
+            reasons.append("+1 (long prompt)")
 
-        # Default: Use Ollama (cost-effective)
-        return False, "Default routing (cost optimization)"
+        # Code block detection (reduces complexity)
+        if "```" in prompt:
+            complexity_score -= 1
+            reasons.append("-1 (code block)")
+
+        # Decision threshold
+        threshold = 3
+        should_use_claude = complexity_score >= threshold
+
+        # Build reason string
+        reason_str = f"Score: {complexity_score} ({'≥' if should_use_claude else '<'}{threshold}) [{', '.join(reasons)}]"
+
+        if should_use_claude:
+            return True, f"Complex task - {reason_str}"
+        else:
+            return False, f"Simple task - {reason_str}"
+
+    def estimate_tokens(self, text: str) -> int:
+        """
+        Estimate token count for text.
+
+        Uses tiktoken if available (accurate), otherwise falls back to
+        character-based estimation (4 chars ≈ 1 token).
+
+        Returns:
+            Estimated token count
+        """
+        if TIKTOKEN_AVAILABLE:
+            try:
+                return len(TIKTOKEN_ENCODING.encode(text))
+            except Exception as e:
+                logger.warning(f"tiktoken encoding failed: {e}, falling back to char estimation")
+                return len(text) // 4
+        else:
+            # Fallback: rough approximation (4 characters ≈ 1 token)
+            return len(text) // 4
 
     def estimate_cost(self, input_tokens: int, output_tokens: int) -> float:
-        """Estimate cost for Claude API call."""
+        """
+        Estimate cost for Claude API call.
+
+        NOTE: This is an ESTIMATE only! We use Claude CLI which doesn't
+        return actual token counts. For accurate tracking, use Claude API directly.
+
+        Args:
+            input_tokens: Estimated input tokens
+            output_tokens: Estimated output tokens
+
+        Returns:
+            Estimated cost in USD
+        """
         input_cost = input_tokens * self.config["cost_per_input_token"]
         output_cost = output_tokens * self.config["cost_per_output_token"]
         return input_cost + output_cost
@@ -242,22 +333,32 @@ class SmartAIRouter:
             }
 
     def get_routing_info(self, prompt: str) -> Dict:
-        """Get routing decision without making the call."""
+        """
+        Get routing decision without making the call.
+
+        Returns routing decision with cost estimates.
+        NOTE: Costs are ESTIMATED (not measured from actual API response).
+        """
         should_use_claude, reason = self.should_escalate_to_claude(prompt)
         budget_status = self.get_budget_status()
 
-        # Estimate tokens (rough approximation: 1 token ≈ 4 chars)
-        estimated_input_tokens = len(prompt) // 4
-        estimated_output_tokens = 500  # Average response
+        # Estimate tokens using tiktoken (if available) or character-based fallback
+        estimated_input_tokens = self.estimate_tokens(prompt)
+        # Output tokens: conservative estimate (avg Claude response ~400-600 tokens)
+        estimated_output_tokens = 500
         estimated_cost = self.estimate_cost(estimated_input_tokens, estimated_output_tokens)
 
         return {
             "should_use_claude": should_use_claude,
             "reason": reason,
             "estimated_cost": estimated_cost,
+            "estimated_input_tokens": estimated_input_tokens,
+            "estimated_output_tokens": estimated_output_tokens,
             "budget_remaining": budget_status["remaining"],
             "budget_percentage_used": budget_status["percentage_used"],
-            "recommended_model": "claude" if should_use_claude else "ollama"
+            "recommended_model": "claude" if should_use_claude else "ollama",
+            "is_estimate": True,  # Flag that this is not measured!
+            "tiktoken_used": TIKTOKEN_AVAILABLE
         }
 
     def reset_budget(self, month: Optional[str] = None):

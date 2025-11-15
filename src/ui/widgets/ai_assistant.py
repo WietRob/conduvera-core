@@ -117,8 +117,9 @@ class AIAssistant(VerticalScroll):
         budget_bar = self.get_budget_bar(budget_pct)
 
         yield Static(
-            f"[dim green]Smart routing between Ollama (free) and Claude (paid)[/]\n\n"
-            f"[cyan]💰 Budget Status:[/] [{budget_color}]${budget_status['spent']:.2f}[/] / "
+            f"[dim green]Smart routing between Ollama (free) and Claude (paid)[/]\n"
+            f"[yellow]⚠️  Note: Costs are estimated (CLI doesn't return actual tokens)[/]\n\n"
+            f"[cyan]💰 Budget Status:[/] [{budget_color}]~${budget_status['spent']:.2f}[/] / "
             f"[green]${budget_status['budget']:.2f}[/] ({budget_pct:.1f}%)\n"
             f"[{budget_color}]{budget_bar}[/]\n"
             f"[dim]Ollama: {budget_status['ollama_requests']} | "
@@ -137,16 +138,23 @@ class AIAssistant(VerticalScroll):
         empty = width - filled
         return "█" * filled + "░" * empty
 
-    def show_routing_info(self, model: str, cost: float, reason: str) -> None:
-        """Show routing decision info."""
+    def show_routing_info(self, model: str, cost: float, reason: str, is_estimate: bool = True, tiktoken_used: bool = False) -> None:
+        """Show routing decision info with estimation warnings."""
         model_emoji = "🟢" if "ollama" in model.lower() else "🟡"
         model_class = "model-ollama" if "ollama" in model.lower() else "model-claude"
+
+        # Build cost display with warning if it's an estimate
+        if is_estimate and cost > 0:
+            cost_method = "tiktoken" if tiktoken_used else "char-based"
+            cost_display = f"[dim]~${cost:.4f} [yellow]⚠ estimated ({cost_method})[/][/]"
+        else:
+            cost_display = f"[dim]${cost:.4f}[/]"
 
         self.mount(
             Static(
                 f"{model_emoji} [bold]Routed to:[/] [{model_class}]{model}[/] "
-                f"[dim]Cost: ${cost:.4f}[/]\n"
-                f"[dim]Reason: {reason}[/]",
+                f"{cost_display}\n"
+                f"[dim]{reason}[/]",
                 classes="ai-routing-info"
             )
         )
@@ -226,11 +234,13 @@ class AIAssistant(VerticalScroll):
             routing_info = self.router.get_routing_info(full_prompt)
             should_use_claude = routing_info["should_use_claude"]
 
-            # Show routing decision
+            # Show routing decision with estimate warning
             self.show_routing_info(
                 model=routing_info["recommended_model"],
                 cost=routing_info["estimated_cost"],
-                reason=routing_info["reason"]
+                reason=routing_info["reason"],
+                is_estimate=routing_info.get("is_estimate", True),
+                tiktoken_used=routing_info.get("tiktoken_used", False)
             )
 
             # Check budget warnings

@@ -451,14 +451,15 @@ class MonitoringDashboard(VerticalScroll):
             claude_pct = (claude / total_requests * 100) if total_requests > 0 else 0
 
             text = (
-                f"[bold cyan]🧠 AI BUDGET ({metrics['current_month']})[/]\n\n"
-                f"[bold]Spent:[/] [{budget_color}]${spent:.2f}[/] / [green]${budget:.2f}[/] "
+                f"[bold cyan]🧠 AI BUDGET ({metrics['current_month']})[/]\n"
+                f"[yellow]⚠️  Estimated costs (not measured)[/]\n\n"
+                f"[bold]Spent:[/] [{budget_color}]~${spent:.2f}[/] / [green]${budget:.2f}[/] "
                 f"[dim]({percentage:.1f}%)[/]\n"
                 f"[{budget_color}]{self.get_bar(percentage)}[/]\n"
-                f"[bold]Remaining:[/] [green]${remaining:.2f}[/]\n\n"
+                f"[bold]Remaining:[/] [green]~${remaining:.2f}[/]\n\n"
                 f"[bold]Requests:[/] [green]{total_requests}[/] total\n"
                 f"  [green]🟢 Ollama:[/] {ollama} [dim]({ollama_pct:.1f}%) - $0.00[/]\n"
-                f"  [yellow]🟡 Claude:[/] {claude} [dim]({claude_pct:.1f}%) - ${spent:.2f}[/]"
+                f"  [yellow]🟡 Claude:[/] {claude} [dim]({claude_pct:.1f}%) - ~${spent:.2f}[/]"
             )
 
             # Add monthly history if available
