@@ -12,6 +12,7 @@ import json
 from datetime import datetime
 from src.utils.logger import logger
 from src.utils.ai_router import SmartAIRouter
+from src.utils.feedback_tracker import FeedbackTracker
 
 
 class MonitoringDashboard(VerticalScroll):
@@ -90,6 +91,7 @@ class MonitoringDashboard(VerticalScroll):
         self.last_update = None
         self.metrics_history = []
         self.router = SmartAIRouter()
+        self.feedback_tracker = FeedbackTracker()
 
     def compose(self):
         """Create dashboard widgets."""
@@ -462,10 +464,42 @@ class MonitoringDashboard(VerticalScroll):
                 f"  [yellow]🟡 Claude:[/] {claude} [dim]({claude_pct:.1f}%) - ~${spent:.2f}[/]"
             )
 
+            # Add user feedback stats (Phase 7C)
+            feedback_stats = self.feedback_tracker.get_feedback_stats(days=30)
+            if feedback_stats["total_feedback"] > 0:
+                thumbs_up = feedback_stats["ratings"]["thumbs_up"]
+                thumbs_down = feedback_stats["ratings"]["thumbs_down"]
+                skip = feedback_stats["ratings"]["skip"]
+                total_fb = feedback_stats["total_feedback"]
+
+                thumbs_up_pct = feedback_stats["percentages"]["thumbs_up"]
+                thumbs_down_pct = feedback_stats["percentages"]["thumbs_down"]
+
+                # Routing accuracy
+                routing_acc = feedback_stats["routing_accuracy"]
+                ollama_acc = routing_acc["ollama_accuracy"]
+                claude_acc = routing_acc["claude_accuracy"]
+                misrouted = feedback_stats["misrouted"]["total"]
+
+                text += (
+                    f"\n\n[bold cyan]📊 USER SATISFACTION[/] [dim](30 days)[/]\n"
+                    f"  [green]👍 Helpful:[/] {thumbs_up} [dim]({thumbs_up_pct:.0f}%)[/]\n"
+                    f"  [red]👎 Not helpful:[/] {thumbs_down} [dim]({thumbs_down_pct:.0f}%)[/]\n"
+                    f"  [yellow]⏭️  Skipped:[/] {skip} [dim]({skip / total_fb * 100:.0f}%)[/]\n\n"
+                    f"[bold cyan]🎯 ROUTING ACCURACY[/]\n"
+                    f"  [green]✅ Ollama:[/] {routing_acc['ollama_correct']}/{routing_acc['ollama_total']} "
+                    f"[dim]({ollama_acc:.0f}%)[/]\n"
+                    f"  [yellow]✅ Claude:[/] {routing_acc['claude_correct']}/{routing_acc['claude_total']} "
+                    f"[dim]({claude_acc:.0f}%)[/]\n"
+                )
+
+                if misrouted > 0:
+                    text += f"  [red]❌ Misrouted:[/] {misrouted} prompts [dim](should review)[/]\n"
+
             # Add monthly history if available
             monthly_stats = metrics.get("monthly_stats", [])
             if monthly_stats:
-                text += "\n\n[bold]Recent Months:[/]\n"
+                text += "\n[bold]Recent Months:[/]\n"
                 for stat in monthly_stats:
                     month = stat["month"]
                     spent_month = stat["spent"]

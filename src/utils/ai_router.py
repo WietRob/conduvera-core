@@ -4,6 +4,7 @@ Smart AI Router - Budget-based routing between Ollama and Claude
 Adapted for Matrix OS from ai-router-system
 
 Version 6.1: Improved with tiktoken and weighted keyword scoring
+Version 7.0: BERT-based routing + user feedback loop
 """
 
 import os
@@ -11,10 +12,19 @@ import json
 import requests
 import datetime
 import logging
+import hashlib
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# Try to import BERT classifier
+try:
+    from .bert_classifier import get_bert_classifier
+    BERT_CLASSIFIER_AVAILABLE = True
+except ImportError:
+    BERT_CLASSIFIER_AVAILABLE = False
+    logger.warning("BERT classifier not available")
 
 # Try to import tiktoken for better token estimation
 try:
@@ -46,6 +56,21 @@ class SmartAIRouter:
         self.config_path = Path(config_path).expanduser()
         self.config = self.load_config()
         self.budget_file = Path(config_path).parent / "budget_tracker.json"
+        self.routing_log_file = Path(config_path).parent / "routing_decisions.jsonl"
+
+        # Initialize BERT classifier (lazy-loaded)
+        self.bert_classifier = None
+        if self.config.get("use_bert_routing", False) and BERT_CLASSIFIER_AVAILABLE:
+            try:
+                self.bert_classifier = get_bert_classifier()
+                if self.bert_classifier and self.bert_classifier.available:
+                    logger.info("BERT classifier initialized successfully")
+                else:
+                    logger.warning("BERT classifier failed to initialize")
+                    self.bert_classifier = None
+            except Exception as e:
+                logger.error(f"Failed to initialize BERT classifier: {e}")
+                self.bert_classifier = None
 
     def load_config(self) -> Dict:
         """Load router configuration."""
@@ -53,6 +78,11 @@ class SmartAIRouter:
             "ollama_base_url": "http://localhost:11434",
             "monthly_budget": 5.0,
             "warning_threshold": 4.0,
+            # Phase 7B: BERT routing
+            "use_bert_routing": False,  # Enable BERT-based routing
+            "bert_threshold": 0.6,  # BERT complexity threshold (0.0-1.0)
+            "bert_weight": 0.7,  # Weight for BERT in hybrid mode (0.7 BERT + 0.3 weighted)
+            "routing_mode": "weighted",  # "weighted", "bert", or "hybrid"
             # High-complexity keywords (weight: +3)
             "high_complexity_keywords": [
                 "architecture", "design", "microservices", "scalability",
@@ -75,7 +105,8 @@ class SmartAIRouter:
             "cost_per_input_token": 0.000003,  # Claude Sonnet pricing
             "cost_per_output_token": 0.000015,
             "ollama_model": "mistral",
-            "prompt_length_threshold": 500  # Long prompts → Claude
+            "prompt_length_threshold": 500,  # Long prompts → Claude
+            "complexity_threshold": 3  # Weighted scoring threshold
         }
 
         try:
@@ -235,7 +266,7 @@ class SmartAIRouter:
             reasons.append("-1 (code block)")
 
         # Decision threshold
-        threshold = 3
+        threshold = self.config.get("complexity_threshold", 3)
         should_use_claude = complexity_score >= threshold
 
         # Build reason string
@@ -245,6 +276,161 @@ class SmartAIRouter:
             return True, f"Complex task - {reason_str}"
         else:
             return False, f"Simple task - {reason_str}"
+
+    def should_escalate_to_claude_bert(self, prompt: str) -> Tuple[bool, str, float]:
+        """
+        Decide if Claude is needed using BERT classifier.
+
+        Returns:
+            Tuple of (should_use_claude, reason, bert_score)
+        """
+        if not self.bert_classifier or not self.bert_classifier.available:
+            # Fallback to weighted scoring
+            should_use, reason = self.should_escalate_to_claude(prompt)
+            return should_use, f"BERT unavailable - {reason}", 0.5
+
+        # Get BERT prediction
+        should_use, bert_score, reason = self.bert_classifier.should_use_claude(
+            prompt,
+            threshold=self.config.get("bert_threshold", 0.6)
+        )
+
+        return should_use, reason, bert_score
+
+    def should_escalate_to_claude_hybrid(self, prompt: str) -> Tuple[bool, str, Dict]:
+        """
+        Decide using hybrid mode: BERT + weighted scoring.
+
+        Combines BERT semantic understanding with keyword-based heuristics.
+
+        Returns:
+            Tuple of (should_use_claude, reason, metadata)
+        """
+        # Get weighted scoring decision
+        weighted_decision, weighted_reason = self.should_escalate_to_claude(prompt)
+
+        # Get BERT decision if available
+        bert_score = 0.5
+        bert_available = False
+        if self.bert_classifier and self.bert_classifier.available:
+            _, bert_score, bert_reason = self.should_escalate_to_claude_bert(prompt)
+            bert_available = True
+        else:
+            bert_reason = "BERT unavailable"
+
+        # Hybrid decision: weighted combination
+        bert_weight = self.config.get("bert_weight", 0.7)
+        weighted_score_normalized = 1.0 if weighted_decision else 0.0
+
+        if bert_available:
+            # Combine: bert_weight * BERT + (1-bert_weight) * weighted
+            final_score = (bert_weight * bert_score) + ((1 - bert_weight) * weighted_score_normalized)
+        else:
+            # BERT unavailable - use weighted only
+            final_score = weighted_score_normalized
+
+        # Decision threshold
+        threshold = 0.5
+        should_use_claude = final_score >= threshold
+
+        # Build reason
+        if bert_available:
+            reason = (
+                f"Hybrid: {final_score:.2f} ({'≥' if should_use_claude else '<'}{threshold}) "
+                f"[BERT: {bert_score:.2f} ({bert_weight*100:.0f}%), "
+                f"Weighted: {'yes' if weighted_decision else 'no'} ({(1-bert_weight)*100:.0f}%)]"
+            )
+        else:
+            reason = f"Hybrid (BERT unavailable): {weighted_reason}"
+
+        metadata = {
+            "bert_score": bert_score,
+            "bert_available": bert_available,
+            "weighted_decision": weighted_decision,
+            "final_score": final_score
+        }
+
+        return should_use_claude, reason, metadata
+
+    def route_prompt(self, prompt: str) -> Tuple[bool, str, Dict]:
+        """
+        Route prompt based on configured routing mode.
+
+        Routing modes:
+        - "weighted": Keyword-based weighted scoring (Phase 6.1)
+        - "bert": BERT semantic similarity (Phase 7B)
+        - "hybrid": Combination of BERT + weighted (default Phase 7B)
+
+        Returns:
+            Tuple of (should_use_claude, reason, metadata)
+        """
+        budget_status = self.get_budget_status()
+
+        # Budget check (hard limit)
+        if budget_status["remaining"] <= 0:
+            return False, "Budget exhausted - Fallback to Ollama", {}
+
+        # Get routing mode
+        routing_mode = self.config.get("routing_mode", "weighted")
+
+        metadata = {"routing_mode": routing_mode}
+
+        if routing_mode == "bert":
+            should_use, reason, bert_score = self.should_escalate_to_claude_bert(prompt)
+            metadata["bert_score"] = bert_score
+        elif routing_mode == "hybrid":
+            should_use, reason, hybrid_metadata = self.should_escalate_to_claude_hybrid(prompt)
+            metadata.update(hybrid_metadata)
+        else:  # "weighted" (default)
+            should_use, reason = self.should_escalate_to_claude(prompt)
+
+        return should_use, reason, metadata
+
+    def log_routing_decision(
+        self,
+        prompt: str,
+        decision: bool,
+        reason: str,
+        metadata: Dict,
+        cost: float = 0.0
+    ):
+        """
+        Log routing decision for training data collection.
+
+        Logged data format:
+        {
+            "timestamp": "2025-11-15T10:30:00",
+            "prompt": "Design a microservices...",
+            "prompt_hash": "abc123...",
+            "decision": "claude",
+            "reason": "...",
+            "metadata": {...},
+            "cost": 0.018,
+            "user_feedback": null
+        }
+        """
+        try:
+            # Create hash of prompt (for deduplication)
+            prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()[:16]
+
+            log_entry = {
+                "timestamp": datetime.datetime.now().isoformat(),
+                "prompt": prompt[:200],  # Truncate for privacy
+                "prompt_hash": prompt_hash,
+                "decision": "claude" if decision else "ollama",
+                "reason": reason,
+                "metadata": metadata,
+                "cost": cost,
+                "user_feedback": None  # Will be filled by Phase 7C
+            }
+
+            # Append to JSONL file
+            self.routing_log_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.routing_log_file, 'a') as f:
+                f.write(json.dumps(log_entry) + '\n')
+
+        except Exception as e:
+            logger.error(f"Failed to log routing decision: {e}")
 
     def estimate_tokens(self, text: str) -> int:
         """
@@ -339,7 +525,8 @@ class SmartAIRouter:
         Returns routing decision with cost estimates.
         NOTE: Costs are ESTIMATED (not measured from actual API response).
         """
-        should_use_claude, reason = self.should_escalate_to_claude(prompt)
+        # Use new route_prompt method (supports weighted/bert/hybrid)
+        should_use_claude, reason, metadata = self.route_prompt(prompt)
         budget_status = self.get_budget_status()
 
         # Estimate tokens using tiktoken (if available) or character-based fallback
@@ -348,7 +535,7 @@ class SmartAIRouter:
         estimated_output_tokens = 500
         estimated_cost = self.estimate_cost(estimated_input_tokens, estimated_output_tokens)
 
-        return {
+        routing_info = {
             "should_use_claude": should_use_claude,
             "reason": reason,
             "estimated_cost": estimated_cost,
@@ -358,8 +545,11 @@ class SmartAIRouter:
             "budget_percentage_used": budget_status["percentage_used"],
             "recommended_model": "claude" if should_use_claude else "ollama",
             "is_estimate": True,  # Flag that this is not measured!
-            "tiktoken_used": TIKTOKEN_AVAILABLE
+            "tiktoken_used": TIKTOKEN_AVAILABLE,
+            "routing_metadata": metadata  # Phase 7B metadata (BERT scores, etc.)
         }
+
+        return routing_info
 
     def reset_budget(self, month: Optional[str] = None):
         """Reset budget for a specific month (or current month)."""

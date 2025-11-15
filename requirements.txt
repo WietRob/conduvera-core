@@ -11,6 +11,9 @@ tiktoken>=0.5.0  # Better token estimation
 anthropic>=0.25.0  # Claude API (for future direct API usage)
 requests>=2.31.0  # Ollama API calls
 
+# Phase 7B: BERT-based Routing
+sentence-transformers>=2.2.0  # Lightweight BERT for complexity detection (22MB model)
+
 # Development Dependencies (optional)
 pytest>=7.4.0
 pytest-asyncio>=0.21.0

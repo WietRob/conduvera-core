@@ -1,5 +1,5 @@
 """AI Assistant widget with Smart Router integration."""
-from textual.widgets import Static
+from textual.widgets import Static, Button
 from textual.containers import VerticalScroll, Horizontal
 from textual.reactive import reactive
 from textual.message import Message
@@ -7,9 +7,11 @@ from rich.text import Text
 from rich.markdown import Markdown
 from pathlib import Path
 import subprocess
-from typing import Optional
+import time
+from typing import Optional, Dict
 from src.utils.logger import logger
 from src.utils.ai_router import SmartAIRouter
+from src.utils.feedback_tracker import FeedbackTracker
 
 
 class AIAssistant(VerticalScroll):
@@ -86,6 +88,47 @@ class AIAssistant(VerticalScroll):
         color: #FFD700;
         text-style: bold;
     }
+
+    AIAssistant .feedback-container {
+        background: rgba(0, 40, 0, 0.6);
+        border: round #00AA00;
+        padding: 1;
+        margin: 1 0;
+        height: auto;
+    }
+
+    AIAssistant .feedback-button {
+        margin: 0 1;
+        min-width: 12;
+        background: rgba(0, 100, 0, 0.8);
+        color: #00FF00;
+        border: round #00AA00;
+    }
+
+    AIAssistant .feedback-button:hover {
+        background: rgba(0, 150, 0, 0.9);
+        border: heavy #00FF00;
+    }
+
+    AIAssistant .feedback-button-positive {
+        background: rgba(0, 100, 0, 0.8);
+        color: #00FF00;
+    }
+
+    AIAssistant .feedback-button-negative {
+        background: rgba(100, 0, 0, 0.8);
+        color: #FF5555;
+    }
+
+    AIAssistant .feedback-button-skip {
+        background: rgba(50, 50, 0, 0.8);
+        color: #FFFF55;
+    }
+
+    AIAssistant .feedback-recorded {
+        color: #00FFAA;
+        text-style: italic;
+    }
     """
 
     class ResponseReceived(Message):
@@ -99,7 +142,9 @@ class AIAssistant(VerticalScroll):
         super().__init__(**kwargs)
         self.conversation_history = []
         self.router = SmartAIRouter()
+        self.feedback_tracker = FeedbackTracker()
         self.use_router = True  # Toggle for enabling/disabling smart routing
+        self.current_response_metadata: Optional[Dict] = None  # For feedback correlation
 
     def compose(self):
         """Create child widgets."""
@@ -268,6 +313,25 @@ class AIAssistant(VerticalScroll):
             # Update budget tracking
             self.router.update_budget(cost, model)
 
+            # Log routing decision for training data
+            self.router.log_routing_decision(
+                prompt=full_prompt,
+                decision=should_use_claude,
+                reason=routing_info["reason"],
+                metadata=routing_info.get("routing_metadata", {}),
+                cost=cost
+            )
+
+            # Store metadata for feedback correlation
+            self.current_response_metadata = {
+                "prompt": full_prompt,
+                "model": model,
+                "cost": cost,
+                "routing_score": routing_info.get("routing_metadata", {}).get("final_score"),
+                "routing_metadata": routing_info.get("routing_metadata", {}),
+                "timestamp": time.time()
+            }
+
             # Store and display response
             self.last_response = response
             self.show_response(response)
@@ -319,7 +383,7 @@ class AIAssistant(VerticalScroll):
 
     def show_response(self, response: str) -> None:
         """
-        Show AI response.
+        Show AI response with feedback buttons.
 
         Args:
             response: Response text to display
@@ -340,6 +404,20 @@ class AIAssistant(VerticalScroll):
                 classes="ai-response"
             )
         )
+
+        # Add feedback buttons (Phase 7C)
+        feedback_container = Horizontal(classes="feedback-container")
+        feedback_container.mount(Static("[cyan]Was this response helpful?[/] "))
+        feedback_container.mount(
+            Button("👍 Yes", id="feedback-thumbs-up", classes="feedback-button feedback-button-positive")
+        )
+        feedback_container.mount(
+            Button("👎 No", id="feedback-thumbs-down", classes="feedback-button feedback-button-negative")
+        )
+        feedback_container.mount(
+            Button("⏭️  Skip", id="feedback-skip", classes="feedback-button feedback-button-skip")
+        )
+        self.mount(feedback_container)
 
         # Auto-scroll to bottom
         self.scroll_end(animate=True)
@@ -448,3 +526,63 @@ class AIAssistant(VerticalScroll):
             Answer
         """
         return await self.ask_claude(question, code=code)
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """
+        Handle feedback button presses (Phase 7C).
+
+        Args:
+            event: Button press event
+        """
+        button_id = event.button.id
+
+        # Only handle feedback buttons
+        if not button_id or not button_id.startswith("feedback-"):
+            return
+
+        # Determine rating
+        rating_map = {
+            "feedback-thumbs-up": "thumbs_up",
+            "feedback-thumbs-down": "thumbs_down",
+            "feedback-skip": "skip"
+        }
+
+        rating = rating_map.get(button_id)
+        if not rating or not self.current_response_metadata:
+            return
+
+        # Record feedback
+        response_time = time.time() - self.current_response_metadata.get("timestamp", time.time())
+
+        self.feedback_tracker.record_feedback(
+            prompt=self.current_response_metadata["prompt"],
+            model=self.current_response_metadata["model"],
+            rating=rating,
+            response_length=len(self.last_response),
+            routing_score=self.current_response_metadata.get("routing_score"),
+            routing_metadata=self.current_response_metadata.get("routing_metadata"),
+            response_time=response_time
+        )
+
+        # Hide feedback buttons and show thank you message
+        try:
+            # Remove the feedback container
+            for container in self.query(".feedback-container"):
+                container.remove()
+
+            # Show feedback recorded message
+            emoji_map = {
+                "thumbs_up": "👍",
+                "thumbs_down": "👎",
+                "skip": "⏭️"
+            }
+            self.mount(
+                Static(
+                    f"[dim cyan]{emoji_map.get(rating, '')} Feedback recorded - Thank you![/]",
+                    classes="feedback-recorded"
+                )
+            )
+
+            logger.info(f"Feedback recorded: {rating} for {self.current_response_metadata['model']}")
+        except Exception as e:
+            logger.error(f"Error handling feedback: {e}")
