@@ -23,6 +23,7 @@ from src.ui.widgets.database_browser import DatabaseBrowser
 from src.ui.widgets.git_manager import GitManager
 from src.ui.widgets.split_pane import SplitPane, EditorTerminalSplit
 from src.ui.widgets.monitoring_dashboard import MonitoringDashboard
+from src.ui.widgets.skills_dashboard import SkillsDashboard
 from src.utils.config import get_config
 from src.utils.logger import logger
 
@@ -95,6 +96,7 @@ class Sidebar(VerticalScroll):
         yield Button("🎨 Matrix Effects", id="btn_effects")
         yield Button("📊 System Info", id="btn_sysinfo")
         yield Button("📈 Monitoring", id="btn_monitoring")
+        yield Button("🔧 Skills", id="btn_skills")
         yield Button("⚙️  Settings", id="btn_settings")
         yield Button("❓ Help", id="btn_help")
         yield Button("🚪 Exit", id="btn_exit", variant="error")
@@ -123,6 +125,7 @@ class MatrixOS(App):
         Binding("ctrl+r", "show_api", "API Client", show=True),
         Binding("ctrl+b", "show_database", "Database", show=True),
         Binding("ctrl+p", "show_processes", "Processes", show=False),
+        Binding("ctrl+s", "show_skills", "Skills Dashboard", show=True),
     ]
 
     show_rain = reactive(True)
@@ -302,6 +305,10 @@ class MatrixOS(App):
                 id="monitoring-dashboard-view",
                 classes="view"
             ),
+            "skills": lambda: SkillsDashboard(
+                id="skills-dashboard-view",
+                classes="view"
+            ),
             "welcome": lambda: Container(
                 Label(
                     "[bold bright_green]╔═══════════════════════════════════════════╗[/]\n"
@@ -379,6 +386,11 @@ class MatrixOS(App):
         self.switch_view("monitoring")
         self.update_status("📈 [bold green]Monitoring Dashboard loaded[/] - Unified system, docker, and process monitoring")
 
+    def action_show_skills(self) -> None:
+        """Show skills dashboard view."""
+        self.switch_view("skills")
+        self.update_status("🔧 [bold green]CuraOps Skills Dashboard loaded[/] - Lock status, sessions, ASPICE compliance")
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button press events."""
         button_id = event.button.id
@@ -424,6 +436,10 @@ class MatrixOS(App):
             "btn_monitoring": lambda: (
                 self.switch_view("monitoring"),
                 self.update_status("📈 [bold green]Monitoring Dashboard loaded[/] - Unified monitoring")
+            ),
+            "btn_skills": lambda: (
+                self.switch_view("skills"),
+                self.update_status("🔧 [bold green]CuraOps Skills Dashboard loaded[/] - All 7 skills status")
             ),
             "btn_help": lambda: self.action_help(),
             "btn_exit": lambda: self.action_quit(),

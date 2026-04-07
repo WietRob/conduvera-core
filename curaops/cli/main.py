@@ -23,6 +23,8 @@ from curaops.cli.commands.skills import (
     lock_app,
     pattern_app,
 )
+from curaops.cli.completion import completion_app
+from curaops.cli.hooks import hooks_app
 
 console = Console()
 
@@ -40,6 +42,8 @@ app.add_typer(session_app, name="session", help="Session Manager - Session lifec
 app.add_typer(aspice_app, name="aspice", help="ASPICE Compliance - Traceability")
 app.add_typer(lock_app, name="lock", help="Multi-Agent Lock - File coordination")
 app.add_typer(pattern_app, name="pattern", help="Pattern Learning - Behavior learning")
+app.add_typer(completion_app, name="completion", help="Shell completion & aliases")
+app.add_typer(hooks_app, name="hooks", help="Git hooks integration")
 
 
 @app.callback()

@@ -276,6 +276,7 @@ def session_list(
 def aspice_link(
     requirement: str = typer.Option(..., "--req", "-r", help="Requirement ID (e.g., SW-REQ-001)"),
     file: Path = typer.Option(..., "--file", "-f", help="File to link"),
+    bidirectional: bool = typer.Option(True, "--bidirectional/--no-bidirectional", help="Update bidirectional links"),
 ):
     """Create ASPICE traceability link (requirement → implementation)."""
     try:
@@ -297,11 +298,98 @@ def aspice_link(
                     console.print(f"[green]✅ Linked:[/green] {requirement} → {file}")
                 else:
                     console.print(f"[yellow]⚠️  Already linked:[/yellow] {requirement} → {file}")
+                
+                # Update bidirectional links
+                if bidirectional:
+                    with console.status("[bold green]Updating bidirectional links..."):
+                        result = lm.update_bidirectional_links(req_file)
+                    if result.success:
+                        console.print(f"[green]✅ Updated {result.updated_count} bidirectional links[/green]")
+                    else:
+                        console.print(f"[yellow]⚠️  Updated {result.updated_count} links with {len(result.errors)} errors[/yellow]")
+                        for error in result.errors[:3]:  # Show first 3 errors
+                            console.print(f"  [dim]- {error}[/dim]")
             else:
                 console.print(f"[red]Error: Could not parse {req_file}[/red]")
         else:
             console.print(f"[yellow]⚠️  Requirement file not found: {req_file}[/yellow]")
             console.print(f"  Searched in: requirements/software/ and requirements/")
+        
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(1)
+
+
+@aspice_app.command("update-all")
+def aspice_update_all(
+    path: Path = typer.Option(Path.cwd(), "--path", "-p", help="Project root path"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Show what would be updated without making changes"),
+):
+    """Update bidirectional links for all documents (<5min SLA)."""
+    try:
+        from curaops.skills.aspice_link_manager import ASPICELinkManager
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        import time
+        
+        lm = ASPICELinkManager(root_dir=path)
+        
+        # Collect all documents
+        all_docs = []
+        for search_dir in lm.search_dirs:
+            if not search_dir.exists():
+                continue
+            for md_file in search_dir.rglob("*.md"):
+                all_docs.append(md_file)
+        
+        if not all_docs:
+            console.print("[yellow]No requirement documents found[/yellow]")
+            return
+        
+        console.print(f"[bold]Processing {len(all_docs)} documents...[/bold]")
+        start_time = time.time()
+        
+        total_updated = 0
+        errors = []
+        
+        if dry_run:
+            console.print("[dim]Dry run mode - no changes will be made[/dim]")
+            for doc_file in all_docs:
+                doc = lm.parse_document(doc_file)
+                if doc:
+                    console.print(f"  Would update: {doc.id}")
+            return
+        
+        # Process documents in parallel for SLA compliance
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            future_to_doc = {executor.submit(lm.update_bidirectional_links, doc): doc for doc in all_docs}
+            
+            for future in as_completed(future_to_doc):
+                doc = future_to_doc[future]
+                try:
+                    result = future.result()
+                    total_updated += result.updated_count
+                    errors.extend(result.errors)
+                except Exception as e:
+                    errors.append(f"{doc}: {e}")
+        
+        elapsed = time.time() - start_time
+        
+        # Results
+        console.print(f"\n[bold]Results:[/bold]")
+        console.print(f"  Documents processed: {len(all_docs)}")
+        console.print(f"  Links updated: {total_updated}")
+        console.print(f"  Errors: {len(errors)}")
+        console.print(f"  Time elapsed: {elapsed:.2f}s")
+        
+        if elapsed > 300:  # 5min SLA
+            console.print(f"[yellow]⚠️  SLA Warning: {elapsed:.1f}s > 300s target[/yellow]")
+        else:
+            console.print(f"[green]✅ SLA Met: {elapsed:.1f}s < 300s target[/green]")
+        
+        if errors:
+            console.print(f"\n[yellow]First 5 errors:[/yellow]")
+            for error in errors[:5]:
+                console.print(f"  [dim]- {error}[/dim]")
         
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
