@@ -52,5 +52,18 @@ def main():
     pass
 
 
+def main():
+    """Entry point - handles both CLI and MCP server modes."""
+    import sys
+    
+    if len(sys.argv) > 1 and sys.argv[1] == "mcp-server":
+        # Run in MCP server mode for Zed integration
+        from curaops.cli.mcp_server import run_mcp_server
+        run_mcp_server()
+    else:
+        # Normal CLI mode
+        app()
+
+
 if __name__ == "__main__":
-    app()
+    main()
