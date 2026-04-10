@@ -8,10 +8,15 @@ from pathlib import Path
 import sys
 import os
 
-# Add skill to path
-sys.path.insert(0, os.path.expanduser("~/.hermes/skills/change-request"))
+# Add skill to path (use local matrix-os version)
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from __init__ import ChangeRequestService, ChangeRequestError
+from __init__ import (
+    ChangeRequestService, 
+    ChangeRequestError,
+    generate_cr_evidence,
+    validate_cr_traceability,
+)
 
 
 class TestChangeRequestService:
@@ -166,6 +171,128 @@ class TestChangeRequestService:
         
         final = self.service.get_cr_status(cr_id)
         assert final["status"] == "SUBMITTED"
+
+
+class TestComplianceCRFeatures:
+    """Test Compliance-CR specific features (C Context)."""
+    
+    def setup_method(self):
+        """Setup for each test."""
+        self.test_dir = Path("/tmp/test_compliance_cr")
+        self.test_dir.mkdir(parents=True, exist_ok=True)
+        self.service = ChangeRequestService(changes_path=self.test_dir / "changes")
+    
+    def teardown_method(self):
+        """Cleanup after each test."""
+        if self.test_dir.exists():
+            shutil.rmtree(self.test_dir)
+    
+    def test_submit_cr_with_requirement_refs(self):
+        """C-AC1: Submit CR with requirement references."""
+        cr = self.service.submit_change_request(
+            title="Test Feature with Requirements",
+            description="This CR links to requirements",
+            requirement_refs=["SW-REQ-001", "SYS-REQ-042", "ARCH-003"]
+        )
+        
+        assert cr["cr_id"] == "CR-001"
+        assert "requirement_refs" in cr
+        assert cr["requirement_refs"] == ["SW-REQ-001", "SYS-REQ-042", "ARCH-003"]
+        
+        # Verify requirements are in the Markdown file
+        md_file = Path(cr["file_path"])
+        content = md_file.read_text()
+        assert "## Requirement References" in content
+        assert "- SW-REQ-001" in content
+        assert "- SYS-REQ-042" in content
+        assert "- ARCH-003" in content
+    
+    def test_submit_cr_without_requirement_refs(self):
+        """C-AC2: Submit CR without requirements (backward compatible)."""
+        cr = self.service.submit_change_request(
+            title="Test Feature",
+            description="This CR has no requirements yet"
+        )
+        
+        assert cr["requirement_refs"] == []
+        
+        # Verify placeholder in Markdown
+        md_file = Path(cr["file_path"])
+        content = md_file.read_text()
+        assert "## Requirement References" in content
+        assert "- (TBD)" in content
+    
+    def test_generate_cr_evidence_json(self):
+        """C-AC3: Generate JSON evidence for CR."""
+        # generate_cr_evidence already imported at top
+        
+        # Create a CR with requirements
+        cr = self.service.submit_change_request(
+            title="Feature with Evidence",
+            description="Test description",
+            requirement_refs=["SW-REQ-001"]
+        )
+        
+        # Generate evidence
+        result = generate_cr_evidence(
+            project_path=str(self.test_dir),
+            cr_id=cr["cr_id"],
+            output_format="json"
+        )
+        
+        assert "✅ Evidence generated" in result
+        assert "CR-001_evidence.json" in result
+        
+        # Verify evidence file exists
+        evidence_file = self.test_dir / "changes" / "evidence" / "CR-001_evidence.json"
+        assert evidence_file.exists()
+        
+        # Verify content
+        import json
+        evidence = json.loads(evidence_file.read_text())
+        assert evidence["cr_id"] == "CR-001"
+        assert evidence["title"] == "Feature with Evidence"
+        assert evidence["status"] == "SUBMITTED"
+        assert evidence["requirement_references"] == ["SW-REQ-001"]
+        assert evidence["evidence_format"] == "compliance-cr-v1.0"
+    
+    def test_validate_cr_traceability_no_refs(self):
+        """C-AC4: Validate CR without requirement refs shows warning."""
+        # validate_cr_traceability already imported at top
+        
+        # Create a CR without requirements
+        cr = self.service.submit_change_request(
+            title="Feature without Requirements",
+            description="Test description"
+        )
+        
+        # Validate
+        result = validate_cr_traceability(
+            project_path=str(self.test_dir),
+            cr_id=cr["cr_id"]
+        )
+        
+        assert "No requirement references found" in result
+    
+    def test_validate_cr_traceability_with_refs_no_aspice(self):
+        """C-AC5: Validate CR with refs when ASPICE Link Manager not available."""
+        # validate_cr_traceability already imported at top
+        
+        # Create a CR with requirements
+        cr = self.service.submit_change_request(
+            title="Feature with Requirements",
+            description="Test description",
+            requirement_refs=["SW-REQ-001", "SYS-REQ-042"]
+        )
+        
+        # Validate (ASPICE Link Manager may not be available in test)
+        result = validate_cr_traceability(
+            project_path=str(self.test_dir),
+            cr_id=cr["cr_id"]
+        )
+        
+        # Should show requirements but warn about ASPICE
+        assert "SW-REQ-001" in result or "ASPICE Link Manager not available" in result
 
 
 if __name__ == "__main__":
