@@ -82,23 +82,31 @@ def safety_validate_delete(
 def cr_create(
     title: str = typer.Option(..., "--title", "-t", help="CR title"),
     description: Optional[str] = typer.Option(None, "--description", "-d", help="CR description"),
-    scope: Optional[str] = typer.Option(None, "--scope", "-s", help="Files/paths scope (comma-separated)"),
+    requirements: Optional[str] = typer.Option(None, "--requirements", "-r", help="Requirement refs (comma-separated, e.g., 'SW-REQ-001,SYS-REQ-042')"),
     priority: str = typer.Option("MEDIUM", "--priority", "-p", help="Priority: LOW, MEDIUM, HIGH, CRITICAL"),
 ):
-    """Create a new Change Request."""
+    """Create a new Change Request with optional requirement references."""
     try:
         from curaops.skills.change_request import ChangeRequestService
+        
+        # Parse requirement references
+        req_refs = None
+        if requirements:
+            req_refs = [r.strip() for r in requirements.split(",") if r.strip()]
         
         cr_service = ChangeRequestService(changes_path=Path.cwd() / "changes")
         result = cr_service.submit_change_request(
             title=title,
-            description=description or ""
+            description=description or "",
+            requirement_refs=req_refs,
         )
         
-        cr_id = result.get("id", "unknown")
+        cr_id = result.get("cr_id", "unknown")
         console.print(f"[green]✅ Created CR:[/green] {cr_id}")
         console.print(f"  Title: {title}")
-        console.print(f"  File: {result.get('file', 'N/A')}")
+        console.print(f"  File: {result.get('file_path', 'N/A')}")
+        if req_refs:
+            console.print(f"  Requirements: {', '.join(req_refs)}")
         
     except ImportError:
         console.print("[red]Error: change_request skill not found[/red]")
@@ -138,20 +146,63 @@ def cr_show(
 ):
     """Show Change Request details."""
     try:
-        from curaops.skills.change_request import ChangeRequest
+        from curaops.skills.change_request import ChangeRequestService
         
-        cr = ChangeRequest.load(cr_id)
+        cr_service = ChangeRequestService(changes_path=Path.cwd() / "changes")
+        result = cr_service.get_cr_status(cr_id)
         
-        console.print(f"[bold]Change Request: {cr.cr_id}[/bold]")
-        console.print(f"  Title: {cr.title}")
-        console.print(f"  Status: {cr.status}")
-        console.print(f"  Priority: {cr.priority}")
-        console.print(f"  Created: {cr.created_at}")
-        if cr.scope:
-            console.print(f"  Scope: {', '.join(cr.scope)}")
-        if cr.blockers:
-            console.print(f"[red]  Blockers: {len(cr.blockers)}[/red]")
+        if not result.get("success"):
+            console.print(f"[red]Error: {result.get('error', 'CR not found')}[/red]")
+            raise typer.Exit(1)
+        
+        console.print(f"[bold]Change Request: {result['cr_id']}[/bold]")
+        console.print(f"  Title: {result['title']}")
+        console.print(f"  Status: {result['status']}")
+        console.print(f"  Created: {result['created']}")
+        console.print(f"  File: {result['file_path']}")
+        if result.get('description'):
+            console.print(f"\nDescription:\n  {result['description'][:200]}...")
             
+    except ImportError:
+        console.print("[red]Error: change_request skill not found[/red]")
+        raise typer.Exit(1)
+
+
+@cr_app.command("evidence")
+def cr_evidence(
+    cr_id: str = typer.Argument(..., help="CR ID to generate evidence for"),
+    format: str = typer.Option("json", "--format", "-f", help="Output format: json, markdown"),
+):
+    """Generate compliance evidence for a Change Request."""
+    try:
+        from curaops.skills.change_request import generate_cr_evidence
+        
+        result = generate_cr_evidence(
+            project_path=str(Path.cwd()),
+            cr_id=cr_id,
+            output_format=format,
+        )
+        console.print(result)
+        
+    except ImportError:
+        console.print("[red]Error: change_request skill not found[/red]")
+        raise typer.Exit(1)
+
+
+@cr_app.command("validate")
+def cr_validate(
+    cr_id: str = typer.Argument(..., help="CR ID to validate traceability for"),
+):
+    """Validate CR traceability against requirement documents."""
+    try:
+        from curaops.skills.change_request import validate_cr_traceability
+        
+        result = validate_cr_traceability(
+            project_path=str(Path.cwd()),
+            cr_id=cr_id,
+        )
+        console.print(result)
+        
     except ImportError:
         console.print("[red]Error: change_request skill not found[/red]")
         raise typer.Exit(1)
@@ -603,4 +654,134 @@ def pattern_suggest(
             
     except ImportError:
         console.print("[red]Error: pattern_learning skill not found[/red]")
+        raise typer.Exit(1)
+
+
+# ═══════════════════════════════════════════════════════════════
+# ACCOUNTABLE AGENT COMMANDS (Context B)
+# ═══════════════════════════════════════════════════════════════
+
+accountable_app = typer.Typer(help="Accountable Agent - AI-assisted change accountability")
+
+
+@accountable_app.command("register")
+def accountable_register(
+    agent_id: str = typer.Option(..., "--agent-id", "-a", help="Agent identifier"),
+    agent_name: str = typer.Option(..., "--name", "-n", help="Agent name"),
+    model: str = typer.Option(..., "--model", "-m", help="AI model used"),
+    description: str = typer.Option(..., "--description", "-d", help="Change description"),
+    change_type: str = typer.Option("feature", "--type", "-t", help="Change type: feature, bugfix, refactor, test"),
+    cr_id: Optional[str] = typer.Option(None, "--cr", "-c", help="Linked Change Request ID"),
+    requirements: Optional[str] = typer.Option(None, "--requirements", "-r", help="Requirement refs (comma-separated)"),
+    tools: Optional[str] = typer.Option(None, "--tools", help="Tools used (comma-separated)"),
+    files: Optional[str] = typer.Option(None, "--files", "-f", help="Files affected (comma-separated)"),
+    strict: bool = typer.Option(True, "--strict/--no-strict", help="Block if mandatory links missing"),
+):
+    """Register an accountable AI-assisted change."""
+    try:
+        from curaops.skills.accountable_agent import (
+            AccountableAgentService,
+            AgentContext,
+            ChangeIntent,
+            MissingMandatoryLinkError,
+        )
+        
+        service = AccountableAgentService(project_root=Path.cwd())
+        
+        agent_context = AgentContext(
+            agent_id=agent_id,
+            agent_name=agent_name,
+            model=model,
+            tools_used=[t.strip() for t in tools.split(",")] if tools else [],
+        )
+        
+        change_intent = ChangeIntent(
+            description=description,
+            change_type=change_type,
+            files_affected=[f.strip() for f in files.split(",")] if files else [],
+        )
+        
+        req_refs = [r.strip() for r in requirements.split(",")] if requirements else None
+        
+        try:
+            ac = service.register_accountable_change(
+                agent_context=agent_context,
+                change_intent=change_intent,
+                cr_id=cr_id,
+                requirement_refs=req_refs,
+                strict=strict,
+            )
+            
+            console.print(f"[green]✅ Accountable change registered:[/green] {ac.accountable_id}")
+            console.print(f"  Status: {ac.status}")
+            if ac.cr_id:
+                console.print(f"  Linked CR: {ac.cr_id}")
+            if ac.requirement_refs:
+                console.print(f"  Requirements: {', '.join(ac.requirement_refs)}")
+                
+        except MissingMandatoryLinkError as e:
+            console.print(f"[bold red]🚫 BLOCKED[/bold red] {e}")
+            raise typer.Exit(1)
+            
+    except ImportError as e:
+        console.print(f"[red]Error: accountable_agent skill not found: {e}[/red]")
+        raise typer.Exit(1)
+
+
+@accountable_app.command("validate")
+def accountable_validate(
+    accountable_id: str = typer.Argument(..., help="Accountable change ID"),
+):
+    """Validate an accountable change has all required links."""
+    try:
+        from curaops.skills.accountable_agent import AccountableAgentService
+        
+        service = AccountableAgentService(project_root=Path.cwd())
+        result = service.validate_accountability(accountable_id)
+        
+        if result["valid"]:
+            console.print(f"[green]✅ VALID[/green] {accountable_id}")
+            console.print(f"  CR: {result.get('cr_id', 'N/A')}")
+            console.print(f"  Requirements: {', '.join(result.get('requirement_refs', []))}")
+        else:
+            console.print(f"[bold red]❌ INVALID[/bold red] {accountable_id}")
+            for issue in result.get("issues", []):
+                console.print(f"  • {issue}")
+            raise typer.Exit(1)
+            
+    except ImportError:
+        console.print("[red]Error: accountable_agent skill not found[/red]")
+        raise typer.Exit(1)
+
+
+@accountable_app.command("evidence")
+def accountable_evidence(
+    accountable_id: str = typer.Argument(..., help="Accountable change ID"),
+    format: str = typer.Option("json", "--format", "-f", help="Output format: json, markdown"),
+):
+    """Generate evidence report for an accountable change."""
+    try:
+        from curaops.skills.accountable_agent import AccountableAgentService
+        
+        service = AccountableAgentService(project_root=Path.cwd())
+        evidence_path = service.generate_accountability_evidence(accountable_id, format)
+        
+        console.print(f"[green]✅ Evidence generated:[/green] {evidence_path}")
+        
+        # Show summary
+        import json
+        if format == "json":
+            with open(evidence_path) as f:
+                evidence = json.load(f)
+            
+            ac = evidence.get("accountable_change", {})
+            console.print(f"\n[bold]Accountability Summary:[/bold]")
+            console.print(f"  Agent: {ac.get('agent_context', {}).get('agent_name', 'N/A')}")
+            console.print(f"  Model: {ac.get('agent_context', {}).get('model', 'N/A')}")
+            console.print(f"  Change: {ac.get('change_intent', {}).get('description', 'N/A')[:50]}...")
+            console.print(f"  Status: {ac.get('status', 'N/A')}")
+            console.print(f"  Valid: {'✅' if evidence.get('validation', {}).get('valid') else '❌'}")
+            
+    except ImportError:
+        console.print("[red]Error: accountable_agent skill not found[/red]")
         raise typer.Exit(1)
