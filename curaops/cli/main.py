@@ -15,9 +15,9 @@ import typer
 from rich.console import Console
 
 # Import skill command groups
+from curaops.cli.commands.cr import cr_app  # v2.0.0 C core
 from curaops.cli.commands.skills import (
     safety_app,
-    cr_app,
     session_app,
     aspice_app,
     lock_app,
@@ -38,7 +38,7 @@ app = typer.Typer(
 
 # Add sub-commands
 app.add_typer(safety_app, name="safety", help="Safety Guard - Protect production data")
-app.add_typer(cr_app, name="cr", help="Change Request - CR-driven workflow")
+app.add_typer(cr_app, name="cr", help="Compliance Change Control — CR lifecycle (v2.0.0)")
 app.add_typer(session_app, name="session", help="Session Manager - Session lifecycle")
 app.add_typer(aspice_app, name="aspice", help="ASPICE Compliance - Traceability")
 app.add_typer(lock_app, name="lock", help="Multi-Agent Lock - File coordination")

@@ -6,13 +6,8 @@ import pytest
 import shutil
 import json
 from pathlib import Path
-import sys
-import os
 
-# Add skill to path
-sys.path.insert(0, os.path.expanduser("~/.hermes/skills/aspice-link-manager"))
-
-from __init__ import ASPICELinkManager, Requirement
+from curaops.skills.aspice_link_manager import ASPICELinkManager, Requirement
 
 
 class TestASPICELinkManager:
