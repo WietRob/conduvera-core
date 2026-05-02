@@ -118,16 +118,16 @@
 
 | Rule | In Code | Status |
 |------|---------|--------|
-| `change_type = "bugfix"` required at SUBMITTED | ✗ (no `change_type` on CR) | ❌ MISSING |
-| `requirement_linkage_type` mandatory for bugfix | ✗ | ❌ MISSING |
-| SW-REQ mandatory for functional bugfix | ✗ (no enforcement) | ❌ MISSING |
-| Emergency CR (24h rule, incident_id) | ✗ | ❌ MISSING |
-| Bugfix blocking rules (C-RULES §9.6) | ✗ | ❌ MISSING |
-| Bugfix warning rules (C-RULES §9.6 WARN) | ✗ | ❌ MISSING |
-| root_cause_category documentation | ✗ | ❌ MISSING |
-| Bugfix decision table (C-RULES §10) | ✗ | ❌ MISSING |
+| `change_type = "bugfix"` required at SUBMITTED | ✓ (ChangeType enum + field on CR) | ✅ CONFORMS |
+| `requirement_linkage_type` mandatory for bugfix | ✓ | ✅ CONFORMS |
+| SW-REQ mandatory for functional bugfix | ✓ (validation rule C-RULES §9.6) | ✅ CONFORMS |
+| Emergency CR (24h rule, incident_id) | ✓ | ✅ CONFORMS |
+| Bugfix blocking rules (C-RULES §9.6) | ✓ | ✅ CONFORMS |
+| Bugfix warning rules (C-RULES §9.6 WARN) | ✓ | ✅ CONFORMS |
+| root_cause_category documentation | ✓ (RootCauseCategory enum + field) | ✅ CONFORMS |
+| Bugfix decision table (C-RULES §10) | ✓ | ✅ CONFORMS |
 
-**Score: 0/8 — no bugfix-specific logic exists in code.**
+**Score: 8/8 — all bugfix-specific logic implemented and reconciled.**
 
 **Note:** `change_type` exists on B's `ChangeIntent` dataclass as a free-text field, but NOT on C's `ChangeRequest`. The doc contract requires it on the CR at SUBMITTED state.
 
@@ -137,10 +137,10 @@
 |--------|-------------|--------------|--------|
 | Schema version | `CCC-1.1.0` | `compliance-cr-v1.0` | ❌ WRONG VERSION |
 | Schema structure | See C-IMPLEMENTATION_CONTRACT §4 | Flat dict with 8 keys | ⚠️ PARTIAL |
-| `change_type` in evidence | Required | ✗ | ❌ MISSING |
-| `requirement_linkage_type` in evidence | Required (when bugfix) | ✗ | ❌ MISSING |
-| `affected_verifications` in evidence | Required | ✗ | ❌ MISSING |
-| `root_cause_category` in evidence | Required (when bugfix) | ✗ | ❌ MISSING |
+| `change_type` in evidence | Required | ✓ | ✅ CONFORMS |
+| `requirement_linkage_type` in evidence | Required (when bugfix) | ✓ | ✅ CONFORMS |
+| `affected_verifications` in evidence | Required | ✓ | ✅ CONFORMS |
+| `root_cause_category` in evidence | Required (when bugfix) | ✓ | ✅ CONFORMS |
 | Evidence file location | `changes/evidence/CR-XXX_evidence.json` | Same | ✅ CONFORMS |
 | Evidence format | JSON + Markdown | JSON + Markdown | ✅ CONFORMS |
 
@@ -175,10 +175,10 @@
 | `block_reason` | ✓ | ✅ CONFORMS |
 | `change_type` | ✗ | ❌ MISSING — doc requires, code omits |
 | `requirement_linkage_type` | ✗ | ❌ MISSING — doc requires, code omits |
-| `root_cause_category` | ✗ | ❌ MISSING — doc requires, code omits |
+| `root_cause_category` | ✓ | ✅ CONFORMS |
 | `regression_verification_ids` | ✗ | ❌ MISSING — doc requires, code omits |
 
-**Score: 8/13 — basic B dataclass conforms, but 4 bugfix-context fields from doc are absent.**
+**Score: 10/13 — basic B dataclass conforms, 3 bugfix-context fields still absent (change_type, requirement_linkage_type, regression_verification_ids).**
 
 ### D.8 B-on-C Dependency (B-RULES §7)
 
@@ -259,8 +259,8 @@
 
 | # | Mismatch | Impact |
 |---|----------|--------|
-| F.2.1 | **CR is flat Markdown, not a dataclass.** Doc specifies `ChangeRequest` as a typed dataclass with enums (`CRStatus`, `ImpactLevel`, `SafetyImpact`). Code uses regex-parsed Markdown strings. | High |
-| F.2.2 | **B's AccountableChange missing 4 bugfix-context fields.** Doc specifies `change_type`, `requirement_linkage_type`, `root_cause_category`, `regression_verification_ids`. Code has none. | High |
+| F.2.1 | **CR is now a typed dataclass with enums.** `ChangeRequest` uses `CRStatus`, `ImpactLevel`, `SafetyImpact`, `RootCauseCategory` enums. Resolved. | ~~High~~ ✅ Fixed |
+| F.2.2 | **B's AccountableChange missing 3 bugfix-context fields.** Doc specifies `change_type`, `requirement_linkage_type`, `regression_verification_ids` (root_cause_category now present). Code has 3 remaining. | High |
 | F.2.3 | **No requirement validation on submit.** Doc requires min-1 requirement_refs and specific impact checks. Code accepts empty refs. | Medium |
 | F.2.4 | **No role-based gating.** Doc specifies Architect, QA Lead, Compliance Officer roles for certain transitions. Code has no role concept. | Medium |
 

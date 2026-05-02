@@ -63,6 +63,7 @@ class SafetyImpact(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
+    CRITICAL = "critical"
 
 
 class RequirementLinkageType(Enum):

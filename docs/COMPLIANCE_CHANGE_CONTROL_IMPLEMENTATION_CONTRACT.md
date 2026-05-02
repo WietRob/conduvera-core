@@ -178,10 +178,10 @@ class CRStatus(Enum):
     EMERGENCY = "emergency"
 
 class ImpactLevel(Enum):
-    SYS = "sys"
-    ARCH = "arch"
-    SW = "sw"
-    CODE = "code"
+    SYS = "SYS"
+    ARCH = "ARCH"
+    SW = "SW"
+    CODE = "CODE"
 
 class SafetyImpact(Enum):
     NONE = "none"
@@ -236,6 +236,9 @@ class ChangeRequest:
     severity: Optional[str] = None
     rollback_plan: Optional[str] = None
     post_mortem_date: Optional[datetime] = None
+    
+    # Bugfix metadata (required at CLOSED for bugfix — C-RULES §8.1)
+    root_cause_category: Optional[str] = None  # impl_bug, req_ambiguous, req_missing, arch_bug, sys_bug
     
     # Storage
     file_path: Optional[Path] = None
