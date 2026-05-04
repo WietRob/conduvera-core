@@ -1,6 +1,6 @@
 """
 Tests for Accountable Agent Service — Accountable Agent Layer v2.0.0
-Tests the thin accountability layer on top of Compliance Change Control v2.0.0
+Tests the thin accountability layer on top of Compliance Change Control (Compliance Change Control v2.0.0)
 """
 
 import json

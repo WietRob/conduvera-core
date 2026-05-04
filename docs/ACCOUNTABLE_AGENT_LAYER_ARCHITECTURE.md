@@ -296,7 +296,9 @@ def generate_accountability_evidence(accountable_id: str) -> Path:
 11. [ ] CLI commands: register, validate, evidence, pre-flight
 12. [ ] Bugfix-specific block conditions tested (3 scenarios from C-RULES §9.6)
 13. [ ] Bugfix semantics consumed from C, not duplicated in B
-14. [ ] Evidence includes bugfix_context when change_type=bugfix
+14. [ ] DEFERRED — Evidence includes bugfix_context when change_type=bugfix (see CAVEAT below)
+
+**CAVEAT (bugfix_context):** The `bugfix_context` nested evidence block for bugfix-type accountable changes is intentionally deferred. The C-core (Compliance Change Control) already populates `change_type`, `requirement_linkage_type`, `root_cause_category`, and `regression_verification_ids` as flat top-level fields in CR evidence. The B-layer (Accountable Agent Layer) does not yet surface these in its own evidence output. No code model falsely implies implemented behavior — the feature exists only as unchecked DoD items in architecture docs.
 
 ### Verification Criteria
 

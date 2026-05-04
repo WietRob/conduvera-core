@@ -1,17 +1,17 @@
 """
 Accountable Agent Service — Accountable Agent Layer v2.1.0
 
-Thin accountability layer on top of Compliance Change Control v2.0.0.
+Thin accountability layer on top of Compliance Change Control (Compliance Change Control v2.0.0).
 
 Captures agent identity, context, and intent for AI-assisted changes.
 Ensures mandatory accountability links (CR + requirements) are present.
 Generates evidence packets for audit trail.
 
 v2.1.0 additions (HIGH blocker fixes):
-- Formal state machine with transition guards (Accountable Agent Layer process §C)
-- Bugfix-specific blocking rules consumed from Compliance Change Control (Accountable Agent Layer rules §3.1, §7.1)
-- pre_flight_check() session gate (Accountable Agent Layer rules §5.1 and process §D.1)
-- reset() transition support (Accountable Agent Layer process §C.3)
+- Formal state machine with transition guards (B-PROCESS §C)
+- Bugfix-specific blocking rules consumed from C (B-RULES §3.1, §7.1)
+- pre_flight_check() session gate (B-RULES §5.1, B-PROCESS §D.1)
+- reset() for B→P transition (B-PROCESS §C.3)
 
 Dependencies:
     - change-request (Compliance Change Control v2.0.0): CR lifecycle, validation, evidence
@@ -27,10 +27,13 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Set
 
-# Import Compliance Change Control core services (v2.0.0)
-from curaops.skills.change_request import ChangeRequestService, CRStatus
-
-from curaops.skills.change_request.evidence import verify_evidence_file
+# Import C core services (v2.0.0)
+from curaops.skills.change_request import (
+    ChangeRequestService,
+    VerificationService,
+    CREvidenceGenerator,
+    CRStatus,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -110,17 +113,6 @@ class AgentContext:
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "AgentContext":
-        return cls(
-            agent_id=data["agent_id"],
-            agent_name=data["agent_name"],
-            model=data["model"],
-            tools_used=list(data.get("tools_used") or []),
-            session_id=data.get("session_id"),
-            platform=data.get("platform"),
-        )
-
 
 @dataclass
 class ChangeIntent:
@@ -133,16 +125,6 @@ class ChangeIntent:
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ChangeIntent":
-        return cls(
-            description=data["description"],
-            change_type=data["change_type"],
-            files_affected=list(data.get("files_affected") or []),
-            estimated_impact=data.get("estimated_impact"),
-            justification=data.get("justification"),
-        )
 
 
 @dataclass
@@ -175,20 +157,6 @@ class AccountableChange:
             "evidence_path": self.evidence_path,
             "block_reason": self.block_reason,
         }
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "AccountableChange":
-        return cls(
-            accountable_id=data["accountable_id"],
-            agent_context=AgentContext.from_dict(data["agent_context"]),
-            change_intent=ChangeIntent.from_dict(data["change_intent"]),
-            cr_id=data.get("cr_id"),
-            requirement_refs=list(data.get("requirement_refs") or []),
-            status=data.get("status", "pending"),
-            created_at=data.get("created_at") or datetime.now(timezone.utc).isoformat(),
-            evidence_path=data.get("evidence_path"),
-            block_reason=data.get("block_reason"),
-        )
 
 
 # ── Valid ID Patterns ───────────────────────────────────────────────────
@@ -242,35 +210,10 @@ class AccountableAgentService:
             evidence_dir=self.evidence_dir,
         )
 
-        # Track accountable changes in a small on-disk store so CLI commands
-        # can register in one process and validate/evidence in later commands.
-        self.accountable_dir = changes_dir / "accountable"
-        self.accountable_dir.mkdir(parents=True, exist_ok=True)
+        # Track accountable changes in memory (session-persistent)
         self._accountable_changes: Dict[str, AccountableChange] = {}
-        self._load_accountable_changes()
 
         logger.info(f"AccountableAgentService initialized: {self.project_root}")
-
-    # ── Persistence ─────────────────────────────────────────────────────
-
-    def _accountable_path(self, accountable_id: str) -> Path:
-        return self.accountable_dir / f"{accountable_id}.json"
-
-    def _load_accountable_changes(self) -> None:
-        """Load persisted accountable changes for process-to-process CLI use."""
-        for path in sorted(self.accountable_dir.glob("AC-*.json")):
-            try:
-                data = json.loads(path.read_text(encoding="utf-8"))
-                ac = AccountableChange.from_dict(data)
-                self._accountable_changes[ac.accountable_id] = ac
-            except Exception as exc:
-                logger.warning("Skipping invalid accountable change %s: %s", path, exc)
-
-    def _save_accountable_change(self, ac: AccountableChange) -> Path:
-        self.accountable_dir.mkdir(parents=True, exist_ok=True)
-        path = self._accountable_path(ac.accountable_id)
-        path.write_text(json.dumps(ac.to_dict(), indent=2), encoding="utf-8")
-        return path
 
     # ── State Machine ──────────────────────────────────────────────────
 
@@ -323,7 +266,6 @@ class AccountableAgentService:
 
         ac = self._accountable_changes[accountable_id]
         self._transition(ac, "pending", reason="Developer reset")
-        self._save_accountable_change(ac)
         logger.info(f"Reset {accountable_id}: blocked → pending")
         return ac
 
@@ -563,7 +505,6 @@ class AccountableAgentService:
         )
 
         self._accountable_changes[accountable_id] = accountable_change
-        self._save_accountable_change(accountable_change)
 
         logger.info(f"Registered accountable change: {accountable_id}")
         return accountable_change
@@ -600,7 +541,6 @@ class AccountableAgentService:
             )
 
         logger.info(f"Linked {accountable_id} to CR {cr_id}")
-        self._save_accountable_change(ac)
         return ac
 
     def validate_accountability(
@@ -683,8 +623,6 @@ class AccountableAgentService:
             # Terminal states (validated/blocked from other paths)
             # are not transitioned further per §C.2 matrix
 
-        self._save_accountable_change(ac)
-
         return {
             "valid": is_valid,
             "accountable_id": accountable_id,
@@ -694,86 +632,6 @@ class AccountableAgentService:
             "traceability": traceability_result,
         }
 
-    def _linked_cr_for(self, ac: AccountableChange):
-        """Load the linked Compliance Change Control CR if available."""
-        if not ac.cr_id:
-            return None
-        try:
-            return self.cr_service.get_cr(ac.cr_id)
-        except Exception as exc:
-            logger.warning("Could not load linked CR %s: %s", ac.cr_id, exc)
-            return None
-
-    @staticmethod
-    def _enum_value(value: Any) -> Any:
-        return getattr(value, "value", value)
-
-    def _bugfix_context_for(self, ac: AccountableChange, cr: Any) -> Optional[Dict[str, Any]]:
-        """Build bugfix metadata from the linked C CR without duplicating C lifecycle."""
-        if ac.change_intent.change_type != "bugfix":
-            return None
-
-        regression_ids = list(getattr(cr, "affected_verifications", []) or []) if cr else []
-        warnings: List[str] = []
-        if not regression_ids:
-            warnings.append("No regression VerificationCase linked (required at IMPLEMENTED)")
-
-        return {
-            "change_type": "bugfix",
-            "requirement_linkage_type": self._enum_value(getattr(cr, "requirement_linkage_type", None)) if cr else None,
-            "root_cause_category": self._enum_value(getattr(cr, "root_cause_category", None)) if cr else None,
-            "escalation_triggers_met": [],
-            "regression_verification_ids": regression_ids,
-            "regression_verification_semantics": (
-                "linked_from_cr_affected_verifications"
-                if regression_ids
-                else "no_regression_verification_linked_on_cr"
-            ),
-            "warnings": warnings,
-        }
-
-    def _referenced_c_evidence_for(self, ac: AccountableChange) -> Dict[str, Any]:
-        """Generate/reference C evidence explicitly, or record why unavailable."""
-        if not ac.cr_id:
-            return {
-                "available": False,
-                "cr_evidence_path": None,
-                "integrity_verified": False,
-                "hash": None,
-                "verification": None,
-                "unavailable_reason": "no linked CR",
-            }
-        try:
-            cr_evidence_path = self.cr_service.generate_evidence(ac.cr_id)
-            verification = verify_evidence_file(cr_evidence_path)
-            if verification["valid"]:
-                return {
-                    "available": True,
-                    "cr_evidence_path": str(cr_evidence_path),
-                    "integrity_verified": True,
-                    "hash": verification["stored_hash"],
-                    "verification": verification,
-                    "unavailable_reason": None,
-                }
-            return {
-                "available": False,
-                "cr_evidence_path": str(cr_evidence_path),
-                "integrity_verified": False,
-                "hash": verification.get("stored_hash"),
-                "verification": verification,
-                "unavailable_reason": verification.get("reason") or "integrity_verification_failed",
-            }
-        except Exception as exc:
-            logger.warning(f"Could not generate CR evidence: {exc}")
-            return {
-                "available": False,
-                "cr_evidence_path": None,
-                "integrity_verified": False,
-                "hash": None,
-                "verification": None,
-                "unavailable_reason": str(exc),
-            }
-
     def generate_accountability_evidence(
         self,
         accountable_id: str,
@@ -781,8 +639,8 @@ class AccountableAgentService:
     ) -> str:
         """
         Generate evidence packet for an accountable change.
-        Combines agent context, change intent, CR linkage, validation results,
-        linked C evidence, and bugfix metadata required by AAL docs.
+        Combines agent context, change intent, CR linkage, and
+        validation results.
 
         Args:
             accountable_id: The accountable change ID
@@ -800,59 +658,43 @@ class AccountableAgentService:
 
         # Validate first
         validation = self.validate_accountability(accountable_id)
-        cr = self._linked_cr_for(ac)
-        referenced_c_evidence = self._referenced_c_evidence_for(ac)
-        cr_evidence = referenced_c_evidence["cr_evidence_path"]
 
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-        evidence_filename = f"{accountable_id}_{timestamp}.{output_format if output_format == 'json' else 'md'}"
-        evidence_file = self.evidence_dir / evidence_filename
-
-        accountable_change = ac.to_dict()
-        accountable_change["accountability_links"] = {
-            "cr_id": ac.cr_id,
-            "requirement_refs": ac.requirement_refs,
-        }
-        if cr:
-            accountable_change["linked_cr_metadata"] = {
-                "change_type": self._enum_value(cr.change_type),
-                "requirement_linkage_type": self._enum_value(cr.requirement_linkage_type),
-                "root_cause_category": self._enum_value(cr.root_cause_category),
-                "regression_verification_ids": list(cr.affected_verifications or []),
-                "status": self._enum_value(cr.status),
-            }
-        bugfix_context = self._bugfix_context_for(ac, cr)
-        accountable_change["bugfix_context"] = bugfix_context
+        # Get CR evidence via C core v2.0.0 if available
+        cr_evidence = None
+        if ac.cr_id:
+            try:
+                cr_evidence_path = self.cr_service.generate_evidence(
+                    ac.cr_id
+                )
+                cr_evidence = str(cr_evidence_path)
+            except Exception as e:
+                logger.warning(f"Could not generate CR evidence: {e}")
 
         # Build evidence packet
         evidence = {
-            "schema_version": "AAL-1.0.0",
-            "accountable_change": accountable_change,
-            "bugfix_context": bugfix_context,
+            "accountable_change": ac.to_dict(),
             "validation": validation,
-            "referenced_c_evidence": referenced_c_evidence,
-            # Backward-compatible alias used by older docs/code.
             "cr_evidence_path": cr_evidence,
-            "evidence_chain": {
-                "this_evidence": str(evidence_file),
-                "linked_cr": str(self.project_root / "changes" / f"{ac.cr_id}.md") if ac.cr_id else None,
-                "linked_cr_evidence": cr_evidence,
-                "chain_integrity": "verified" if referenced_c_evidence["integrity_verified"] else "incomplete",
-            },
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "service_version": "B-2.1.0",
         }
 
         # Write evidence file
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         if output_format == "json":
+            evidence_file = (
+                self.evidence_dir / f"{accountable_id}_{timestamp}.json"
+            )
             with open(evidence_file, "w") as f:
                 json.dump(evidence, f, indent=2)
         else:
+            evidence_file = (
+                self.evidence_dir / f"{accountable_id}_{timestamp}.md"
+            )
             with open(evidence_file, "w") as f:
                 f.write(self._format_evidence_markdown(evidence))
 
         ac.evidence_path = str(evidence_file)
-        self._save_accountable_change(ac)
         logger.info(f"Generated evidence: {evidence_file}")
 
         return str(evidence_file)

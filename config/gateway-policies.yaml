@@ -1,0 +1,54 @@
+# gateway-policies.yaml
+# Loaded by curaops/control/gateway/config.py via _load_yaml()
+# Key: policy-name -> rules (cloud_block, sensitive_class_check, etc.)
+
+policies:
+  default:
+    description: "Default policy applied when no override is specified"
+    rules:
+      cloud_block: false
+      sensitive_class_check: true
+      max_daily_cost_eur: 10.0
+      rate_limit_per_minute: 60
+      retry_on_failure: true
+      retry_max_attempts: 3
+
+  strict-local:
+    description: "Force local-only inference, no cloud fallback"
+    rules:
+      cloud_block: true
+      sensitive_class_check: true
+      max_daily_cost_eur: 0.0
+      rate_limit_per_minute: 30
+      retry_on_failure: true
+      retry_max_attempts: 2
+
+  cloud-allowed:
+    description: "Permit cloud fallback for non-sensitive requests"
+    rules:
+      cloud_block: false
+      sensitive_class_check: true
+      max_daily_cost_eur: 50.0
+      rate_limit_per_minute: 120
+      retry_on_failure: true
+      retry_max_attempts: 3
+
+  sensitive-only:
+    description: "Strict policy for requests involving sensitive data"
+    rules:
+      cloud_block: true
+      sensitive_class_check: true
+      max_daily_cost_eur: 0.0
+      rate_limit_per_minute: 15
+      retry_on_failure: false
+      retry_max_attempts: 0
+
+  unrestricted:
+    description: "No restrictions - trusted internal tooling only"
+    rules:
+      cloud_block: false
+      sensitive_class_check: false
+      max_daily_cost_eur: null
+      rate_limit_per_minute: null
+      retry_on_failure: true
+      retry_max_attempts: 5

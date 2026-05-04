@@ -1,0 +1,42 @@
+# gateway-clients.yaml
+# Loaded by curaops/control/gateway/config.py via _load_yaml()
+# Key: client-name -> default_profile, cloud_allowed, sensitive_classes
+
+clients:
+  internal-api:
+    default_profile: local_light
+    cloud_allowed: true
+    sensitive_classes:
+      - general
+
+  admin-console:
+    default_profile: local_deep
+    cloud_allowed: true
+    sensitive_classes:
+      - general
+      - admin
+
+  batch-processor:
+    default_profile: local_deep
+    cloud_allowed: false
+    sensitive_classes:
+      - general
+
+  external-hook:
+    default_profile: cloud_public
+    cloud_allowed: true
+    sensitive_classes: []
+
+  data-pipeline:
+    default_profile: local_only_sensitive
+    cloud_allowed: false
+    sensitive_classes:
+      - pii
+      - financial
+      - health
+
+  cicd-runner:
+    default_profile: local_light
+    cloud_allowed: false
+    sensitive_classes:
+      - general

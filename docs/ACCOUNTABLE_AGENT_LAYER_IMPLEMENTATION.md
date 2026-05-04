@@ -548,7 +548,7 @@ def test_b_evidence_includes_bugfix_context():
 10. [ ] Evidence chain verified (Accountable Agent Layer to Compliance Change Control reference)
 11. [ ] Bugfix-specific block conditions tested (3 scenarios)
 12. [ ] Bugfix semantics consumed from C, not duplicated in B
-13. [ ] Evidence includes bugfix_context when change_type=bugfix
+13. [ ] DEFERRED — Evidence includes bugfix_context when change_type=bugfix (see ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md CAVEAT)
 
 ---
 
