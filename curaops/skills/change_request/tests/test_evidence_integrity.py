@@ -124,3 +124,26 @@ def test_c_evidence_hash_verification_reports_missing_and_invalid(tmp_path):
     invalid = verify_evidence_file(invalid_path)
     assert invalid["valid"] is False
     assert invalid["reason"] == "invalid_json"
+
+
+def test_c_evidence_hash_verification_reports_invalid_schema(tmp_path):
+    invalid_schema_path = tmp_path / "array.json"
+    invalid_schema_path.write_text("[]", encoding="utf-8")
+
+    result = verify_evidence_file(invalid_schema_path)
+
+    assert result["valid"] is False
+    assert result["reason"] == "invalid_schema"
+
+
+def test_c_evidence_hash_verification_detects_alias_mismatch(tmp_path):
+    service, cr_id = _approved_cr(tmp_path)
+    path = service.generate_evidence(cr_id)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["hash"] = "sha256:" + "0" * 64
+    path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = verify_evidence_file(path)
+
+    assert result["valid"] is False
+    assert result["reason"] == "hash_alias_mismatch"
