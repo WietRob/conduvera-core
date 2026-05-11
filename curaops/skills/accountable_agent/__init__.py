@@ -113,6 +113,17 @@ class AgentContext:
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "AgentContext":
+        return cls(
+            agent_id=data["agent_id"],
+            agent_name=data["agent_name"],
+            model=data["model"],
+            tools_used=list(data.get("tools_used") or []),
+            session_id=data.get("session_id"),
+            platform=data.get("platform"),
+        )
+
 
 @dataclass
 class ChangeIntent:
@@ -125,6 +136,16 @@ class ChangeIntent:
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "ChangeIntent":
+        return cls(
+            description=data["description"],
+            change_type=data["change_type"],
+            files_affected=list(data.get("files_affected") or []),
+            estimated_impact=data.get("estimated_impact"),
+            justification=data.get("justification"),
+        )
 
 
 @dataclass
@@ -157,6 +178,20 @@ class AccountableChange:
             "evidence_path": self.evidence_path,
             "block_reason": self.block_reason,
         }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "AccountableChange":
+        return cls(
+            accountable_id=data["accountable_id"],
+            agent_context=AgentContext.from_dict(data["agent_context"]),
+            change_intent=ChangeIntent.from_dict(data["change_intent"]),
+            cr_id=data.get("cr_id"),
+            requirement_refs=list(data.get("requirement_refs") or []),
+            status=data.get("status", "pending"),
+            created_at=data.get("created_at") or datetime.now(timezone.utc).isoformat(),
+            evidence_path=data.get("evidence_path"),
+            block_reason=data.get("block_reason"),
+        )
 
 
 # ── Valid ID Patterns ───────────────────────────────────────────────────
@@ -210,10 +245,35 @@ class AccountableAgentService:
             evidence_dir=self.evidence_dir,
         )
 
-        # Track accountable changes in memory (session-persistent)
+        # Track accountable changes in a small on-disk store so CLI commands
+        # can register in one process and validate/evidence in later commands.
+        self.accountable_dir = changes_dir / "accountable"
+        self.accountable_dir.mkdir(parents=True, exist_ok=True)
         self._accountable_changes: Dict[str, AccountableChange] = {}
+        self._load_accountable_changes()
 
         logger.info(f"AccountableAgentService initialized: {self.project_root}")
+
+    # ── Persistence ─────────────────────────────────────────────────────
+
+    def _accountable_path(self, accountable_id: str) -> Path:
+        return self.accountable_dir / f"{accountable_id}.json"
+
+    def _load_accountable_changes(self) -> None:
+        """Load persisted accountable changes for process-to-process CLI use."""
+        for path in sorted(self.accountable_dir.glob("AC-*.json")):
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                ac = AccountableChange.from_dict(data)
+                self._accountable_changes[ac.accountable_id] = ac
+            except Exception as exc:
+                logger.warning("Skipping invalid accountable change %s: %s", path, exc)
+
+    def _save_accountable_change(self, ac: AccountableChange) -> Path:
+        self.accountable_dir.mkdir(parents=True, exist_ok=True)
+        path = self._accountable_path(ac.accountable_id)
+        path.write_text(json.dumps(ac.to_dict(), indent=2), encoding="utf-8")
+        return path
 
     # ── State Machine ──────────────────────────────────────────────────
 
@@ -266,6 +326,7 @@ class AccountableAgentService:
 
         ac = self._accountable_changes[accountable_id]
         self._transition(ac, "pending", reason="Developer reset")
+        self._save_accountable_change(ac)
         logger.info(f"Reset {accountable_id}: blocked → pending")
         return ac
 
@@ -505,6 +566,7 @@ class AccountableAgentService:
         )
 
         self._accountable_changes[accountable_id] = accountable_change
+        self._save_accountable_change(accountable_change)
 
         logger.info(f"Registered accountable change: {accountable_id}")
         return accountable_change
@@ -541,6 +603,7 @@ class AccountableAgentService:
             )
 
         logger.info(f"Linked {accountable_id} to CR {cr_id}")
+        self._save_accountable_change(ac)
         return ac
 
     def validate_accountability(
@@ -623,6 +686,8 @@ class AccountableAgentService:
             # Terminal states (validated/blocked from other paths)
             # are not transitioned further per §C.2 matrix
 
+        self._save_accountable_change(ac)
+
         return {
             "valid": is_valid,
             "accountable_id": accountable_id,
@@ -695,6 +760,7 @@ class AccountableAgentService:
                 f.write(self._format_evidence_markdown(evidence))
 
         ac.evidence_path = str(evidence_file)
+        self._save_accountable_change(ac)
         logger.info(f"Generated evidence: {evidence_file}")
 
         return str(evidence_file)

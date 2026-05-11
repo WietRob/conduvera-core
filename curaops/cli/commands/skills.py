@@ -664,6 +664,48 @@ def pattern_suggest(
 accountable_app = typer.Typer(help="Accountable Agent - AI-assisted change accountability")
 
 
+@accountable_app.command("preflight")
+@accountable_app.command("pre-flight")
+def accountable_preflight(
+    cr_id: str = typer.Option(..., "--cr", "-c", help="Existing Change Request ID"),
+    requirements: str = typer.Option(..., "--requirements", "-r", help="Requirement refs (comma-separated)"),
+    change_type: str = typer.Option("feature", "--type", "-t", help="Change type: feature, bugfix, refactor, test"),
+    impact_level: Optional[str] = typer.Option(None, "--impact", help="Impact levels (comma-separated: SYS,ARCH,SW,CODE)"),
+):
+    """Run the Accountable Agent pre-flight gate before AI-assisted work."""
+    try:
+        from curaops.skills.accountable_agent import AccountableAgentService
+
+        service = AccountableAgentService(project_root=Path.cwd())
+        req_refs = [r.strip() for r in requirements.split(",") if r.strip()]
+        impacts = [i.strip() for i in impact_level.split(",") if i.strip()] if impact_level else None
+        result = service.pre_flight_check(
+            cr_id=cr_id,
+            requirement_refs=req_refs,
+            change_type=change_type,
+            impact_level=impacts,
+        )
+
+        if result["passed"]:
+            console.print(f"[green]✅ PREFLIGHT PASS[/green] {cr_id}")
+            if result.get("warnings"):
+                console.print("[yellow]Warnings:[/yellow]")
+                for warning in result["warnings"]:
+                    console.print(f"  • {warning}")
+            return
+
+        console.print(f"[bold red]🚫 PREFLIGHT BLOCK[/bold red] {cr_id}")
+        for block in result.get("blocks", []):
+            console.print(f"  • {block}")
+        for warning in result.get("warnings", []):
+            console.print(f"  ⚠ {warning}")
+        raise typer.Exit(2)
+
+    except ImportError as e:
+        console.print(f"[red]Error: accountable_agent skill not found: {e}[/red]")
+        raise typer.Exit(1)
+
+
 @accountable_app.command("register")
 def accountable_register(
     agent_id: str = typer.Option(..., "--agent-id", "-a", help="Agent identifier"),
@@ -681,6 +723,7 @@ def accountable_register(
     try:
         from curaops.skills.accountable_agent import (
             AccountableAgentService,
+            AccountabilityError,
             AgentContext,
             ChangeIntent,
             MissingMandatoryLinkError,
@@ -722,6 +765,9 @@ def accountable_register(
         except MissingMandatoryLinkError as e:
             console.print(f"[bold red]🚫 BLOCKED[/bold red] {e}")
             raise typer.Exit(1)
+        except AccountabilityError as e:
+            console.print(f"[bold red]🚫 BLOCKED[/bold red] {e}")
+            raise typer.Exit(2)
             
     except ImportError as e:
         console.print(f"[red]Error: accountable_agent skill not found: {e}[/red]")
@@ -734,7 +780,7 @@ def accountable_validate(
 ):
     """Validate an accountable change has all required links."""
     try:
-        from curaops.skills.accountable_agent import AccountableAgentService
+        from curaops.skills.accountable_agent import AccountableAgentService, AccountabilityError
         
         service = AccountableAgentService(project_root=Path.cwd())
         result = service.validate_accountability(accountable_id)
@@ -747,8 +793,13 @@ def accountable_validate(
             console.print(f"[bold red]❌ INVALID[/bold red] {accountable_id}")
             for issue in result.get("issues", []):
                 console.print(f"  • {issue}")
+            if result.get("error"):
+                console.print(f"  • {result['error']}")
             raise typer.Exit(1)
             
+    except AccountabilityError as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(2)
     except ImportError:
         console.print("[red]Error: accountable_agent skill not found[/red]")
         raise typer.Exit(1)
@@ -761,7 +812,7 @@ def accountable_evidence(
 ):
     """Generate evidence report for an accountable change."""
     try:
-        from curaops.skills.accountable_agent import AccountableAgentService
+        from curaops.skills.accountable_agent import AccountableAgentService, AccountabilityError
         
         service = AccountableAgentService(project_root=Path.cwd())
         evidence_path = service.generate_accountability_evidence(accountable_id, format)
@@ -782,6 +833,9 @@ def accountable_evidence(
             console.print(f"  Status: {ac.get('status', 'N/A')}")
             console.print(f"  Valid: {'✅' if evidence.get('validation', {}).get('valid') else '❌'}")
             
+    except AccountabilityError as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(2)
     except ImportError:
         console.print("[red]Error: accountable_agent skill not found[/red]")
         raise typer.Exit(1)
