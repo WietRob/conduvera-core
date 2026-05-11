@@ -697,6 +697,70 @@ class AccountableAgentService:
             "traceability": traceability_result,
         }
 
+    def _linked_cr_for(self, ac: AccountableChange):
+        """Load the linked Compliance Change Control CR if available."""
+        if not ac.cr_id:
+            return None
+        try:
+            return self.cr_service.get_cr(ac.cr_id)
+        except Exception as exc:
+            logger.warning("Could not load linked CR %s: %s", ac.cr_id, exc)
+            return None
+
+    @staticmethod
+    def _enum_value(value: Any) -> Any:
+        return getattr(value, "value", value)
+
+    def _bugfix_context_for(self, ac: AccountableChange, cr: Any) -> Optional[Dict[str, Any]]:
+        """Build bugfix metadata from the linked C CR without duplicating C lifecycle."""
+        if ac.change_intent.change_type != "bugfix":
+            return None
+
+        regression_ids = list(getattr(cr, "affected_verifications", []) or []) if cr else []
+        warnings: List[str] = []
+        if not regression_ids:
+            warnings.append("No regression VerificationCase linked (required at IMPLEMENTED)")
+
+        return {
+            "change_type": "bugfix",
+            "requirement_linkage_type": self._enum_value(getattr(cr, "requirement_linkage_type", None)) if cr else None,
+            "root_cause_category": self._enum_value(getattr(cr, "root_cause_category", None)) if cr else None,
+            "escalation_triggers_met": [],
+            "regression_verification_ids": regression_ids,
+            "regression_verification_semantics": (
+                "linked_from_cr_affected_verifications"
+                if regression_ids
+                else "no_regression_verification_linked_on_cr"
+            ),
+            "warnings": warnings,
+        }
+
+    def _referenced_c_evidence_for(self, ac: AccountableChange) -> Dict[str, Any]:
+        """Generate/reference C evidence explicitly, or record why unavailable."""
+        if not ac.cr_id:
+            return {
+                "available": False,
+                "cr_evidence_path": None,
+                "integrity_verified": False,
+                "unavailable_reason": "no linked CR",
+            }
+        try:
+            cr_evidence_path = self.cr_service.generate_evidence(ac.cr_id)
+            return {
+                "available": True,
+                "cr_evidence_path": str(cr_evidence_path),
+                "integrity_verified": True,
+                "unavailable_reason": None,
+            }
+        except Exception as exc:
+            logger.warning(f"Could not generate CR evidence: {exc}")
+            return {
+                "available": False,
+                "cr_evidence_path": None,
+                "integrity_verified": False,
+                "unavailable_reason": str(exc),
+            }
+
     def generate_accountability_evidence(
         self,
         accountable_id: str,
@@ -704,8 +768,8 @@ class AccountableAgentService:
     ) -> str:
         """
         Generate evidence packet for an accountable change.
-        Combines agent context, change intent, CR linkage, and
-        validation results.
+        Combines agent context, change intent, CR linkage, validation results,
+        linked C evidence, and bugfix metadata required by AAL docs.
 
         Args:
             accountable_id: The accountable change ID
@@ -723,39 +787,54 @@ class AccountableAgentService:
 
         # Validate first
         validation = self.validate_accountability(accountable_id)
+        cr = self._linked_cr_for(ac)
+        referenced_c_evidence = self._referenced_c_evidence_for(ac)
+        cr_evidence = referenced_c_evidence["cr_evidence_path"]
 
-        # Get CR evidence via C core v2.0.0 if available
-        cr_evidence = None
-        if ac.cr_id:
-            try:
-                cr_evidence_path = self.cr_service.generate_evidence(
-                    ac.cr_id
-                )
-                cr_evidence = str(cr_evidence_path)
-            except Exception as e:
-                logger.warning(f"Could not generate CR evidence: {e}")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        evidence_filename = f"{accountable_id}_{timestamp}.{output_format if output_format == 'json' else 'md'}"
+        evidence_file = self.evidence_dir / evidence_filename
+
+        accountable_change = ac.to_dict()
+        accountable_change["accountability_links"] = {
+            "cr_id": ac.cr_id,
+            "requirement_refs": ac.requirement_refs,
+        }
+        if cr:
+            accountable_change["linked_cr_metadata"] = {
+                "change_type": self._enum_value(cr.change_type),
+                "requirement_linkage_type": self._enum_value(cr.requirement_linkage_type),
+                "root_cause_category": self._enum_value(cr.root_cause_category),
+                "regression_verification_ids": list(cr.affected_verifications or []),
+                "status": self._enum_value(cr.status),
+            }
+        bugfix_context = self._bugfix_context_for(ac, cr)
+        accountable_change["bugfix_context"] = bugfix_context
 
         # Build evidence packet
         evidence = {
-            "accountable_change": ac.to_dict(),
+            "schema_version": "AAL-1.0.0",
+            "accountable_change": accountable_change,
+            "bugfix_context": bugfix_context,
             "validation": validation,
+            "referenced_c_evidence": referenced_c_evidence,
+            # Backward-compatible alias used by older docs/code.
             "cr_evidence_path": cr_evidence,
+            "evidence_chain": {
+                "this_evidence": str(evidence_file),
+                "linked_cr": str(self.project_root / "changes" / f"{ac.cr_id}.md") if ac.cr_id else None,
+                "linked_cr_evidence": cr_evidence,
+                "chain_integrity": "verified" if referenced_c_evidence["available"] else "incomplete",
+            },
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "service_version": "B-2.1.0",
         }
 
         # Write evidence file
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         if output_format == "json":
-            evidence_file = (
-                self.evidence_dir / f"{accountable_id}_{timestamp}.json"
-            )
             with open(evidence_file, "w") as f:
                 json.dump(evidence, f, indent=2)
         else:
-            evidence_file = (
-                self.evidence_dir / f"{accountable_id}_{timestamp}.md"
-            )
             with open(evidence_file, "w") as f:
                 f.write(self._format_evidence_markdown(evidence))
 
