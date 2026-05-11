@@ -147,3 +147,16 @@ def test_c_evidence_hash_verification_detects_alias_mismatch(tmp_path):
 
     assert result["valid"] is False
     assert result["reason"] == "hash_alias_mismatch"
+
+
+def test_c_evidence_hash_verification_detects_blank_integrity_hash(tmp_path):
+    service, cr_id = _approved_cr(tmp_path)
+    path = service.generate_evidence(cr_id)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["integrity"]["hash"] = ""
+    path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    result = verify_evidence_file(path)
+
+    assert result["valid"] is False
+    assert result["reason"] == "hash_alias_mismatch"

@@ -227,12 +227,13 @@ def verify_evidence_file(path: Path) -> Dict[str, Any]:
             "path": str(path),
         }
 
-    integrity_hash = None
-    if isinstance(evidence.get("integrity"), dict):
-        integrity_hash = evidence["integrity"].get("hash")
+    integrity = evidence.get("integrity")
+    has_integrity = isinstance(integrity, dict)
+    integrity_hash = integrity.get("hash") if has_integrity else None
+    has_alias = "hash" in evidence
     alias_hash = evidence.get("hash")
 
-    if integrity_hash and alias_hash and integrity_hash != alias_hash:
+    if has_integrity and has_alias and integrity_hash != alias_hash:
         computed = CREvidenceGenerator.compute_hash(evidence)
         return {
             "valid": False,
@@ -242,7 +243,7 @@ def verify_evidence_file(path: Path) -> Dict[str, Any]:
             "path": str(path),
         }
 
-    stored = integrity_hash or alias_hash
+    stored = integrity_hash if has_integrity else alias_hash
     computed = CREvidenceGenerator.compute_hash(evidence)
     if not stored:
         return {
