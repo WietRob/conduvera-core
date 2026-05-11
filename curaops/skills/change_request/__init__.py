@@ -27,7 +27,11 @@ from .state_machine import (
     MissingFieldsError,
 )
 from .validation import CRValidator
-from .evidence import CREvidenceGenerator, SCHEMA_VERSION as EVIDENCE_SCHEMA_VERSION
+from .evidence import (
+    CREvidenceGenerator,
+    SCHEMA_VERSION as EVIDENCE_SCHEMA_VERSION,
+    verify_evidence_file,
+)
 from .persistence import CRPersistence, VCPersistence
 from .service import ChangeRequestService, VerificationService
 
@@ -53,6 +57,7 @@ __all__ = [
     # Evidence
     "CREvidenceGenerator",
     "EVIDENCE_SCHEMA_VERSION",
+    "verify_evidence_file",
     # Persistence
     "CRPersistence",
     "VCPersistence",

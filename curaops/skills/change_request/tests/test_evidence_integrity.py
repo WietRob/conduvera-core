@@ -1,11 +1,12 @@
 """Compliance Change Control evidence schema and hash-integrity tests."""
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 from curaops.skills.change_request import ChangeRequestService
 from curaops.skills.change_request.evidence import verify_evidence_file
-from curaops.skills.change_request.models import RootCauseCategory
+from curaops.skills.change_request.models import RootCauseCategory, VerificationResult
 
 
 def _approved_cr(tmp_path: Path, *, change_type="feature", refs=None):
@@ -47,9 +48,28 @@ def test_generic_c_evidence_contains_required_schema_fields(tmp_path):
     assert evidence["affected_files"] == []
     assert evidence["affected_verifications"] == []
     assert evidence["generated_at"]
+    assert evidence["generated_at"].endswith("Z")
+    assert "+00:00Z" not in evidence["generated_at"]
+    assert evidence["timestamp"] == evidence["generated_at"]
     assert evidence["integrity"]["algorithm"] == "sha256"
     assert evidence["integrity"]["hash_excludes"] == ["hash", "integrity.hash"]
     assert evidence["integrity"]["hash"].startswith("sha256:")
+
+
+def test_verification_result_timestamp_is_canonical_utc(tmp_path):
+    service, cr_id = _approved_cr(tmp_path)
+    cr = service.get_cr(cr_id)
+    result = VerificationResult(
+        verification_case_id="TC-UT-500",
+        result="PASS",
+        executed_at=datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc),
+        output="ok",
+        validates=["SW-REQ-500"],
+    )
+
+    evidence = service.evidence_gen.generate_to_dict(cr, [result])
+
+    assert evidence["verification_results"][0]["executed_at"] == "2026-01-02T03:04:05Z"
 
 
 def test_bugfix_c_evidence_contains_root_cause_and_verifications(tmp_path):

@@ -74,7 +74,6 @@ class CREvidenceGenerator:
     ) -> dict:
         """Build the evidence payload per C-PROCESS §H.2 schema."""
         blocking = [i for i in issues if i["severity"] == "BLOCKING"]
-        generated_at = datetime.now(timezone.utc).isoformat() + "Z"
         generated_at = _utc_isoformat_z(datetime.now(timezone.utc))
         evidence: Dict = {
             "schema_version": SCHEMA_VERSION,
@@ -152,7 +151,7 @@ class CREvidenceGenerator:
         return {
             "verification_case_id": vr.verification_case_id,
             "result": vr.result,
-            "executed_at": vr.executed_at.isoformat() + "Z",
+            "executed_at": _utc_isoformat_z(vr.executed_at),
             "output": vr.output,
             "validates": vr.validates,
         }
@@ -219,12 +218,33 @@ def verify_evidence_file(path: Path) -> Dict[str, Any]:
             "error": str(exc),
         }
 
-    stored = None
+    if not isinstance(evidence, dict):
+        return {
+            "valid": False,
+            "reason": "invalid_schema",
+            "stored_hash": None,
+            "computed_hash": None,
+            "path": str(path),
+        }
+
+    integrity_hash = None
     if isinstance(evidence.get("integrity"), dict):
-        stored = evidence["integrity"].get("hash")
-    stored = stored or evidence.get("hash")
-    if not stored:
+        integrity_hash = evidence["integrity"].get("hash")
+    alias_hash = evidence.get("hash")
+
+    if integrity_hash and alias_hash and integrity_hash != alias_hash:
         computed = CREvidenceGenerator.compute_hash(evidence)
+        return {
+            "valid": False,
+            "reason": "hash_alias_mismatch",
+            "stored_hash": integrity_hash,
+            "computed_hash": computed,
+            "path": str(path),
+        }
+
+    stored = integrity_hash or alias_hash
+    computed = CREvidenceGenerator.compute_hash(evidence)
+    if not stored:
         return {
             "valid": False,
             "reason": "missing_hash",
@@ -233,7 +253,6 @@ def verify_evidence_file(path: Path) -> Dict[str, Any]:
             "path": str(path),
         }
 
-    computed = CREvidenceGenerator.compute_hash(evidence)
     return {
         "valid": stored == computed,
         "reason": None if stored == computed else "hash_mismatch",
@@ -246,7 +265,14 @@ def verify_evidence_file(path: Path) -> Dict[str, Any]:
 def _json_default(obj):
     """Handle non-serialisable types in JSON dump."""
     if isinstance(obj, datetime):
-        return obj.isoformat() + "Z"
+        return _utc_isoformat_z(obj)
     if isinstance(obj, Path):
         return str(obj)
     raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+
+def _utc_isoformat_z(value: datetime) -> str:
+    """Return a canonical UTC ISO-8601 timestamp ending in ``Z``."""
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
