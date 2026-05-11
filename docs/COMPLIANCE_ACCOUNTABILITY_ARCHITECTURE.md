@@ -650,7 +650,7 @@ def generate_accountability_evidence(accountable_id: str) -> Path:
 ### Definition of Done (DoD) for B
 
 1. [ ] Pre-flight check blocks changes without approved CR
-2. [ ] AgentContext captures all fields (agent_id, name, model, tools, session)
+2. [ ] AgentContext records all fields (agent_id, name, model, tools, session)
 3. [ ] ChangeIntent captures all fields (description, type, files, impact)
 4. [ ] Strict mode blocks when cr_id missing
 5. [ ] Strict mode blocks when requirement_refs empty

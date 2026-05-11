@@ -680,6 +680,8 @@ def test_e2e_cr_lifecycle():
 
 ## I. Definition of Done
 
+**PR #3 hardening note:** This checklist is normative acceptance criteria for the Compliance Change Control slice. Unchecked items are intentional open merge gates unless backed by explicit proof in the PR.
+
 ### I.1 C Slice Done When
 
 1. [ ] `change_request/models.py` — All dataclasses implemented

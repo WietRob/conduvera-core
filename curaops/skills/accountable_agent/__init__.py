@@ -1,20 +1,20 @@
 """
-Accountable Agent Service — Context B v2.1.0
+Accountable Agent Service — Accountable Agent Layer v2.1.0
 
-Thin accountability layer on top of Compliance-CR (Context C v2.0.0).
+Thin accountability layer on top of Compliance Change Control v2.0.0.
 
 Captures agent identity, context, and intent for AI-assisted changes.
 Ensures mandatory accountability links (CR + requirements) are present.
 Generates evidence packets for audit trail.
 
 v2.1.0 additions (HIGH blocker fixes):
-- Formal state machine with transition guards (B-PROCESS §C)
-- Bugfix-specific blocking rules consumed from C (B-RULES §3.1, §7.1)
-- pre_flight_check() session gate (B-RULES §5.1, B-PROCESS §D.1)
-- reset() for B→P transition (B-PROCESS §C.3)
+- Formal state machine with transition guards (Accountable Agent Layer process §C)
+- Bugfix-specific blocking rules consumed from Compliance Change Control (Accountable Agent Layer rules §3.1, §7.1)
+- pre_flight_check() session gate (Accountable Agent Layer rules §5.1 and process §D.1)
+- reset() transition support (Accountable Agent Layer process §C.3)
 
 Dependencies:
-    - change-request (Context C v2.0.0): CR lifecycle, validation, evidence
+    - change-request (Compliance Change Control v2.0.0): CR lifecycle, validation, evidence
 """
 
 import json
@@ -27,7 +27,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Set
 
-# Import C core services (v2.0.0)
+# Import Compliance Change Control core services (v2.0.0)
 from curaops.skills.change_request import (
     ChangeRequestService,
     VerificationService,

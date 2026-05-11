@@ -1,5 +1,5 @@
 """
-Tests for HIGH Blocker fixes — Context B v2.1.0
+Tests for HIGH Blocker fixes — Accountable Agent Layer v2.1.0
 
 Covers:
 - HIGH #2: Formal state machine with transition guards + reset()

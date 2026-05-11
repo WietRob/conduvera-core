@@ -10,49 +10,49 @@
 
 | Need | Document |
 |------|----------|
-| **C Rules** | [COMPLIANCE_CHANGE_CONTROL_RULES.md](./COMPLIANCE_CHANGE_CONTROL_RULES.md) |
-| **C Process** | [COMPLIANCE_CHANGE_CONTROL_PROCESS.md](./COMPLIANCE_CHANGE_CONTROL_PROCESS.md) |
-| **C Implementation** | [COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md) |
-| **C Architecture** | [COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md](./COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md) |
-| **B Rules** | [ACCOUNTABLE_AGENT_LAYER_RULES.md](./ACCOUNTABLE_AGENT_LAYER_RULES.md) |
-| **B Process** | [ACCOUNTABLE_AGENT_LAYER_PROCESS.md](./ACCOUNTABLE_AGENT_LAYER_PROCESS.md) |
-| **B Implementation** | [ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md](./ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md) |
-| **B Architecture** | [ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md](./ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md) |
+| **Compliance Change Control Rules** | [COMPLIANCE_CHANGE_CONTROL_RULES.md](./COMPLIANCE_CHANGE_CONTROL_RULES.md) |
+| **Compliance Change Control Process** | [COMPLIANCE_CHANGE_CONTROL_PROCESS.md](./COMPLIANCE_CHANGE_CONTROL_PROCESS.md) |
+| **Compliance Change Control Implementation** | [COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md) |
+| **Compliance Change Control Architecture** | [COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md](./COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md) |
+| **Accountable Agent Layer Rules** | [ACCOUNTABLE_AGENT_LAYER_RULES.md](./ACCOUNTABLE_AGENT_LAYER_RULES.md) |
+| **Accountable Agent Layer Process** | [ACCOUNTABLE_AGENT_LAYER_PROCESS.md](./ACCOUNTABLE_AGENT_LAYER_PROCESS.md) |
+| **Accountable Agent Layer Implementation** | [ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md](./ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md) |
+| **Accountable Agent Layer Architecture** | [ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md](./ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md) |
 
 ---
 
 ## Authoritative Documents (Source of Truth)
 
-### Compliance Change Control (C)
+### Compliance Change Control
 
 | Document | Purpose | Status |
 |----------|---------|--------|
 | [COMPLIANCE_CHANGE_CONTROL_RULES.md](./COMPLIANCE_CHANGE_CONTROL_RULES.md) | Binding rules for CR workflow | ✅ AUTHORITATIVE |
 | [COMPLIANCE_CHANGE_CONTROL_PROCESS.md](./COMPLIANCE_CHANGE_CONTROL_PROCESS.md) | State machines, transitions, evidence | ✅ AUTHORITATIVE |
-| [COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md) | Module design, schemas, DoD (C only) | ✅ AUTHORITATIVE |
+| [COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md) | Module design, schemas, DoD (Compliance Change Control only) | ✅ AUTHORITATIVE |
 | [COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md](./COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md) | Architecture package | ✅ AUTHORITATIVE |
 
-### Accountable Agent Layer (B)
+### Accountable Agent Layer
 
 | Document | Purpose | Status |
 |----------|---------|--------|
 | [ACCOUNTABLE_AGENT_LAYER_RULES.md](./ACCOUNTABLE_AGENT_LAYER_RULES.md) | Blocking rules, intervention logic | ✅ AUTHORITATIVE |
 | [ACCOUNTABLE_AGENT_LAYER_PROCESS.md](./ACCOUNTABLE_AGENT_LAYER_PROCESS.md) | Intervention points, state machine | ✅ AUTHORITATIVE |
-| [ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md](./ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md) | Module design, schemas, DoD (B only) | ✅ AUTHORITATIVE |
-| [ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md](./ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md) | Architecture, dependency on C, DoD | ✅ AUTHORITATIVE |
+| [ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md](./ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md) | Module design, schemas, DoD (Accountable Agent Layer only) | ✅ AUTHORITATIVE |
+| [ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md](./ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md) | Architecture, dependency on Compliance Change Control, DoD | ✅ AUTHORITATIVE |
 
 ---
 
 ## Legacy Mixed Documents (Deprecated — Do Not Extend)
 
-> **⚠️ WARNING:** These documents contain mixed C+B content. Do not modify or extend. Use authoritative docs above.
+> **⚠️ WARNING:** These documents contain mixed Compliance Change Control + Accountable Agent Layer content. Do not modify or extend. Use authoritative docs above.
 
 | Document | Content | Replacement |
 |----------|---------|-------------|
-| [COMPLIANCE_CHANGE_CONTROL_RULES_BINDING.md](./COMPLIANCE_CHANGE_CONTROL_RULES_BINDING.md) | Mixed C+B rules | Use separate RULES.md files |
-| [COMPLIANCE_CHANGE_CONTROL_PROCESS_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_PROCESS_CONTRACT.md) | Mixed C+B process | Use separate PROCESS.md files |
-| [COMPLIANCE_ACCOUNTABILITY_ARCHITECTURE.md](./COMPLIANCE_ACCOUNTABILITY_ARCHITECTURE.md) | Mixed C+B architecture | Use C-ARCHITECTURE + B-ARCHITECTURE |
-| [COMPLIANCE_ACCOUNTABILITY_SPECIFICATION.md](./COMPLIANCE_ACCOUNTABILITY_SPECIFICATION.md) | Mixed operational spec | Use C-PROCESS + B-PROCESS |
+| [COMPLIANCE_CHANGE_CONTROL_RULES_BINDING.md](./COMPLIANCE_CHANGE_CONTROL_RULES_BINDING.md) | Mixed Compliance Change Control + Accountable Agent Layer rules | Use separate RULES.md files |
+| [COMPLIANCE_CHANGE_CONTROL_PROCESS_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_PROCESS_CONTRACT.md) | Mixed Compliance Change Control + Accountable Agent Layer process | Use separate PROCESS.md files |
+| [COMPLIANCE_ACCOUNTABILITY_ARCHITECTURE.md](./COMPLIANCE_ACCOUNTABILITY_ARCHITECTURE.md) | Mixed C+B architecture | Use Compliance Change Control Architecture + Accountable Agent Layer Architecture |
+| [COMPLIANCE_ACCOUNTABILITY_SPECIFICATION.md](./COMPLIANCE_ACCOUNTABILITY_SPECIFICATION.md) | Mixed operational spec | Use Compliance Change Control Process + Accountable Agent Layer Process |
 
 ---
 
@@ -62,9 +62,9 @@
 
 | Concept | Official Name | Legacy (deprecated) |
 |---------|---------------|---------------------|
-| A | Safety Guard | A, Context A |
-| C | Compliance Change Control | C, Context C |
-| B | Accountable Agent Layer | B, Context B |
+| Safety Guard | Safety Guard | Historical module identifier only; do not use shorthand in public docs |
+| Compliance Change Control | Compliance Change Control | Historical module identifier only; do not use shorthand in public docs |
+| Accountable Agent Layer | Accountable Agent Layer | Historical module identifier only; do not use shorthand in public docs |
 
 ### Canonical Verification Model
 
@@ -86,8 +86,8 @@
     │   ├── accountable_agent/     # Accountable Agent Layer
     │   └── aspice_link_manager/   # Shared Link Management
     └── docs/
-        ├── COMPLIANCE_CHANGE_CONTROL_*.md   # C docs (authoritative)
-        ├── ACCOUNTABLE_AGENT_LAYER_*.md     # B docs (authoritative)
+        ├── COMPLIANCE_CHANGE_CONTROL_*.md   # Compliance Change Control docs (authoritative)
+        ├── ACCOUNTABLE_AGENT_LAYER_*.md     # Accountable Agent Layer docs (authoritative)
         └── COMPLIANCE_ACCOUNTABILITY_*.md   # Mixed (legacy, do not extend)
 ```
 
@@ -113,8 +113,8 @@
 
 | Category | Count | Documents |
 |----------|-------|-----------|
-| **Authoritative C** | 4 | RULES, PROCESS, IMPLEMENTATION_CONTRACT, ARCHITECTURE |
-| **Authoritative B** | 4 | RULES, PROCESS, IMPLEMENTATION, ARCHITECTURE |
+| **Authoritative Compliance Change Control** | 4 | RULES, PROCESS, IMPLEMENTATION_CONTRACT, ARCHITECTURE |
+| **Authoritative Accountable Agent Layer** | 4 | RULES, PROCESS, IMPLEMENTATION, ARCHITECTURE |
 | **Legacy Mixed** | 4 | RULES_BINDING, PROCESS_CONTRACT, ACCOUNTABILITY_ARCH, ACCOUNTABILITY_SPEC |
 | **Index** | 1 | This file |
 
@@ -126,7 +126,7 @@
 
 The following sections are intentionally duplicated across C and B authoritative docs because they describe the shared repo structure and interface:
 
-| Section | C Location | B Location |
+| Section | Compliance Change Control Location | Accountable Agent Layer Location |
 |---------|------------|------------|
 | Module Ownership Matrix | IMPLEMENTATION_CONTRACT B.2 | IMPLEMENTATION Section B |
 | Directory Structure | IMPLEMENTATION_CONTRACT B.3 | IMPLEMENTATION Section B |
@@ -138,14 +138,14 @@ The following sections are intentionally duplicated across C and B authoritative
 
 | Date | Action |
 |------|--------|
-| 2026-04-10 | Normalized from A/B/C shorthand to professional names |
+| 2026-04-10 | Normalized from internal shorthand to professional names |
 | 2026-04-10 | Split mixed documents into authoritative C-only and B-only |
 | 2026-04-10 | Extracted B implementation from C-IMPL to ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md |
 | 2026-04-10 | Extracted B architecture from ACCOUNTABILITY-ARCH to ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md |
-| 2026-04-10 | Cleaned cross-contamination: C-IMPL is now C-only, B-IMPL is now B-only |
+| 2026-04-10 | Cleaned cross-contamination: C-IMPL is now C-only, Accountable Agent Layer Implementation is now B-only |
 | 2026-04-19 | Applied bugfix-policy hardening (D1-D22, E1-E12) and level-specific VerificationCase model |
 | 2026-04-19 | Bumped all docs to v2.0.0 (C-RULES/PROCESS/ARCHITECTURE were already v2.0.0) |
-| 2026-04-19 | C-IMPLEMENTATION_CONTRACT synced from v1.0.0 to v2.0.0 |
+| 2026-04-19 | Compliance Change Control Implementation Contract synced from v1.0.0 to v2.0.0 |
 | 2026-04-19 | B docs bumped from v1.0.0 to v2.0.0 with bugfix-specific blocks/warnings/evidence |
 
 ---

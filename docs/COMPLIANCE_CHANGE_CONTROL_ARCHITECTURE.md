@@ -322,6 +322,8 @@ class VerificationService:
 
 ### Definition of Done (DoD)
 
+**PR #3 hardening note:** This checklist is a merge-gate checklist for the Compliance Change Control slice, not proof that PR #3 is complete. Leave unchecked items open until backed by tests, CLI proof, or linked evidence.
+
 **For C to be considered complete:**
 
 1. [ ] CR creation with requirement_refs works via CLI

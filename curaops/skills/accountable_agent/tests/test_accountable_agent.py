@@ -1,6 +1,6 @@
 """
-Tests for Accountable Agent Service — Context B v2.0.0
-Tests the thin accountability layer on top of Compliance-CR (Context C v2.0.0)
+Tests for Accountable Agent Service — Accountable Agent Layer v2.0.0
+Tests the thin accountability layer on top of Compliance Change Control v2.0.0
 """
 
 import json

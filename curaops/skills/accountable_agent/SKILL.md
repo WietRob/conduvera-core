@@ -1,6 +1,6 @@
 # Accountable Agent Skill
 
-**Context B Implementation** — Thin accountability layer on top of Compliance-CR (Context C)
+**Accountable Agent Layer Implementation** — Thin accountability layer on top of Compliance Change Control
 
 ## Purpose
 
@@ -8,7 +8,7 @@ Captures agent identity, context, and intent for AI-assisted changes. Ensures ma
 
 ## Dependencies
 
-- **change-request** (Context C): CR creation, requirement linking, evidence generation
+- **change-request** (Compliance Change Control): CR creation, requirement linking, evidence generation
 - **aspice-link-manager**: Traceability validation
 
 ## Core Concepts
@@ -170,13 +170,13 @@ Human-readable report with:
 ## Testing
 
 ```bash
-cd /home/roberto_schmidt/projects/matrix-os/curaops/skills/accountable-agent/tests
+cd /home/roberto_schmidt/projects/matrix-os/curaops/skills/accountable_agent/tests
 python3 -m pytest test_accountable_agent.py -v
 ```
 
 ## Integration with C Core
 
-B layer reuses C services:
+Accountable Agent Layer reuses Compliance Change Control services:
 - `ChangeRequestService`: CR creation and management
 - `generate_cr_evidence()`: CR evidence generation
 - `validate_cr_traceability()`: Requirement traceability

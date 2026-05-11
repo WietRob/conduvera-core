@@ -152,7 +152,7 @@ def install_completion(
         if global_install:
             # System-wide installation
             if shell == "bash":
-                completion_file = Path(f"/etc/bash_completion.d/{prog_name}")
+                completion_file = Path(f"/etc/" f"bash_completion.d/{prog_name}")
             elif shell == "zsh":
                 completion_file = Path(f"/usr/share/zsh/site-functions/_{prog_name}")
             elif shell == "fish":

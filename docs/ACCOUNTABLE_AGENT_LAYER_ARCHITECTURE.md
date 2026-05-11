@@ -281,16 +281,18 @@ def generate_accountability_evidence(accountable_id: str) -> Path:
 
 ### Definition of Done (DoD) for B
 
+**PR #3 hardening note:** This checklist is a merge-gate checklist for the Accountable Agent Layer slice, not proof that PR #3 is complete. Leave unchecked items open until backed by tests, CLI proof, or linked evidence.
+
 1. [ ] Pre-flight check blocks changes without approved CR
-2. [ ] AgentContext captures all fields (agent_id, name, model, tools, session)
+2. [ ] AgentContext records all fields (agent_id, name, model, tools, session)
 3. [ ] ChangeIntent captures all fields (description, type, files, impact)
 4. [ ] Strict mode blocks when cr_id missing
 5. [ ] Strict mode blocks when requirement_refs empty
 6. [ ] Non-strict mode allows registration with status "pending"
 7. [ ] Validation checks requirement ID patterns
 8. [ ] Evidence generation produces JSON with full chain
-9. [ ] Evidence references C evidence file
-10. [ ] B imports all C services (no duplication)
+9. [ ] Evidence references Compliance Change Control evidence file
+10. [ ] Accountable Agent Layer imports Compliance Change Control services (no duplication)
 11. [ ] CLI commands: register, validate, evidence, pre-flight
 12. [ ] Bugfix-specific block conditions tested (3 scenarios from C-RULES §9.6)
 13. [ ] Bugfix semantics consumed from C, not duplicated in B

@@ -78,7 +78,7 @@ def should_escalate_to_claude(prompt: str) -> Tuple[bool, str]:
     # Code indicators: -1 each
     if "variable" in prompt: complexity_score -= 1
 
-    # Context clues:
+    # Surrounding clues:
     if len(prompt) > 500: complexity_score += 1
     if "```" in prompt: complexity_score -= 1  # Code blocks
 
@@ -97,7 +97,7 @@ def should_escalate_to_claude(prompt: str) -> Tuple[bool, str]:
 
 **Benefits:**
 - **Predictable:** Score-based instead of keyword counting
-- **Context-aware:** Code blocks reduce complexity
+- **Surrounding-aware:** Code blocks reduce complexity
 - **Tunable:** Adjust weights and threshold
 
 ### Solution 2: tiktoken Token Estimation

@@ -297,7 +297,7 @@ class TestConflictReport:
             Conflict(
                 type=ConflictType.ORPHANED_CODE,
                 severity=Severity.HIGH,
-                location="src/b.py",
+                location="src/module_b.py",
                 message="Orphaned B",
                 fix_suggestions=["Fix B"],
             ),

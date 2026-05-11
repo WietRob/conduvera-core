@@ -200,7 +200,7 @@ requirement_refs: [String]  # Min 1, valid IDs
 - [ ] Validation = passed
 - [ ] Evidence generated
 - [ ] CR on IMPLEMENTED or CLOSED
-- [ ] Agent context captured
+- [ ] Agent identity captured
 - [ ] Change intent documented
 - [ ] Accountability links verified
 - [ ] Bugfix-specific block conditions tested (3 scenarios)

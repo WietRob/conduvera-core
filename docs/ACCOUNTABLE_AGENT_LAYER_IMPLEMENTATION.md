@@ -16,7 +16,7 @@
 
 **IN SCOPE:**
 - Accountable Agent Layer: Active intervention for AI-assisted changes
-- Agent context capture (attribution)
+- Agent identity capture (attribution)
 - Pre-flight blocking logic
 - Accountability validation
 - Evidence generation
@@ -532,18 +532,20 @@ def test_b_evidence_includes_bugfix_context():
 
 ## F. Definition of Done
 
+**PR #3 hardening note:** This checklist is normative acceptance criteria for the Accountable Agent Layer slice. Unchecked items are intentional open merge gates unless backed by explicit proof in the PR.
+
 ### F.1 B Slice Done When
 
 1. [ ] `accountable_agent/models.py` — All dataclasses implemented
 2. [ ] `accountable_agent/intervention.py` — Pre-flight blocking working
 3. [ ] `accountable_agent/validation.py` — Accountability validation working
-4. [ ] `accountable_agent/evidence.py` — B evidence generation working
+4. [ ] `accountable_agent/evidence.py` — Accountable Agent Layer evidence generation working
 5. [ ] `cli/commands/accountable.py` — All CLI commands working
 6. [ ] Unit tests: 40+ tests, >80% coverage
-7. [ ] Integration tests: B+C integration verified
+7. [ ] Integration tests: Accountable Agent Layer + Compliance Change Control integration verified
 8. [ ] B imports from C (no duplication) verified by code review
 9. [ ] Blocking scenarios tested (5 worked examples)
-10. [ ] Evidence chain verified (B→C reference)
+10. [ ] Evidence chain verified (Accountable Agent Layer to Compliance Change Control reference)
 11. [ ] Bugfix-specific block conditions tested (3 scenarios)
 12. [ ] Bugfix semantics consumed from C, not duplicated in B
 13. [ ] Evidence includes bugfix_context when change_type=bugfix
@@ -562,7 +564,7 @@ def test_b_evidence_includes_bugfix_context():
 ### G.2 Minimum Requirement Set
 
 **Accountability (B):**
-- Agent context capture
+- Agent identity capture
 - Pre-flight blocking
 - Evidence chain to C
 

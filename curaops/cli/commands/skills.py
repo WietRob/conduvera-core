@@ -658,7 +658,7 @@ def pattern_suggest(
 
 
 # ═══════════════════════════════════════════════════════════════
-# ACCOUNTABLE AGENT COMMANDS (Context B)
+# ACCOUNTABLE AGENT LAYER COMMANDS
 # ═══════════════════════════════════════════════════════════════
 
 accountable_app = typer.Typer(help="Accountable Agent - AI-assisted change accountability")
