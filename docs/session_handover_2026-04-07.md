@@ -118,7 +118,7 @@ d0dd77f feat(cli): Fix CLI commands for all 7 Skills + Comparison Test
 │   │   ├── change-request/
 │   │   ├── session-manager/
 │   │   ├── aspice-link-manager/
-│   │   ├── aspice-conflict-detector/
+│   │   ├── aspice_conflict_detector/
 │   │   ├── multi-agent-lock/
 │   │   └── pattern-learning/
 │   └── tests/
@@ -147,7 +147,7 @@ d0dd77f feat(cli): Fix CLI commands for all 7 Skills + Comparison Test
 ├── change-request/
 ├── session-manager/
 ├── aspice-link-manager/
-├── aspice-conflict-detector/
+├── aspice_conflict_detector/
 ├── multi-agent-lock/
 └── pattern-learning/
 ```

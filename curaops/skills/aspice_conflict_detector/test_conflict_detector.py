@@ -3,16 +3,12 @@
 Validated by: TC-UT-095
 """
 
-import sys
 import tempfile
 from pathlib import Path
 
 import pytest
 
-# Add skill directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
-
-from conflict_detector import (
+from curaops.skills.aspice_conflict_detector import (
     Conflict,
     ConflictDetector,
     ConflictDetectorError,

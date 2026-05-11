@@ -29,7 +29,7 @@ curaops/
 │   ├── aspice-link-manager/   # P2: Traceability compliance
 │   ├── pattern-learning/      # P2: Behavior learning
 │   ├── session-manager/       # P2: Session lifecycle
-│   ├── aspice-conflict-detector/  # P2: Conflict detection
+│   ├── aspice_conflict_detector/  # P2: Conflict detection
 │   └── multi-agent-lock/      # P2: File locking
 │
 ├── docs/            # Architecture documentation

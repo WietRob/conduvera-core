@@ -85,7 +85,7 @@ CuraOps is a **CR-driven development framework** that combines:
 | 3 | **aspice-link-manager** | P2 | 10/10 | ASPICE traceability compliance | `curaops/skills/aspice-link-manager/` |
 | 4 | **pattern-learning** | P2 | 9/9 | Learn from user behavior | `curaops/skills/pattern-learning/` |
 | 5 | **session-manager** | P2 | 13/13 | Session lifecycle management | `curaops/skills/session-manager/` |
-| 6 | **aspice-conflict-detector** | P2 | 18/18 | Detect ASPICE level conflicts | `curaops/skills/aspice-conflict-detector/` |
+| 6 | **aspice-conflict-detector** | P2 | 18/18 | Detect ASPICE level conflicts | `curaops/skills/aspice_conflict_detector/` |
 | 7 | **multi-agent-lock** | P2 | 32/32 | File locking between agents | `curaops/skills/multi-agent-lock/` |
 
 **Total:** 103 Tests, 100% Pass Rate
@@ -196,7 +196,7 @@ matrix-os/
 │   │   ├── aspice-link-manager/
 │   │   ├── pattern-learning/
 │   │   ├── session-manager/
-│   │   ├── aspice-conflict-detector/
+│   │   ├── aspice_conflict_detector/
 │   │   └── multi-agent-lock/
 │   │
 │   ├── docs/                     # Architecture Docs
