@@ -77,6 +77,9 @@ def test_generic_accountable_evidence_matches_contract(tmp_path):
     assert evidence["validation"]["valid"] is True
     assert evidence["bugfix_context"] is None
     assert evidence["referenced_c_evidence"]["available"] is True
+    assert evidence["referenced_c_evidence"]["integrity_verified"] is True
+    assert evidence["referenced_c_evidence"]["verification"]["valid"] is True
+    assert evidence["referenced_c_evidence"]["hash"].startswith("sha256:")
     assert evidence["referenced_c_evidence"]["cr_evidence_path"]
     assert evidence["evidence_chain"]["linked_cr"].endswith(f"changes/{cr_id}.md")
     assert evidence["evidence_chain"]["linked_cr_evidence"] == evidence["referenced_c_evidence"]["cr_evidence_path"]
@@ -118,6 +121,26 @@ def test_bugfix_evidence_uses_explicit_empty_regression_list_when_none(tmp_path)
     assert any("No regression VerificationCase linked" in warning for warning in bugfix["warnings"])
 
 
+def test_tampered_c_evidence_is_not_marked_verified(tmp_path, monkeypatch):
+    _, cr_id = _approved_cr(tmp_path)
+    service = AccountableAgentService(project_root=tmp_path)
+    ac = _register(service, cr_id)
+    c_path = service.cr_service.generate_evidence(cr_id)
+    data = json.loads(Path(c_path).read_text(encoding="utf-8"))
+    data["requirement_refs"] = ["SW-REQ-TAMPERED"]
+    Path(c_path).write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    monkeypatch.setattr(service.cr_service, "generate_evidence", lambda _cr_id: c_path)
+    evidence = _load_evidence(service.generate_accountability_evidence(ac.accountable_id))
+
+    ref = evidence["referenced_c_evidence"]
+    assert ref["available"] is False
+    assert ref["integrity_verified"] is False
+    assert ref["verification"]["valid"] is False
+    assert ref["unavailable_reason"] == "hash_mismatch"
+    assert evidence["evidence_chain"]["chain_integrity"] == "incomplete"
+
+
 def test_c_evidence_unavailable_is_explicit(tmp_path, monkeypatch):
     _, cr_id = _approved_cr(tmp_path)
     service = AccountableAgentService(project_root=tmp_path)
@@ -133,6 +156,8 @@ def test_c_evidence_unavailable_is_explicit(tmp_path, monkeypatch):
         "available": False,
         "cr_evidence_path": None,
         "integrity_verified": False,
+        "hash": None,
+        "verification": None,
         "unavailable_reason": "boom",
     }
     assert evidence["cr_evidence_path"] is None

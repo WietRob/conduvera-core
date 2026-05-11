@@ -28,12 +28,9 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any, Set
 
 # Import Compliance Change Control core services (v2.0.0)
-from curaops.skills.change_request import (
-    ChangeRequestService,
-    VerificationService,
-    CREvidenceGenerator,
-    CRStatus,
-)
+from curaops.skills.change_request import ChangeRequestService, CRStatus
+
+from curaops.skills.change_request.evidence import verify_evidence_file
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -742,15 +739,29 @@ class AccountableAgentService:
                 "available": False,
                 "cr_evidence_path": None,
                 "integrity_verified": False,
+                "hash": None,
+                "verification": None,
                 "unavailable_reason": "no linked CR",
             }
         try:
             cr_evidence_path = self.cr_service.generate_evidence(ac.cr_id)
+            verification = verify_evidence_file(cr_evidence_path)
+            if verification["valid"]:
+                return {
+                    "available": True,
+                    "cr_evidence_path": str(cr_evidence_path),
+                    "integrity_verified": True,
+                    "hash": verification["stored_hash"],
+                    "verification": verification,
+                    "unavailable_reason": None,
+                }
             return {
-                "available": True,
+                "available": False,
                 "cr_evidence_path": str(cr_evidence_path),
-                "integrity_verified": True,
-                "unavailable_reason": None,
+                "integrity_verified": False,
+                "hash": verification.get("stored_hash"),
+                "verification": verification,
+                "unavailable_reason": verification.get("reason") or "integrity_verification_failed",
             }
         except Exception as exc:
             logger.warning(f"Could not generate CR evidence: {exc}")
@@ -758,6 +769,8 @@ class AccountableAgentService:
                 "available": False,
                 "cr_evidence_path": None,
                 "integrity_verified": False,
+                "hash": None,
+                "verification": None,
                 "unavailable_reason": str(exc),
             }
 
@@ -824,7 +837,7 @@ class AccountableAgentService:
                 "this_evidence": str(evidence_file),
                 "linked_cr": str(self.project_root / "changes" / f"{ac.cr_id}.md") if ac.cr_id else None,
                 "linked_cr_evidence": cr_evidence,
-                "chain_integrity": "verified" if referenced_c_evidence["available"] else "incomplete",
+                "chain_integrity": "verified" if referenced_c_evidence["integrity_verified"] else "incomplete",
             },
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "service_version": "B-2.1.0",
