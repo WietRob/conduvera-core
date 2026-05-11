@@ -75,6 +75,7 @@ class CREvidenceGenerator:
         """Build the evidence payload per C-PROCESS §H.2 schema."""
         blocking = [i for i in issues if i["severity"] == "BLOCKING"]
         generated_at = datetime.now(timezone.utc).isoformat() + "Z"
+        generated_at = _utc_isoformat_z(datetime.now(timezone.utc))
         evidence: Dict = {
             "schema_version": SCHEMA_VERSION,
             "cr_id": cr.id,
