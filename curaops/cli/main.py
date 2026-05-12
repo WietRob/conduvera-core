@@ -8,12 +8,17 @@ Compliance Change Control and Accountable Agent Layer review PRs.
 import typer
 from rich.console import Console
 
+from curaops.cli.commands.cr import cr_app
+
 console = Console()
 app = typer.Typer(
     name="matrix-cli",
     help="Matrix OS - CuraOps Skills CLI baseline",
     no_args_is_help=True,
 )
+
+
+app.add_typer(cr_app, name="cr", help="Compliance Change Control — CR lifecycle")
 
 
 @app.command("version")
