@@ -197,6 +197,23 @@ This requirement is implemented.
             # Should not have MISSING_TRACEABILITY conflict
             ct2_conflicts = [c for c in conflicts if c.type == ConflictType.MISSING_TRACEABILITY]
             assert len(ct2_conflicts) == 0
+    def test_no_missing_traceability_with_json_implemented_in(self):
+        """JSON frontmatter from link manager is accepted by conflict detector."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            req_dir = Path(tmpdir) / "requirements" / "software"
+            req_dir.mkdir(parents=True)
+            req_file = req_dir / "SW-REQ-020_test.md"
+            req_file.write_text('''```json
+{"id":"SW-REQ-020","title":"JSON Req","implemented_in":["src/impl.py"]}
+```
+# JSON Requirement
+''')
+
+            detector = ConflictDetector(root_dir=tmpdir)
+            conflicts = detector.detect_conflicts_for_file(req_file)
+
+            ct2_conflicts = [c for c in conflicts if c.type == ConflictType.MISSING_TRACEABILITY]
+            assert ct2_conflicts == []
 
 
 class TestConflictDetectorCT4TestCoverageGap:

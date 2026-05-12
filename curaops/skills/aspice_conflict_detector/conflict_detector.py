@@ -379,21 +379,28 @@ class ConflictDetector:
             content = req_file.read_text(encoding="utf-8")
             req_id = req_file.stem.split("_")[0] if "_" in req_file.stem else req_file.stem
 
-            # Check if implemented_in field exists in frontmatter
-            # Look for YAML frontmatter
-            frontmatter_match = re.search(r"^---\s*\n(.*?)\n---", content, re.DOTALL)
-            if frontmatter_match:
-                frontmatter = frontmatter_match.group(1)
-                # Check for implemented_in field
-                if "implemented_in:" not in frontmatter.lower():
+            # Check if implemented_in field exists in YAML or JSON frontmatter.
+            yaml_match = re.search(r"^---\s*\n(.*?)\n---", content, re.DOTALL)
+            json_match = re.search(r"```json\s*\n(.*?)\n```", content, re.DOTALL)
+            has_implemented_in = False
+            if yaml_match:
+                has_implemented_in = "implemented_in:" in yaml_match.group(1).lower()
+            elif json_match:
+                import json
+
+                data = json.loads(json_match.group(1).strip())
+                has_implemented_in = bool(data.get("implemented_in"))
+
+            if yaml_match or json_match:
+                if not has_implemented_in:
                     conflicts.append(
                         Conflict(
                             type=ConflictType.MISSING_TRACEABILITY,
                             severity=Severity.MEDIUM,
                             location=str(req_file),
-                            message=f"SW-REQ {req_id} has no 'implemented_in' field in frontmatter",
+                            message=f"SW-REQ {req_id} has no implemented_in traceability",
                             fix_suggestions=[
-                                f"Add 'implemented_in: src/core/xxx.py' to {req_id} frontmatter",
+                                f"Add implemented_in link to {req_id} frontmatter",
                                 "Link requirement to implementation file(s)",
                             ],
                         )
@@ -407,7 +414,7 @@ class ConflictDetector:
                             type=ConflictType.MISSING_TRACEABILITY,
                             severity=Severity.MEDIUM,
                             location=str(req_file),
-                            message=f"SW-REQ {req_id} has no implementation found",
+                            message=f"SW-REQ {req_id} has no implemented_in traceability",
                             fix_suggestions=[
                                 f"Create implementation file for {req_id}",
                                 f"Add 'Implements: {req_id}' to code docstring",
