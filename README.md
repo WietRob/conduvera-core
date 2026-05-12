@@ -65,5 +65,5 @@ Merged:
 
 Planned:
 
-- PR F MCP / UI / Editor Scaffolding
-- Later focused adapter PRs for Safety Guard, agent-evidence-plane, CAS, failure-loop, peekxd, OpenCode plugin, and ai-router
+- MCP / UI / Editor Scaffolding slice
+- Later focused adapter slices for Safety Guard, agent-evidence-plane, CAS, failure-loop, peekxd, OpenCode plugin, and ai-router

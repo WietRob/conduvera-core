@@ -77,7 +77,7 @@ These names are tracked as future adapter candidates, not merged Matrix OS runti
 | peekxd | Future adapter/capability candidate |
 | OpenCode plugin | Future adapter/capability candidate |
 | ai-router | Future adapter/capability candidate |
-| UI/MCP/editor scaffolding | Planned PR F scope, not part of PR E |
+| UI/MCP/editor scaffolding | Planned next scaffolding slice; not currently merged |
 
 ## Production-readiness boundary
 

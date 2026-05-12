@@ -32,14 +32,14 @@ python3 -m curaops.cli.main aspice --help
 
 | Planned PR | Scope | Boundary |
 |---|---|---|
-| PR F | MCP / UI / Editor Scaffolding | Add scaffolding separately from compliance, accountability, and ASPICE core |
-| Later adapter PRs | Safety Guard adapter | Keep Safety Guard standalone; integrate through a narrow adapter only |
-| Later adapter PRs | agent-evidence-plane adapter | Treat as reusable evidence/audit sidecar, not absorbed core |
-| Later adapter PRs | CAS Extractor adapter/capability | Define a focused contract before integration |
-| Later adapter PRs | failure-driven-loop adapter/capability | Define a focused contract before integration |
-| Later adapter PRs | peekxd adapter/capability | Define a focused contract before integration |
-| Later adapter PRs | OpenCode plugin adapter/capability | Define a focused contract before integration |
-| Later adapter PRs | ai-router adapter/capability | Define a focused contract before integration |
+| Next scaffolding slice | MCP / UI / Editor Scaffolding | Add scaffolding separately from compliance, accountability, and ASPICE core |
+| Later adapter slices | Safety Guard adapter | Keep Safety Guard standalone; integrate through a narrow adapter only |
+| Later adapter slices | agent-evidence-plane adapter | Treat as reusable evidence/audit sidecar, not absorbed core |
+| Later adapter slices | CAS Extractor adapter/capability | Define a focused contract before integration |
+| Later adapter slices | failure-driven-loop adapter/capability | Define a focused contract before integration |
+| Later adapter slices | peekxd adapter/capability | Define a focused contract before integration |
+| Later adapter slices | OpenCode plugin adapter/capability | Define a focused contract before integration |
+| Later adapter slices | ai-router adapter/capability | Define a focused contract before integration |
 
 ## Current local verification set
 

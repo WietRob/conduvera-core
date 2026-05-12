@@ -1,6 +1,6 @@
 # Matrix OS Documentation Inventory
 
-Status: authoritative documentation inventory for PR E.
+Status: authoritative documentation inventory for the architecture/documentation index slice.
 
 This inventory classifies existing and newly authoritative documents after PR #4, #5, #6, and #7. Historical documents remain available for context, but current implementation guidance should start from the authoritative docs listed here.
 
