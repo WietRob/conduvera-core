@@ -5,7 +5,7 @@ Detect conflicts between ASPICE levels (Requirements, Code, Tests) within 1 minu
 ## Usage
 
 ```python
-from aspice_conflict_detector import ConflictDetector, ConflictType, Severity
+from curaops.skills.aspice_conflict_detector import ConflictDetector, ConflictType, Severity
 
 # Initialize detector
 detector = ConflictDetector(root_dir=Path("/path/to/project"))

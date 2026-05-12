@@ -46,7 +46,7 @@ Description here...
 ### Python API
 
 ```python
-from aspice_link_manager import ASPICELinkManager
+from curaops.skills.aspice_link_manager import ASPICELinkManager
 
 # Initialize
 manager = ASPICELinkManager(root_dir="./my-project")
@@ -128,11 +128,11 @@ SW-REQ-001.md:
 ## Tests
 
 ```bash
-cd ~/.hermes/skills/aspice-link-manager
-python -m pytest tests/ -v
+cd /home/roberto_schmidt/projects/matrix-os
+python -m pytest curaops/skills/aspice_link_manager/tests -v
 ```
 
-10 tests covering:
+12 tests covering:
 - Document parsing
 - Document finding
 - Link updates
