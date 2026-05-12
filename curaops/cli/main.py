@@ -8,6 +8,7 @@ Compliance Change Control and Accountable Agent Layer review PRs.
 import typer
 from rich.console import Console
 
+from curaops.cli.commands.accountable import accountable_app
 from curaops.cli.commands.cr import cr_app
 
 console = Console()
@@ -19,6 +20,7 @@ app = typer.Typer(
 
 
 app.add_typer(cr_app, name="cr", help="Compliance Change Control — CR lifecycle")
+app.add_typer(accountable_app, name="accountable", help="Accountable Agent - AI change accountability")
 
 
 @app.command("version")
