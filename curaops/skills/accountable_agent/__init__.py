@@ -644,6 +644,17 @@ class AccountableAgentService:
             try:
                 cr = self.cr_service.get_cr(ac.cr_id)
                 cr_obj = cr
+                approved_or_later = {
+                    CRStatus.APPROVED,
+                    CRStatus.IN_PROGRESS,
+                    CRStatus.IMPLEMENTED,
+                    CRStatus.VERIFIED,
+                    CRStatus.CLOSED,
+                }
+                if cr.status not in approved_or_later:
+                    issues.append(
+                        f"CR {ac.cr_id} status is {cr.status.value}, must be APPROVED or later"
+                    )
                 # Validate CR has no blocking issues
                 cr_issues = self.cr_service.validate_cr(ac.cr_id)
                 blocking = [

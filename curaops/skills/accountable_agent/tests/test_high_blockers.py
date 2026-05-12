@@ -145,6 +145,32 @@ class TestStateMachine(_Base):
         self.assertTrue(result["valid"])
         self.assertEqual(ac.status, "validated")
 
+    def test_validate_blocks_linked_draft_cr(self):
+        """B-RULES §3.1: validate/evidence require an APPROVED linked CR."""
+        svc = ChangeRequestService(
+            changes_dir=self.changes_dir,
+            evidence_dir=self.evidence_dir,
+        )
+        cr = svc.create_cr(
+            title="Draft CR title long enough",
+            requester="test",
+            problem="Draft CR must not validate accountability",
+            justification="test justification long enough",
+            impact_level=["SW"],
+            requirement_refs=["SW-REQ-001"],
+        )
+        ac = self.service.register_accountable_change(
+            agent_context=self.agent_ctx,
+            change_intent=ChangeIntent(description="test", change_type="feature"),
+            cr_id=cr.id,
+            requirement_refs=["SW-REQ-001"],
+            strict=False,
+        )
+        result = self.service.validate_accountability(ac.accountable_id)
+        self.assertFalse(result["valid"])
+        self.assertEqual(ac.status, "blocked")
+        self.assertTrue(any("must be APPROVED" in issue for issue in result["issues"]))
+
     def test_transition_linked_to_blocked(self):
         """L → B when validation finds issues."""
         ac = self.service.register_accountable_change(
