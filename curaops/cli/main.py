@@ -9,6 +9,7 @@ import typer
 from rich.console import Console
 
 from curaops.cli.commands.accountable import accountable_app
+from curaops.cli.commands.aspice import aspice_app
 from curaops.cli.commands.cr import cr_app
 
 console = Console()
@@ -21,6 +22,7 @@ app = typer.Typer(
 
 app.add_typer(cr_app, name="cr", help="Compliance Change Control — CR lifecycle")
 app.add_typer(accountable_app, name="accountable", help="Accountable Agent - AI change accountability")
+app.add_typer(aspice_app, name="aspice", help="ASPICE support utilities - traceability checks")
 
 
 @app.command("version")
