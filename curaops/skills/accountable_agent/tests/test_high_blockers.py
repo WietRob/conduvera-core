@@ -19,6 +19,7 @@ from curaops.skills.accountable_agent import (
     ACStatus,
     MissingMandatoryLinkError,
     InvalidACTransitionError,
+    AccountabilityError,
 )
 from curaops.skills.change_request import (
     ChangeRequestService,
@@ -170,6 +171,31 @@ class TestStateMachine(_Base):
         self.assertFalse(result["valid"])
         self.assertEqual(ac.status, "blocked")
         self.assertTrue(any("must be APPROVED" in issue for issue in result["issues"]))
+
+    def test_evidence_blocks_linked_draft_cr(self):
+        """Evidence generation must not write audit evidence for pre-approval CRs."""
+        svc = ChangeRequestService(
+            changes_dir=self.changes_dir,
+            evidence_dir=self.evidence_dir,
+        )
+        cr = svc.create_cr(
+            title="Draft CR evidence title long enough",
+            requester="test",
+            problem="Draft CR must not generate accountability evidence",
+            justification="test justification long enough",
+            impact_level=["SW"],
+            requirement_refs=["SW-REQ-001"],
+        )
+        ac = self.service.register_accountable_change(
+            agent_context=self.agent_ctx,
+            change_intent=ChangeIntent(description="test", change_type="feature"),
+            cr_id=cr.id,
+            requirement_refs=["SW-REQ-001"],
+            strict=False,
+        )
+        with self.assertRaises(AccountabilityError):
+            self.service.generate_accountability_evidence(ac.accountable_id)
+        self.assertEqual(list(self.evidence_dir.glob(f"{ac.accountable_id}_*.json")), [])
 
     def test_transition_linked_to_blocked(self):
         """L → B when validation finds issues."""

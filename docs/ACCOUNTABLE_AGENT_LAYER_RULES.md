@@ -215,24 +215,24 @@ Accountable Agent Layer consumes:
 
 ```python
 from curaops.skills.change_request import (
+    CRStatus,
     ChangeRequestService,
-    generate_cr_evidence,
-    validate_cr_traceability,
+    verify_evidence_file,
 )
 
 # Accountable Agent Layer blocks when Compliance Change Control says:
 # - CR does not exist
-# - Status not APPROVED
-# - Links invalid
+# - CR status is before APPROVED
+# - Links/bugfix semantics are invalid
 ```
 
 Accountable Agent Layer adds:
 
 ```python
 AccountableAgentService:
-  - pre_flight_check(session_id) → Bool
-  - register_accountable_change(agent_ctx, intent, cr_id, refs) → AC-ID
-  - validate_accountability(ac_id) → Report
+  - pre_flight_check(cr_id, requirement_refs, change_type, impact_level) → dict
+  - register_accountable_change(agent_ctx, intent, cr_id, refs) → AccountableChange
+  - validate_accountability(ac_id) → dict
   - generate_accountability_evidence(ac_id) → Path
 ```
 

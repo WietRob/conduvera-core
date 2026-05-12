@@ -110,126 +110,30 @@ class AccountableChange:
 ### B.3 Intervention Implementation
 
 ```python
-# accountable_agent/intervention.py
+# Canonical PR C runtime entrypoint: curaops.skills.accountable_agent.AccountableAgentService
+from curaops.skills.accountable_agent import AccountableAgentService
+from curaops.skills.change_request import CRStatus, ChangeRequestService, verify_evidence_file
 
-from typing import Tuple, Optional
-from curaops.skills.change_request import ChangeRequestService, CRStatus
+service = AccountableAgentService(project_root=project_root)
+result = service.pre_flight_check(
+    cr_id="CR-001",
+    requirement_refs=["SW-REQ-001"],
+    change_type="bugfix",
+    impact_level=["SW", "CODE"],
+)
 
-class BIntervention:
-    """Implements blocking logic from COMPLIANCE_CHANGE_CONTROL_RULES.md Section 9."""
+# Blocks when:
+# - the linked CR does not exist
+# - the linked CR is before APPROVED for pre-flight
+# - requirement refs are missing
+# - bugfix SW-REQ / new_ref / VerificationCase semantics from CCC fail
+# - validate/evidence sees a CR before APPROVED
 
-    BLOCKING_MESSAGES = {
-        "no_cr": "No CR linked. Run: matrix-cli cr create/submit/approve, then pass --cr <id>",
-        "cr_not_approved": "CR-{cr_id} status is {status}, must be APPROVED or later",
-        "missing_refs": "Missing requirement_refs (min 1 required)",
-        "invalid_id": "Invalid requirement ID format: {ids}",
-        "sys_impact_no_sys_req": "SYS impact detected but no SYS-REQ linked",
-        "arch_impact_no_arch": "ARCH impact detected but no SW-ARCH linked",
-        "sw_impact_no_sw_req": "SW impact detected but no SW-REQ linked",
-        "cr_not_found": "CR-{cr_id} does not exist in changes/",
-        "safety_critical_no_approval": "Safety-critical change requires Compliance approval",
-    }
-
-    def __init__(self, cr_service: ChangeRequestService):
-        self.cr_service = cr_service
-        self.session_cr_map = {}  # session_id -> cr_id
-
-    def pre_flight_check(self, session_id: str,
-                         proposed_files: List[str]) -> Tuple[bool, Optional[str]]:
-        """
-        Pre-flight check before ANY AI-assisted change.
-
-        Returns: (allowed: bool, block_message: Optional[str])
-        """
-        # Check 1: CR linked to session
-        cr_id = self.session_cr_map.get(session_id)
-        if not cr_id:
-            return False, self.BLOCKING_MESSAGES["no_cr"]
-
-        # Check 2: CR exists
-        cr = self.cr_service.get_cr(cr_id)
-        if not cr:
-            return False, self.BLOCKING_MESSAGES["cr_not_found"].format(cr_id=cr_id)
-
-        # Check 3: CR is APPROVED
-        if cr.status != CRStatus.APPROVED:
-            return False, self.BLOCKING_MESSAGES["cr_not_approved"].format(
-                cr_id=cr_id, status=cr.status.value
-            )
-
-        # Check 4: Has requirement refs
-        if not cr.requirement_refs:
-            return False, self.BLOCKING_MESSAGES["missing_refs"]
-
-        # Check 5: Valid ID formats
-        invalid_ids = self._validate_ids(cr.requirement_refs)
-        if invalid_ids:
-            return False, self.BLOCKING_MESSAGES["invalid_id"].format(ids=invalid_ids)
-
-        # Check 6: Impact classification
-        impact_issues = self._check_impact(cr, proposed_files)
-        for issue in impact_issues:
-            if issue["severity"] == "BLOCKING":
-                return False, issue["message"]
-
-        # Check 7: Bugfix-specific rules (consumed from C-RULES §9)
-        if cr.change_type == "bugfix":
-            sw_reqs = [r for r in cr.requirement_refs if r.startswith("SW-REQ-")]
-            if not sw_reqs:
-                return False, "Bugfix CR has no SW-REQ linkage (C-RULES §9.1)"
-
-            if cr.status.value in ("implemented", "verified", "closed"):
-                if not cr.affected_verifications:
-                    return False, "Bugfix CR at IMPLEMENTED with no VerificationCases (C-RULES §9.4)"
-
-        return True, None
-
-    def link_cr_to_session(self, session_id: str, cr_id: str):
-        """Explicit CR binding (per user decision)."""
-        self.session_cr_map[session_id] = cr_id
-
-    def _validate_ids(self, refs: List[str]) -> List[str]:
-        """Validate ID formats."""
-        invalid = []
-        for ref in refs:
-            # Use C's validator
-            valid, _ = self.cr_service.validate_id_format(ref)
-            if not valid:
-                invalid.append(ref)
-        return invalid
-
-    def _check_impact(self, cr, proposed_files: List[str]) -> List[dict]:
-        """Check impact classification rules."""
-        issues = []
-
-        # Detect impact from refs
-        has_sys = any(r.startswith("SYS-REQ-") for r in cr.requirement_refs)
-        has_arch = any(r.startswith("SW-ARCH-") for r in cr.requirement_refs)
-        has_sw = any(r.startswith("SW-REQ-") for r in cr.requirement_refs)
-
-        # Rule: SYS impact must have SYS-REQ
-        if "SYS" in [i.value for i in cr.impact_level] and not has_sys:
-            issues.append({
-                "severity": "BLOCKING",
-                "message": self.BLOCKING_MESSAGES["sys_impact_no_sys_req"]
-            })
-
-        # Rule: ARCH impact must have SW-ARCH
-        if "ARCH" in [i.value for i in cr.impact_level] and not has_arch:
-            issues.append({
-                "severity": "BLOCKING",
-                "message": self.BLOCKING_MESSAGES["arch_impact_no_arch"]
-            })
-
-        # Rule: SW impact must have SW-REQ
-        if "SW" in [i.value for i in cr.impact_level] and not has_sw:
-            issues.append({
-                "severity": "BLOCKING",
-                "message": self.BLOCKING_MESSAGES["sw_impact_no_sw_req"]
-            })
-
-        return issues
+if not result["passed"]:
+    raise SystemExit(result["blocks"])
 ```
+
+> PR C keeps impact/ref helper logic inside `AccountableAgentService`; no separate `BIntervention` public class or CCC helper API is exposed.
 
 ### B.4 Validation
 
@@ -464,90 +368,12 @@ matrix-cli accountable evidence AC-58D0D7B9
 ```python
 # test_integration.py
 
-def test_b_blocks_without_cr():
-    intervention = BIntervention(cr_service)
-    allowed, msg = intervention.pre_flight_check("sess-123", ["src/auth.py"])
-    assert not allowed
-    assert "No CR linked" in msg
-
-def test_b_blocks_cr_not_approved():
-    # Setup: Create CR in DRAFT
-    cr = cr_service.create_cr(...)
-    intervention.link_cr_to_session("sess-123", cr.id)
-
-    allowed, msg = intervention.pre_flight_check("sess-123", ["src/auth.py"])
-    assert not allowed
-    assert "must be APPROVED or later" in msg
-
-def test_b_allows_approved_cr():
-    # Setup: Create and approve CR
-    cr = cr_service.create_cr(...)
-    cr_service.approve(cr.id, "lead@example.com")
-    intervention.link_cr_to_session("sess-123", cr.id)
-
-    allowed, msg = intervention.pre_flight_check("sess-123", ["src/auth.py"])
-    assert allowed
-    assert msg is None
-
-def test_b_blocks_bugfix_without_sw_req():
-    """Bugfix CR without SW-REQ should be blocked."""
-    cr = cr_service.create_cr(..., change_type="bugfix", requirement_refs=["SYS-REQ-001"])
-    cr_service.approve(cr.id, "lead@example.com")
-    intervention.link_cr_to_session("sess-123", cr.id)
-
-    allowed, msg = intervention.pre_flight_check("sess-123", ["src/auth.py"])
-    assert not allowed
-    assert "Bugfix CR has no SW-REQ linkage" in msg
-
-def test_b_blocks_bugfix_implemented_without_verifications():
-    """Bugfix CR at IMPLEMENTED without VerificationCases should be blocked."""
-    cr = cr_service.create_cr(..., change_type="bugfix", requirement_refs=["SW-REQ-001"])
-    cr_service.approve(cr.id, "lead@example.com")
-    cr_service.transition(cr.id, CRStatus.IN_PROGRESS)
-    cr_service.transition(cr.id, CRStatus.IMPLEMENTED)  # No affected_verifications
-    intervention.link_cr_to_session("sess-123", cr.id)
-
-    allowed, msg = intervention.pre_flight_check("sess-123", ["src/auth.py"])
-    assert not allowed
-    assert "no VerificationCases" in msg
-
-def test_b_evidence_includes_bugfix_context():
-    """B evidence should include bugfix_context when change_type=bugfix."""
-    ac = AccountableChange(
-        change_intent=ChangeIntent(description="Fix bug", change_type="bugfix", ...),
-        ...
-        requirement_linkage_type="existing_ref",
-        root_cause_category="impl_bug",
-        regression_verification_ids=["TC-SVT-012"],
-    )
-    evidence = generator.generate(ac, "changes/evidence/CR-001.json")
-    data = json.loads(evidence.read_text())
-    assert data["bugfix_context"]["change_type"] == "bugfix"
-    assert data["bugfix_context"]["requirement_linkage_type"] == "existing_ref"
-    assert data["bugfix_context"]["root_cause_category"] == "impl_bug"
-    assert "TC-SVT-012" in data["bugfix_context"]["regression_verification_ids"]
-```
-
-## F. Definition of Done
-
-**PR #3 hardening note:** This checklist is normative acceptance criteria for the Accountable Agent Layer slice. Unchecked items are intentional open merge gates unless backed by explicit proof in the PR.
-
-### F.1 B Slice Done When
-
-1. [ ] `accountable_agent/models.py` — All dataclasses implemented
-2. [ ] `accountable_agent/intervention.py` — Pre-flight blocking working
-3. [ ] `accountable_agent/validation.py` — Accountability validation working
-4. [ ] `accountable_agent/evidence.py` — Accountable Agent Layer evidence generation working
-5. [ ] `cli/commands/accountable.py` — All CLI commands working
-6. [ ] Unit tests: 40+ tests, >80% coverage
-7. [ ] Integration tests: Accountable Agent Layer + Compliance Change Control integration verified
-8. [ ] B imports from C (no duplication) verified by code review
-9. [ ] Blocking scenarios tested (5 worked examples)
-10. [ ] Evidence chain verified (Accountable Agent Layer to Compliance Change Control reference)
-11. [ ] Bugfix-specific block conditions tested (3 scenarios)
-12. [ ] Bugfix semantics consumed from C, not duplicated in B
-13. [ ] Evidence includes bugfix_context when change_type=bugfix
-
+# See canonical executable tests under `curaops/skills/accountable_agent/tests/`:
+# - pre-flight blocking
+# - register / validate / evidence
+# - draft/pre-approval CR evidence blocking
+# - bugfix metadata and regression VerificationCase rules
+# - referenced CCC evidence integrity
 ---
 
 ## G. Minimum Requirement Set

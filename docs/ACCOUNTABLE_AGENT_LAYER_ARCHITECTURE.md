@@ -103,29 +103,27 @@ AI-assisted code changes bypass the CR process:
 
 | Component | Location | Status |
 |-----------|----------|--------|
-| AccountableAgentService | `curaops/skills/accountable_agent/__init__.py` | **REVISION REQUIRED** — add active intervention |
-| AgentContext dataclass | Same file | **REVISION REQUIRED** |
-| ChangeIntent dataclass | Same file | **REVISION REQUIRED** |
-| Pre-flight check logic | Same file | **CREATE** — new |
+| AccountableAgentService | `curaops/skills/accountable_agent/__init__.py` | **PR C IMPLEMENTED** |
+| AgentContext dataclass | Same file | **PR C IMPLEMENTED** |
+| ChangeIntent dataclass | Same file | **PR C IMPLEMENTED** |
+| Pre-flight check logic | Same file / `matrix-cli accountable preflight` | **PR C IMPLEMENTED** |
 
 ### Exact Dependency Reuse from C
 
 **B MUST import from C (verified by code review):**
 
 ```python
-# B's __init__.py
+# B imports only exported CCC public API
 from curaops.skills.change_request import (
+    CRStatus,
     ChangeRequestService,
-    submit_change_request,
-    generate_cr_evidence,
-    validate_cr_traceability,
+    verify_evidence_file,
 )
 
 # B NEVER implements:
-# - CR creation logic (calls C)
-# - CR template enforcement (relies on C)
-# - Requirement ID validation (uses C)
-# - Evidence format for CRs (references C evidence)
+# - CR creation/state-machine logic (uses ChangeRequestService)
+# - CR validation semantics (uses ChangeRequestService.validate_cr)
+# - CR evidence format/integrity (references CCC evidence and verify_evidence_file)
 ```
 
 **B Evidence references C Evidence:**

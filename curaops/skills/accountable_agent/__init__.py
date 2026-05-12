@@ -812,6 +812,11 @@ class AccountableAgentService:
 
         # Validate first
         validation = self.validate_accountability(accountable_id)
+        if not validation["valid"]:
+            raise AccountabilityError(
+                "Cannot generate accountability evidence for invalid change: "
+                + "; ".join(validation.get("issues") or [validation.get("error", "unknown error")])
+            )
         cr = self._linked_cr_for(ac)
         referenced_c_evidence = self._referenced_c_evidence_for(ac)
         cr_evidence = referenced_c_evidence["cr_evidence_path"]
