@@ -489,10 +489,9 @@ class TestBugfixBlocking(_Base):
             requirement_refs=["SW-REQ-099"],
             change_type="bugfix",
         )
-        self.assertFalse(result["passed"])
-        self.assertTrue(
-            any("not APPROVED" in b for b in result["blocks"])
-        )
+        # C owns new_ref approval semantics; AAL must not add an extra hard block.
+        self.assertTrue(result["passed"])
+        self.assertFalse(any("not APPROVED" in b for b in result["blocks"]))
 
     def test_bugfix_existing_ref_not_blocked(self):
         """B-RULES §3.1: Bugfix with existing_ref does NOT trigger §9.3 block.

@@ -350,10 +350,7 @@ class AccountableAgentService:
         Returns:
             (blocks_list, warnings_list)
         """
-        from curaops.skills.change_request import (
-            ChangeType,
-            RequirementLinkageType,
-        )
+        from curaops.skills.change_request import ChangeType
 
         blocks: List[str] = []
         warnings: List[str] = []
@@ -371,12 +368,8 @@ class AccountableAgentService:
                 "Bugfix CR has no SW-REQ linkage (C-RULES §9.1)"
             )
 
-        # BLOCK: Bugfix new_ref SW-REQ not APPROVED (C-RULES §9.3)
-        if cr.requirement_linkage_type == RequirementLinkageType.NEW_REF:
-            blocks.append(
-                "Bugfix new SW-REQ not APPROVED (C-RULES §9.3)"
-            )
-
+        # C owns new_ref approval semantics; AAL only enforces that bugfix work
+        # carries SW-REQ linkage and delegates the rest to ChangeRequestService.
         # BLOCK: Bugfix at IMPLEMENTED+ without VerificationCases
         # (C-RULES §9.4)
         if cr.status.value in ("implemented", "verified", "closed"):
