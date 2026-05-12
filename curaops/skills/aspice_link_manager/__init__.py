@@ -319,16 +319,20 @@ class ASPICELinkManager:
                     f"Forward link {target_id} (refined_in) points to non-existent document"
                 )
 
-        # Verify backward links are reciprocal
+        # Verify backward links exist and are reciprocal
         for source_id in doc.refined_from:
             source_file = self.find_document(source_id)
-            if source_file:
-                source_doc = self.parse_document(source_file)
-                if source_doc and doc.id not in source_doc.refined_in:
-                    errors.append(
-                        f"Backward link {source_id} (refined_from) is not reciprocal: "
-                        f"{source_id} does not have {doc.id} in refined_in"
-                    )
+            if not source_file:
+                errors.append(
+                    f"Backward link {source_id} (refined_from) points to non-existent document"
+                )
+                continue
+            source_doc = self.parse_document(source_file)
+            if source_doc and doc.id not in source_doc.refined_in:
+                errors.append(
+                    f"Backward link {source_id} (refined_from) is not reciprocal: "
+                    f"{source_id} does not have {doc.id} in refined_in"
+                )
 
         # Verify forward links are reciprocal
         for target_id in doc.refined_in:
@@ -340,6 +344,16 @@ class ASPICELinkManager:
                         f"Forward link {target_id} (refined_in) is not reciprocal: "
                         f"{target_id} does not have {doc.id} in refined_from"
                     )
+
+        # Verify implementation paths exist when they are local relative paths.
+        for impl_path in doc.implemented_in:
+            candidate = Path(impl_path)
+            if not candidate.is_absolute():
+                candidate = self.root_dir / candidate
+            if not candidate.exists():
+                errors.append(
+                    f"Implementation link {impl_path} (implemented_in) points to non-existent file"
+                )
 
         # Verify validation links exist and are reciprocal.
         for test_id in doc.validated_by:

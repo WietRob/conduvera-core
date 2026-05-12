@@ -128,11 +128,11 @@ SW-REQ-001.md:
 ## Tests
 
 ```bash
-cd /home/roberto_schmidt/projects/matrix-os
+cd <matrix-os checkout>
 python -m pytest curaops/skills/aspice_link_manager/tests -v
 ```
 
-12 tests covering:
+14 tests covering:
 - Document parsing
 - Document finding
 - Link updates

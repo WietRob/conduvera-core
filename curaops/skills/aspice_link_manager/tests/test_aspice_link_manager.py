@@ -220,6 +220,36 @@ Description of {doc_id}.
         assert not result.success
         assert any("NON-EXISTENT" in e for e in result.errors)
 
+    def test_verify_links_missing_refined_from_target(self):
+        """Broken refined_from source IDs are reported."""
+        doc_file = self.test_dir / "requirements" / "SW-REQ-004.md"
+        self._create_doc(
+            doc_file,
+            "SW-REQ-004",
+            "Requirement with missing parent",
+            refined_from=["SYS-MISSING"],
+        )
+
+        errors = self.manager.verify_links(doc_file)
+
+        assert any("SYS-MISSING" in e for e in errors)
+        assert any("refined_from" in e for e in errors)
+
+    def test_verify_links_missing_implemented_in_file(self):
+        """Broken implemented_in paths are reported."""
+        doc_file = self.test_dir / "requirements" / "SW-REQ-005.md"
+        self._create_doc(
+            doc_file,
+            "SW-REQ-005",
+            "Requirement with missing implementation",
+            implemented_in=["src/missing.py"],
+        )
+
+        errors = self.manager.verify_links(doc_file)
+
+        assert any("src/missing.py" in e for e in errors)
+        assert any("implemented_in" in e for e in errors)
+
     def test_verify_links_missing_validation_target(self):
         """Validation links to missing test documents are reported."""
         doc_file = self.test_dir / "requirements" / "SW-REQ-002.md"
