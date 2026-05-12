@@ -100,11 +100,11 @@ def test_requirements_include_cli_runtime_dependencies() -> None:
     assert "typer" in _requirement_names()
 
 
-def test_pyproject_includes_matrix_os_app_runtime_dependencies() -> None:
-    """pyproject installs enough runtime dependencies for the Matrix OS app entry point."""
+def test_pyproject_includes_cli_runtime_dependencies() -> None:
+    """pyproject installs enough runtime dependencies for the matrix-cli entry point."""
     dependencies = _project_dependencies()
 
-    assert "requests" in dependencies
+    assert "typer" in dependencies
 
 
 def test_console_scripts_preserve_matrix_os_app_entrypoints() -> None:

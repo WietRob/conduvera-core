@@ -25,6 +25,11 @@ def version() -> None:
 @app.command("doctor")
 def doctor() -> None:
     """Run a minimal package/import smoke check."""
+    import curaops
+    import curaops.cli.main
+    import curaops.skills
+
+    _ = (curaops, curaops.cli.main, curaops.skills)
     console.print("matrix-cli baseline imports OK")
 
 
