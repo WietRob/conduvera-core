@@ -1,356 +1,69 @@
-# Matrix OS 🟢
+# Matrix OS
 
-A Matrix-themed Terminal User Interface (TUI) operating system for software development, built with Python and Textual.
+Matrix OS is currently a Python package and CLI-based harness/control plane for compliance-oriented agent workflows.
 
-```
-╔═══════════════════════════════════════════════════════════════╗
-║                                                               ║
-║   ███╗   ███╗ █████╗ ████████╗██████╗ ██╗██╗  ██╗           ║
-║   ████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗██║╚██╗██╔╝           ║
-║   ██╔████╔██║███████║   ██║   ██████╔╝██║ ╚███╔╝            ║
-║   ██║╚██╔╝██║██╔══██║   ██║   ██╔══██╗██║ ██╔██╗            ║
-║   ██║ ╚═╝ ██║██║  ██║   ██║   ██║  ██║██║██╔╝ ██╗           ║
-║   ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝           ║
-║                                                               ║
-║              Development Environment v0.1.0                   ║
-║                                                               ║
-╚═══════════════════════════════════════════════════════════════╝
-```
+Current merged scope:
 
-## 🎯 Features
+| Slice | Status | Responsibility |
+|---|---|---|
+| Foundation / Packaging / CLI Baseline | Merged | `curaops` package baseline and root CLI |
+| Compliance Change Control | Merged | Change Request lifecycle, validation, evidence, verification cases |
+| Accountable Agent Layer | Merged | AI-assisted change accountability gates and evidence |
+| ASPICE Support Utilities | Merged | Traceability conflict detection and link-management support |
 
-- **🎨 Matrix Digital Rain Effect** - Iconic falling green characters animation
-- **💻 Terminal Emulator** - Full PTY-based terminal with shell integration
-- **📁 File Browser** - Tree-view file navigation with icons
-- **📊 Process Monitor** - Real-time system process monitoring
-- **✏️ Code Editor** - Syntax highlighting for multiple languages
-- **🎨 Theming System** - Customizable Matrix green theme
-- **⚡ High Performance** - 30+ FPS smooth animations
-- **🔌 Plugin Architecture** - Extensible plugin system (coming soon)
+This repository is not yet a production-ready platform. UI/MCP/editor scaffolding and external adapter work are planned future slices.
 
-## 🚀 Quick Start
-
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/WietRob/matrix-os.git
-cd matrix-os
-```
-
-2. **Run Matrix OS**
-```bash
-./run.sh
-```
-
-The launcher script will automatically:
-- Check Python version (3.10+ required)
-- Create virtual environment
-- Install dependencies
-- Launch Matrix OS
-
-### Manual Installation
+## Current CLI
 
 ```bash
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run Matrix OS
-python3 -m src.core.app
+python3 -m curaops.cli.main --help
+python3 -m curaops.cli.main cr --help
+python3 -m curaops.cli.main accountable --help
+python3 -m curaops.cli.main aspice --help
 ```
 
-## 🎮 Usage
+Root command namespaces:
 
-### Launch Modes
+| Namespace | Purpose |
+|---|---|
+| `version` | Print CLI/package baseline version |
+| `doctor` | Run minimal package/import smoke check |
+| `cr` | Compliance Change Control |
+| `accountable` | Accountable Agent Layer |
+| `aspice` | ASPICE Support Utilities |
 
-```bash
-# Main Textual application (default)
-./run.sh textual
+## Authoritative docs
 
-# Rich-based demo (status dashboard)
-./run.sh rich
+Start here:
 
-# Curses-based demo (minimal dependencies)
-./run.sh curses
+1. `docs/MATRIX_OS_ARCHITECTURE.md`
+2. `docs/MATRIX_OS_MODULE_BOUNDARIES.md`
+3. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
+4. `docs/RELEASE_TRAIN_STATUS.md`
+5. `docs/DOCUMENTATION_INVENTORY.md`
 
-# Development mode with DevTools
-./run.sh dev
+Module-specific docs:
 
-# Run tests
-./run.sh test
-```
+| Module | Docs |
+|---|---|
+| Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_*` |
+| Accountable Agent Layer | `docs/ACCOUNTABLE_AGENT_LAYER_*` |
+| ASPICE Support Utilities | `curaops/skills/aspice_conflict_detector/SKILL.md`, `curaops/skills/aspice_link_manager/README.md` |
 
-### Keyboard Shortcuts
+## Historical docs
 
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl+Q` | Quit application |
-| `F1` | Toggle Matrix rain effect |
-| `Ctrl+T` | Open terminal |
-| `Ctrl+F` | Open file browser |
-| `Ctrl+P` | Open process monitor |
-| `F2` | Show help |
+Older TUI, UI, routing, and phase-plan documents remain in the repository as historical reference. They are not the current implementation map. See `docs/DOCUMENTATION_INVENTORY.md` for the deprecated-document map.
 
-## 📁 Project Structure
+## Release train
 
-```
-matrix-os/
-├── src/
-│   ├── core/
-│   │   ├── app.py              # Main application
-│   │   └── __init__.py
-│   │
-│   ├── ui/
-│   │   ├── widgets/
-│   │   │   ├── matrix_rain.py  # Matrix rain effect
-│   │   │   ├── terminal.py     # Terminal emulator
-│   │   │   ├── file_browser.py # File browser
-│   │   │   ├── process_monitor.py
-│   │   │   └── code_editor.py
-│   │   │
-│   │   ├── themes/
-│   │   │   └── matrix.tcss     # Matrix theme CSS
-│   │   │
-│   │   └── layouts/
-│   │
-│   ├── system/                 # System integrations
-│   ├── effects/                # Visual effects
-│   │
-│   └── utils/
-│       ├── config.py           # Configuration
-│       └── logger.py           # Logging
-│
-├── config/
-│   └── default.yaml            # Default configuration
-│
-├── examples/
-│   ├── rich_demo.py           # Rich library demo
-│   └── curses_demo.py         # Curses demo
-│
-├── tests/                      # Test suite
-├── docs/                       # Documentation
-│
-├── run.sh                      # Launcher script
-├── requirements.txt
-├── pyproject.toml
-└── README.md
-```
+Merged:
 
-## 🔧 Configuration
+- PR #4 Foundation / Packaging / CLI Baseline
+- PR #5 Compliance Change Control Core
+- PR #6 Accountable Agent Layer
+- PR #7 ASPICE Support Utilities
 
-Configuration is stored in YAML format at:
-- `~/.config/matrix-os/config.yaml` (user config)
-- `./config/default.yaml` (default config)
+Planned:
 
-### Example Configuration
-
-```yaml
-matrix_os:
-  display:
-    fps: 30
-    true_color: true
-
-  effects:
-    rain:
-      enabled: true
-      density: 0.05
-      speed_min: 0.5
-      speed_max: 2.0
-      char_set: "mixed"  # katakana, ascii, mixed
-
-  terminal:
-    shell: "/bin/bash"
-    scrollback: 10000
-
-  editor:
-    theme: "monokai"
-    tab_size: 4
-    syntax_highlighting: true
-```
-
-## 🎨 Widgets Overview
-
-### Matrix Rain Widget
-
-Iconic digital rain effect with customizable:
-- Character sets (Katakana, ASCII, mixed)
-- Falling speed
-- Density
-- Color gradients
-
-```python
-from src.ui.widgets.matrix_rain import MatrixRain
-
-rain = MatrixRain(
-    char_set="mixed",
-    fps=30,
-    speed_min=0.5,
-    speed_max=2.0
-)
-```
-
-### Terminal Emulator
-
-Full-featured terminal with:
-- PTY (pseudo-terminal) support
-- Shell integration
-- Command execution
-- Output streaming
-
-```python
-from src.ui.widgets.terminal import Terminal
-
-terminal = Terminal(shell="/bin/bash")
-terminal.execute_command("ls -la")
-```
-
-### File Browser
-
-Tree-view file navigation with:
-- Lazy loading
-- File type icons
-- Hidden files toggle
-- Directory expansion
-
-```python
-from src.ui.widgets.file_browser import FileBrowser
-
-browser = FileBrowser(root_path=Path.home())
-```
-
-### Process Monitor
-
-Real-time process monitoring:
-- CPU and memory usage
-- Process status
-- Sortable columns
-- Auto-refresh
-
-```python
-from src.ui.widgets.process_monitor import ProcessMonitor
-
-monitor = ProcessMonitor(refresh_interval=2.0)
-```
-
-## 🛠️ Development
-
-### Prerequisites
-
-- Python 3.10+
-- Terminal with true color support
-- Linux/macOS (Windows via WSL)
-
-### Development Setup
-
-```bash
-# Install dev dependencies
-pip install -r requirements.txt
-
-# Run in development mode
-./run.sh dev
-
-# Run tests
-pytest tests/ -v
-
-# Code formatting
-black src/ tests/
-
-# Type checking
-mypy src/
-```
-
-### Running Tests
-
-```bash
-# All tests
-pytest
-
-# With coverage
-pytest --cov=src tests/
-
-# Specific test
-pytest tests/test_widgets.py -v
-```
-
-## 🎯 Roadmap
-
-### v0.2.0 (In Progress)
-- [ ] Window management system
-- [ ] Event bus implementation
-- [ ] Plugin system
-- [ ] Multi-tab support
-
-### v0.3.0 (Planned)
-- [ ] Git integration
-- [ ] Debugger interface
-- [ ] Search functionality
-- [ ] Custom keybindings
-
-### v1.0.0 (Future)
-- [ ] Remote SSH support
-- [ ] Collaborative editing
-- [ ] Plugin marketplace
-- [ ] Theme customization UI
-
-## 📚 Documentation
-
-- [Analysis Document](ANALYSIS_MATRIX_OS_TUI.md) - Comprehensive technical analysis
-- [API Documentation](docs/API.md) - API reference (coming soon)
-- [User Guide](docs/USER_GUIDE.md) - Detailed user guide (coming soon)
-- [Plugin Development](docs/PLUGINS.md) - Plugin creation guide (coming soon)
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Textual](https://textual.textualize.io/) - Modern TUI framework
-- [Rich](https://rich.readthedocs.io/) - Beautiful terminal formatting
-- [The Matrix](https://en.wikipedia.org/wiki/The_Matrix) - Inspiration for the aesthetic
-
-## 🔗 Links
-
-- **GitHub**: [WietRob/matrix-os](https://github.com/WietRob/matrix-os)
-- **Issues**: [Report a bug](https://github.com/WietRob/matrix-os/issues)
-- **Textual Documentation**: [textual.textualize.io](https://textual.textualize.io/)
-
-## 📸 Screenshots
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Matrix OS - Development Environment                         │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  📁 Files          │  ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉ     │
-│  💻 Terminal       │  0123456789ABCDEFGHIJK                 │
-│  📊 Processes      │  ﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ           │
-│  ✏️ Editor         │                                         │
-│                    │  [Matrix Rain Effect]                  │
-│                    │                                         │
-│  ⚙️ Settings       │  System Status: ONLINE                 │
-│  ❓ Help           │  Terminal: 80x24                       │
-│                    │  Processes: 142                        │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-**Built with 💚 using Python and Textual**
-
-*"Welcome to the Matrix"*
+- PR F MCP / UI / Editor Scaffolding
+- Later focused adapter PRs for Safety Guard, agent-evidence-plane, CAS, failure-loop, peekxd, OpenCode plugin, and ai-router

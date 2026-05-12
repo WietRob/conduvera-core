@@ -1,5 +1,8 @@
 # Phase 1 UI Enhancements - Matrix OS
 
+> Deprecated: Historical reference only. This document does not describe the current merged Matrix OS architecture. Use `docs/MATRIX_OS_ARCHITECTURE.md`, `docs/MATRIX_OS_MODULE_BOUNDARIES.md`, `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`, and `docs/RELEASE_TRAIN_STATUS.md` as authoritative current docs.
+
+
 **Date:** 2025-11-13
 **Branch:** `claude/matrix-os-ui-design-comparison-011CV5dNAePdv7fjnr4ABzKW`
 **Status:** ✅ Completed
