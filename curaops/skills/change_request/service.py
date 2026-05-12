@@ -69,6 +69,7 @@ class ChangeRequestService:
         incident_id: Optional[str] = None,
         severity: Optional[str] = None,
         rollback_plan: Optional[str] = None,
+        post_mortem_date: Optional[datetime] = None,
     ) -> ChangeRequest:
         """Create a new CR in DRAFT (or EMERGENCY) state."""
         cr_id = f"CR-{self.persistence.next_cr_number():03d}"
@@ -96,6 +97,7 @@ class ChangeRequestService:
             incident_id=incident_id,
             severity=severity,
             rollback_plan=rollback_plan,
+            post_mortem_date=post_mortem_date,
         )
 
         self.persistence.save(cr)
@@ -153,8 +155,21 @@ class ChangeRequestService:
         self.persistence.save(cr)
         return cr
 
-    def submit_cr(self, cr_id: str, actor: str = "") -> ChangeRequest:
-        """Shortcut: DRAFT → SUBMITTED."""
+    def submit_cr(
+        self,
+        cr_id: str,
+        actor: str = "",
+        post_mortem_date: Optional[datetime] = None,
+        rollback_plan: Optional[str] = None,
+    ) -> ChangeRequest:
+        """Shortcut: DRAFT/EMERGENCY → SUBMITTED."""
+        if post_mortem_date is not None or rollback_plan is not None:
+            cr = self.persistence.load(cr_id)
+            if post_mortem_date is not None:
+                cr.post_mortem_date = post_mortem_date
+            if rollback_plan is not None:
+                cr.rollback_plan = rollback_plan
+            self.persistence.save(cr)
         return self.transition_cr(cr_id, "submitted", actor)
 
     def approve_cr(self, cr_id: str, reviewer: str, comment: str = "") -> ChangeRequest:
@@ -200,8 +215,16 @@ class ChangeRequestService:
         """Shortcut: IMPLEMENTED → VERIFIED."""
         return self.transition_cr(cr_id, "verified")
 
-    def close_cr(self, cr_id: str) -> ChangeRequest:
+    def close_cr(
+        self,
+        cr_id: str,
+        root_cause_category: Optional[str] = None,
+    ) -> ChangeRequest:
         """Shortcut: VERIFIED → CLOSED."""
+        if root_cause_category is not None:
+            cr = self.persistence.load(cr_id)
+            cr.root_cause_category = RootCauseCategory(root_cause_category)
+            self.persistence.save(cr)
         return self.transition_cr(cr_id, "closed")
 
     def revise_cr(self, cr_id: str) -> ChangeRequest:

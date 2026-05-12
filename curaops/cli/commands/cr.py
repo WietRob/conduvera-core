@@ -9,6 +9,7 @@ Commands: create, submit, approve, reject, status, list, evidence, validate
 from __future__ import annotations
 
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -43,6 +44,8 @@ def cr_create(
     emergency: bool = typer.Option(False, "--emergency", help="Create as EMERGENCY CR"),
     incident_id: Optional[str] = typer.Option(None, "--incident-id", help="Incident ID (emergency)"),
     severity: Optional[str] = typer.Option(None, "--severity", help="P0/P1/P2 (emergency)"),
+    rollback_plan: Optional[str] = typer.Option(None, "--rollback-plan", help="Rollback plan (emergency)"),
+    post_mortem_date: Optional[str] = typer.Option(None, "--post-mortem-date", help="Post-mortem date, ISO-8601 (emergency)"),
     requester: str = typer.Option("cli-user", "--requester", help="Requester identifier"),
 ):
     """Create a new Change Request in DRAFT (or EMERGENCY) state."""
@@ -66,6 +69,8 @@ def cr_create(
             is_emergency=emergency,
             incident_id=incident_id,
             severity=severity,
+            rollback_plan=rollback_plan,
+            post_mortem_date=_parse_datetime(post_mortem_date) if post_mortem_date else None,
         )
         console.print(f"[green]✅ Created {cr.id}[/green]")
         console.print(f"  Title:  {cr.title}")
@@ -81,9 +86,23 @@ def cr_create(
 @cr_app.command("submit")
 def cr_submit(
     cr_id: str = typer.Argument(..., help="CR ID to submit"),
+    post_mortem_date: Optional[str] = typer.Option(None, "--post-mortem-date", help="Post-mortem date, ISO-8601 (emergency)"),
+    rollback_plan: Optional[str] = typer.Option(None, "--rollback-plan", help="Rollback plan (emergency)"),
 ):
-    """Transition DRAFT → SUBMITTED."""
-    _transition(cr_id, "submitted")
+    """Transition DRAFT/EMERGENCY → SUBMITTED."""
+    from curaops.skills.change_request import ChangeRequestService
+
+    svc = _get_service()
+    try:
+        cr = svc.submit_cr(
+            cr_id,
+            post_mortem_date=_parse_datetime(post_mortem_date) if post_mortem_date else None,
+            rollback_plan=rollback_plan,
+        )
+        console.print(f"[green]✅ {cr.id} → {cr.status.value.upper()}[/green]")
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(_exit_code(e))
 
 
 @cr_app.command("approve")
@@ -173,9 +192,18 @@ def cr_verify(
 @cr_app.command("close")
 def cr_close(
     cr_id: str = typer.Argument(..., help="CR ID to close"),
+    root_cause_category: Optional[str] = typer.Option(None, "--root-cause-category", help="Bugfix root cause: impl_bug|req_ambiguous|req_missing|arch_bug|sys_bug"),
 ):
     """Transition VERIFIED → CLOSED."""
-    _transition(cr_id, "closed")
+    from curaops.skills.change_request import ChangeRequestService
+
+    svc = _get_service()
+    try:
+        cr = svc.close_cr(cr_id, root_cause_category=root_cause_category)
+        console.print(f"[green]✅ {cr.id} → {cr.status.value.upper()}[/green]")
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(_exit_code(e))
 
 
 @cr_app.command("revise")
@@ -400,6 +428,17 @@ def _get_service():
 def _get_verification_service():
     from curaops.skills.change_request import VerificationService
     return VerificationService(verification_dir=Path.cwd() / "verification")
+
+
+def _parse_datetime(value: str) -> datetime:
+    """Parse an ISO-8601 datetime string, accepting trailing Z for UTC."""
+    normalized = value.strip()
+    if normalized.endswith("Z"):
+        normalized = normalized[:-1] + "+00:00"
+    parsed = datetime.fromisoformat(normalized)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
 
 
 def _transition(cr_id: str, target: str):

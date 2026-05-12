@@ -272,9 +272,21 @@ class CRValidator:
         issues.extend(self.validate_impact_classification(cr))
         issues.extend(self.validate_derivation_obligations(cr))
 
-        # Bugfix rules are relevant from SUBMITTED onward
+        # Bugfix rules are relevant from SUBMITTED onward.  Closing needs a
+        # target-aware root-cause check because the persisted CR is still
+        # VERIFIED while transition validation runs.
         if target not in (CRStatus.DRAFT, CRStatus.EMERGENCY):
             issues.extend(self.validate_bugfix_rules(cr))
+            if (
+                target == CRStatus.CLOSED
+                and cr.change_type == ChangeType.BUGFIX
+                and cr.root_cause_category is None
+            ):
+                issues.append({
+                    "severity": "BLOCKING",
+                    "message": "Bugfix CR at CLOSED without root_cause_category",
+                    "rule": "C-RULES §8.1: root_cause_category documented for bugfix",
+                })
 
         # Emergency rules
         if cr.is_emergency:

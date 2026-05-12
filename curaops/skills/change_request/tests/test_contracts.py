@@ -259,7 +259,7 @@ class TestContract4BugfixExistingRef:
         # Evidence must be generated before verify (VERIFIED requires evidence_refs)
         svc.generate_evidence(cr.id)
         svc.verify_cr(cr.id)
-        svc.close_cr(cr.id)
+        svc.close_cr(cr.id, root_cause_category="impl_bug")
         assert svc.check_status(cr.id) == CRStatus.CLOSED
 
 
