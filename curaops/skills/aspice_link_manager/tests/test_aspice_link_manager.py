@@ -220,6 +220,39 @@ Description of {doc_id}.
         assert not result.success
         assert any("NON-EXISTENT" in e for e in result.errors)
 
+    def test_verify_links_missing_validation_target(self):
+        """Validation links to missing test documents are reported."""
+        doc_file = self.test_dir / "requirements" / "SW-REQ-002.md"
+        self._create_doc(
+            doc_file,
+            "SW-REQ-002",
+            "Requirement with missing validation",
+            validated_by=["TEST-MISSING"],
+        )
+
+        errors = self.manager.verify_links(doc_file)
+
+        assert any("TEST-MISSING" in e for e in errors)
+        assert any("validated_by" in e for e in errors)
+
+    def test_verify_links_validation_reciprocal(self):
+        """Validation links require reciprocal validates backlink."""
+        doc_file = self.test_dir / "requirements" / "SW-REQ-003.md"
+        self._create_doc(
+            doc_file,
+            "SW-REQ-003",
+            "Requirement with validation",
+            validated_by=["TEST-003"],
+        )
+        test_file = self.test_dir / "tests" / "TEST-003.md"
+        self._create_doc(test_file, "TEST-003", "Test without validates")
+
+        errors = self.manager.verify_links(doc_file)
+        assert any("not reciprocal" in e for e in errors)
+
+        self.manager._add_backlink(test_file, "SW-REQ-003", "validates")
+        assert self.manager.verify_links(doc_file) == []
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

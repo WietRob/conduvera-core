@@ -35,6 +35,7 @@ class Requirement:
     refined_in: List[str] = None
     validated_by: List[str] = None
     implemented_in: List[str] = None
+    validates: List[str] = None
     file_path: str = ""
 
     def __post_init__(self):
@@ -46,6 +47,8 @@ class Requirement:
             self.validated_by = []
         if self.implemented_in is None:
             self.implemented_in = []
+        if self.validates is None:
+            self.validates = []
 
 
 @dataclass
@@ -138,6 +141,7 @@ class ASPICELinkManager:
                 refined_in=data.get("refined_in", []),
                 validated_by=data.get("validated_by", []),
                 implemented_in=data.get("implemented_in", []),
+                validates=data.get("validates", []),
                 file_path=str(file_path),
             )
 
@@ -337,6 +341,21 @@ class ASPICELinkManager:
                         f"{target_id} does not have {doc.id} in refined_from"
                     )
 
+        # Verify validation links exist and are reciprocal.
+        for test_id in doc.validated_by:
+            test_file = self.find_document(test_id)
+            if not test_file:
+                errors.append(
+                    f"Validation link {test_id} (validated_by) points to non-existent document"
+                )
+                continue
+            test_doc = self.parse_document(test_file)
+            if test_doc and doc.id not in test_doc.validates:
+                errors.append(
+                    f"Validation link {test_id} (validated_by) is not reciprocal: "
+                    f"{test_id} does not have {doc.id} in validates"
+                )
+
         return errors
 
     def generate_traceability_matrix(self) -> Dict:
@@ -375,6 +394,7 @@ class ASPICELinkManager:
                 "refined_in": doc.refined_in,
                 "validated_by": doc.validated_by,
                 "implemented_in": doc.implemented_in,
+                "validates": doc.validates,
             }
 
         # Calculate coverage
