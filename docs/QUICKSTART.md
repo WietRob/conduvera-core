@@ -1,5 +1,8 @@
 # Matrix OS Quick Start Guide
 
+> Deprecated: Historical reference only. This document does not describe the current merged Matrix OS architecture. Use `docs/MATRIX_OS_ARCHITECTURE.md`, `docs/MATRIX_OS_MODULE_BOUNDARIES.md`, `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`, and `docs/RELEASE_TRAIN_STATUS.md` as authoritative current docs.
+
+
 ## Installation
 
 ### Prerequisites

@@ -1,5 +1,8 @@
 # Phase 6.1 - Routing Improvements: Quick Wins
 
+> Deprecated: Historical reference only. This document does not describe the current merged Matrix OS architecture. Use `docs/MATRIX_OS_ARCHITECTURE.md`, `docs/MATRIX_OS_MODULE_BOUNDARIES.md`, `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`, and `docs/RELEASE_TRAIN_STATUS.md` as authoritative current docs.
+
+
 **Status:** ✅ COMPLETE
 **Date:** 2025-11-15
 **Branch:** `claude/matrix-os-ui-design-comparison-011CV5dNAePdv7fjnr4ABzKW`
