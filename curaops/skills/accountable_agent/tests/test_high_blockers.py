@@ -7,7 +7,6 @@ Covers:
 - HIGH #3: pre_flight_check() session gate (B-RULES §5.1)
 """
 
-import json
 import shutil
 import unittest
 from pathlib import Path
@@ -18,17 +17,11 @@ from curaops.skills.accountable_agent import (
     ChangeIntent,
     AccountableChange,
     ACStatus,
-    AccountabilityError,
     MissingMandatoryLinkError,
     InvalidACTransitionError,
-    submit_change_request,
 )
 from curaops.skills.change_request import (
     ChangeRequestService,
-    CRStatus,
-    ChangeType,
-    RequirementLinkageType,
-    RootCauseCategory,
 )
 
 

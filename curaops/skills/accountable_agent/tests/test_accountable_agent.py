@@ -13,11 +13,8 @@ from curaops.skills.accountable_agent import (
     AgentContext,
     ChangeIntent,
     AccountableChange,
-    AccountabilityError,
     MissingMandatoryLinkError,
     create_accountable_change,
-    validate_accountable_change,
-    generate_accountability_report,
     submit_change_request,  # B wrapper over C core v2.0.0
 )
 
