@@ -49,7 +49,7 @@ AI-assisted code changes bypass the CR process:
 │  - Is there an APPROVED CR for this session?                           │
 │  - Is the agent accountable (registered)?                              │
 │  IF NOT APPROVED CR:                                                   │
-│    → BLOCK with error: "No approved CR. Run: curaops accountable setup"│
+│    → BLOCK with error: "No approved CR. Run: matrix-cli accountable setup"│
 └────────────────────────────────────────────────────────────────────────┘
                                     │ (if approved CR exists)
                                     ▼

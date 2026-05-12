@@ -119,8 +119,8 @@ class BIntervention:
     """Implements blocking logic from COMPLIANCE_CHANGE_CONTROL_RULES.md Section 9."""
 
     BLOCKING_MESSAGES = {
-        "no_cr": "No CR linked. Run: curaops cr link --cr <id>",
-        "cr_not_approved": "CR-{cr_id} status is {status}, must be APPROVED",
+        "no_cr": "No CR linked. Run: matrix-cli cr create/submit/approve, then pass --cr <id>",
+        "cr_not_approved": "CR-{cr_id} status is {status}, must be APPROVED or later",
         "missing_refs": "Missing requirement_refs (min 1 required)",
         "invalid_id": "Invalid requirement ID format: {ids}",
         "sys_impact_no_sys_req": "SYS impact detected but no SYS-REQ linked",
@@ -407,29 +407,27 @@ class ACEvidenceGenerator:
 ### D.1 B CLI Commands
 
 ```bash
-# Pre-flight
-curaops accountable pre-flight \
-  --session-id sess-abc-123 \
-  --files src/auth.py
-
-# CR linking (explicit, per decision)
-curaops cr link \
-  --session-id sess-abc-123 \
-  --cr CR-001
+# Pre-flight: consume an existing approved-or-later CCC CR and requirement refs
+matrix-cli accountable pre-flight \
+  --cr CR-001 \
+  --requirements SW-REQ-001 \
+  --type bugfix \
+  --impact SW,CODE
 
 # Register accountable change
-curaops accountable register \
-  --session-id sess-abc-123 \
+matrix-cli accountable register \
   --agent-id claude-code-001 \
-  --agent-name "Claude Code" \
+  --name "Claude Code" \
   --model claude-sonnet-4 \
   --description "Fix auth vulnerability" \
-  --change-type bugfix \
+  --type bugfix \
+  --cr CR-001 \
+  --requirements SW-REQ-001 \
   --files src/auth.py,tests/test_auth.py
 
-# Validation
-curaops accountable validate AC-58D0D7B9
-curaops accountable evidence AC-58D0D7B9
+# Validation and evidence
+matrix-cli accountable validate AC-58D0D7B9
+matrix-cli accountable evidence AC-58D0D7B9
 ```
 
 ### D.2 Exit Codes <!-- shared-interface: duplicated in C implementation contract -->
@@ -479,7 +477,7 @@ def test_b_blocks_cr_not_approved():
 
     allowed, msg = intervention.pre_flight_check("sess-123", ["src/auth.py"])
     assert not allowed
-    assert "must be APPROVED" in msg
+    assert "must be APPROVED or later" in msg
 
 def test_b_allows_approved_cr():
     # Setup: Create and approve CR

@@ -70,11 +70,11 @@ The Accountable Agent Layer provides active intervention for AI-assisted changes
 ### 3.1 Hard Block (Exit 1, Work Denied)
 
 ```python
-IF no CR linked to session:
-    BLOCK("No CR linked. Run: curaops cr link --session <id> --cr <cr-id>")
+IF no CR linked to the accountable change:
+    BLOCK("No CR linked. Create/approve a CCC CR, then pass --cr <cr-id> to matrix-cli accountable pre-flight/register")
 
-IF CR.status != APPROVED:
-    BLOCK(f"CR-{cr_id} status is {status}, must be APPROVED")
+IF CR.status is before APPROVED:
+    BLOCK(f"CR-{cr_id} status is {status}, must be APPROVED or later")
 
 IF requirement_refs empty:
     BLOCK("No requirement refs. Minimum SW-REQ required.")
@@ -177,16 +177,16 @@ requirement_refs: [String]  # Min 1, valid IDs
 
 ### 5.3 Validation (Before Review)
 
-**Trigger:** Developer runs `curaops accountable validate`
+**Trigger:** Developer runs `matrix-cli accountable validate`
 **Check:** All mandatory links present (cr_id, requirement_refs)
-**Check:** CR exists and is APPROVED
+**Check:** CR exists and is APPROVED or later
 **Check:** Requirement IDs valid
 **Pass:** Status → "validated"
 **Fail:** Status → "blocked" with specific reason
 
 ### 5.4 Evidence (At Completion)
 
-**Trigger:** Developer runs `curaops accountable evidence`
+**Trigger:** Developer runs `matrix-cli accountable evidence`
 **Action:** Generate accountability evidence JSON
 **Content:** AgentContext + ChangeIntent + CR reference + validation
 **Output:** changes/evidence/AC-XXX_YYYYMMDD_HHMMSS.json

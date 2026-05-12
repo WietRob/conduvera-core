@@ -27,10 +27,11 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Set
 
-# Import Compliance Change Control core services (v2.0.0)
-from curaops.skills.change_request import ChangeRequestService, CRStatus
-
-from curaops.skills.change_request.evidence import verify_evidence_file
+from curaops.skills.change_request import (
+    CRStatus,
+    ChangeRequestService,
+    verify_evidence_file,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

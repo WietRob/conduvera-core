@@ -127,7 +127,7 @@ AI AGENT initiates change intent
 **Check:** Is there an APPROVED CR linked to this session?
 **Checks:**
 - CR exists in changes/
-- CR.status = APPROVED
+- CR.status = APPROVED for pre-flight
 - Requirement refs present
 - ID formats valid
 - Impact classification consistent
@@ -163,9 +163,9 @@ AI AGENT initiates change intent
 └─────────────────────────┘
 ```
 
-**Trigger:** Developer runs `curaops accountable validate`
+**Trigger:** Developer runs `matrix-cli accountable validate`
 **Check:** All mandatory links present (cr_id, requirement_refs)
-**Check:** CR exists and is APPROVED
+**Check:** CR exists and is APPROVED or later
 **Check:** Requirement IDs valid
 **Pass:** Status → "validated"
 **Fail:** Status → "blocked" with specific reason
@@ -181,7 +181,7 @@ AI AGENT initiates change intent
 └─────────────────────────┘
 ```
 
-**Trigger:** Developer runs `curaops accountable evidence`
+**Trigger:** Developer runs `matrix-cli accountable evidence`
 **Action:** Generate accountability evidence JSON
 **Content:** AgentContext + ChangeIntent + CR reference + validation
 **Output:** changes/evidence/AC-XXX_YYYYMMDD_HHMMSS.json
@@ -194,8 +194,8 @@ AI AGENT initiates change intent
 
 | Condition | Block Message | Exit Code |
 |-----------|---------------|-----------|
-| No CR linked | "No CR linked. Run: curaops cr link --cr <id>" | 1 |
-| CR.status != APPROVED | "CR-{id} status is {status}, must be APPROVED" | 1 |
+| No CR linked | "No CR linked. Run: matrix-cli cr create/submit/approve, then pass --cr <id>" | 1 |
+| CR.status is before APPROVED | "CR-{id} status is {status}, must be APPROVED or later" | 1 |
 | Missing requirement_refs | "Missing requirement_refs (min 1 required)" | 1 |
 | Invalid ID format | "Invalid requirement ID format: {ids}" | 1 |
 | SYS impact but no SYS-REQ | "SYS impact detected but no SYS-REQ linked" | 1 |
@@ -310,30 +310,28 @@ If no blocks → status = "valid", proceed
 
 ```bash
 # Pre-flight check
-curaops accountable pre-flight \
-  --session-id sess-abc-123 \
-  --files src/auth.py
-
-# Link CR to session (explicit per decision)
-curaops cr link \
-  --session-id sess-abc-123 \
-  --cr CR-001
+matrix-cli accountable pre-flight \
+  --cr CR-001 \
+  --requirements SW-REQ-001 \
+  --type bugfix \
+  --impact SW,CODE
 
 # Register accountable change
-curaops accountable register \
-  --session-id sess-abc-123 \
+matrix-cli accountable register \
   --agent-id claude-code-001 \
-  --agent-name "Claude Code" \
+  --name "Claude Code" \
   --model claude-sonnet-4 \
   --description "Fix auth vulnerability" \
-  --change-type bugfix \
+  --type bugfix \
+  --cr CR-001 \
+  --requirements SW-REQ-001 \
   --files src/auth.py,tests/test_auth.py
 
 # Validate
-curaops accountable validate AC-58D0D7B9
+matrix-cli accountable validate AC-58D0D7B9
 
 # Generate evidence
-curaops accountable evidence AC-58D0D7B9
+matrix-cli accountable evidence AC-58D0D7B9
 ```
 
 ### G.2 Exit Codes
