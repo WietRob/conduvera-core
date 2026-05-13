@@ -1,6 +1,6 @@
 # Matrix OS Architecture
 
-Status: authoritative architecture overview for the merged Matrix OS state as of PR #7.
+Status: authoritative architecture overview for the merged Matrix OS state including the UI/MCP/editor scaffolding slice.
 
 Matrix OS is currently a Python package and CLI-based harness/control plane for compliance-oriented agent workflows. The merged runtime focuses on package structure, Change Request control, accountable AI-assisted change gates, and ASPICE traceability support.
 

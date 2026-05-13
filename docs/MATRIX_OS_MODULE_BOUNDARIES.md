@@ -1,6 +1,6 @@
 # Matrix OS Module Boundaries
 
-Status: authoritative boundary map for the merged Matrix OS state as of PR #7.
+Status: authoritative boundary map for the merged Matrix OS state including the UI/MCP/editor scaffolding slice.
 
 ## Boundary principles
 
@@ -50,7 +50,7 @@ Status: authoritative boundary map for the merged Matrix OS state as of PR #7.
 |---|---|
 | AAL re-implements CR approval or lifecycle rules | CCC is authoritative for CR lifecycle |
 | ASPICE utilities make CR approval decisions | ASPICE owns traceability support, not change control |
-| Docs claim UI/MCP/editor features are merged | They are planned scaffolding scope, not current runtime |
+| Docs claim UI/MCP/editor features are production-ready | Scaffolding is discovery-only and not a production dashboard/runtime |
 | Matrix OS absorbs Safety Guard or evidence-plane internals without adapter PR | External engines remain separately maintainable |
 | Docs use old internal shorthand labels or context letters | Public docs must use professional module names |
 | Docs advertise non-existent commands | CLI help is the source of truth |

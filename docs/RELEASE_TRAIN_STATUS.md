@@ -1,6 +1,6 @@
 # Matrix OS Release Train Status
 
-Status: authoritative release-train index after PR #7.
+Status: authoritative release-train index including the UI/MCP/editor scaffolding slice.
 
 This document tracks merged slices and planned next slices. It is not a product launch announcement and not a production-readiness claim.
 

@@ -1,6 +1,6 @@
 """Scaffolding manifest for Matrix OS UI/MCP/editor integration.
 
-The manifest is intentionally declarative. PR F records the ownership and launch
+The manifest is intentionally declarative. This scaffolding slice records the ownership and launch
 boundaries for the original Matrix UI and future MCP/editor surfaces without
 starting servers, adding adapters, or changing compliance/accountability logic.
 """

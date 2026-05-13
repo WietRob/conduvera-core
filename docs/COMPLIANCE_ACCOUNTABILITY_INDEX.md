@@ -1,6 +1,6 @@
 # Compliance and Accountability Index
 
-Status: authoritative documentation index for the merged Matrix OS compliance stack as of PR #7.
+Status: authoritative documentation index for the merged Matrix OS compliance stack and scaffolding surface.
 
 This document maps the currently merged compliance/accountability modules and their public entry points. It is descriptive only; it does not claim production readiness.
 

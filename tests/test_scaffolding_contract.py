@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_scaffolding_registers_expected_slices() -> None:
-    """PR F registers only the intended UI/MCP/editor scaffolding slices."""
+    """The manifest registers only the intended UI/MCP/editor scaffolding slices."""
 
     keys = {item.key for item in list_scaffolding_slices()}
 
@@ -40,7 +40,7 @@ def test_declared_existing_source_paths_are_present() -> None:
 
 
 def test_scaffolding_excludes_external_engine_integration() -> None:
-    """PR F scaffolding must not absorb future external engines."""
+    """Scaffolding must not absorb future external engines."""
 
     external_names = {
         "Safety Guard",
