@@ -1,6 +1,6 @@
 # Compliance and Accountability Index
 
-Status: authoritative documentation index for the merged Matrix OS compliance stack and scaffolding surface.
+Status: authoritative documentation index for the merged Matrix OS compliance stack, scaffolding surface, and evidence backbone.
 
 This document maps the currently merged compliance/accountability modules and their public entry points. It is descriptive only; it does not claim production readiness.
 
@@ -12,6 +12,7 @@ This document maps the currently merged compliance/accountability modules and th
 | Compliance Change Control | PR #5 | `curaops.skills.change_request` | `cr` | Change Request lifecycle, validation, evidence generation, verification-case management |
 | Accountable Agent Layer | PR #6 | `curaops.skills.accountable_agent` | `accountable` | AI-assisted change accountability gates, CR linkage validation, accountability evidence |
 | ASPICE Support Utilities | PR #7 | `curaops.skills.aspice_conflict_detector`, `curaops.skills.aspice_link_manager` | `aspice` | Traceability support, conflict detection, link updates, traceability matrix support |
+| Evidence Backbone Adapter Contract | Current | `curaops.evidence` | `evidence` | Harness-side evidence event envelope, local JSONL store, validation/summarization |
 
 ## CLI command index
 
@@ -22,6 +23,8 @@ python3 -m curaops.cli.main --help
 python3 -m curaops.cli.main cr --help
 python3 -m curaops.cli.main accountable --help
 python3 -m curaops.cli.main aspice --help
+python3 -m curaops.cli.main scaffold --help
+python3 -m curaops.cli.main evidence --help
 ```
 
 Root commands:
@@ -34,6 +37,7 @@ Root commands:
 | `accountable` | Accountable Agent Layer checks/evidence |
 | `aspice` | ASPICE Support Utilities |
 | `scaffold` | Matrix OS UI/MCP/editor scaffolding |
+| `evidence` | Matrix OS evidence backbone validation/summarization |
 
 Compliance Change Control commands:
 
@@ -81,12 +85,20 @@ Scaffolding commands:
 | `scaffold show mcp` | Show MCP contract-only scaffold details |
 | `scaffold show editor` | Show editor scaffold details and source-path checks |
 
+Evidence backbone commands:
+
+| Command | Purpose |
+|---|---|
+| `evidence validate` | Validate a Matrix OS evidence event JSONL stream |
+| `evidence summarize` | Summarize a valid Matrix OS evidence event JSONL stream |
+
 ## Authoritative module docs
 
 | Area | Authoritative docs |
 |---|---|
 | Overall architecture | `docs/MATRIX_OS_ARCHITECTURE.md`, `docs/MATRIX_OS_MODULE_BOUNDARIES.md` |
 | MCP / UI / Editor scaffolding | `docs/MATRIX_OS_SCAFFOLDING.md` |
+| Evidence backbone | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md` |
 | Release train | `docs/RELEASE_TRAIN_STATUS.md` |
 | Compliance/accountability index | this file |
 | Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md`, `docs/COMPLIANCE_CHANGE_CONTROL_PROCESS.md`, `docs/COMPLIANCE_CHANGE_CONTROL_RULES.md`, `docs/COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md` |
@@ -95,4 +107,4 @@ Scaffolding commands:
 
 ## Non-goals in the current merged stack
 
-The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding; it does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, or agent execution bridge. Safety Guard adapter work, agent-evidence-plane adapter work, CAS/failure-loop/peekxd/OpenCode/ai-router adapters, deployment hardening, and external compliance certification remain outside the current merged stack.
+The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding, and the evidence backbone is a local Matrix OS harness-side contract. It does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, agent execution bridge, production audit retention, cloud persistence, or external certification. Safety Guard adapter work, agent-evidence-plane adapter work, CAS/failure-loop/peekxd/OpenCode/ai-router adapters, and deployment hardening remain outside the current merged stack.

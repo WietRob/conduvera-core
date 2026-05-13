@@ -1,6 +1,6 @@
 # Matrix OS Module Boundaries
 
-Status: authoritative boundary map for the merged Matrix OS state including the UI/MCP/editor scaffolding slice.
+Status: authoritative boundary map for the merged Matrix OS state including UI/MCP/editor scaffolding and the evidence backbone contract.
 
 ## Boundary principles
 
@@ -22,6 +22,7 @@ Status: authoritative boundary map for the merged Matrix OS state including the 
 | Verification-case management | Yes | Compliance Change Control | Under `cr verification` |
 | AI-assisted change accountability gate | Yes | Accountable Agent Layer | Merged in PR #6 |
 | Accountable-change evidence | Yes | Accountable Agent Layer | References CCC evidence where relevant |
+| Evidence event envelope and JSONL store | Yes | Matrix OS Harness | Harness-side contract only; not agent-evidence-plane internals |
 | ASPICE conflict detection | Yes | ASPICE Support Utilities | Merged in PR #7 |
 | ASPICE bidirectional link support | Yes | ASPICE Support Utilities | Merged in PR #7 |
 | UI/dashboard | Scaffolding only | Matrix OS Harness | Original Matrix UI is preserved; no production dashboard claim |
@@ -43,6 +44,7 @@ Status: authoritative boundary map for the merged Matrix OS state including the 
 | ASPICE Support Utilities | Filesystem/project documents | ASPICE utilities should not require CCC/AAL runtime state |
 | Compliance Change Control | Foundation package/CLI baseline | CCC remains the CR lifecycle authority |
 | CLI commands | Corresponding module services | CLI should stay thin and not duplicate domain logic |
+| Future evidence adapters | `curaops.evidence.EvidenceProducer` protocol | Adapters may emit Matrix OS events but external projects remain separately maintainable |
 
 ## Disallowed coupling
 
@@ -52,6 +54,7 @@ Status: authoritative boundary map for the merged Matrix OS state including the 
 | ASPICE utilities make CR approval decisions | ASPICE owns traceability support, not change control |
 | Docs claim UI/MCP/editor features are production-ready | Scaffolding is discovery-only and not a production dashboard/runtime |
 | Matrix OS absorbs Safety Guard or evidence-plane internals without adapter PR | External engines remain separately maintainable |
+| Evidence backbone claims production audit retention/cloud persistence | Current store is local JSONL contract only |
 | Docs use old internal shorthand labels or context letters | Public docs must use professional module names |
 | Docs advertise non-existent commands | CLI help is the source of truth |
 
