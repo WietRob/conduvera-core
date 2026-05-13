@@ -22,6 +22,7 @@ The evidence backbone provides a common event envelope and JSONL store so future
 | Matrix OS event envelope | Matrix OS | merged harness-side contract |
 | Matrix OS JSONL store convention | Matrix OS | merged harness-side contract |
 | Matrix OS evidence CLI validate/summarize | Matrix OS | discovery/validation utility |
+| agent-evidence-plane thin adapter | Matrix OS | explicit translation boundary for a small supported event subset; no vendoring |
 | agent-evidence-plane | separate project | not copied, not vendored, not absorbed |
 | Safety Guard / CAS / failure-loop / peekxd / OpenCode / ai-router | external adapters | not integrated |
 
@@ -77,6 +78,10 @@ Current Matrix OS registry:
 | `accountable_change.evidence.generated` | Accountable Agent Layer |
 | `aspice.check.completed` | ASPICE Support Utilities |
 | `gate.run.completed` | Matrix OS harness/gates |
+| `agent.run.started` | agent-evidence-plane thin adapter |
+| `agent.run.completed` | agent-evidence-plane thin adapter |
+| `agent.run.failed` | agent-evidence-plane thin adapter |
+| `failure.observed` | agent-evidence-plane thin adapter |
 
 Future external producers must adapt into this registry through explicit PRs.
 
@@ -123,9 +128,10 @@ This protocol is only the Matrix OS harness-side boundary. It is not an external
 python3 -m curaops.cli.main evidence --help
 python3 -m curaops.cli.main evidence validate changes/evidence/events.jsonl
 python3 -m curaops.cli.main evidence summarize changes/evidence/events.jsonl
+python3 -m curaops.cli.main evidence convert-agent-plane agent-plane.jsonl matrix-os-events.jsonl
 ```
 
-The CLI validates and summarizes event streams. It does not start an MCP runtime, dashboard, external adapter, cloud persistence, or production audit service.
+The CLI validates, summarizes, and performs narrow explicit conversions into Matrix OS event streams. It does not start an MCP runtime, dashboard, broad external adapter, cloud persistence, or production audit service.
 
 ## Non-goals
 
@@ -135,6 +141,7 @@ This slice does not include:
 - cloud persistence
 - external compliance certification
 - agent-evidence-plane product merge
+- broad agent-evidence-plane adapter beyond `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
 - Safety Guard adapter
 - CAS adapter
 - failure-loop adapter

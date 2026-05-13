@@ -16,6 +16,15 @@ CORE_EVENT_TYPES = {
     "aspice.check.completed",
     "gate.run.completed",
 }
+ADAPTER_EVENT_TYPES = {
+    # Thin adapter event types imported from agent-evidence-plane. These are
+    # explicit Matrix OS adapter contract types, not an open-ended registry.
+    "agent.run.started",
+    "agent.run.completed",
+    "agent.run.failed",
+    "failure.observed",
+}
+EVENT_TYPES = CORE_EVENT_TYPES | ADAPTER_EVENT_TYPES
 SEVERITIES = {"debug", "info", "warning", "error", "critical"}
 
 
@@ -183,7 +192,7 @@ def _validate_event_dict(data: dict[str, Any]) -> None:
         raise ValidationError(f"unsupported schema_version: {data['schema_version']}")
     if not isinstance(data["event_id"], str) or not data["event_id"].startswith("mxev_"):
         raise ValidationError("event_id must start with mxev_")
-    if data["event_type"] not in CORE_EVENT_TYPES:
+    if data["event_type"] not in EVENT_TYPES:
         raise ValidationError(f"unsupported event_type: {data['event_type']}")
     if not isinstance(data["occurred_at"], str) or not data["occurred_at"].endswith("Z"):
         raise ValidationError("occurred_at must be UTC RFC3339 with Z suffix")

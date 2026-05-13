@@ -5,7 +5,9 @@ copy, or run the separately maintainable agent-evidence-plane project.
 """
 
 from curaops.evidence.contract import (
+    ADAPTER_EVENT_TYPES,
     CORE_EVENT_TYPES,
+    EVENT_TYPES,
     SCHEMA_VERSION,
     EventEnvelope,
     EvidenceProducer,
@@ -19,7 +21,9 @@ from curaops.evidence.store import (
 )
 
 __all__ = [
+    "ADAPTER_EVENT_TYPES",
     "CORE_EVENT_TYPES",
+    "EVENT_TYPES",
     "SCHEMA_VERSION",
     "EventEnvelope",
     "EvidenceProducer",
