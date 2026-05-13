@@ -68,6 +68,15 @@ def test_event_validation_rejects_hash_tampering() -> None:
         EventEnvelope.from_dict(event)
 
 
+def test_event_validation_rejects_missing_hash() -> None:
+    event = minimal_event().to_dict()
+    event.pop("event_hash")
+    event["integrity"].pop("hash")
+
+    with pytest.raises(ValidationError, match="missing required field: event_hash"):
+        EventEnvelope.from_dict(event)
+
+
 def test_jsonl_store_append_read_validate_and_summarize_roundtrip(tmp_path: Path) -> None:
     store_path = tmp_path / "matrix-os" / "events.jsonl"
     store = EvidenceStore(store_path)

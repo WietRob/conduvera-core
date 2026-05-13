@@ -204,11 +204,12 @@ def _validate_event_dict(data: dict[str, Any]) -> None:
         raise ValidationError("links must be a list")
     stored = data.get("event_hash")
     integrity = data.get("integrity")
-    if isinstance(integrity, dict) and integrity.get("hash"):
-        if stored and stored != integrity["hash"]:
-            raise ValidationError("event_hash mismatch with integrity.hash")
-        stored = integrity["hash"]
-    if stored:
-        computed = compute_event_hash(data)
-        if stored != computed:
-            raise ValidationError("event_hash mismatch")
+    if not isinstance(integrity, dict) or not integrity.get("hash"):
+        raise ValidationError("missing required field: event_hash")
+    if not stored:
+        raise ValidationError("missing required field: event_hash")
+    if stored != integrity["hash"]:
+        raise ValidationError("event_hash mismatch with integrity.hash")
+    computed = compute_event_hash(data)
+    if stored != computed:
+        raise ValidationError("event_hash mismatch")
