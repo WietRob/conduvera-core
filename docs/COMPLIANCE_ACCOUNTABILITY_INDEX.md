@@ -15,6 +15,7 @@ This document maps the currently merged compliance/accountability modules and th
 | Evidence Backbone Adapter Contract | Current | `curaops.evidence` | `evidence` | Harness-side evidence event envelope, local JSONL store, validation/summarization |
 | agent-evidence-plane Thin Adapter | Current | `curaops.evidence.adapters.agent_evidence_plane` | `evidence convert-agent-plane` | Convert a small supported external JSONL subset into Matrix OS events |
 | Safety Guard Adapter Contract | Current | `curaops.evidence.adapters.safety_guard` | `evidence convert-safety-guard` | Convert compatible trust/safety result JSONL into Matrix OS events |
+| Evidence Adapter Registry | Current | `curaops.evidence.adapters.registry` | `evidence adapters`, `evidence adapter show` | Discover registered evidence adapters and their explicit event/input contracts |
 
 ## CLI command index
 
@@ -91,6 +92,9 @@ Evidence backbone commands:
 
 | Command | Purpose |
 |---|---|
+| `evidence` | Evidence backbone utilities |
+| `evidence adapters` | List registered Matrix OS evidence adapters |
+| `evidence adapter show` | Show one evidence adapter descriptor; unknown ids fail closed |
 | `evidence validate` | Validate a Matrix OS evidence event JSONL stream |
 | `evidence summarize` | Summarize a valid Matrix OS evidence event JSONL stream |
 | `evidence convert-agent-plane` | Convert compatible agent-evidence-plane JSONL events into Matrix OS evidence JSONL |
@@ -105,6 +109,7 @@ Evidence backbone commands:
 | Evidence backbone | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md` |
 | agent-evidence-plane thin adapter | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md` |
 | Safety Guard adapter contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md` |
+| Evidence adapter registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md` |
 | Release train | `docs/RELEASE_TRAIN_STATUS.md` |
 | Compliance/accountability index | this file |
 | Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md`, `docs/COMPLIANCE_CHANGE_CONTROL_PROCESS.md`, `docs/COMPLIANCE_CHANGE_CONTROL_RULES.md`, `docs/COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md` |

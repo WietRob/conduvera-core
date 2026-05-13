@@ -10,10 +10,62 @@ from rich.table import Table
 
 from curaops.evidence import summarize_event_stream, validate_event_stream
 from curaops.evidence.adapters.agent_evidence_plane import convert_agent_evidence_plane_jsonl
+from curaops.evidence.adapters.registry import get_adapter_descriptor, list_adapter_descriptors
 from curaops.evidence.adapters.safety_guard import convert_safety_guard_jsonl
 
 console = Console(width=200)
 evidence_app = typer.Typer(help="Matrix OS evidence backbone contract utilities")
+adapter_app = typer.Typer(help="Evidence adapter registry discovery")
+evidence_app.add_typer(adapter_app, name="adapter")
+
+
+@evidence_app.command("adapters")
+def adapters():
+    """List registered Matrix OS evidence adapters."""
+
+    table = Table(title="Matrix OS Evidence Adapters")
+    table.add_column("Adapter ID")
+    table.add_column("Source Project")
+    table.add_column("Execution")
+    table.add_column("Production Status")
+    table.add_column("Events", justify="right")
+    for descriptor in list_adapter_descriptors():
+        table.add_row(
+            descriptor.adapter_id,
+            descriptor.source_project,
+            descriptor.execution_mode,
+            descriptor.production_status,
+            str(len(descriptor.supported_event_types)),
+        )
+    console.print(table)
+
+
+@adapter_app.command("show")
+def show_adapter(
+    adapter_id: str = typer.Argument(..., help="Evidence adapter id to inspect"),
+):
+    """Show one registered evidence adapter descriptor."""
+
+    try:
+        descriptor = get_adapter_descriptor(adapter_id)
+    except ValueError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    table = Table(title=f"Evidence Adapter: {descriptor.adapter_id}")
+    table.add_column("Field")
+    table.add_column("Value")
+    table.add_row("name", descriptor.name)
+    table.add_row("source_project", descriptor.source_project)
+    table.add_row("module_path", descriptor.module_path)
+    table.add_row("docs_path", descriptor.docs_path)
+    table.add_row("input_contract", descriptor.input_contract)
+    table.add_row("execution_mode", descriptor.execution_mode)
+    table.add_row("production_status", descriptor.production_status)
+    table.add_row("external_repo_policy", descriptor.external_repo_policy)
+    table.add_row("supported_event_types", "\n".join(descriptor.supported_event_types))
+    table.add_row("cli_commands", "\n".join(descriptor.cli_commands))
+    console.print(table)
 
 
 @evidence_app.command("validate")

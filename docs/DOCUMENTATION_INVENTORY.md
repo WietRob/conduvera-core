@@ -13,6 +13,7 @@ This inventory classifies existing and newly authoritative documents after PR #4
 | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md` | Authoritative evidence backbone contract | Create | Defines Matrix OS harness-side event envelope, local JSONL store, and adapter boundary without absorbing agent-evidence-plane |
 | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md` | Authoritative thin-adapter boundary | Create | Defines read-only local agent-evidence-plane translation without vendoring or product launch |
 | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md` | Authoritative Safety Guard adapter boundary | Create | Defines read-only trust/safety evidence translation without execution, shell interception, vendoring, or release creation |
+| `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md` | Authoritative evidence adapter registry | Create | Metadata-only index of registered adapters, event types, CLI commands, and execution/readiness boundaries |
 | `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md` | Authoritative command/module index | Create | Needed navigable index for compliance, accountability, ASPICE, and CLI commands |
 | `docs/RELEASE_TRAIN_STATUS.md` | Authoritative release status | Create | Needed current release-train status and next planned PRs |
 | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md` | Current CCC architecture | Keep | Describes merged PR #5 module; some historical API sketches remain non-authoritative next to current CLI/API docs |
@@ -45,9 +46,10 @@ This inventory classifies existing and newly authoritative documents after PR #4
 5. `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`
 6. `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
 7. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
-8. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
-9. `docs/RELEASE_TRAIN_STATUS.md`
-10. Module-specific docs for CCC, AAL, and ASPICE as needed
+8. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
+9. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
+10. `docs/RELEASE_TRAIN_STATUS.md`
+11. Module-specific docs for CCC, AAL, and ASPICE as needed
 
 ## Deprecated-document rule
 
