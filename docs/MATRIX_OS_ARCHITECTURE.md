@@ -25,7 +25,8 @@ Matrix OS Harness
 │   └── CLI: matrix CLI namespace `aspice`
 └── Evidence Backbone Adapter Contract
     ├── Package: curaops.evidence
-    ├── Store: changes/evidence/events.jsonl
+    ├── Package: curaops.evidence.adapters.agent_evidence_plane
+    ├── Package: curaops.evidence.adapters.safety_guard
     └── CLI: matrix CLI namespace `evidence`
 ```
 
@@ -37,7 +38,7 @@ Matrix OS Harness
 | Compliance Change Control | CR lifecycle, CR validation, CR evidence, verification-case management | Agent identity/accountability policy, ASPICE traceability graph semantics |
 | Accountable Agent Layer | AI-assisted change pre-flight, accountability registration, CR linkage checks, accountable evidence | CR lifecycle transitions, CR approval authority, ASPICE link maintenance |
 | ASPICE Support Utilities | Traceability conflict detection, requirement-to-file links, bidirectional link updates, traceability matrix support | CR lifecycle, AI-agent accountability, UI/MCP/editor integration |
-| Evidence Backbone Adapter Contract | Matrix OS event envelope, local JSONL store convention, validate/summarize utilities, adapter protocol | Production audit retention, cloud persistence, external adapter runtimes, agent-evidence-plane product ownership |
+| Evidence Backbone Adapter Contract | Matrix OS event envelope, local JSONL store convention, validate/summarize utilities, adapter protocol, thin agent-evidence-plane and Safety Guard evidence translations | Production audit retention, cloud persistence, external adapter runtimes, agent-evidence-plane product ownership, Safety Guard runtime/policy ownership |
 | External Engines / Adapters | Safety Guard, agent-evidence-plane, CAS, failure-loop, peekxd, OpenCode plugin, ai-router, other independently maintainable engines | Core ownership inside Matrix OS until adapter PRs define explicit contracts |
 
 ## Current data/control flow
@@ -47,7 +48,8 @@ Matrix OS Harness
 3. Accountable Agent Layer consumes approved-or-later CR state and enforces accountability gates for AI-assisted changes.
 4. ASPICE utilities support traceability documents and code/test links independently of CR approval and accountable-agent registration.
 5. Evidence backbone validates and summarizes Matrix OS harness-side evidence event streams.
-6. Future adapters may connect external engines into the harness, but those engines remain separately maintainable unless a later PR defines a narrow adapter contract.
+6. Thin evidence adapters translate compatible local agent-evidence-plane and Safety Guard JSONL into Matrix OS envelopes without owning external runtimes.
+7. Future adapters may connect external engines into the harness, but those engines remain separately maintainable unless a later focused change defines a narrow adapter contract.
 
 ## CLI surface
 
@@ -60,6 +62,8 @@ python3 -m curaops.cli.main accountable --help
 python3 -m curaops.cli.main aspice --help
 python3 -m curaops.cli.main scaffold --help
 python3 -m curaops.cli.main evidence --help
+python3 -m curaops.cli.main evidence convert-agent-plane --help
+python3 -m curaops.cli.main evidence convert-safety-guard --help
 ```
 
 Current root commands:
@@ -72,7 +76,7 @@ Current root commands:
 | `accountable` | Accountable Agent Layer |
 | `aspice` | ASPICE Support Utilities |
 | `scaffold` | UI/MCP/editor scaffolding manifest |
-| `evidence` | Evidence backbone validate/summarize utilities |
+| `evidence` | Evidence backbone validate/summarize/convert utilities |
 
 ## External and future modules
 
@@ -80,8 +84,8 @@ These names are tracked as future adapter candidates, not merged Matrix OS runti
 
 | Candidate | Current status |
 |---|---|
-| Safety Guard | External trust-funnel project; not merged into Matrix OS core |
-| agent-evidence-plane | Candidate evidence/audit sidecar; adapter work later |
+| Safety Guard | Standalone external trust-funnel project; Matrix OS owns only the evidence translation adapter |
+| agent-evidence-plane | Standalone evidence/audit sidecar candidate; Matrix OS owns only the thin evidence translation adapter |
 | CAS Extractor | Future adapter/capability candidate |
 | failure-driven-loop | Future adapter/capability candidate |
 | peekxd | Future adapter/capability candidate |
@@ -92,4 +96,4 @@ These names are tracked as future adapter candidates, not merged Matrix OS runti
 
 ## Production-readiness boundary
 
-The merged repository has passing local tests for the focused modules, but Matrix OS is not yet production-ready. Missing production gates include deployment model, security hardening, persistence/backups beyond local JSONL, audit-retention policy, migration strategy, external-adapter contracts, CI policy, and operational runbooks.
+The merged repository has passing local tests for the focused modules, but Matrix OS is not yet production-ready. Missing production gates include deployment model, security hardening, persistence/backups beyond local JSONL, audit-retention policy, migration strategy, broader external-adapter contracts, CI policy, and operational runbooks. The Safety Guard adapter is evidence translation only; it does not execute commands, intercept shells, or implement a production safety-policy engine.

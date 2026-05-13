@@ -23,6 +23,13 @@ ADAPTER_EVENT_TYPES = {
     "agent.run.completed",
     "agent.run.failed",
     "failure.observed",
+    # Thin adapter event types imported from CuraOps Safety Guard result
+    # fixtures/logs. These are explicit Matrix OS adapter contract types, not
+    # an open-ended safety-event registry.
+    "safety_guard.check.completed",
+    "safety_guard.action.allowed",
+    "safety_guard.action.blocked",
+    "safety_guard.approval.required",
 }
 EVENT_TYPES = CORE_EVENT_TYPES | ADAPTER_EVENT_TYPES
 SEVERITIES = {"debug", "info", "warning", "error", "critical"}
