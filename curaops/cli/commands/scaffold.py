@@ -20,7 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 @scaffold_app.command("status")
 def status() -> None:
-    """Show PR-F scaffolding status without launching runtime services."""
+    """Show scaffolding status without launching runtime services."""
 
     table = Table(title="Matrix OS Scaffolding Status")
     table.add_column("Slice")

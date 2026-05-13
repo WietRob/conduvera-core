@@ -98,7 +98,7 @@ SCAFFOLDING_SLICES: tuple[ScaffoldingSlice, ...] = (
 
 
 def list_scaffolding_slices() -> tuple[ScaffoldingSlice, ...]:
-    """Return all registered PR-F scaffolding slices."""
+    """Return all registered UI/MCP/editor scaffolding slices."""
 
     return SCAFFOLDING_SLICES
 
