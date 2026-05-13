@@ -32,7 +32,7 @@ Observed state:
 | Current structured JSON output | Not observed in code/docs; adapter starts from explicit JSONL fixtures/results |
 | Audit behavior | Blocked operations are logged best-effort to a local safety-guard log |
 
-The adapter does not call the CLI because this PR is evidence translation only and must not execute destructive commands or shell interception.
+The adapter does not call the CLI because this adapter is evidence translation only and must not execute destructive commands or shell interception.
 
 ## Safety Guard result fixture contract
 
