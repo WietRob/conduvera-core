@@ -10,6 +10,7 @@ from rich.table import Table
 
 from curaops.evidence import summarize_event_stream, validate_event_stream
 from curaops.evidence.adapters.agent_evidence_plane import convert_agent_evidence_plane_jsonl
+from curaops.evidence.adapters.safety_guard import convert_safety_guard_jsonl
 
 console = Console(width=200)
 evidence_app = typer.Typer(help="Matrix OS evidence backbone contract utilities")
@@ -44,6 +45,21 @@ def convert_agent_plane(
         console.print(f"[red]Agent evidence plane conversion failed[/red]: {exc}")
         raise typer.Exit(1) from exc
     console.print(f"[green]Converted {count} agent-evidence-plane events[/green] to {output_events}")
+
+
+@evidence_app.command("convert-safety-guard")
+def convert_safety_guard(
+    input_results: Path = typer.Argument(..., help="Safety Guard result JSONL input stream"),
+    output_events: Path = typer.Argument(..., help="Matrix OS JSONL output stream"),
+):
+    """Convert compatible Safety Guard results into Matrix OS events."""
+
+    try:
+        count = convert_safety_guard_jsonl(input_results, output_events)
+    except ValueError as exc:
+        console.print(f"[red]Safety Guard conversion failed[/red]: {exc}")
+        raise typer.Exit(1) from exc
+    console.print(f"[green]Converted {count} Safety Guard results[/green] to {output_events}")
 
 
 @evidence_app.command("summarize")

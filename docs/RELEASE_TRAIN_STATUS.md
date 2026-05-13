@@ -15,7 +15,8 @@ This document tracks merged slices and planned next slices. It is not a product 
 | #8 | Architecture / Documentation Index | Merged | `75144a0` | Module boundaries, release train, documentation inventory |
 | #9 | MCP / UI / Editor Scaffolding | Merged | `09a6ef9` | Original Matrix UI preserved, MCP/editor discovery-only scaffolding |
 | #10 | Evidence Backbone Adapter Contract | Merged | `41b060b` | Harness-side event envelope, JSONL store, validate/summarize CLI |
-| #11 | agent-evidence-plane Thin Adapter | Current | TBD | Translate a small supported external-event subset into Matrix OS events |
+| #11 | agent-evidence-plane Thin Adapter | Merged | `805adce` | Translate a small supported external-event subset into Matrix OS events |
+| #12 | Safety Guard Adapter Contract | Current | TBD | Translate Safety Guard trust/safety results into Matrix OS evidence events |
 
 Closed as superseded:
 
@@ -33,6 +34,7 @@ python3 -m curaops.cli.main aspice --help
 python3 -m curaops.cli.main scaffold --help
 python3 -m curaops.cli.main evidence --help
 python3 -m curaops.cli.main evidence convert-agent-plane --help
+python3 -m curaops.cli.main evidence convert-safety-guard --help
 ```
 
 ## Release train next slices
@@ -41,8 +43,9 @@ python3 -m curaops.cli.main evidence convert-agent-plane --help
 |---|---|---|---|
 | MCP / UI / Editor Scaffolding | Original Matrix UI preservation plus MCP/editor contracts | Merged | Scaffolding only; no server, adapter, or production dashboard claim |
 | Evidence Backbone Adapter Contract | Harness-side evidence event contract and local JSONL store | Merged | No production audit retention or cloud persistence |
-| agent-evidence-plane Thin Adapter | Translate compatible local agent-evidence-plane events into Matrix OS envelopes | Current | No vendoring, no external repo modification, no public launch |
-| Later adapter slices | Safety Guard adapter | Planned | Keep Safety Guard standalone; integrate through a narrow adapter only |
+| agent-evidence-plane Thin Adapter | Translate compatible local agent-evidence-plane events into Matrix OS envelopes | Merged | No vendoring, no external repo modification, no public launch |
+| Safety Guard Adapter Contract | Translate compatible local Safety Guard trust/safety results into Matrix OS envelopes | Current | No execution, shell interception, repo modification, release creation, or production policy claim |
+| Later adapter slices | Broader Safety Guard runtime integration | Planned | Only after evidence bridge proves the boundary; keep Safety Guard standalone |
 | Later adapter slices | Broader agent-evidence-plane adapter | Planned | Only after thin adapter proves the boundary; keep sidecar separate |
 | Later adapter slices | CAS Extractor adapter/capability | Planned | Define a focused contract before integration |
 | Later adapter slices | failure-driven-loop adapter/capability | Planned | Define a focused contract before integration |
@@ -67,6 +70,7 @@ python3 -m curaops.cli.main aspice --help
 python3 -m curaops.cli.main scaffold --help
 python3 -m curaops.cli.main evidence --help
 python3 -m curaops.cli.main evidence convert-agent-plane --help
+python3 -m curaops.cli.main evidence convert-safety-guard --help
 ```
 
 ## Not production-ready yet

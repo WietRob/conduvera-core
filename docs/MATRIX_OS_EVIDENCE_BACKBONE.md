@@ -82,6 +82,10 @@ Current Matrix OS registry:
 | `agent.run.completed` | agent-evidence-plane thin adapter |
 | `agent.run.failed` | agent-evidence-plane thin adapter |
 | `failure.observed` | agent-evidence-plane thin adapter |
+| `safety_guard.check.completed` | CuraOps Safety Guard adapter |
+| `safety_guard.action.allowed` | CuraOps Safety Guard adapter |
+| `safety_guard.action.blocked` | CuraOps Safety Guard adapter |
+| `safety_guard.approval.required` | CuraOps Safety Guard adapter |
 
 Future external producers must adapt into this registry through explicit PRs.
 
@@ -129,6 +133,7 @@ python3 -m curaops.cli.main evidence --help
 python3 -m curaops.cli.main evidence validate changes/evidence/events.jsonl
 python3 -m curaops.cli.main evidence summarize changes/evidence/events.jsonl
 python3 -m curaops.cli.main evidence convert-agent-plane agent-plane.jsonl matrix-os-events.jsonl
+python3 -m curaops.cli.main evidence convert-safety-guard safety-guard.jsonl matrix-os-events.jsonl
 ```
 
 The CLI validates, summarizes, and performs narrow explicit conversions into Matrix OS event streams. It does not start an MCP runtime, dashboard, broad external adapter, cloud persistence, or production audit service.
@@ -142,7 +147,8 @@ This slice does not include:
 - external compliance certification
 - agent-evidence-plane product merge
 - broad agent-evidence-plane adapter beyond `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
-- Safety Guard adapter
+- broad Safety Guard integration beyond `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
+- Safety Guard runtime/policy engine integration
 - CAS adapter
 - failure-loop adapter
 - peekxd adapter

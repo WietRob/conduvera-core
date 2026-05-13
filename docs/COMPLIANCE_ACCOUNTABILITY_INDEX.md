@@ -14,6 +14,7 @@ This document maps the currently merged compliance/accountability modules and th
 | ASPICE Support Utilities | PR #7 | `curaops.skills.aspice_conflict_detector`, `curaops.skills.aspice_link_manager` | `aspice` | Traceability support, conflict detection, link updates, traceability matrix support |
 | Evidence Backbone Adapter Contract | Current | `curaops.evidence` | `evidence` | Harness-side evidence event envelope, local JSONL store, validation/summarization |
 | agent-evidence-plane Thin Adapter | Current | `curaops.evidence.adapters.agent_evidence_plane` | `evidence convert-agent-plane` | Convert a small supported external JSONL subset into Matrix OS events |
+| Safety Guard Adapter Contract | Current | `curaops.evidence.adapters.safety_guard` | `evidence convert-safety-guard` | Convert compatible trust/safety result JSONL into Matrix OS events |
 
 ## CLI command index
 
@@ -93,6 +94,7 @@ Evidence backbone commands:
 | `evidence validate` | Validate a Matrix OS evidence event JSONL stream |
 | `evidence summarize` | Summarize a valid Matrix OS evidence event JSONL stream |
 | `evidence convert-agent-plane` | Convert compatible agent-evidence-plane JSONL events into Matrix OS evidence JSONL |
+| `evidence convert-safety-guard` | Convert compatible Safety Guard result JSONL into Matrix OS evidence JSONL |
 
 ## Authoritative module docs
 
@@ -102,6 +104,7 @@ Evidence backbone commands:
 | MCP / UI / Editor scaffolding | `docs/MATRIX_OS_SCAFFOLDING.md` |
 | Evidence backbone | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md` |
 | agent-evidence-plane thin adapter | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md` |
+| Safety Guard adapter contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md` |
 | Release train | `docs/RELEASE_TRAIN_STATUS.md` |
 | Compliance/accountability index | this file |
 | Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md`, `docs/COMPLIANCE_CHANGE_CONTROL_PROCESS.md`, `docs/COMPLIANCE_CHANGE_CONTROL_RULES.md`, `docs/COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md` |
@@ -110,4 +113,4 @@ Evidence backbone commands:
 
 ## Non-goals in the current merged stack
 
-The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding, and the evidence backbone plus agent-evidence-plane thin adapter are local Matrix OS harness-side contracts. It does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, agent execution bridge, production audit retention, cloud persistence, or external certification. Safety Guard adapter work, broad agent-evidence-plane product work, CAS/failure-loop/peekxd/OpenCode/ai-router adapters, and deployment hardening remain outside the current merged stack.
+The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding, and the evidence backbone plus thin external adapters are local Matrix OS harness-side contracts. It does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, agent execution bridge, shell interception, destructive command execution, production audit retention, cloud persistence, or external certification. Broad Safety Guard runtime work, broad agent-evidence-plane product work, CAS/failure-loop/peekxd/OpenCode/ai-router adapters, and deployment hardening remain outside the current merged stack.

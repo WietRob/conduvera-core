@@ -24,12 +24,13 @@ Status: authoritative boundary map for the merged Matrix OS state including UI/M
 | Accountable-change evidence | Yes | Accountable Agent Layer | References CCC evidence where relevant |
 | Evidence event envelope and JSONL store | Yes | Matrix OS Harness | Harness-side contract only; not agent-evidence-plane internals |
 | agent-evidence-plane thin adapter | Yes | Matrix OS Harness | Translation-only adapter for a small supported event subset; no vendoring or repo modification |
+| Safety Guard adapter contract | Yes | Matrix OS Harness | Translation-only trust/safety evidence bridge; no execution, shell interception, or repo modification |
 | ASPICE conflict detection | Yes | ASPICE Support Utilities | Merged in PR #7 |
 | ASPICE bidirectional link support | Yes | ASPICE Support Utilities | Merged in PR #7 |
 | UI/dashboard | Scaffolding only | Matrix OS Harness | Original Matrix UI is preserved; no production dashboard claim |
 | MCP server | Contract only | Matrix OS Harness | No server implementation yet |
 | Editor scaffolding | Scaffolding only | Matrix OS Harness | Existing code editor widget is preserved; no IDE plugin yet |
-| Safety Guard | No | External engine / later adapter | Remains standalone OSS trust funnel |
+| Safety Guard | No | External engine | Remains standalone OSS trust funnel; Matrix OS only owns the narrow evidence translation adapter |
 | agent-evidence-plane | No | External sidecar | Separately maintainable reference project; Matrix OS only owns the thin translation adapter |
 | CAS Extractor | No | Later adapter/capability | Not in merged core |
 | failure-driven-loop | No | Later adapter/capability | Not in merged core |
