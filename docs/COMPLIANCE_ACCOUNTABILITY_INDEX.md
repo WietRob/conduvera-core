@@ -95,4 +95,4 @@ Scaffolding commands:
 
 ## Non-goals in the current merged stack
 
-The merged stack is not a production certification claim. It does not yet include UI/MCP/editor scaffolding, Safety Guard adapter work, agent-evidence-plane adapter work, CAS/failure-loop/peekxd/OpenCode/ai-router adapters, deployment hardening, or external compliance certification.
+The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding; it does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, or agent execution bridge. Safety Guard adapter work, agent-evidence-plane adapter work, CAS/failure-loop/peekxd/OpenCode/ai-router adapters, deployment hardening, and external compliance certification remain outside the current merged stack.
