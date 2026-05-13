@@ -22,9 +22,12 @@ The evidence backbone provides a common event envelope and JSONL store so future
 | Matrix OS event envelope | Matrix OS | merged harness-side contract |
 | Matrix OS JSONL store convention | Matrix OS | merged harness-side contract |
 | Matrix OS evidence CLI validate/summarize | Matrix OS | discovery/validation utility |
+| Matrix OS evidence adapter registry | Matrix OS | metadata-only discovery index for registered adapters; no runtime execution |
 | agent-evidence-plane thin adapter | Matrix OS | explicit translation boundary for a small supported event subset; no vendoring |
+| Safety Guard adapter contract | Matrix OS | explicit translation boundary for compatible Safety Guard result JSONL; no runtime execution |
 | agent-evidence-plane | separate project | not copied, not vendored, not absorbed |
-| Safety Guard / CAS / failure-loop / peekxd / OpenCode / ai-router | external adapters | not integrated |
+| Safety Guard | separate project | not copied, not vendored, not executed |
+| CAS / failure-loop / peekxd / OpenCode / ai-router | external adapter candidates | not integrated |
 
 ## Event store path convention
 
@@ -130,13 +133,16 @@ This protocol is only the Matrix OS harness-side boundary. It is not an external
 
 ```text
 python3 -m curaops.cli.main evidence --help
+python3 -m curaops.cli.main evidence adapters
+python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
+python3 -m curaops.cli.main evidence adapter show safety-guard
 python3 -m curaops.cli.main evidence validate changes/evidence/events.jsonl
 python3 -m curaops.cli.main evidence summarize changes/evidence/events.jsonl
 python3 -m curaops.cli.main evidence convert-agent-plane agent-plane.jsonl matrix-os-events.jsonl
 python3 -m curaops.cli.main evidence convert-safety-guard safety-guard.jsonl matrix-os-events.jsonl
 ```
 
-The CLI validates, summarizes, and performs narrow explicit conversions into Matrix OS event streams. It does not start an MCP runtime, dashboard, broad external adapter, cloud persistence, or production audit service.
+The CLI discovers registered adapters, validates/summarizes streams, and performs narrow explicit conversions into Matrix OS event streams. It does not start an MCP runtime, dashboard, broad external adapter, cloud persistence, or production audit service.
 
 ## Non-goals
 

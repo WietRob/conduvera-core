@@ -11,9 +11,10 @@ Current merged scope:
 | Accountable Agent Layer | Merged | AI-assisted change accountability gates and evidence |
 | ASPICE Support Utilities | Merged | Traceability conflict detection and link-management support |
 | MCP / UI / Editor Scaffolding | Merged | Original Matrix UI preservation and discovery-only scaffolding |
-| Evidence Backbone Adapter Contract | Current | Harness-side event envelope, local JSONL store, validate/summarize CLI |
-| agent-evidence-plane Thin Adapter | Current | Convert a small supported external JSONL subset into Matrix OS evidence events |
-| Safety Guard Adapter Contract | Current | Convert compatible trust/safety result JSONL into Matrix OS evidence events |
+| Evidence Backbone Adapter Contract | Merged | Harness-side event envelope, local JSONL store, validate/summarize CLI |
+| agent-evidence-plane Thin Adapter | Merged | Convert a small supported external JSONL subset into Matrix OS evidence events |
+| Safety Guard Adapter Contract | Merged | Convert compatible trust/safety result JSONL into Matrix OS evidence events |
+| Evidence Adapter Registry | Current | Discover registered adapters and their explicit contracts |
 
 This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope.
 
@@ -26,6 +27,9 @@ python3 -m curaops.cli.main accountable --help
 python3 -m curaops.cli.main aspice --help
 python3 -m curaops.cli.main scaffold --help
 python3 -m curaops.cli.main evidence --help
+python3 -m curaops.cli.main evidence adapters
+python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
+python3 -m curaops.cli.main evidence adapter show safety-guard
 python3 -m curaops.cli.main evidence convert-agent-plane --help
 python3 -m curaops.cli.main evidence convert-safety-guard --help
 ```
@@ -40,7 +44,7 @@ Root command namespaces:
 | `accountable` | Accountable Agent Layer |
 | `aspice` | ASPICE Support Utilities |
 | `scaffold` | UI/MCP/editor scaffolding manifest |
-| `evidence` | Evidence backbone validate/summarize utilities |
+| `evidence` | Evidence backbone validate/summarize/convert/discovery utilities |
 
 ## Authoritative docs
 
@@ -53,8 +57,9 @@ Start here:
 5. `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`
 6. `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
 7. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
-8. `docs/RELEASE_TRAIN_STATUS.md`
-9. `docs/DOCUMENTATION_INVENTORY.md`
+8. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
+9. `docs/RELEASE_TRAIN_STATUS.md`
+10. `docs/DOCUMENTATION_INVENTORY.md`
 
 Module-specific docs:
 
@@ -66,6 +71,7 @@ Module-specific docs:
 | Evidence Backbone | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`, `curaops/evidence/` |
 | agent-evidence-plane Thin Adapter | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`, `curaops/evidence/adapters/agent_evidence_plane.py` |
 | Safety Guard Adapter Contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`, `curaops/evidence/adapters/safety_guard.py` |
+| Evidence Adapter Registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`, `curaops/evidence/adapters/registry.py` |
 
 ## Historical docs
 
@@ -82,11 +88,13 @@ Merged:
 - PR #8 Architecture / Documentation Index
 - PR #9 MCP / UI / Editor Scaffolding
 
+- PR #10 Evidence Backbone Adapter Contract
+- PR #11 agent-evidence-plane Thin Adapter
+- PR #12 Safety Guard Adapter Contract
+
 Current:
 
-- Evidence Backbone Adapter Contract: harness-side event contract; no agent-evidence-plane absorption
-- agent-evidence-plane Thin Adapter: translation-only adapter for a small supported event subset; no vendoring or external repo modification
-- Safety Guard Adapter Contract: translation-only trust/safety evidence bridge; no execution, shell interception, or external repo modification
+- Evidence Adapter Registry: metadata-only discovery for existing adapters; no runtime execution
 
 Planned:
 
