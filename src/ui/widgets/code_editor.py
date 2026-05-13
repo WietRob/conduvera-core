@@ -4,7 +4,7 @@ from textual.reactive import reactive
 from textual.message import Message
 from pathlib import Path
 from typing import Optional
-from pygments.lexers import get_lexer_for_filename, guess_lexer
+from pygments.lexers import get_lexer_for_filename
 from pygments.util import ClassNotFound
 from src.utils.logger import logger
 
@@ -18,7 +18,7 @@ class CodeEditor(TextArea):
 
     file_path = reactive(None)
     is_modified = reactive(False)
-    language = reactive("python")
+    display_language = reactive("python")
 
     DEFAULT_CSS = """
     CodeEditor {
@@ -60,11 +60,17 @@ class CodeEditor(TextArea):
         theme: str = "monokai",
         **kwargs,
     ) -> None:
+        # Textual's TextArea only accepts languages for which tree-sitter grammars
+        # are installed in the current environment. Keep the Matrix OS editor usable
+        # even when optional grammar packages are absent.
+        kwargs.setdefault("language", None)
         super().__init__(**kwargs)
         self.file_path = file_path
-        self.language = language
+        self.display_language = language
         self.theme_name = theme
         self.show_line_numbers = True
+
+        self._apply_text_area_language(language)
 
         if file_path:
             self.load_file(file_path)
@@ -112,7 +118,9 @@ class CodeEditor(TextArea):
             self.text = content
 
             # Detect language
-            self.language = self.detect_language(file_path)
+            detected_language = self.detect_language(file_path)
+            self.display_language = detected_language
+            self._apply_text_area_language(detected_language)
 
             # Update state
             self.file_path = file_path
@@ -121,7 +129,7 @@ class CodeEditor(TextArea):
             # Post message
             self.post_message(self.FileLoaded(file_path))
 
-            logger.info(f"Loaded file: {file_path} (language: {self.language})")
+            logger.info(f"Loaded file: {file_path} (language: {self.display_language})")
             return True
 
         except Exception as e:
@@ -170,6 +178,19 @@ class CodeEditor(TextArea):
         """Handle text changes."""
         self.is_modified = True
 
+    def _apply_text_area_language(self, language: str) -> None:
+        """Apply TextArea syntax highlighting when the grammar is available."""
+
+        try:
+            self.language = language
+        except Exception as e:
+            logger.warning(
+                "Syntax grammar unavailable for %s; using plain text editing: %s",
+                language,
+                e,
+            )
+            self.language = None
+
     def action_save(self) -> None:
         """Save current file."""
         if self.file_path:
@@ -207,7 +228,7 @@ class CodeEditor(TextArea):
             "lines": text.count("\n") + 1,
             "characters": len(text),
             "words": len(text.split()),
-            "language": self.language,
+            "language": self.display_language,
             "modified": self.is_modified,
             "file": str(self.file_path) if self.file_path else "Untitled",
         }

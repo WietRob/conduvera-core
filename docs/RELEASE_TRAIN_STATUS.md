@@ -26,20 +26,21 @@ python3 -m curaops.cli.main --help
 python3 -m curaops.cli.main cr --help
 python3 -m curaops.cli.main accountable --help
 python3 -m curaops.cli.main aspice --help
+python3 -m curaops.cli.main scaffold --help
 ```
 
-## Planned next PRs
+## Release train next slices
 
-| Planned PR | Scope | Boundary |
-|---|---|---|
-| Next scaffolding slice | MCP / UI / Editor Scaffolding | Add scaffolding separately from compliance, accountability, and ASPICE core |
-| Later adapter slices | Safety Guard adapter | Keep Safety Guard standalone; integrate through a narrow adapter only |
-| Later adapter slices | agent-evidence-plane adapter | Treat as reusable evidence/audit sidecar, not absorbed core |
-| Later adapter slices | CAS Extractor adapter/capability | Define a focused contract before integration |
-| Later adapter slices | failure-driven-loop adapter/capability | Define a focused contract before integration |
-| Later adapter slices | peekxd adapter/capability | Define a focused contract before integration |
-| Later adapter slices | OpenCode plugin adapter/capability | Define a focused contract before integration |
-| Later adapter slices | ai-router adapter/capability | Define a focused contract before integration |
+| Slice | Scope | Status | Boundary |
+|---|---|---|---|
+| MCP / UI / Editor Scaffolding | Original Matrix UI preservation plus MCP/editor contracts | In progress | Scaffolding only; no server, adapter, or production dashboard claim |
+| Later adapter slices | Safety Guard adapter | Planned | Keep Safety Guard standalone; integrate through a narrow adapter only |
+| Later adapter slices | agent-evidence-plane adapter | Planned | Treat as reusable evidence/audit sidecar, not absorbed core |
+| Later adapter slices | CAS Extractor adapter/capability | Planned | Define a focused contract before integration |
+| Later adapter slices | failure-driven-loop adapter/capability | Planned | Define a focused contract before integration |
+| Later adapter slices | peekxd adapter/capability | Planned | Define a focused contract before integration |
+| Later adapter slices | OpenCode plugin adapter/capability | Planned | Define a focused contract before integration |
+| Later adapter slices | ai-router adapter/capability | Planned | Define a focused contract before integration |
 
 ## Current local verification set
 
@@ -55,6 +56,7 @@ python3 -m curaops.cli.main --help
 python3 -m curaops.cli.main cr --help
 python3 -m curaops.cli.main accountable --help
 python3 -m curaops.cli.main aspice --help
+python3 -m curaops.cli.main scaffold --help
 ```
 
 ## Not production-ready yet

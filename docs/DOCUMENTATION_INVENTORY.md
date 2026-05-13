@@ -9,6 +9,7 @@ This inventory classifies existing and newly authoritative documents after PR #4
 | `README.md` | Entry point | Update | Previous README described an older TUI-centric state; now points to the merged package/CLI harness docs |
 | `docs/MATRIX_OS_ARCHITECTURE.md` | Authoritative overview | Create | Needed top-level architecture aligned to merged PR #4-#7 state |
 | `docs/MATRIX_OS_MODULE_BOUNDARIES.md` | Authoritative boundary map | Create | Needed clear ownership split for harness, CCC, AAL, ASPICE, and external engines |
+| `docs/MATRIX_OS_SCAFFOLDING.md` | Authoritative scaffolding contract | Create | Preserves original Matrix UI and defines MCP/editor scaffolding boundaries without implementation claims |
 | `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md` | Authoritative command/module index | Create | Needed navigable index for compliance, accountability, ASPICE, and CLI commands |
 | `docs/RELEASE_TRAIN_STATUS.md` | Authoritative release status | Create | Needed current release-train status and next planned PRs |
 | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md` | Current CCC architecture | Keep | Describes merged PR #5 module; some historical API sketches remain non-authoritative next to current CLI/API docs |
@@ -37,9 +38,10 @@ This inventory classifies existing and newly authoritative documents after PR #4
 1. `README.md`
 2. `docs/MATRIX_OS_ARCHITECTURE.md`
 3. `docs/MATRIX_OS_MODULE_BOUNDARIES.md`
-4. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
-5. `docs/RELEASE_TRAIN_STATUS.md`
-6. Module-specific docs for CCC, AAL, and ASPICE as needed
+4. `docs/MATRIX_OS_SCAFFOLDING.md`
+5. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
+6. `docs/RELEASE_TRAIN_STATUS.md`
+7. Module-specific docs for CCC, AAL, and ASPICE as needed
 
 ## Deprecated-document rule
 

@@ -32,7 +32,8 @@ Root commands:
 | `doctor` | Run minimal package/import smoke check |
 | `cr` | Compliance Change Control lifecycle |
 | `accountable` | Accountable Agent Layer checks/evidence |
-| `aspice` | ASPICE support utilities |
+| `aspice` | ASPICE Support Utilities |
+| `scaffold` | Matrix OS UI/MCP/editor scaffolding |
 
 Compliance Change Control commands:
 
@@ -71,11 +72,21 @@ ASPICE Support Utility commands:
 | `aspice link` | Link a requirement document to an implementation file |
 | `aspice update-all` | Update bidirectional traceability links for Markdown documents |
 
+Scaffolding commands:
+
+| Command | Purpose |
+|---|---|
+| `scaffold status` | Show UI/MCP/editor scaffolding status without launching runtime services |
+| `scaffold show ui` | Show original Matrix UI scaffold details and source-path checks |
+| `scaffold show mcp` | Show MCP contract-only scaffold details |
+| `scaffold show editor` | Show editor scaffold details and source-path checks |
+
 ## Authoritative module docs
 
 | Area | Authoritative docs |
 |---|---|
 | Overall architecture | `docs/MATRIX_OS_ARCHITECTURE.md`, `docs/MATRIX_OS_MODULE_BOUNDARIES.md` |
+| MCP / UI / Editor scaffolding | `docs/MATRIX_OS_SCAFFOLDING.md` |
 | Release train | `docs/RELEASE_TRAIN_STATUS.md` |
 | Compliance/accountability index | this file |
 | Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md`, `docs/COMPLIANCE_CHANGE_CONTROL_PROCESS.md`, `docs/COMPLIANCE_CHANGE_CONTROL_RULES.md`, `docs/COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md` |
