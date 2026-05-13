@@ -1,6 +1,6 @@
 # Compliance and Accountability Index
 
-Status: authoritative documentation index for the merged Matrix OS compliance stack as of PR #7.
+Status: authoritative documentation index for the merged Matrix OS compliance stack and scaffolding surface.
 
 This document maps the currently merged compliance/accountability modules and their public entry points. It is descriptive only; it does not claim production readiness.
 
@@ -32,7 +32,8 @@ Root commands:
 | `doctor` | Run minimal package/import smoke check |
 | `cr` | Compliance Change Control lifecycle |
 | `accountable` | Accountable Agent Layer checks/evidence |
-| `aspice` | ASPICE support utilities |
+| `aspice` | ASPICE Support Utilities |
+| `scaffold` | Matrix OS UI/MCP/editor scaffolding |
 
 Compliance Change Control commands:
 
@@ -71,11 +72,21 @@ ASPICE Support Utility commands:
 | `aspice link` | Link a requirement document to an implementation file |
 | `aspice update-all` | Update bidirectional traceability links for Markdown documents |
 
+Scaffolding commands:
+
+| Command | Purpose |
+|---|---|
+| `scaffold status` | Show UI/MCP/editor scaffolding status without launching runtime services |
+| `scaffold show ui` | Show original Matrix UI scaffold details and source-path checks |
+| `scaffold show mcp` | Show MCP contract-only scaffold details |
+| `scaffold show editor` | Show editor scaffold details and source-path checks |
+
 ## Authoritative module docs
 
 | Area | Authoritative docs |
 |---|---|
 | Overall architecture | `docs/MATRIX_OS_ARCHITECTURE.md`, `docs/MATRIX_OS_MODULE_BOUNDARIES.md` |
+| MCP / UI / Editor scaffolding | `docs/MATRIX_OS_SCAFFOLDING.md` |
 | Release train | `docs/RELEASE_TRAIN_STATUS.md` |
 | Compliance/accountability index | this file |
 | Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md`, `docs/COMPLIANCE_CHANGE_CONTROL_PROCESS.md`, `docs/COMPLIANCE_CHANGE_CONTROL_RULES.md`, `docs/COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md` |
@@ -84,4 +95,4 @@ ASPICE Support Utility commands:
 
 ## Non-goals in the current merged stack
 
-The merged stack is not a production certification claim. It does not yet include UI/MCP/editor scaffolding, Safety Guard adapter work, agent-evidence-plane adapter work, CAS/failure-loop/peekxd/OpenCode/ai-router adapters, deployment hardening, or external compliance certification.
+The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding; it does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, or agent execution bridge. Safety Guard adapter work, agent-evidence-plane adapter work, CAS/failure-loop/peekxd/OpenCode/ai-router adapters, deployment hardening, and external compliance certification remain outside the current merged stack.

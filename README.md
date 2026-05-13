@@ -11,7 +11,7 @@ Current merged scope:
 | Accountable Agent Layer | Merged | AI-assisted change accountability gates and evidence |
 | ASPICE Support Utilities | Merged | Traceability conflict detection and link-management support |
 
-This repository is not yet a production-ready platform. UI/MCP/editor scaffolding and external adapter work are planned future slices.
+This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, and external adapter work remains future scope.
 
 ## Current CLI
 
@@ -20,6 +20,7 @@ python3 -m curaops.cli.main --help
 python3 -m curaops.cli.main cr --help
 python3 -m curaops.cli.main accountable --help
 python3 -m curaops.cli.main aspice --help
+python3 -m curaops.cli.main scaffold --help
 ```
 
 Root command namespaces:
@@ -31,6 +32,7 @@ Root command namespaces:
 | `cr` | Compliance Change Control |
 | `accountable` | Accountable Agent Layer |
 | `aspice` | ASPICE Support Utilities |
+| `scaffold` | UI/MCP/editor scaffolding manifest |
 
 ## Authoritative docs
 
@@ -39,8 +41,9 @@ Start here:
 1. `docs/MATRIX_OS_ARCHITECTURE.md`
 2. `docs/MATRIX_OS_MODULE_BOUNDARIES.md`
 3. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
-4. `docs/RELEASE_TRAIN_STATUS.md`
-5. `docs/DOCUMENTATION_INVENTORY.md`
+4. `docs/MATRIX_OS_SCAFFOLDING.md`
+5. `docs/RELEASE_TRAIN_STATUS.md`
+6. `docs/DOCUMENTATION_INVENTORY.md`
 
 Module-specific docs:
 
@@ -65,5 +68,5 @@ Merged:
 
 Planned:
 
-- MCP / UI / Editor Scaffolding slice
+- MCP / UI / Editor Scaffolding slice: started as scaffolding; original Matrix UI preserved; no MCP server or production dashboard claim
 - Later focused adapter slices for Safety Guard, agent-evidence-plane, CAS, failure-loop, peekxd, OpenCode plugin, and ai-router

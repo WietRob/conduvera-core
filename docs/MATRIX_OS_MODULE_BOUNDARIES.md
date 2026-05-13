@@ -1,6 +1,6 @@
 # Matrix OS Module Boundaries
 
-Status: authoritative boundary map for the merged Matrix OS state as of PR #7.
+Status: authoritative boundary map for the merged Matrix OS state including the UI/MCP/editor scaffolding slice.
 
 ## Boundary principles
 
@@ -24,9 +24,9 @@ Status: authoritative boundary map for the merged Matrix OS state as of PR #7.
 | Accountable-change evidence | Yes | Accountable Agent Layer | References CCC evidence where relevant |
 | ASPICE conflict detection | Yes | ASPICE Support Utilities | Merged in PR #7 |
 | ASPICE bidirectional link support | Yes | ASPICE Support Utilities | Merged in PR #7 |
-| UI/dashboard | No | Planned scaffolding slice | Do not describe as merged runtime |
-| MCP server | No | Planned scaffolding slice | Do not describe as merged runtime |
-| Editor scaffolding | No | Planned scaffolding slice | Do not describe as merged runtime |
+| UI/dashboard | Scaffolding only | Matrix OS Harness | Original Matrix UI is preserved; no production dashboard claim |
+| MCP server | Contract only | Matrix OS Harness | No server implementation yet |
+| Editor scaffolding | Scaffolding only | Matrix OS Harness | Existing code editor widget is preserved; no IDE plugin yet |
 | Safety Guard | No | External engine / later adapter | Remains standalone OSS trust funnel |
 | agent-evidence-plane | No | External sidecar / later adapter | Candidate reusable evidence/audit sidecar |
 | CAS Extractor | No | Later adapter/capability | Not in merged core |
@@ -50,7 +50,7 @@ Status: authoritative boundary map for the merged Matrix OS state as of PR #7.
 |---|---|
 | AAL re-implements CR approval or lifecycle rules | CCC is authoritative for CR lifecycle |
 | ASPICE utilities make CR approval decisions | ASPICE owns traceability support, not change control |
-| Docs claim UI/MCP/editor features are merged | They are planned scaffolding scope, not current runtime |
+| Docs claim UI/MCP/editor features are production-ready | Scaffolding is discovery-only and not a production dashboard/runtime |
 | Matrix OS absorbs Safety Guard or evidence-plane internals without adapter PR | External engines remain separately maintainable |
 | Docs use old internal shorthand labels or context letters | Public docs must use professional module names |
 | Docs advertise non-existent commands | CLI help is the source of truth |
