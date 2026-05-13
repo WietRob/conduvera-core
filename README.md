@@ -12,8 +12,9 @@ Current merged scope:
 | ASPICE Support Utilities | Merged | Traceability conflict detection and link-management support |
 | MCP / UI / Editor Scaffolding | Merged | Original Matrix UI preservation and discovery-only scaffolding |
 | Evidence Backbone Adapter Contract | Current | Harness-side event envelope, local JSONL store, validate/summarize CLI |
+| agent-evidence-plane Thin Adapter | Current | Convert a small supported external JSONL subset into Matrix OS evidence events |
 
-This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone is a local harness-side contract, and external adapter work remains future scope.
+This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone and agent-evidence-plane adapter are local harness-side contracts, and broad external adapter work remains future scope.
 
 ## Current CLI
 
@@ -24,6 +25,7 @@ python3 -m curaops.cli.main accountable --help
 python3 -m curaops.cli.main aspice --help
 python3 -m curaops.cli.main scaffold --help
 python3 -m curaops.cli.main evidence --help
+python3 -m curaops.cli.main evidence convert-agent-plane --help
 ```
 
 Root command namespaces:
@@ -47,8 +49,9 @@ Start here:
 3. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
 4. `docs/MATRIX_OS_SCAFFOLDING.md`
 5. `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`
-6. `docs/RELEASE_TRAIN_STATUS.md`
-7. `docs/DOCUMENTATION_INVENTORY.md`
+6. `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
+7. `docs/RELEASE_TRAIN_STATUS.md`
+8. `docs/DOCUMENTATION_INVENTORY.md`
 
 Module-specific docs:
 
@@ -58,6 +61,7 @@ Module-specific docs:
 | Accountable Agent Layer | `docs/ACCOUNTABLE_AGENT_LAYER_*` |
 | ASPICE Support Utilities | `curaops/skills/aspice_conflict_detector/SKILL.md`, `curaops/skills/aspice_link_manager/README.md` |
 | Evidence Backbone | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`, `curaops/evidence/` |
+| agent-evidence-plane Thin Adapter | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`, `curaops/evidence/adapters/agent_evidence_plane.py` |
 
 ## Historical docs
 
@@ -77,6 +81,7 @@ Merged:
 Current:
 
 - Evidence Backbone Adapter Contract: harness-side event contract; no agent-evidence-plane absorption
+- agent-evidence-plane Thin Adapter: translation-only adapter for a small supported event subset; no vendoring or external repo modification
 
 Planned:
 
