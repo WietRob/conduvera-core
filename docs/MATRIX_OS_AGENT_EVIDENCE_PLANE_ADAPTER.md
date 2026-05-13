@@ -2,7 +2,7 @@
 
 Status: narrow Matrix OS adapter contract for compatible local agent-evidence-plane JSONL events.
 
-This document defines the PR H adapter boundary. Matrix OS does not absorb, vendor, launch, or modify agent-evidence-plane. The adapter reads compatible JSON event dictionaries and writes Matrix OS `EventEnvelope` JSONL through the Matrix OS Evidence Backbone.
+This document defines the agent-evidence-plane thin-adapter boundary. Matrix OS does not absorb, vendor, launch, or modify agent-evidence-plane. The adapter reads compatible JSON event dictionaries and writes Matrix OS `EventEnvelope` JSONL through the Matrix OS Evidence Backbone.
 
 ## Boundary decision
 
