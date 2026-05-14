@@ -26,6 +26,7 @@ Status: authoritative boundary map for the merged Matrix OS state including UI/M
 | agent-evidence-plane thin adapter | Yes | Matrix OS Harness | Translation-only adapter for a small supported event subset; no vendoring or repo modification |
 | Safety Guard adapter contract | Yes | Matrix OS Harness | Translation-only trust/safety evidence bridge; no execution, shell interception, or repo modification |
 | Evidence adapter registry | Yes | Matrix OS Harness | Metadata-only discovery index for existing adapters; no runtime execution or new adapters |
+| failure-driven-loop thin adapter | Yes | Matrix OS Harness | Translation-only failure/result evidence bridge; no runtime execution, rule enforcement, or repo modification |
 | ASPICE conflict detection | Yes | ASPICE Support Utilities | Merged in PR #7 |
 | ASPICE bidirectional link support | Yes | ASPICE Support Utilities | Merged in PR #7 |
 | UI/dashboard | Scaffolding only | Matrix OS Harness | Original Matrix UI is preserved; no production dashboard claim |

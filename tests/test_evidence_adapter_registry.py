@@ -22,6 +22,7 @@ def test_registry_contains_exactly_existing_two_adapters() -> None:
     assert [descriptor.adapter_id for descriptor in descriptors] == [
         "agent-evidence-plane",
         "safety-guard",
+        "failure-loop",
     ]
 
 
@@ -87,6 +88,7 @@ def test_cli_lists_registered_adapters() -> None:
     assert result.exit_code == 0
     assert "agent-evidence-plane" in result.output
     assert "safety-guard" in result.output
+    assert "failure-loop" in result.output
     assert "translation-only" in result.output
     assert "not-production-runtime" in result.output
 

@@ -21,6 +21,7 @@ Matrix OS now has more than one evidence adapter. The registry answers:
 |---|---|---|---|---|
 | `agent-evidence-plane` | agent-evidence-plane Thin Adapter | agent-evidence-plane | translation-only | local-contract-only / not-production-runtime |
 | `safety-guard` | Safety Guard Adapter Contract | CuraOps Safety Guard | translation-only | local-contract-only / not-production-runtime |
+| `failure-loop` | failure-driven-loop Thin Adapter | failure-driven-loop | translation-only | local-contract-only / not-production-runtime |
 
 No other adapters are registered by this slice.
 
@@ -84,12 +85,34 @@ Supported event types:
 - `safety_guard.action.blocked`
 - `safety_guard.approval.required`
 
+## failure-loop descriptor
+
+| Field | Value |
+|---|---|
+| Adapter ID | `failure-loop` |
+| Source project | `failure-driven-loop` |
+| Module path | `curaops.evidence.adapters.failure_loop` |
+| Docs path | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md` |
+| Input contract | `failure-loop result JSONL schema_version failure-loop.result.v1` |
+| Execution mode | `translation-only` |
+| Production status | `local-contract-only / not-production-runtime` |
+| External repo policy | standalone; not vendored; not executed by Matrix OS |
+| CLI | `python3 -m curaops.cli.main evidence convert-failure-loop INPUT.jsonl OUTPUT.jsonl` |
+
+Supported event types:
+
+- `failure.observed`
+- `rule.proposed`
+
+`rule.proposed` is proposal evidence only. It is not treated as an enforced rule.
+
 ## CLI discovery
 
 ```bash
 python3 -m curaops.cli.main evidence adapters
 python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
 python3 -m curaops.cli.main evidence adapter show safety-guard
+python3 -m curaops.cli.main evidence adapter show failure-loop
 ```
 
 Unknown adapter IDs fail closed with a non-zero exit code:
@@ -112,9 +135,11 @@ This registry does not:
 - add a new external adapter
 - execute agent-evidence-plane
 - execute Safety Guard
+- execute failure-driven-loop
+- enforce proposed failure-loop rules
 - add shell interception
 - run destructive commands
-- add CAS, failure-loop, peekxd, OpenCode, or ai-router adapters
+- add CAS, peekxd, OpenCode, or ai-router adapters
 - add dashboard or MCP runtime
 - claim production audit retention, cloud persistence, or certification readiness
 - accept arbitrary external event types

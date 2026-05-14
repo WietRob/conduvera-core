@@ -23,11 +23,13 @@ The evidence backbone provides a common event envelope and JSONL store so future
 | Matrix OS JSONL store convention | Matrix OS | merged harness-side contract |
 | Matrix OS evidence CLI validate/summarize | Matrix OS | discovery/validation utility |
 | Matrix OS evidence adapter registry | Matrix OS | metadata-only discovery index for registered adapters; no runtime execution |
+| failure-driven-loop thin adapter | Matrix OS | explicit translation boundary for compatible failure-loop result JSONL; no runtime execution or rule enforcement |
 | agent-evidence-plane thin adapter | Matrix OS | explicit translation boundary for a small supported event subset; no vendoring |
 | Safety Guard adapter contract | Matrix OS | explicit translation boundary for compatible Safety Guard result JSONL; no runtime execution |
 | agent-evidence-plane | separate project | not copied, not vendored, not absorbed |
 | Safety Guard | separate project | not copied, not vendored, not executed |
-| CAS / failure-loop / peekxd / OpenCode / ai-router | external adapter candidates | not integrated |
+| failure-driven-loop | separate project | not copied, not vendored, not executed; proposed rules are not enforced by Matrix OS |
+| CAS / peekxd / OpenCode / ai-router | external adapter candidates | not integrated |
 
 ## Event store path convention
 
@@ -84,7 +86,8 @@ Current Matrix OS registry:
 | `agent.run.started` | agent-evidence-plane thin adapter |
 | `agent.run.completed` | agent-evidence-plane thin adapter |
 | `agent.run.failed` | agent-evidence-plane thin adapter |
-| `failure.observed` | agent-evidence-plane thin adapter |
+| `failure.observed` | agent-evidence-plane thin adapter; failure-driven-loop thin adapter |
+| `rule.proposed` | failure-driven-loop thin adapter |
 | `safety_guard.check.completed` | CuraOps Safety Guard adapter |
 | `safety_guard.action.allowed` | CuraOps Safety Guard adapter |
 | `safety_guard.action.blocked` | CuraOps Safety Guard adapter |
@@ -136,10 +139,12 @@ python3 -m curaops.cli.main evidence --help
 python3 -m curaops.cli.main evidence adapters
 python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
 python3 -m curaops.cli.main evidence adapter show safety-guard
+python3 -m curaops.cli.main evidence adapter show failure-loop
 python3 -m curaops.cli.main evidence validate changes/evidence/events.jsonl
 python3 -m curaops.cli.main evidence summarize changes/evidence/events.jsonl
 python3 -m curaops.cli.main evidence convert-agent-plane agent-plane.jsonl matrix-os-events.jsonl
 python3 -m curaops.cli.main evidence convert-safety-guard safety-guard.jsonl matrix-os-events.jsonl
+python3 -m curaops.cli.main evidence convert-failure-loop failure-loop.jsonl matrix-os-events.jsonl
 ```
 
 The CLI discovers registered adapters, validates/summarizes streams, and performs narrow explicit conversions into Matrix OS event streams. It does not start an MCP runtime, dashboard, broad external adapter, cloud persistence, or production audit service.
@@ -156,7 +161,7 @@ This slice does not include:
 - broad Safety Guard integration beyond `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
 - Safety Guard runtime/policy engine integration
 - CAS adapter
-- failure-loop adapter
+- broader failure-loop runtime/policy-engine integration
 - peekxd adapter
 - OpenCode plugin adapter
 - ai-router adapter
