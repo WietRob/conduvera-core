@@ -11,6 +11,7 @@ import pytest
 from curaops.cli.main import app
 
 from curaops.evidence import (
+    ADAPTER_EVENT_TYPES,
     CORE_EVENT_TYPES,
     EventEnvelope,
     EvidenceStore,
@@ -41,6 +42,11 @@ def test_core_registry_contains_matrix_os_evidence_events() -> None:
         "aspice.check.completed",
         "gate.run.completed",
     }
+
+
+def test_adapter_registry_contains_explicit_external_adapter_event_types() -> None:
+    assert "failure.observed" in ADAPTER_EVENT_TYPES
+    assert "rule.proposed" in ADAPTER_EVENT_TYPES
 
 
 def test_event_envelope_create_adds_id_timestamp_and_hash_reference() -> None:

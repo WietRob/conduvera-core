@@ -10,6 +10,7 @@ from dataclasses import dataclass
 
 from curaops.evidence import ValidationError
 from curaops.evidence.adapters.agent_evidence_plane import AGENT_EVIDENCE_PLANE_EVENT_TYPES
+from curaops.evidence.adapters.failure_loop import FAILURE_LOOP_EVENT_TYPES
 from curaops.evidence.adapters.safety_guard import SAFETY_GUARD_EVENT_TYPES
 
 
@@ -59,11 +60,14 @@ _SAFETY_GUARD_EVENT_ORDER = (
     "safety_guard.action.blocked",
     "safety_guard.approval.required",
 )
+_FAILURE_LOOP_EVENT_ORDER = ("failure.observed", "rule.proposed")
 
 if set(_AGENT_EVIDENCE_PLANE_EVENT_ORDER) != AGENT_EVIDENCE_PLANE_EVENT_TYPES:
     raise RuntimeError("agent-evidence-plane registry metadata drift")
 if set(_SAFETY_GUARD_EVENT_ORDER) != SAFETY_GUARD_EVENT_TYPES:
     raise RuntimeError("Safety Guard registry metadata drift")
+if set(_FAILURE_LOOP_EVENT_ORDER) != FAILURE_LOOP_EVENT_TYPES:
+    raise RuntimeError("failure-loop registry metadata drift")
 
 _ADAPTERS: tuple[AdapterDescriptor, ...] = (
     AdapterDescriptor(
@@ -91,6 +95,21 @@ _ADAPTERS: tuple[AdapterDescriptor, ...] = (
         supported_event_types=_SAFETY_GUARD_EVENT_ORDER,
         cli_commands=(
             "python3 -m curaops.cli.main evidence convert-safety-guard INPUT.jsonl OUTPUT.jsonl",
+        ),
+        execution_mode="translation-only",
+        production_status="local-contract-only / not-production-runtime",
+        external_repo_policy="standalone; not vendored; not executed by Matrix OS",
+    ),
+    AdapterDescriptor(
+        adapter_id="failure-loop",
+        name="failure-driven-loop Thin Adapter",
+        source_project="failure-driven-loop",
+        module_path="curaops.evidence.adapters.failure_loop",
+        docs_path="docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md",
+        input_contract="failure-loop result JSONL schema_version failure-loop.result.v1",
+        supported_event_types=_FAILURE_LOOP_EVENT_ORDER,
+        cli_commands=(
+            "python3 -m curaops.cli.main evidence convert-failure-loop INPUT.jsonl OUTPUT.jsonl",
         ),
         execution_mode="translation-only",
         production_status="local-contract-only / not-production-runtime",

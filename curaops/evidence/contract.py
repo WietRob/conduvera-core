@@ -23,6 +23,7 @@ ADAPTER_EVENT_TYPES = {
     "agent.run.completed",
     "agent.run.failed",
     "failure.observed",
+    "rule.proposed",
     # Thin adapter event types imported from CuraOps Safety Guard result
     # fixtures/logs. These are explicit Matrix OS adapter contract types, not
     # an open-ended safety-event registry.

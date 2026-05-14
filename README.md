@@ -14,7 +14,8 @@ Current merged scope:
 | Evidence Backbone Adapter Contract | Merged | Harness-side event envelope, local JSONL store, validate/summarize CLI |
 | agent-evidence-plane Thin Adapter | Merged | Convert a small supported external JSONL subset into Matrix OS evidence events |
 | Safety Guard Adapter Contract | Merged | Convert compatible trust/safety result JSONL into Matrix OS evidence events |
-| Evidence Adapter Registry | Current | Discover registered adapters and their explicit contracts |
+| Evidence Adapter Registry | Merged | Discover registered adapters and their explicit contracts |
+| failure-driven-loop Thin Adapter | Current | Convert compatible failure-loop result JSONL into Matrix OS evidence events |
 
 This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope.
 
@@ -30,8 +31,10 @@ python3 -m curaops.cli.main evidence --help
 python3 -m curaops.cli.main evidence adapters
 python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
 python3 -m curaops.cli.main evidence adapter show safety-guard
+python3 -m curaops.cli.main evidence adapter show failure-loop
 python3 -m curaops.cli.main evidence convert-agent-plane --help
 python3 -m curaops.cli.main evidence convert-safety-guard --help
+python3 -m curaops.cli.main evidence convert-failure-loop --help
 ```
 
 Root command namespaces:
@@ -58,8 +61,9 @@ Start here:
 6. `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
 7. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
 8. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
-9. `docs/RELEASE_TRAIN_STATUS.md`
-10. `docs/DOCUMENTATION_INVENTORY.md`
+9. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
+10. `docs/RELEASE_TRAIN_STATUS.md`
+11. `docs/DOCUMENTATION_INVENTORY.md`
 
 Module-specific docs:
 
@@ -72,6 +76,7 @@ Module-specific docs:
 | agent-evidence-plane Thin Adapter | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`, `curaops/evidence/adapters/agent_evidence_plane.py` |
 | Safety Guard Adapter Contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`, `curaops/evidence/adapters/safety_guard.py` |
 | Evidence Adapter Registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`, `curaops/evidence/adapters/registry.py` |
+| failure-driven-loop Thin Adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`, `curaops/evidence/adapters/failure_loop.py` |
 
 ## Historical docs
 
@@ -91,11 +96,12 @@ Merged:
 - PR #10 Evidence Backbone Adapter Contract
 - PR #11 agent-evidence-plane Thin Adapter
 - PR #12 Safety Guard Adapter Contract
+- PR #13 Evidence Adapter Registry
 
 Current:
 
-- Evidence Adapter Registry: metadata-only discovery for existing adapters; no runtime execution
+- failure-driven-loop Thin Adapter: translation-only failure/result evidence bridge; no runtime execution or rule enforcement
 
 Planned:
 
-- Later focused adapter slices for Safety Guard, agent-evidence-plane, CAS, failure-loop, peekxd, OpenCode plugin, and ai-router
+- Later focused adapter slices for Safety Guard, agent-evidence-plane, CAS, peekxd, OpenCode plugin, and ai-router

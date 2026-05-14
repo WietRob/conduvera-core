@@ -10,6 +10,7 @@ from rich.table import Table
 
 from curaops.evidence import summarize_event_stream, validate_event_stream
 from curaops.evidence.adapters.agent_evidence_plane import convert_agent_evidence_plane_jsonl
+from curaops.evidence.adapters.failure_loop import convert_failure_loop_jsonl
 from curaops.evidence.adapters.registry import get_adapter_descriptor, list_adapter_descriptors
 from curaops.evidence.adapters.safety_guard import convert_safety_guard_jsonl
 
@@ -112,6 +113,21 @@ def convert_safety_guard(
         console.print(f"[red]Safety Guard conversion failed[/red]: {exc}")
         raise typer.Exit(1) from exc
     console.print(f"[green]Converted {count} Safety Guard results[/green] to {output_events}")
+
+
+@evidence_app.command("convert-failure-loop")
+def convert_failure_loop(
+    input_results: Path = typer.Argument(..., help="failure-driven-loop result JSONL input stream"),
+    output_events: Path = typer.Argument(..., help="Matrix OS JSONL output stream"),
+):
+    """Convert compatible failure-driven-loop results into Matrix OS events."""
+
+    try:
+        count = convert_failure_loop_jsonl(input_results, output_events)
+    except ValueError as exc:
+        console.print(f"[red]failure-loop conversion failed[/red]: {exc}")
+        raise typer.Exit(1) from exc
+    console.print(f"[green]Converted {count} failure-loop events[/green] to {output_events}")
 
 
 @evidence_app.command("summarize")

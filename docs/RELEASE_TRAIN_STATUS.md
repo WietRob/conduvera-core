@@ -17,7 +17,8 @@ This document tracks merged slices and planned next slices. It is not a product 
 | #10 | Evidence Backbone Adapter Contract | Merged | `41b060b` | Harness-side event envelope, JSONL store, validate/summarize CLI |
 | #11 | agent-evidence-plane Thin Adapter | Merged | `805adce` | Translate a small supported external-event subset into Matrix OS events |
 | #12 | Safety Guard Adapter Contract | Merged | `93118b2` | Translate compatible Safety Guard trust/safety results into Matrix OS events |
-| #13 | Evidence Adapter Registry | Current | TBD | Metadata-only registry and CLI discovery for existing evidence adapters |
+| #13 | Evidence Adapter Registry | Merged | `2e2b8c7` | Metadata-only registry and CLI discovery for existing evidence adapters |
+| #14 | failure-driven-loop Thin Adapter | Current | TBD | Translate compatible failure-loop result JSONL into Matrix OS evidence events |
 
 Closed as superseded:
 
@@ -39,6 +40,8 @@ python3 -m curaops.cli.main evidence convert-safety-guard --help
 python3 -m curaops.cli.main evidence adapters
 python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
 python3 -m curaops.cli.main evidence adapter show safety-guard
+python3 -m curaops.cli.main evidence adapter show failure-loop
+python3 -m curaops.cli.main evidence convert-failure-loop --help
 ```
 
 ## Release train next slices
@@ -49,7 +52,8 @@ python3 -m curaops.cli.main evidence adapter show safety-guard
 | Evidence Backbone Adapter Contract | Harness-side evidence event contract and local JSONL store | Merged | No production audit retention or cloud persistence |
 | agent-evidence-plane Thin Adapter | Translate compatible local agent-evidence-plane events into Matrix OS envelopes | Merged | No vendoring, no external repo modification, no public launch |
 | Safety Guard Adapter Contract | Translate compatible local Safety Guard trust/safety results into Matrix OS envelopes | Merged | No execution, shell interception, repo modification, release creation, or production policy claim |
-| Evidence Adapter Registry | Discover existing evidence adapters and their explicit contracts | Current | Registry metadata only; no new adapter, runtime execution, or production audit claim |
+| Evidence Adapter Registry | Discover existing evidence adapters and their explicit contracts | Merged | Registry metadata only; no new adapter, runtime execution, or production audit claim |
+| failure-driven-loop Thin Adapter | Translate compatible local failure-loop result JSONL into Matrix OS envelopes | Current | No runtime execution, rule enforcement, external repo modification, or production policy claim |
 | Later adapter slices | Broader Safety Guard runtime integration | Planned | Only after evidence bridge proves the boundary; keep Safety Guard standalone |
 | Later adapter slices | Broader agent-evidence-plane adapter | Planned | Only after thin adapter proves the boundary; keep sidecar separate |
 | Later adapter slices | CAS Extractor adapter/capability | Planned | Define a focused contract before integration |
@@ -79,6 +83,8 @@ python3 -m curaops.cli.main evidence convert-safety-guard --help
 python3 -m curaops.cli.main evidence adapters
 python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
 python3 -m curaops.cli.main evidence adapter show safety-guard
+python3 -m curaops.cli.main evidence adapter show failure-loop
+python3 -m curaops.cli.main evidence convert-failure-loop --help
 ```
 
 ## Not production-ready yet
