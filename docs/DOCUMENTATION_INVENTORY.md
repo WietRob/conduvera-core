@@ -15,6 +15,10 @@ This inventory classifies existing and newly authoritative documents after PR #4
 | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md` | Authoritative Safety Guard adapter boundary | Create | Defines read-only trust/safety evidence translation without execution, shell interception, vendoring, or release creation |
 | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md` | Authoritative evidence adapter registry | Create | Metadata-only index of registered adapters, event types, CLI commands, and execution/readiness boundaries |
 | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md` | Authoritative failure-loop adapter boundary | Create | Defines translation-only failure/result evidence mapping without runtime execution, rule enforcement, or external repo mutation |
+| `docs/MATRIX_OS_PRODUCT_COHERENCE.md` | Authoritative product coherence/value proof | Create | Shows how merged modules answer operator questions together without monster-system overclaim |
+| `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md` | Authoritative generic gateway boundary | Create | Defines Hermes/OpenCode/Zed/MCP/local-shell/peekxd future descriptors without runtime execution |
+| `docs/MATRIX_OS_UI_VALUE_MAP.md` | Authoritative original UI value map | Create | Maps preserved TUI surfaces to future CR/evidence/runner/editor use without UI rewrite or dashboard claim |
+| `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` | Authoritative provenance note | Create | Separates confirmed Matrix UI lineage facts from UNKNOWN Pi/fork claims |
 | `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md` | Authoritative command/module index | Create | Needed navigable index for compliance, accountability, ASPICE, and CLI commands |
 | `docs/RELEASE_TRAIN_STATUS.md` | Authoritative release status | Create | Needed current release-train status and next planned PRs |
 | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md` | Current CCC architecture | Keep | Describes merged PR #5 module; some historical API sketches remain non-authoritative next to current CLI/API docs |
@@ -41,17 +45,21 @@ This inventory classifies existing and newly authoritative documents after PR #4
 ## Current authoritative reading order
 
 1. `README.md`
-2. `docs/MATRIX_OS_ARCHITECTURE.md`
-3. `docs/MATRIX_OS_MODULE_BOUNDARIES.md`
-4. `docs/MATRIX_OS_SCAFFOLDING.md`
-5. `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`
-6. `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
-7. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
-8. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
-9. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
-10. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
-11. `docs/RELEASE_TRAIN_STATUS.md`
-12. Module-specific docs for CCC, AAL, and ASPICE as needed
+2. `docs/MATRIX_OS_PRODUCT_COHERENCE.md`
+3. `docs/MATRIX_OS_ARCHITECTURE.md`
+4. `docs/MATRIX_OS_MODULE_BOUNDARIES.md`
+5. `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`
+6. `docs/MATRIX_OS_UI_VALUE_MAP.md`
+7. `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md`
+8. `docs/MATRIX_OS_SCAFFOLDING.md`
+9. `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`
+10. `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
+11. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
+12. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
+13. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
+14. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
+15. `docs/RELEASE_TRAIN_STATUS.md`
+16. Module-specific docs for CCC, AAL, and ASPICE as needed
 
 ## Deprecated-document rule
 

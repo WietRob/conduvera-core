@@ -15,7 +15,8 @@ Current merged scope:
 | agent-evidence-plane Thin Adapter | Merged | Convert a small supported external JSONL subset into Matrix OS evidence events |
 | Safety Guard Adapter Contract | Merged | Convert compatible trust/safety result JSONL into Matrix OS evidence events |
 | Evidence Adapter Registry | Merged | Discover registered adapters and their explicit contracts |
-| failure-driven-loop Thin Adapter | Current | Convert compatible failure-loop result JSONL into Matrix OS evidence events |
+| failure-driven-loop Thin Adapter | Merged | Convert compatible failure-loop result JSONL into Matrix OS evidence events |
+| Product Coherence & Harness Gateway Validation | Current | Prove Matrix OS product scenarios and generic future runner/editor boundaries |
 
 This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope.
 
@@ -53,17 +54,21 @@ Root command namespaces:
 
 Start here:
 
-1. `docs/MATRIX_OS_ARCHITECTURE.md`
-2. `docs/MATRIX_OS_MODULE_BOUNDARIES.md`
-3. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
-4. `docs/MATRIX_OS_SCAFFOLDING.md`
-5. `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`
-6. `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
-7. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
-8. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
-9. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
-10. `docs/RELEASE_TRAIN_STATUS.md`
-11. `docs/DOCUMENTATION_INVENTORY.md`
+1. `docs/MATRIX_OS_PRODUCT_COHERENCE.md`
+2. `docs/MATRIX_OS_ARCHITECTURE.md`
+3. `docs/MATRIX_OS_MODULE_BOUNDARIES.md`
+4. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
+5. `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`
+6. `docs/MATRIX_OS_UI_VALUE_MAP.md`
+7. `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md`
+8. `docs/MATRIX_OS_SCAFFOLDING.md`
+9. `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`
+10. `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
+11. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
+12. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
+13. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
+14. `docs/RELEASE_TRAIN_STATUS.md`
+15. `docs/DOCUMENTATION_INVENTORY.md`
 
 Module-specific docs:
 
@@ -77,6 +82,9 @@ Module-specific docs:
 | Safety Guard Adapter Contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`, `curaops/evidence/adapters/safety_guard.py` |
 | Evidence Adapter Registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`, `curaops/evidence/adapters/registry.py` |
 | failure-driven-loop Thin Adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`, `curaops/evidence/adapters/failure_loop.py` |
+| Product Coherence Scenarios | `docs/MATRIX_OS_PRODUCT_COHERENCE.md`, `tests/test_product_coherence_scenarios.py` |
+| Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `curaops/harness/gateway.py` |
+| UI Value Map / Provenance | `docs/MATRIX_OS_UI_VALUE_MAP.md`, `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` |
 
 ## Historical docs
 
@@ -97,10 +105,11 @@ Merged:
 - PR #11 agent-evidence-plane Thin Adapter
 - PR #12 Safety Guard Adapter Contract
 - PR #13 Evidence Adapter Registry
+- PR #14 failure-driven-loop Thin Adapter
 
 Current:
 
-- failure-driven-loop Thin Adapter: translation-only failure/result evidence bridge; no runtime execution or rule enforcement
+- Product Coherence & Harness Gateway Validation: scenario proof, generic gateway descriptors, UI/provenance mapping; no runtime execution
 
 Planned:
 
