@@ -71,7 +71,7 @@ Zed/MCP is a future adapter candidate, not an implementation in this PR.
 |---|---|
 | Matrix OS | generic `EditorSurfaceDescriptor`, evidence links, future adapter path |
 | Zed | editor/plugin/runtime behavior |
-| MCP future adapter | reviewed PR through Gateway Registry -> EditorSurfaceDescriptor -> MCP/adapter contract |
+| MCP future adapter | reviewed adapter change through Gateway Registry -> EditorSurfaceDescriptor -> MCP/adapter contract |
 | CCC/AAL/Evidence | remain runner/editor agnostic |
 
 Matrix OS must not hardcode Zed-specific logic into CCC, AAL, ASPICE, or Evidence Backbone. A future Zed route should attach through gateway descriptors and an explicit adapter PR.
@@ -89,7 +89,7 @@ Gateway Registry
 
 ## Not implemented
 
-This PR does not implement:
+This slice does not implement:
 
 - Hermes execution
 - OpenCode execution

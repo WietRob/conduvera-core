@@ -46,7 +46,7 @@ Zed/MCP remains future adapter work.
 
 ## No rewrite claim
 
-This PR intentionally does not:
+This slice intentionally does not:
 
 - rewrite `src/core/app.py`,
 - change Textual widget behavior,

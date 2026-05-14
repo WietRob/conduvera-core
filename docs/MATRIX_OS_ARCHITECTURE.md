@@ -54,9 +54,10 @@ Matrix OS Harness
 3. Accountable Agent Layer consumes approved-or-later CR state and enforces accountability gates for AI-assisted changes.
 4. ASPICE utilities support traceability documents and code/test links independently of CR approval and accountable-agent registration.
 5. Evidence backbone validates and summarizes Matrix OS harness-side evidence event streams.
-6. Translation-only adapters convert approved external fixture/result/event streams into canonical Matrix OS evidence.
-7. Product coherence scenarios prove the combined stream can answer operator questions.
-8. Gateway descriptors document future runner/tool/editor boundaries without runtime execution.
+6. Future adapters may connect external engines into the harness, but those engines remain separately maintainable unless a later PR defines a narrow adapter contract.
+7. Translation-only adapters convert approved external fixture/result/event streams into canonical Matrix OS evidence.
+8. Product coherence scenarios prove the combined stream can answer operator questions.
+9. Gateway descriptors document future runner/tool/editor boundaries without runtime execution.
 
 ## CLI surface
 

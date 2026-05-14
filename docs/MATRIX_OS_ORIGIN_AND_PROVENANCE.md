@@ -9,7 +9,7 @@ This document records confirmed facts and unknowns. It does not invent a Pi, for
 | Fact | Evidence |
 |---|---|
 | Current remote | `origin git@github.com:WietRob/matrix-os.git` |
-| Current main at PR L start | `58b89069db6c9261da95255233753744a3c193e6` |
+| Current main at slice start | `58b89069db6c9261da95255233753744a3c193e6` |
 | Root commit on current main graph | `0724a12dd0547e9d4ff1e945680eae38cab05273` |
 | Early local/root-line commit | `0724a12 Initial commit` |
 | Early branch visible | `origin/feature-final-matrix-os` with `1fe1386 Initial working version of Matrix OS with all features` |
