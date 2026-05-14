@@ -65,7 +65,7 @@ Descriptors:
 
 ## Zed / editor boundary
 
-Zed/MCP is a future adapter candidate, not an implementation in this PR.
+Zed/MCP is a future adapter candidate, not an implementation in this slice.
 
 | Ownership | Boundary |
 |---|---|

@@ -60,7 +60,7 @@ The harness has value when an operator can answer questions that no single modul
 
 Risk: Matrix OS could become a large collection of adapters and UI ideas without proving operator value.
 
-Mitigation in this PR:
+Mitigation in this slice:
 
 1. scenario tests combine modules instead of only checking imports,
 2. gateway descriptors keep future runners generic and external,
