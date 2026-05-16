@@ -281,12 +281,19 @@ def test_cli_evidence_report_works_against_product_coherence_fixture_stream(tmp_
     assert "rule_product_coherence_regression" in result.output
 
 
-def test_malformed_or_invalid_event_stream_fails_closed(tmp_path: Path) -> None:
+def test_malformed_missing_or_invalid_event_stream_fails_closed(tmp_path: Path) -> None:
+    missing = tmp_path / "missing.jsonl"
     invalid = tmp_path / "invalid.jsonl"
     invalid.write_text('{"event_type":"agent.run.completed"}\n', encoding="utf-8")
 
     with pytest.raises(ValidationError):
+        build_operator_report(missing)
+    with pytest.raises(ValidationError):
         build_operator_report(invalid)
+
+    missing_result = runner.invoke(app, ["evidence", "report", str(missing)])
+    assert missing_result.exit_code == 1
+    assert "Evidence report failed" in missing_result.output
 
     result = runner.invoke(app, ["evidence", "report", str(invalid)])
     assert result.exit_code == 1

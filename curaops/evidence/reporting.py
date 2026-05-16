@@ -8,6 +8,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
+from curaops.evidence.contract import ValidationError
 from curaops.evidence.store import read_event_stream
 
 ReportFormat = Literal["text", "markdown", "json"]
@@ -51,6 +52,9 @@ def build_operator_report(events_path: Path) -> EvidenceOperatorReport:
     ``ValidationError`` and fail closed.
     """
 
+    events_path = Path(events_path)
+    if not events_path.exists():
+        raise ValidationError(f"missing file: {events_path}")
     events = sorted(list(read_event_stream(events_path)), key=lambda event: (event.occurred_at, event.event_id))
     requirements: set[str] = set()
 
