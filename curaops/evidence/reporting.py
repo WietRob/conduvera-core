@@ -23,6 +23,7 @@ class EvidenceOperatorReport:
     producers: dict[str, int]
     subjects: dict[str, int]
     adapters: dict[str, int]
+    change_requests: list[dict[str, Any]] = field(default_factory=list)
     agent_actions: list[dict[str, Any]] = field(default_factory=list)
     blocked_actions: list[dict[str, Any]] = field(default_factory=list)
     failures: list[dict[str, Any]] = field(default_factory=list)
@@ -70,6 +71,7 @@ def build_operator_report(events_path: Path) -> EvidenceOperatorReport:
         producers=_count(event.producer["name"] for event in events),
         subjects=_count(event.subject["kind"] for event in events),
         adapters=_count(_adapter_id(event.producer) for event in events),
+        change_requests=_change_requests(events),
         agent_actions=_agent_actions(events),
         blocked_actions=_blocked_actions(events),
         failures=_failures(events),
@@ -112,6 +114,23 @@ def _extract_requirements(payload: dict[str, Any]) -> set[str]:
     if requirement_id:
         values.add(str(requirement_id))
     return values
+
+
+def _change_requests(events) -> list[dict[str, Any]]:
+    requests: list[dict[str, Any]] = []
+    for event in events:
+        if event.event_type != "change_request.evidence.generated":
+            continue
+        requests.append(
+            {
+                "change_request_id": str(event.subject.get("id") or event.correlation_id or "unknown"),
+                "status": str(event.payload.get("status") or "unknown"),
+                "change_type": str(event.payload.get("change_type") or "unknown"),
+                "requirements": sorted(_extract_requirements(event.payload)),
+                "adapter": _adapter_id(event.producer),
+            }
+        )
+    return requests
 
 
 def _agent_actions(events) -> list[dict[str, Any]]:
@@ -205,12 +224,15 @@ def _traceability_gaps(events) -> list[dict[str, Any]]:
 
 
 def _operator_answers(report: EvidenceOperatorReport) -> list[tuple[str, str]]:
+    cr_status_by_id = {item["change_request_id"]: item["status"] for item in report.change_requests}
     agent_answer = "No accountable agent action found."
     if report.agent_actions:
         action = report.agent_actions[0]
+        cr_id = action["change_request_id"]
+        cr_status = cr_status_by_id.get(cr_id, "unknown-status")
         agent_answer = (
             f"{action['agent_id']} run {action['run_id']} changed "
-            f"{', '.join(action['changed_files']) or 'unknown files'} under {action['change_request_id']}."
+            f"{', '.join(action['changed_files']) or 'unknown files'} under {cr_status} {cr_id}."
         )
 
     safety_answer = "No blocked risky action found."
@@ -258,6 +280,11 @@ def _render_text(report: EvidenceOperatorReport) -> str:
     lines.append("Operator answers:")
     lines.extend(f"- {question} {answer}" for question, answer in _operator_answers(report))
     lines.append("")
+    lines.append("Change requests:")
+    lines.extend(
+        f"- {item['change_request_id']}: {item['status']} {item['change_type']} requirements={item['requirements']}"
+        for item in report.change_requests
+    )
     lines.append("Agent actions:")
     lines.extend(f"- {item['agent_id']} {item['run_id']} {item['change_request_id']} {item['changed_files']}" for item in report.agent_actions)
     lines.append("Blocked actions:")

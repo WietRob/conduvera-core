@@ -20,6 +20,7 @@ Matrix OS is now more than a package baseline plus separate utilities. The coher
 | Evidence Adapter Registry | Discoverable adapter metadata and fail-closed lookup |
 | failure-driven-loop Thin Adapter | Translation-only failure evidence and non-enforced rule proposals |
 | Evidence Operator Reports | Read-only reports that answer product-coherence questions from validated evidence streams |
+| Evidence Report Golden Fixtures | Deterministic EventEnvelope fixture plus expected text/Markdown/JSON outputs for report regression |
 
 ## Product thesis
 
@@ -106,7 +107,9 @@ python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
 python3 -m curaops.cli.main evidence report EVENTS.jsonl --format json
 ```
 
-It reads existing Matrix OS evidence only. It does not create a new adapter, run external tools, launch a dashboard, provide MCP runtime, retain production audit data, or enforce proposed rules.
+It reads existing Matrix OS evidence only. `tests/test_evidence_report_golden_outputs.py` locks a deterministic `tests/fixtures/evidence/operator_report/product_coherence.events.jsonl` stream against expected text, Markdown, and JSON outputs. The golden outputs are regression contracts for operator-facing accountability answers, not production audit retention.
+
+The report/golden layer does not create a new adapter, run external tools, launch a dashboard, provide MCP runtime, retain production audit data, or enforce proposed rules.
 
 ## Product status
 

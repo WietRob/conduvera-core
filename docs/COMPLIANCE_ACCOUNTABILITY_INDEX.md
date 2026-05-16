@@ -18,7 +18,8 @@ This document maps the currently merged compliance/accountability modules and th
 | Evidence Adapter Registry | Current | `curaops.evidence.adapters.registry` | `evidence adapters`, `evidence adapter show` | Discover registered evidence adapters and their explicit event/input contracts |
 | failure-driven-loop Thin Adapter | PR #14 | `curaops.evidence.adapters.failure_loop` | `evidence convert-failure-loop` | Convert compatible failure-loop result JSONL into Matrix OS evidence events; proposed rules are evidence only |
 | Product Coherence & Harness Gateway Validation | PR #15 | `curaops.harness.gateway`, scenario tests | test/docs | Validate operator scenarios, generic gateway descriptors, UI value map, provenance note |
-| Evidence Operator Report Pack | Current | `curaops.evidence.reporting` | `evidence report` | Render operator-readable text/Markdown/JSON reports over validated evidence streams |
+| Evidence Operator Report Pack | PR #16 | `curaops.evidence.reporting` | `evidence report` | Render operator-readable text/Markdown/JSON reports over validated evidence streams |
+| Evidence Report Golden Fixtures | Current | `curaops.evidence.reporting`, fixtures | tests | Regression contract comparing deterministic product-coherence evidence to expected report outputs |
 
 ## CLI command index
 
@@ -119,7 +120,7 @@ Evidence backbone commands:
 | Safety Guard adapter contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md` |
 | Evidence adapter registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md` |
 | failure-driven-loop thin adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md` |
-| Evidence operator reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md` |
+| Evidence operator reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`, `tests/test_evidence_operator_report.py`, `tests/test_evidence_report_golden_outputs.py` |
 | Release train | `docs/RELEASE_TRAIN_STATUS.md` |
 | Compliance/accountability index | this file |
 | Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md`, `docs/COMPLIANCE_CHANGE_CONTROL_PROCESS.md`, `docs/COMPLIANCE_CHANGE_CONTROL_RULES.md`, `docs/COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md` |
