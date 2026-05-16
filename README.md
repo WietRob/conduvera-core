@@ -17,7 +17,8 @@ Current merged scope:
 | Evidence Adapter Registry | Merged | Discover registered adapters and their explicit contracts |
 | failure-driven-loop Thin Adapter | Merged | Convert compatible failure-loop result JSONL into Matrix OS evidence events |
 | Product Coherence & Harness Gateway Validation | Merged | Prove Matrix OS product scenarios and generic future runner/editor boundaries |
-| Evidence Operator Report Pack | Current | Render operator-readable text/Markdown/JSON reports over validated evidence streams |
+| Evidence Operator Report Pack | Merged | Render operator-readable text/Markdown/JSON reports over validated evidence streams |
+| Evidence Report Golden Fixtures | Current | Regression-lock operator report outputs with deterministic golden evidence |
 
 This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope.
 
@@ -85,7 +86,7 @@ Module-specific docs:
 | Safety Guard Adapter Contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`, `curaops/evidence/adapters/safety_guard.py` |
 | Evidence Adapter Registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`, `curaops/evidence/adapters/registry.py` |
 | failure-driven-loop Thin Adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`, `curaops/evidence/adapters/failure_loop.py` |
-| Evidence Operator Reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`, `curaops/evidence/reporting.py` |
+| Evidence Operator Reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`, `curaops/evidence/reporting.py`, `tests/fixtures/evidence/operator_report/` |
 | Product Coherence Scenarios | `docs/MATRIX_OS_PRODUCT_COHERENCE.md`, `tests/test_product_coherence_scenarios.py` |
 | Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `curaops/harness/gateway.py` |
 | UI Value Map / Provenance | `docs/MATRIX_OS_UI_VALUE_MAP.md`, `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` |
@@ -111,10 +112,11 @@ Merged:
 - PR #13 Evidence Adapter Registry
 - PR #14 failure-driven-loop Thin Adapter
 - PR #15 Product Coherence & Harness Gateway Validation
+- PR #16 Evidence Operator Report Pack
 
 Current:
 
-- Evidence Operator Report Pack: operator-readable reports from existing evidence streams; no new adapter, runtime execution, dashboard, MCP runtime, or production audit claim
+- Evidence Report Golden Fixtures: deterministic EventEnvelope stream plus expected text/Markdown/JSON outputs; no new adapter, runtime execution, dashboard, MCP runtime, production audit retention, or rule enforcement
 
 Planned:
 

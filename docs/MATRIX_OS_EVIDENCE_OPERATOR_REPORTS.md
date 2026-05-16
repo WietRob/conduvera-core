@@ -36,7 +36,7 @@ python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
 python3 -m curaops.cli.main evidence report EVENTS.jsonl --format json
 ```
 
-Text and Markdown are for operators. JSON is for tests and future local tooling. Output is deterministic: events are sorted by timestamp and event id, and counts are sorted by key.
+Text and Markdown are for operators. JSON is for tests and future local tooling. Output is deterministic: events are sorted by timestamp and event id, and counts are sorted by key. The report also carries Change Request status so the operator-facing agent/action answer can distinguish an approved CR from an unknown or unapproved CR.
 
 ## Operator questions answered
 
@@ -69,6 +69,19 @@ They do not include:
 - modification of external repositories.
 
 Proposed rules remain evidence only. A report can say a rule was proposed and not enforced; it must not apply that rule or claim policy enforcement.
+
+## Golden fixtures and regression contract
+
+`tests/fixtures/evidence/operator_report/` contains the deterministic product-coherence report contract:
+
+- `product_coherence.events.jsonl` is the validated Matrix OS `EventEnvelope` stream.
+- `product_coherence.expected.txt` is the expected text output.
+- `product_coherence.expected.md` is the expected Markdown output.
+- `product_coherence.expected.json` is the expected JSON output.
+
+`tests/test_evidence_report_golden_outputs.py` compares generated report output to those golden files. Intentional operator-output changes must update the matching golden files in the same change; accidental drift should fail the regression gate.
+
+These golden files are test fixtures only. They are not production audit retention, do not create a dashboard, do not execute external runtimes, and do not enforce proposed rules.
 
 ## Relationship to Product Coherence tests
 

@@ -1,0 +1,100 @@
+{
+  "adapters": {
+    "matrix-os.agent-evidence-plane": 1,
+    "matrix-os.failure-loop": 2,
+    "matrix-os.safety-guard": 1,
+    "native": 3
+  },
+  "agent_actions": [
+    {
+      "adapter": "native",
+      "agent_id": "hermes-agent",
+      "change_request_id": "CR-MXOS-001",
+      "changed_files": [
+        "curaops/auth.py"
+      ],
+      "requirements": [
+        "SW-REQ-AUTH-007"
+      ],
+      "run_id": "run-900"
+    }
+  ],
+  "blocked_actions": [
+    {
+      "action": "rm production.db",
+      "action_kind": "delete",
+      "adapter": "matrix-os.safety-guard",
+      "path": "production.db",
+      "reason": "Path matches protected pattern"
+    }
+  ],
+  "boundaries": {
+    "automatic_rule_enforcement": false,
+    "dashboard_runtime": false,
+    "external_runtime_required": false,
+    "production_audit_retention": false
+  },
+  "change_requests": [
+    {
+      "adapter": "native",
+      "change_request_id": "CR-MXOS-001",
+      "change_type": "bugfix",
+      "requirements": [
+        "SW-REQ-AUTH-007"
+      ],
+      "status": "approved"
+    }
+  ],
+  "event_types": {
+    "accountable_change.evidence.generated": 1,
+    "agent.run.completed": 1,
+    "aspice.check.completed": 1,
+    "change_request.evidence.generated": 1,
+    "failure.observed": 1,
+    "rule.proposed": 1,
+    "safety_guard.action.blocked": 1
+  },
+  "failures": [
+    {
+      "adapter": "matrix-os.failure-loop",
+      "kind": "test_failure",
+      "signature": "pytest::test_product_coherence::AssertionError",
+      "summary": "Scenario regression failed before rule proposal"
+    }
+  ],
+  "producers": {
+    "agent-evidence-plane": 1,
+    "curaops-safety-guard": 1,
+    "failure-driven-loop": 2,
+    "matrix-os": 3
+  },
+  "requirements": [
+    "SW-REQ-AUTH-007"
+  ],
+  "rule_proposals": [
+    {
+      "adapter": "matrix-os.failure-loop",
+      "enforced": false,
+      "policy_action": "none",
+      "rule_id": "rule_product_coherence_regression",
+      "title": "Require product coherence scenario gate before merge"
+    }
+  ],
+  "subjects": {
+    "accountable_change": 1,
+    "agent_run": 1,
+    "change_request": 1,
+    "failure_loop_observation": 1,
+    "failure_loop_rule_proposal": 1,
+    "safety_guard_action": 1,
+    "traceability_gap": 1
+  },
+  "total_events": 7,
+  "traceability_gaps": [
+    {
+      "missing_link": "verification_case",
+      "requirement_id": "SW-REQ-AUTH-007",
+      "source_file": "docs/requirements/auth.md"
+    }
+  ]
+}
