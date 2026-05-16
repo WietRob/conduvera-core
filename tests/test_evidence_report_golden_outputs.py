@@ -45,7 +45,7 @@ def test_json_output_matches_golden_file() -> None:
     report = build_operator_report(EVENTS_PATH)
 
     assert json.loads(render_operator_report(report, format="json")) == json.loads(_read(EXPECTED_JSON))
-    assert render_operator_report(report, format="json") + "\n" == _read(EXPECTED_JSON)
+    assert render_operator_report(report, format="json") == _read(EXPECTED_JSON)
 
 
 def test_golden_report_locks_operator_accountability_answers() -> None:
@@ -95,4 +95,4 @@ def test_intentional_output_changes_must_update_golden_files() -> None:
 
     assert render_operator_report(report, format="text") == _read(EXPECTED_TEXT)
     assert render_operator_report(report, format="markdown") == _read(EXPECTED_MARKDOWN)
-    assert render_operator_report(report, format="json") + "\n" == _read(EXPECTED_JSON)
+    assert render_operator_report(report, format="json") == _read(EXPECTED_JSON)
