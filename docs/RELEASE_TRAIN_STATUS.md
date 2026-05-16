@@ -19,7 +19,8 @@ This document tracks merged slices and planned next slices. It is not a product 
 | #12 | Safety Guard Adapter Contract | Merged | `93118b2` | Translate compatible Safety Guard trust/safety results into Matrix OS events |
 | #13 | Evidence Adapter Registry | Merged | `2e2b8c7` | Metadata-only registry and CLI discovery for existing evidence adapters |
 | #14 | failure-driven-loop Thin Adapter | Merged | `58b8906` | Translate compatible failure-loop result JSONL into Matrix OS evidence events |
-| #15 | Product Coherence & Harness Gateway Validation | Current | TBD | Scenario proof, generic gateway contract, UI value map, provenance note |
+| #15 | Product Coherence & Harness Gateway Validation | Merged | `661589b` | Scenario proof, generic gateway contract, UI value map, provenance note |
+| #16 | Evidence Operator Report Pack | Current | TBD | Read-only operator reports over validated Matrix OS evidence streams |
 
 Closed as superseded:
 
@@ -43,6 +44,7 @@ python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
 python3 -m curaops.cli.main evidence adapter show safety-guard
 python3 -m curaops.cli.main evidence adapter show failure-loop
 python3 -m curaops.cli.main evidence convert-failure-loop --help
+python3 -m curaops.cli.main evidence report EVENTS.jsonl --format json
 ```
 
 ## Release train next slices
@@ -55,7 +57,8 @@ python3 -m curaops.cli.main evidence convert-failure-loop --help
 | Safety Guard Adapter Contract | Translate compatible local Safety Guard trust/safety results into Matrix OS envelopes | Merged | No execution, shell interception, repo modification, release creation, or production policy claim |
 | Evidence Adapter Registry | Discover existing evidence adapters and their explicit contracts | Merged | Registry metadata only; no new adapter, runtime execution, or production audit claim |
 | failure-driven-loop Thin Adapter | Translate compatible local failure-loop result JSONL into Matrix OS envelopes | Merged | No runtime execution, rule enforcement, external repo modification, or production policy claim |
-| Product Coherence & Harness Gateway Validation | Prove combined operator scenarios and define generic future runner/editor gateway boundaries | Current | No new external adapter, no runtime execution, no MCP server, no dashboard, no production claim |
+| Product Coherence & Harness Gateway Validation | Prove combined operator scenarios and define generic future runner/editor gateway boundaries | Merged | No new external adapter, no runtime execution, no MCP server, no dashboard, no production claim |
+| Evidence Operator Report Pack | Render operator-readable reports for product-coherence evidence questions | Current | No new adapter, no runtime execution, no dashboard, no production audit retention, no automatic rule enforcement |
 | Later adapter slices | Broader Safety Guard runtime integration | Planned | Only after evidence bridge proves the boundary; keep Safety Guard standalone |
 | Later adapter slices | Broader agent-evidence-plane adapter | Planned | Only after thin adapter proves the boundary; keep sidecar separate |
 | Later adapter slices | CAS Extractor adapter/capability | Planned | Define a focused contract before integration |
@@ -87,6 +90,7 @@ python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
 python3 -m curaops.cli.main evidence adapter show safety-guard
 python3 -m curaops.cli.main evidence adapter show failure-loop
 python3 -m curaops.cli.main evidence convert-failure-loop --help
+python3 -m curaops.cli.main evidence report EVENTS.jsonl --format json
 ```
 
 ## Not production-ready yet

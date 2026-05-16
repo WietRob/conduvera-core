@@ -19,6 +19,7 @@ This inventory classifies existing and newly authoritative documents after PR #4
 | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md` | Authoritative generic gateway boundary | Create | Defines Hermes/OpenCode/Zed/MCP/local-shell/peekxd future descriptors without runtime execution |
 | `docs/MATRIX_OS_UI_VALUE_MAP.md` | Authoritative original UI value map | Create | Maps preserved TUI surfaces to future CR/evidence/runner/editor use without UI rewrite or dashboard claim |
 | `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` | Authoritative provenance note | Create | Separates confirmed Matrix UI lineage facts from UNKNOWN Pi/fork claims |
+| `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md` | Authoritative evidence report layer | Create | Defines read-only text/Markdown/JSON operator reports over validated evidence streams without runtime or production-audit claims |
 | `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md` | Authoritative command/module index | Create | Needed navigable index for compliance, accountability, ASPICE, and CLI commands |
 | `docs/RELEASE_TRAIN_STATUS.md` | Authoritative release status | Create | Needed current release-train status and next planned PRs |
 | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md` | Current CCC architecture | Keep | Describes merged PR #5 module; some historical API sketches remain non-authoritative next to current CLI/API docs |
@@ -57,9 +58,10 @@ This inventory classifies existing and newly authoritative documents after PR #4
 11. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
 12. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
 13. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
-14. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
-15. `docs/RELEASE_TRAIN_STATUS.md`
-16. Module-specific docs for CCC, AAL, and ASPICE as needed
+14. `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`
+15. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
+16. `docs/RELEASE_TRAIN_STATUS.md`
+17. Module-specific docs for CCC, AAL, and ASPICE as needed
 
 ## Deprecated-document rule
 

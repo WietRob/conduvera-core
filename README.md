@@ -16,7 +16,8 @@ Current merged scope:
 | Safety Guard Adapter Contract | Merged | Convert compatible trust/safety result JSONL into Matrix OS evidence events |
 | Evidence Adapter Registry | Merged | Discover registered adapters and their explicit contracts |
 | failure-driven-loop Thin Adapter | Merged | Convert compatible failure-loop result JSONL into Matrix OS evidence events |
-| Product Coherence & Harness Gateway Validation | Current | Prove Matrix OS product scenarios and generic future runner/editor boundaries |
+| Product Coherence & Harness Gateway Validation | Merged | Prove Matrix OS product scenarios and generic future runner/editor boundaries |
+| Evidence Operator Report Pack | Current | Render operator-readable text/Markdown/JSON reports over validated evidence streams |
 
 This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope.
 
@@ -36,6 +37,7 @@ python3 -m curaops.cli.main evidence adapter show failure-loop
 python3 -m curaops.cli.main evidence convert-agent-plane --help
 python3 -m curaops.cli.main evidence convert-safety-guard --help
 python3 -m curaops.cli.main evidence convert-failure-loop --help
+python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
 ```
 
 Root command namespaces:
@@ -48,7 +50,7 @@ Root command namespaces:
 | `accountable` | Accountable Agent Layer |
 | `aspice` | ASPICE Support Utilities |
 | `scaffold` | UI/MCP/editor scaffolding manifest |
-| `evidence` | Evidence backbone validate/summarize/convert/discovery utilities |
+| `evidence` | Evidence backbone validate/summarize/convert/discovery/report utilities |
 
 ## Authoritative docs
 
@@ -67,8 +69,9 @@ Start here:
 11. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
 12. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
 13. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
-14. `docs/RELEASE_TRAIN_STATUS.md`
-15. `docs/DOCUMENTATION_INVENTORY.md`
+14. `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`
+15. `docs/RELEASE_TRAIN_STATUS.md`
+16. `docs/DOCUMENTATION_INVENTORY.md`
 
 Module-specific docs:
 
@@ -82,6 +85,7 @@ Module-specific docs:
 | Safety Guard Adapter Contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`, `curaops/evidence/adapters/safety_guard.py` |
 | Evidence Adapter Registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`, `curaops/evidence/adapters/registry.py` |
 | failure-driven-loop Thin Adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`, `curaops/evidence/adapters/failure_loop.py` |
+| Evidence Operator Reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`, `curaops/evidence/reporting.py` |
 | Product Coherence Scenarios | `docs/MATRIX_OS_PRODUCT_COHERENCE.md`, `tests/test_product_coherence_scenarios.py` |
 | Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `curaops/harness/gateway.py` |
 | UI Value Map / Provenance | `docs/MATRIX_OS_UI_VALUE_MAP.md`, `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` |
@@ -106,10 +110,11 @@ Merged:
 - PR #12 Safety Guard Adapter Contract
 - PR #13 Evidence Adapter Registry
 - PR #14 failure-driven-loop Thin Adapter
+- PR #15 Product Coherence & Harness Gateway Validation
 
 Current:
 
-- Product Coherence & Harness Gateway Validation: scenario proof, generic gateway descriptors, UI/provenance mapping; no runtime execution
+- Evidence Operator Report Pack: operator-readable reports from existing evidence streams; no new adapter, runtime execution, dashboard, MCP runtime, or production audit claim
 
 Planned:
 
