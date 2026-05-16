@@ -17,7 +17,8 @@ This document maps the currently merged compliance/accountability modules and th
 | Safety Guard Adapter Contract | Current | `curaops.evidence.adapters.safety_guard` | `evidence convert-safety-guard` | Convert compatible trust/safety result JSONL into Matrix OS events |
 | Evidence Adapter Registry | Current | `curaops.evidence.adapters.registry` | `evidence adapters`, `evidence adapter show` | Discover registered evidence adapters and their explicit event/input contracts |
 | failure-driven-loop Thin Adapter | PR #14 | `curaops.evidence.adapters.failure_loop` | `evidence convert-failure-loop` | Convert compatible failure-loop result JSONL into Matrix OS evidence events; proposed rules are evidence only |
-| Product Coherence & Harness Gateway Validation | Current | `curaops.harness.gateway`, scenario tests | test/docs | Validate operator scenarios, generic gateway descriptors, UI value map, provenance note |
+| Product Coherence & Harness Gateway Validation | PR #15 | `curaops.harness.gateway`, scenario tests | test/docs | Validate operator scenarios, generic gateway descriptors, UI value map, provenance note |
+| Evidence Operator Report Pack | Current | `curaops.evidence.reporting` | `evidence report` | Render operator-readable text/Markdown/JSON reports over validated evidence streams |
 
 ## CLI command index
 
@@ -99,6 +100,7 @@ Evidence backbone commands:
 | `evidence adapter show` | Show one evidence adapter descriptor; unknown ids fail closed |
 | `evidence validate` | Validate a Matrix OS evidence event JSONL stream |
 | `evidence summarize` | Summarize a valid Matrix OS evidence event JSONL stream |
+| `evidence report` | Render an operator-readable evidence report from a valid Matrix OS event JSONL stream |
 | `evidence convert-agent-plane` | Convert compatible agent-evidence-plane JSONL events into Matrix OS evidence JSONL |
 | `evidence convert-safety-guard` | Convert compatible Safety Guard result JSONL into Matrix OS evidence JSONL |
 | `evidence convert-failure-loop` | Convert compatible failure-loop result JSONL into Matrix OS evidence JSONL |
@@ -117,6 +119,7 @@ Evidence backbone commands:
 | Safety Guard adapter contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md` |
 | Evidence adapter registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md` |
 | failure-driven-loop thin adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md` |
+| Evidence operator reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md` |
 | Release train | `docs/RELEASE_TRAIN_STATUS.md` |
 | Compliance/accountability index | this file |
 | Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md`, `docs/COMPLIANCE_CHANGE_CONTROL_PROCESS.md`, `docs/COMPLIANCE_CHANGE_CONTROL_RULES.md`, `docs/COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md` |
@@ -125,4 +128,4 @@ Evidence backbone commands:
 
 ## Non-goals in the current merged stack
 
-The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding, and the evidence backbone plus thin external adapters are local Matrix OS harness-side contracts. The gateway descriptors are declarative future boundaries only. It does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, agent execution bridge, real Hermes/OpenCode/Zed execution, shell interception, destructive command execution, production audit retention, cloud persistence, or external certification. Broad Safety Guard runtime work, broad agent-evidence-plane product work, CAS/peekxd/OpenCode/ai-router adapters, and deployment hardening remain outside the current merged stack.
+The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding, and the evidence backbone plus thin external adapters are local Matrix OS harness-side contracts. The report layer is read-only over existing evidence. The gateway descriptors are declarative future boundaries only. It does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, agent execution bridge, real Hermes/OpenCode/Zed execution, shell interception, destructive command execution, automatic rule enforcement, production audit retention, cloud persistence, or external certification. Broad Safety Guard runtime work, broad agent-evidence-plane product work, CAS/peekxd/OpenCode/ai-router adapters, and deployment hardening remain outside the current merged stack.

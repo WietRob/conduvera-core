@@ -8,7 +8,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from curaops.evidence import summarize_event_stream, validate_event_stream
+from curaops.evidence import build_operator_report, render_operator_report, summarize_event_stream, validate_event_stream
 from curaops.evidence.adapters.agent_evidence_plane import convert_agent_evidence_plane_jsonl
 from curaops.evidence.adapters.failure_loop import convert_failure_loop_jsonl
 from curaops.evidence.adapters.registry import get_adapter_descriptor, list_adapter_descriptors
@@ -155,3 +155,22 @@ def summarize(
         for value, count in values.items():
             table.add_row(dimension, value, str(count))
     console.print(table)
+
+
+@evidence_app.command("report")
+def report(
+    events: Path = typer.Argument(..., help="Matrix OS EventEnvelope JSONL stream to report on"),
+    format: str = typer.Option("text", "--format", help="Report format: text, markdown, or json"),
+):
+    """Render an operator-readable evidence report without external runtime execution."""
+
+    if format not in {"text", "markdown", "json"}:
+        console.print(f"[red]Evidence report failed[/red]: unsupported format: {format}")
+        raise typer.Exit(1)
+    try:
+        operator_report = build_operator_report(events)
+        rendered = render_operator_report(operator_report, format=format)  # type: ignore[arg-type]
+    except Exception as exc:
+        console.print(f"[red]Evidence report failed[/red]: {exc}")
+        raise typer.Exit(1) from exc
+    console.print(rendered, markup=False, end="")

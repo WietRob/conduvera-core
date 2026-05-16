@@ -19,6 +19,7 @@ Matrix OS is now more than a package baseline plus separate utilities. The coher
 | Safety Guard Adapter | Translation-only blocked/allowed/approval safety evidence |
 | Evidence Adapter Registry | Discoverable adapter metadata and fail-closed lookup |
 | failure-driven-loop Thin Adapter | Translation-only failure evidence and non-enforced rule proposals |
+| Evidence Operator Reports | Read-only reports that answer product-coherence questions from validated evidence streams |
 
 ## Product thesis
 
@@ -91,10 +92,22 @@ The product-value scenario pack is implemented in `tests/test_product_coherence_
 | Was a failure observed? | `failure.observed` |
 | Was a rule proposed? | `rule.proposed` |
 | Was any proposed rule enforced? | No: `enforced=false`, `policy_action=none` |
-| Which adapter produced which evidence? | Evidence Adapter Registry descriptors and producers |
+| Which adapter produced which evidence? | Evidence Adapter Registry descriptors, producers, and operator report adapter counts |
 | Which external project remains standalone? | Gateway boundaries and adapter docs |
 | Which Matrix OS surface could show the result later? | UI value map and Gateway editor surface descriptors |
 
+## Operator report layer
+
+The evidence operator report layer is implemented in `curaops/evidence/reporting.py` with CLI access through:
+
+```bash
+python3 -m curaops.cli.main evidence report EVENTS.jsonl --format text
+python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
+python3 -m curaops.cli.main evidence report EVENTS.jsonl --format json
+```
+
+It reads existing Matrix OS evidence only. It does not create a new adapter, run external tools, launch a dashboard, provide MCP runtime, retain production audit data, or enforce proposed rules.
+
 ## Product status
 
-Matrix OS is a coherent local harness/control-plane baseline. It is not yet a production platform, certification system, cloud audit service, dashboard product, MCP runtime, or runner execution bridge.
+Matrix OS is a coherent local harness/control-plane baseline with a local operator report over validated evidence streams. It is not yet a production platform, certification system, cloud audit service, dashboard product, MCP runtime, policy-enforcement runtime, or runner execution bridge.

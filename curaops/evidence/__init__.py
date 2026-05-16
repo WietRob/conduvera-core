@@ -13,6 +13,11 @@ from curaops.evidence.contract import (
     EvidenceProducer,
     ValidationError,
 )
+from curaops.evidence.reporting import (
+    EvidenceOperatorReport,
+    build_operator_report,
+    render_operator_report,
+)
 from curaops.evidence.store import (
     EvidenceStore,
     default_event_store_path,
@@ -26,10 +31,13 @@ __all__ = [
     "EVENT_TYPES",
     "SCHEMA_VERSION",
     "EventEnvelope",
+    "EvidenceOperatorReport",
     "EvidenceProducer",
     "EvidenceStore",
     "ValidationError",
+    "build_operator_report",
     "default_event_store_path",
+    "render_operator_report",
     "summarize_event_stream",
     "validate_event_stream",
 ]
