@@ -27,6 +27,8 @@ Status: authoritative boundary map for the merged Matrix OS state including UI/M
 | Safety Guard adapter contract | Yes | Matrix OS Harness | Translation-only trust/safety evidence bridge; no execution, shell interception, or repo modification |
 | Evidence adapter registry | Yes | Matrix OS Harness | Metadata-only discovery index for existing adapters; no runtime execution or new adapters |
 | failure-driven-loop thin adapter | Yes | Matrix OS Harness | Translation-only failure/result evidence bridge; no runtime execution, rule enforcement, or repo modification |
+| Product coherence scenarios | Yes | Matrix OS Harness | Scenario-test proof of operator value; no production-readiness claim |
+| Harness Gateway registry | Yes | Matrix OS Harness | Declarative future runner/tool/editor descriptors; no runtime execution |
 | ASPICE conflict detection | Yes | ASPICE Support Utilities | Merged in PR #7 |
 | ASPICE bidirectional link support | Yes | ASPICE Support Utilities | Merged in PR #7 |
 | UI/dashboard | Scaffolding only | Matrix OS Harness | Original Matrix UI is preserved; no production dashboard claim |
@@ -35,7 +37,7 @@ Status: authoritative boundary map for the merged Matrix OS state including UI/M
 | Safety Guard | No | External engine | Remains standalone OSS trust funnel; Matrix OS only owns the narrow evidence translation adapter |
 | agent-evidence-plane | No | External sidecar | Separately maintainable reference project; Matrix OS only owns the thin translation adapter |
 | CAS Extractor | No | Later adapter/capability | Not in merged core |
-| failure-driven-loop | No | Later adapter/capability | Not in merged core |
+| failure-driven-loop | No | External engine | Remains standalone; Matrix OS only owns the narrow evidence translation adapter |
 | peekxd | No | Later adapter/capability | Not in merged core |
 | OpenCode plugin | No | Later adapter/capability | Not in merged core |
 | ai-router | No | Later adapter/capability | Not in merged core |
@@ -48,7 +50,8 @@ Status: authoritative boundary map for the merged Matrix OS state including UI/M
 | ASPICE Support Utilities | Filesystem/project documents | ASPICE utilities should not require CCC/AAL runtime state |
 | Compliance Change Control | Foundation package/CLI baseline | CCC remains the CR lifecycle authority |
 | CLI commands | Corresponding module services | CLI should stay thin and not duplicate domain logic |
-| Future evidence adapters | `curaops.evidence.EvidenceProducer` protocol | Adapters may emit Matrix OS events but external projects remain separately maintainable |
+| Future evidence adapters | `curaops.evidence.EvidenceProducer` protocol and Evidence Adapter Registry | Adapters may emit Matrix OS events but external projects remain separately maintainable |
+| Future runner/editor integrations | `curaops.harness.gateway` descriptors | Gateway metadata must remain generic and must not execute external runtimes |
 
 ## Disallowed coupling
 
@@ -59,6 +62,7 @@ Status: authoritative boundary map for the merged Matrix OS state including UI/M
 | Docs claim UI/MCP/editor features are production-ready | Scaffolding is discovery-only and not a production dashboard/runtime |
 | Matrix OS absorbs Safety Guard or evidence-plane internals without adapter PR | External engines remain separately maintainable |
 | Evidence backbone claims production audit retention/cloud persistence | Current store is local JSONL contract only |
+| Matrix OS hardcodes Hermes/OpenCode/Zed into CCC/AAL/Evidence | Runner/editor integrations must go through generic gateway descriptors and focused adapter PRs |
 | Docs use old internal shorthand labels or context letters | Public docs must use professional module names |
 | Docs advertise non-existent commands | CLI help is the source of truth |
 

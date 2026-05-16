@@ -16,7 +16,8 @@ This document maps the currently merged compliance/accountability modules and th
 | agent-evidence-plane Thin Adapter | Current | `curaops.evidence.adapters.agent_evidence_plane` | `evidence convert-agent-plane` | Convert a small supported external JSONL subset into Matrix OS events |
 | Safety Guard Adapter Contract | Current | `curaops.evidence.adapters.safety_guard` | `evidence convert-safety-guard` | Convert compatible trust/safety result JSONL into Matrix OS events |
 | Evidence Adapter Registry | Current | `curaops.evidence.adapters.registry` | `evidence adapters`, `evidence adapter show` | Discover registered evidence adapters and their explicit event/input contracts |
-| failure-driven-loop Thin Adapter | Current | `curaops.evidence.adapters.failure_loop` | `evidence convert-failure-loop` | Convert compatible failure-loop result JSONL into Matrix OS evidence events; proposed rules are evidence only |
+| failure-driven-loop Thin Adapter | PR #14 | `curaops.evidence.adapters.failure_loop` | `evidence convert-failure-loop` | Convert compatible failure-loop result JSONL into Matrix OS evidence events; proposed rules are evidence only |
+| Product Coherence & Harness Gateway Validation | Current | `curaops.harness.gateway`, scenario tests | test/docs | Validate operator scenarios, generic gateway descriptors, UI value map, provenance note |
 
 ## CLI command index
 
@@ -107,6 +108,9 @@ Evidence backbone commands:
 | Area | Authoritative docs |
 |---|---|
 | Overall architecture | `docs/MATRIX_OS_ARCHITECTURE.md`, `docs/MATRIX_OS_MODULE_BOUNDARIES.md` |
+| Product coherence / scenarios | `docs/MATRIX_OS_PRODUCT_COHERENCE.md`, `tests/test_product_coherence_scenarios.py` |
+| Harness gateway contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `curaops/harness/gateway.py` |
+| UI value map / provenance | `docs/MATRIX_OS_UI_VALUE_MAP.md`, `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` |
 | MCP / UI / Editor scaffolding | `docs/MATRIX_OS_SCAFFOLDING.md` |
 | Evidence backbone | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md` |
 | agent-evidence-plane thin adapter | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md` |
@@ -121,4 +125,4 @@ Evidence backbone commands:
 
 ## Non-goals in the current merged stack
 
-The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding, and the evidence backbone plus thin external adapters are local Matrix OS harness-side contracts. It does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, agent execution bridge, shell interception, destructive command execution, production audit retention, cloud persistence, or external certification. Broad Safety Guard runtime work, broad agent-evidence-plane product work, CAS/failure-loop/peekxd/OpenCode/ai-router adapters, and deployment hardening remain outside the current merged stack.
+The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding, and the evidence backbone plus thin external adapters are local Matrix OS harness-side contracts. The gateway descriptors are declarative future boundaries only. It does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, agent execution bridge, real Hermes/OpenCode/Zed execution, shell interception, destructive command execution, production audit retention, cloud persistence, or external certification. Broad Safety Guard runtime work, broad agent-evidence-plane product work, CAS/peekxd/OpenCode/ai-router adapters, and deployment hardening remain outside the current merged stack.

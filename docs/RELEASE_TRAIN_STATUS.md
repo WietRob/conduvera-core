@@ -18,7 +18,8 @@ This document tracks merged slices and planned next slices. It is not a product 
 | #11 | agent-evidence-plane Thin Adapter | Merged | `805adce` | Translate a small supported external-event subset into Matrix OS events |
 | #12 | Safety Guard Adapter Contract | Merged | `93118b2` | Translate compatible Safety Guard trust/safety results into Matrix OS events |
 | #13 | Evidence Adapter Registry | Merged | `2e2b8c7` | Metadata-only registry and CLI discovery for existing evidence adapters |
-| #14 | failure-driven-loop Thin Adapter | Current | TBD | Translate compatible failure-loop result JSONL into Matrix OS evidence events |
+| #14 | failure-driven-loop Thin Adapter | Merged | `58b8906` | Translate compatible failure-loop result JSONL into Matrix OS evidence events |
+| #15 | Product Coherence & Harness Gateway Validation | Current | TBD | Scenario proof, generic gateway contract, UI value map, provenance note |
 
 Closed as superseded:
 
@@ -53,11 +54,12 @@ python3 -m curaops.cli.main evidence convert-failure-loop --help
 | agent-evidence-plane Thin Adapter | Translate compatible local agent-evidence-plane events into Matrix OS envelopes | Merged | No vendoring, no external repo modification, no public launch |
 | Safety Guard Adapter Contract | Translate compatible local Safety Guard trust/safety results into Matrix OS envelopes | Merged | No execution, shell interception, repo modification, release creation, or production policy claim |
 | Evidence Adapter Registry | Discover existing evidence adapters and their explicit contracts | Merged | Registry metadata only; no new adapter, runtime execution, or production audit claim |
-| failure-driven-loop Thin Adapter | Translate compatible local failure-loop result JSONL into Matrix OS envelopes | Current | No runtime execution, rule enforcement, external repo modification, or production policy claim |
+| failure-driven-loop Thin Adapter | Translate compatible local failure-loop result JSONL into Matrix OS envelopes | Merged | No runtime execution, rule enforcement, external repo modification, or production policy claim |
+| Product Coherence & Harness Gateway Validation | Prove combined operator scenarios and define generic future runner/editor gateway boundaries | Current | No new external adapter, no runtime execution, no MCP server, no dashboard, no production claim |
 | Later adapter slices | Broader Safety Guard runtime integration | Planned | Only after evidence bridge proves the boundary; keep Safety Guard standalone |
 | Later adapter slices | Broader agent-evidence-plane adapter | Planned | Only after thin adapter proves the boundary; keep sidecar separate |
 | Later adapter slices | CAS Extractor adapter/capability | Planned | Define a focused contract before integration |
-| Later adapter slices | failure-driven-loop adapter/capability | Planned | Define a focused contract before integration |
+| Later runtime slices | Broader failure-driven-loop policy/runtime capability | Planned | Only after translation-only evidence proves operator value; no automatic rule enforcement yet |
 | Later adapter slices | peekxd adapter/capability | Planned | Define a focused contract before integration |
 | Later adapter slices | OpenCode plugin adapter/capability | Planned | Define a focused contract before integration |
 | Later adapter slices | ai-router adapter/capability | Planned | Define a focused contract before integration |
@@ -95,7 +97,7 @@ The current release train does not yet establish:
 - hosted service operations
 - security threat model and hardening
 - production audit-retention policy beyond local JSONL contract
-- external-adapter contracts
+- external-adapter contracts beyond the reviewed translation-only adapters and gateway descriptors
 - CI enforcement policy
 - migration/upgrade procedures
 - user-facing UI/MCP/editor workflows
