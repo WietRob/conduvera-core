@@ -7,7 +7,7 @@ This inventory classifies authoritative and historical Matrix OS documents acros
 | File | Current role | Action | Reason |
 |---|---|---|---|
 | `README.md` | Entry point | Update | Previous README described an older TUI-centric state; now points to the merged package/CLI harness docs |
-| `docs/MATRIX_OS_ARCHITECTURE.md` | Authoritative overview | Create | Needed top-level architecture aligned to merged PR #4-#7 state |
+| `docs/MATRIX_OS_ARCHITECTURE.md` | Authoritative overview | Create | Needed top-level architecture aligned to the current merged Matrix OS package/CLI harness state |
 | `docs/MATRIX_OS_MODULE_BOUNDARIES.md` | Authoritative boundary map | Create | Needed clear ownership split for harness, CCC, AAL, ASPICE, and external engines |
 | `docs/MATRIX_OS_SCAFFOLDING.md` | Authoritative scaffolding contract | Create | Preserves original Matrix UI and defines MCP/editor scaffolding boundaries without implementation claims |
 | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md` | Authoritative evidence backbone contract | Create | Defines Matrix OS harness-side event envelope, local JSONL store, and adapter boundary without absorbing agent-evidence-plane |
