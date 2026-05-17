@@ -1,5 +1,7 @@
 # Matrix OS Evidence Operator Report
 
+Report contract: `MXOS-REPORT-1.0`
+
 Total events: 7
 
 ## Operator questions

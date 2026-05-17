@@ -21,6 +21,7 @@ Matrix OS is now more than a package baseline plus separate utilities. The coher
 | failure-driven-loop Thin Adapter | Translation-only failure evidence and non-enforced rule proposals |
 | Evidence Operator Reports | Read-only reports that answer product-coherence questions from validated evidence streams |
 | Evidence Report Golden Fixtures | Deterministic EventEnvelope fixture plus expected text/Markdown/JSON outputs for report regression |
+| Evidence Report Contract Versioning + CI Gate | Explicit `MXOS-REPORT-1.0` contract metadata plus focused CI workflow for evidence/report gates |
 
 ## Product thesis
 
@@ -107,7 +108,9 @@ python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
 python3 -m curaops.cli.main evidence report EVENTS.jsonl --format json
 ```
 
-It reads existing Matrix OS evidence only. `tests/test_evidence_report_golden_outputs.py` locks a deterministic `tests/fixtures/evidence/operator_report/product_coherence.events.jsonl` stream against expected text, Markdown, and JSON outputs. The golden outputs are regression contracts for operator-facing accountability answers, not production audit retention.
+It reads existing Matrix OS evidence only. `tests/test_evidence_report_golden_outputs.py` locks a deterministic `tests/fixtures/evidence/operator_report/product_coherence.events.jsonl` stream against expected text, Markdown, and JSON outputs. `tests/test_evidence_report_contract_version.py` pins those outputs to report contract `MXOS-REPORT-1.0`, which is exposed in JSON as `report_schema_version` and in text/Markdown metadata. The golden outputs are regression contracts for operator-facing accountability answers, not production audit retention.
+
+`.github/workflows/matrix-os-evidence-quality.yml` defines a focused evidence/report quality gate for pull requests and manual dispatch. It runs the focused test suite, exact CLI golden-output comparisons, and ruff on the evidence/report surface. It does not claim branch protection, production readiness, runtime execution, or policy enforcement.
 
 The report/golden layer does not create a new adapter, run external tools, launch a dashboard, provide MCP runtime, retain production audit data, or enforce proposed rules.
 

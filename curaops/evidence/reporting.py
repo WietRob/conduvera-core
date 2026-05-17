@@ -12,12 +12,14 @@ from curaops.evidence.contract import ValidationError
 from curaops.evidence.store import read_event_stream
 
 ReportFormat = Literal["text", "markdown", "json"]
+REPORT_SCHEMA_VERSION = "MXOS-REPORT-1.0"
 
 
 @dataclass(frozen=True)
 class EvidenceOperatorReport:
     """Deterministic operator report derived from validated evidence events."""
 
+    report_schema_version: str
     total_events: int
     event_types: dict[str, int]
     producers: dict[str, int]
@@ -66,6 +68,7 @@ def build_operator_report(events_path: Path) -> EvidenceOperatorReport:
                 requirements.add(str(reference["id"]))
 
     return EvidenceOperatorReport(
+        report_schema_version=REPORT_SCHEMA_VERSION,
         total_events=len(events),
         event_types=_count(event.event_type for event in events),
         producers=_count(event.producer["name"] for event in events),
@@ -265,6 +268,7 @@ def _operator_answers(report: EvidenceOperatorReport) -> list[tuple[str, str]]:
 def _render_text(report: EvidenceOperatorReport) -> str:
     lines = [
         "Matrix OS Evidence Operator Report",
+        f"Report contract: {report.report_schema_version}",
         f"Total events: {report.total_events}",
         "",
         "Counts by event type:",
@@ -307,6 +311,8 @@ def _render_text(report: EvidenceOperatorReport) -> str:
 def _render_markdown(report: EvidenceOperatorReport) -> str:
     lines = [
         "# Matrix OS Evidence Operator Report",
+        "",
+        f"Report contract: `{report.report_schema_version}`",
         "",
         f"Total events: {report.total_events}",
         "",

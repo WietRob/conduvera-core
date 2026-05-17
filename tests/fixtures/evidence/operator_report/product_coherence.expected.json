@@ -68,6 +68,7 @@
     "failure-driven-loop": 2,
     "matrix-os": 3
   },
+  "report_schema_version": "MXOS-REPORT-1.0",
   "requirements": [
     "SW-REQ-AUTH-007"
   ],
