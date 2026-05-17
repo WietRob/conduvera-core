@@ -1,6 +1,6 @@
 # Matrix OS Release Train Status
 
-Status: authoritative release-train index including the evidence backbone contract.
+Status: authoritative release-train index including the evidence backbone contract and current lightweight governance policy.
 
 This document tracks merged slices and planned next slices. It is not a product launch announcement and not a production-readiness claim.
 
@@ -22,7 +22,8 @@ This document tracks merged slices and planned next slices. It is not a product 
 | #15 | Product Coherence & Harness Gateway Validation | Merged | `661589b` | Scenario proof, generic gateway contract, UI value map, provenance note |
 | #16 | Evidence Operator Report Pack | Merged | `50614d7` | Read-only operator reports over validated Matrix OS evidence streams |
 | #17 | Evidence Report Golden Fixtures | Merged | `699a579` | Golden EventEnvelope fixture and expected text/Markdown/JSON report outputs |
-| TBD | Evidence Report Contract Versioning + CI Gate | Current | TBD | Explicit report contract version metadata and focused evidence/report CI workflow |
+| #18 | Evidence Report Contract Versioning + CI Gate | Merged | `e9ebe7c` | Explicit report contract version metadata and enforced evidence/report CI workflow |
+| TBD | Governance Hardening & Required Review Policy | Current | TBD | Document current branch protection, review policy, and CODEOWNERS routing draft |
 
 Closed as superseded:
 
@@ -64,7 +65,8 @@ python3 -m pytest tests/test_evidence_report_golden_outputs.py tests/test_eviden
 | Product Coherence & Harness Gateway Validation | Prove combined operator scenarios and define generic future runner/editor gateway boundaries | Merged | No new external adapter, no runtime execution, no MCP server, no dashboard, no production claim |
 | Evidence Operator Report Pack | Render operator-readable reports for product-coherence evidence questions | Merged | No new adapter, no runtime execution, no dashboard, no production audit retention, no automatic rule enforcement |
 | Evidence Report Golden Fixtures | Lock operator report outputs against deterministic product-coherence evidence | Merged | Regression fixtures only; no runtime execution, no dashboard, no MCP runtime, no production audit retention, no rule enforcement |
-| Evidence Report Contract Versioning + CI Gate | Add `MXOS-REPORT-1.0` metadata and focused GitHub Actions workflow | Current | CI workflow definition only; no branch-protection claim, production readiness, runtime execution, dashboard, or enforcement |
+| Evidence Report Contract Versioning + CI Gate | Add `MXOS-REPORT-1.0` metadata and focused GitHub Actions workflow | Merged | Required CI gate now enforced on `main`; no production readiness, runtime execution, dashboard, or rule enforcement |
+| Governance Hardening & Required Review Policy | Document branch protection, review policy, and CODEOWNERS routing | Current | Policy/docs only; no new required pull-request approval, runtime execution, dashboard, MCP runtime, or production audit claim |
 | Later adapter slices | Broader Safety Guard runtime integration | Planned | Only after evidence bridge proves the boundary; keep Safety Guard standalone |
 | Later adapter slices | Broader agent-evidence-plane adapter | Planned | Only after thin adapter proves the boundary; keep sidecar separate |
 | Later adapter slices | CAS Extractor adapter/capability | Planned | Define a focused contract before integration |
@@ -108,7 +110,7 @@ The current release train does not yet establish:
 - security threat model and hardening
 - production audit-retention policy beyond local JSONL contract
 - external-adapter contracts beyond the reviewed translation-only adapters and gateway descriptors
-- CI enforcement policy beyond the added focused workflow definition and any later verified branch-protection settings
+- CI enforcement policy beyond the enforced Matrix OS evidence/report quality gate and documented lightweight branch-protection policy
 - migration/upgrade procedures
 - user-facing UI/MCP/editor workflows
 - certification or compliance approval

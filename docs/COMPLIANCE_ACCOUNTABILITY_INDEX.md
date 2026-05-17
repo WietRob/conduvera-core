@@ -20,7 +20,8 @@ This document maps the currently merged compliance/accountability modules and th
 | Product Coherence & Harness Gateway Validation | PR #15 | `curaops.harness.gateway`, scenario tests | test/docs | Validate operator scenarios, generic gateway descriptors, UI value map, provenance note |
 | Evidence Operator Report Pack | PR #16 | `curaops.evidence.reporting` | `evidence report` | Render operator-readable text/Markdown/JSON reports over validated evidence streams |
 | Evidence Report Golden Fixtures | PR #17 | `curaops.evidence.reporting`, fixtures | tests | Regression contract comparing deterministic product-coherence evidence to expected report outputs |
-| Evidence Report Contract Versioning + CI Gate | Current | `curaops.evidence.reporting`, GitHub Actions | `evidence report-contract`, CI | Explicit `MXOS-REPORT-1.0` report metadata and focused evidence/report quality workflow |
+| Evidence Report Contract Versioning + CI Gate | PR #18 | `curaops.evidence.reporting`, GitHub Actions | `evidence report-contract`, CI | Explicit `MXOS-REPORT-1.0` report metadata and enforced evidence/report quality workflow |
+| Governance Hardening & Required Review Policy | Current | docs, `CODEOWNERS` | policy | Documents branch protection, release review model, and CODEOWNERS routing without adding hard PR-review enforcement |
 
 ## CLI command index
 
@@ -123,6 +124,7 @@ Evidence backbone commands:
 | Evidence adapter registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md` |
 | failure-driven-loop thin adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md` |
 | Evidence operator reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`, `tests/test_evidence_operator_report.py`, `tests/test_evidence_report_golden_outputs.py`, `tests/test_evidence_report_contract_version.py` |
+| Governance policy | `docs/MATRIX_OS_GOVERNANCE_POLICY.md`, `CODEOWNERS`, `.github/workflows/matrix-os-evidence-quality.yml` |
 | Release train | `docs/RELEASE_TRAIN_STATUS.md` |
 | Compliance/accountability index | this file |
 | Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md`, `docs/COMPLIANCE_CHANGE_CONTROL_PROCESS.md`, `docs/COMPLIANCE_CHANGE_CONTROL_RULES.md`, `docs/COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md` |
