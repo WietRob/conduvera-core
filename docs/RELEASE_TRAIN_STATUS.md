@@ -23,7 +23,8 @@ This document tracks merged slices and planned next slices. It is not a product 
 | #16 | Evidence Operator Report Pack | Merged | `50614d7` | Read-only operator reports over validated Matrix OS evidence streams |
 | #17 | Evidence Report Golden Fixtures | Merged | `699a579` | Golden EventEnvelope fixture and expected text/Markdown/JSON report outputs |
 | #18 | Evidence Report Contract Versioning + CI Gate | Merged | `e9ebe7c` | Explicit report contract version metadata and enforced evidence/report CI workflow |
-| TBD | Governance Hardening & Required Review Policy | Current | TBD | Document current branch protection, review policy, and CODEOWNERS routing draft |
+| #19 | Governance Hardening & Required Review Policy | Merged | `48b5550` | Document current branch protection, review policy, and CODEOWNERS routing draft |
+| TBD | Governance Enforcement Decision | Current | TBD | Decide required approval vs operational Kanban; keep settings unchanged for now |
 
 Closed as superseded:
 
@@ -66,7 +67,8 @@ python3 -m pytest tests/test_evidence_report_golden_outputs.py tests/test_eviden
 | Evidence Operator Report Pack | Render operator-readable reports for product-coherence evidence questions | Merged | No new adapter, no runtime execution, no dashboard, no production audit retention, no automatic rule enforcement |
 | Evidence Report Golden Fixtures | Lock operator report outputs against deterministic product-coherence evidence | Merged | Regression fixtures only; no runtime execution, no dashboard, no MCP runtime, no production audit retention, no rule enforcement |
 | Evidence Report Contract Versioning + CI Gate | Add `MXOS-REPORT-1.0` metadata and focused GitHub Actions workflow | Merged | Required CI gate now enforced on `main`; no production readiness, runtime execution, dashboard, or rule enforcement |
-| Governance Hardening & Required Review Policy | Document branch protection, review policy, and CODEOWNERS routing | Current | Policy/docs only; no new required pull-request approval, runtime execution, dashboard, MCP runtime, or production audit claim |
+| Governance Hardening & Required Review Policy | Document branch protection, review policy, and CODEOWNERS routing | Merged | Policy/docs only; no new required pull-request approval, runtime execution, dashboard, MCP runtime, or production audit claim |
+| Governance Enforcement Decision | Decide required approval vs operational Kanban | Current | Decision record only; keep GitHub approvals, owner review, conversation resolution, and admin enforcement non-enforced for now |
 | Later adapter slices | Broader Safety Guard runtime integration | Planned | Only after evidence bridge proves the boundary; keep Safety Guard standalone |
 | Later adapter slices | Broader agent-evidence-plane adapter | Planned | Only after thin adapter proves the boundary; keep sidecar separate |
 | Later adapter slices | CAS Extractor adapter/capability | Planned | Define a focused contract before integration |

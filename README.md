@@ -20,7 +20,8 @@ Current merged scope:
 | Evidence Operator Report Pack | Merged | Render operator-readable text/Markdown/JSON reports over validated evidence streams |
 | Evidence Report Golden Fixtures | Merged | Regression-lock operator report outputs with deterministic golden evidence |
 | Evidence Report Contract Versioning + CI Gate | Merged | Expose `MXOS-REPORT-1.0` report metadata and enforce focused evidence/report CI workflow |
-| Governance Hardening & Required Review Policy | Current | Document branch protection, release review model, and CODEOWNERS routing draft |
+| Governance Hardening & Required Review Policy | Merged | Document branch protection, release review model, and CODEOWNERS routing draft |
+| Governance Enforcement Decision | Current | Decide required approval vs operational Kanban; keep settings unchanged for now |
 
 This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope. The current `main` branch governance is documented in `docs/MATRIX_OS_GOVERNANCE_POLICY.md`: the evidence/report quality gate is enforced as a strict required status check, while required GitHub pull-request approvals and conversation resolution are not currently enforced.
 
@@ -76,7 +77,8 @@ Start here:
 14. `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`
 15. `docs/RELEASE_TRAIN_STATUS.md`
 16. `docs/MATRIX_OS_GOVERNANCE_POLICY.md`
-17. `docs/DOCUMENTATION_INVENTORY.md`
+17. `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`
+18. `docs/DOCUMENTATION_INVENTORY.md`
 
 Module-specific docs:
 
@@ -120,10 +122,11 @@ Merged:
 - PR #16 Evidence Operator Report Pack
 - PR #17 Evidence Report Golden Fixtures
 - PR #18 Evidence Report Contract Versioning + CI Gate
+- PR #19 Governance Hardening & Required Review Policy
 
 Current:
 
-- Governance Hardening & Required Review Policy: document enforced `Evidence/report focused gate`, lightweight branch protection, review-role policy, and CODEOWNERS routing draft; no new required pull-request approvals, runtime execution, dashboard, MCP runtime, production audit retention, or rule enforcement
+- Governance Enforcement Decision: record that required GitHub pull-request approvals, CODEOWNERS owner review, conversation resolution, and admin enforcement stay non-enforced for now; keep strict `Evidence/report focused gate` plus operational Kanban review
 
 Planned:
 

@@ -20,7 +20,8 @@ This inventory classifies authoritative and historical Matrix OS documents acros
 | `docs/MATRIX_OS_UI_VALUE_MAP.md` | Authoritative original UI value map | Create | Maps preserved TUI surfaces to future CR/evidence/runner/editor use without UI rewrite or dashboard claim |
 | `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` | Authoritative provenance note | Create | Separates confirmed Matrix UI lineage facts from UNKNOWN Pi/fork claims |
 | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md` | Authoritative evidence report layer | Update | Defines read-only text/Markdown/JSON operator reports, `MXOS-REPORT-1.0` contract versioning, golden-output regression fixtures, and the focused CI quality gate without runtime or production-audit claims |
-| `docs/MATRIX_OS_GOVERNANCE_POLICY.md` | Authoritative governance policy | Create | Documents verified branch protection, required evidence/report status check, review roles, and CODEOWNERS routing draft without adding required PR-review enforcement |
+| `docs/MATRIX_OS_GOVERNANCE_POLICY.md` | Authoritative governance policy | Update | Documents verified branch protection, required evidence/report status check, review roles, CODEOWNERS routing draft, and links to the enforcement decision |
+| `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md` | Authoritative governance decision record | Create | Records the required approval vs operational Kanban decision and keeps settings unchanged for now |
 | `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md` | Authoritative command/module index | Create | Needed navigable index for compliance, accountability, ASPICE, and CLI commands |
 | `docs/RELEASE_TRAIN_STATUS.md` | Authoritative release status | Create | Needed current release-train status and next planned PRs |
 | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md` | Current CCC architecture | Keep | Describes merged PR #5 module; some historical API sketches remain non-authoritative next to current CLI/API docs |
@@ -61,9 +62,10 @@ This inventory classifies authoritative and historical Matrix OS documents acros
 13. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
 14. `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`
 15. `docs/MATRIX_OS_GOVERNANCE_POLICY.md`
-16. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
-17. `docs/RELEASE_TRAIN_STATUS.md`
-18. Module-specific docs for CCC, AAL, and ASPICE as needed
+16. `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`
+17. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
+18. `docs/RELEASE_TRAIN_STATUS.md`
+19. Module-specific docs for CCC, AAL, and ASPICE as needed
 
 ## Deprecated-document rule
 
