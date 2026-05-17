@@ -63,7 +63,7 @@ Matrix OS currently uses two review layers:
 | GitHub required pull-request approval | not enforced | optional future policy |
 | GitHub required conversation resolution | not enforced | optional future policy |
 
-The recommended near-term stance is to keep GitHub approvals non-enforced while the release train is still moving quickly, but to keep Kanban reviews mandatory for governance-sensitive slices.
+The current governance enforcement decision is recorded in `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`: keep GitHub approvals, CODEOWNERS owner review, conversation resolution, and admin enforcement non-enforced for now; keep the strict evidence/report CI gate enforced; keep Kanban reviews mandatory as the operational process for governance-sensitive slices.
 
 ## Review roles
 

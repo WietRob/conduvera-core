@@ -124,7 +124,7 @@ Evidence backbone commands:
 | Evidence adapter registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md` |
 | failure-driven-loop thin adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md` |
 | Evidence operator reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`, `tests/test_evidence_operator_report.py`, `tests/test_evidence_report_golden_outputs.py`, `tests/test_evidence_report_contract_version.py` |
-| Governance policy | `docs/MATRIX_OS_GOVERNANCE_POLICY.md`, `CODEOWNERS`, `.github/workflows/matrix-os-evidence-quality.yml` |
+| Governance policy | `docs/MATRIX_OS_GOVERNANCE_POLICY.md`, `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`, `CODEOWNERS`, `.github/workflows/matrix-os-evidence-quality.yml` |
 | Release train | `docs/RELEASE_TRAIN_STATUS.md` |
 | Compliance/accountability index | this file |
 | Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md`, `docs/COMPLIANCE_CHANGE_CONTROL_PROCESS.md`, `docs/COMPLIANCE_CHANGE_CONTROL_RULES.md`, `docs/COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md` |
