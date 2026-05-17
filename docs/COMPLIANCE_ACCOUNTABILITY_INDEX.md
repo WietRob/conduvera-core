@@ -21,7 +21,8 @@ This document maps the currently merged compliance/accountability modules and th
 | Evidence Operator Report Pack | PR #16 | `curaops.evidence.reporting` | `evidence report` | Render operator-readable text/Markdown/JSON reports over validated evidence streams |
 | Evidence Report Golden Fixtures | PR #17 | `curaops.evidence.reporting`, fixtures | tests | Regression contract comparing deterministic product-coherence evidence to expected report outputs |
 | Evidence Report Contract Versioning + CI Gate | PR #18 | `curaops.evidence.reporting`, GitHub Actions | `evidence report-contract`, CI | Explicit `MXOS-REPORT-1.0` report metadata and enforced evidence/report quality workflow |
-| Governance Hardening & Required Review Policy | Current | docs, `CODEOWNERS` | policy | Documents branch protection, release review model, and CODEOWNERS routing without adding hard PR-review enforcement |
+| Governance Hardening & Required Review Policy | PR #19 | docs, `CODEOWNERS` | policy | Documents branch protection, release review model, and CODEOWNERS routing without adding hard pull-request approval enforcement |
+| Governance Enforcement Decision | Current | docs | policy | Records the decision to keep GitHub approvals, CODEOWNERS owner review, conversation resolution, and admin enforcement non-enforced for now |
 
 ## CLI command index
 
