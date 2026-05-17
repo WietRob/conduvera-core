@@ -8,7 +8,13 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from curaops.evidence import build_operator_report, render_operator_report, summarize_event_stream, validate_event_stream
+from curaops.evidence import (
+    REPORT_SCHEMA_VERSION,
+    build_operator_report,
+    render_operator_report,
+    summarize_event_stream,
+    validate_event_stream,
+)
 from curaops.evidence.adapters.agent_evidence_plane import convert_agent_evidence_plane_jsonl
 from curaops.evidence.adapters.failure_loop import convert_failure_loop_jsonl
 from curaops.evidence.adapters.registry import get_adapter_descriptor, list_adapter_descriptors
@@ -155,6 +161,13 @@ def summarize(
         for value, count in values.items():
             table.add_row(dimension, value, str(count))
     console.print(table)
+
+
+@evidence_app.command("report-contract")
+def report_contract():
+    """Print the stable Evidence Operator Report contract version."""
+
+    console.print(REPORT_SCHEMA_VERSION)
 
 
 @evidence_app.command("report")

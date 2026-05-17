@@ -15,6 +15,7 @@ from curaops.evidence.contract import (
 )
 from curaops.evidence.reporting import (
     EvidenceOperatorReport,
+    REPORT_SCHEMA_VERSION,
     build_operator_report,
     render_operator_report,
 )
@@ -34,6 +35,7 @@ __all__ = [
     "EvidenceOperatorReport",
     "EvidenceProducer",
     "EvidenceStore",
+    "REPORT_SCHEMA_VERSION",
     "ValidationError",
     "build_operator_report",
     "default_event_store_path",

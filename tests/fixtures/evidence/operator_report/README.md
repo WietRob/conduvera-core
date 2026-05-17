@@ -1,6 +1,6 @@
 # Evidence Operator Report Golden Fixtures
 
-This directory is a regression contract for Matrix OS operator-facing evidence reports.
+This directory is a regression contract for Matrix OS operator-facing evidence reports under report contract `MXOS-REPORT-1.0`.
 
 Files:
 
@@ -24,7 +24,8 @@ Determinism rules:
 
 - event IDs, timestamps, ordering, CR IDs, run IDs, requirement IDs, and adapter names are stable;
 - golden outputs must not include temporary paths or host-specific absolute paths;
-- intentional report output changes must update the corresponding expected files in the same change.
+- intentional report output changes must update the corresponding expected files in the same change;
+- report contract changes must update `REPORT_SCHEMA_VERSION`, tests, and the matching golden outputs together.
 
 Boundaries:
 
