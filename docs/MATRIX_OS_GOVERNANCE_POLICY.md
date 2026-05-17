@@ -15,7 +15,7 @@ Verified repository state for `WietRob/matrix-os`, branch `main`:
 | Required check context | `Evidence/report focused gate` | job from `Matrix OS Evidence Quality Gate` |
 | Strict status checks | yes | branch must be up to date before merge |
 | Admin enforcement | no | admins are not currently bound by branch protection |
-| Required GitHub PR reviews | no | GitHub branch protection does not currently require approvals |
+| Required GitHub pull-request approvals | no | GitHub branch protection does not currently require approvals |
 | Required conversation resolution | no | GitHub branch protection does not currently require resolved threads |
 | Force pushes | disabled | branch protection disallows force pushes |
 | Branch deletion | disabled | branch protection disallows deleting `main` |
@@ -30,7 +30,7 @@ Every Matrix OS release-train slice should follow this minimum policy:
 2. Keep the slice narrowly scoped.
 3. Avoid combining runtime, adapter, UI, MCP, dashboard, governance, and docs changes unless explicitly scoped together.
 4. Run the focused local gate before opening or updating a PR.
-5. Open a draft PR until local gates and scope checks are complete.
+5. Open a draft pull request until local gates and scope checks are complete.
 6. Use Kanban review fan-out for evidence/report, CI/release, architecture/boundary, or documentation concerns depending on the slice.
 7. Mark ready only after review blockers are fixed or explicitly documented as non-blocking.
 8. Merge only when the required GitHub check is green and unresolved review-thread checks are clear.
@@ -60,7 +60,7 @@ Matrix OS currently uses two review layers:
 |---|---|---|
 | GitHub required status check | enforced | prevent untested evidence/report regressions on `main` |
 | Kanban review fan-out | operational process | independent review of evidence semantics, CI gates, release boundaries, docs honesty |
-| GitHub required PR approval | not enforced | optional future policy |
+| GitHub required pull-request approval | not enforced | optional future policy |
 | GitHub required conversation resolution | not enforced | optional future policy |
 
 The recommended near-term stance is to keep GitHub approvals non-enforced while the release train is still moving quickly, but to keep Kanban reviews mandatory for governance-sensitive slices.
@@ -121,4 +121,4 @@ Any move from the current lightweight policy to harder GitHub enforcement should
 3. updates this policy document and release-train docs;
 4. applies the repo setting through GitHub API or UI;
 5. verifies the setting after mutation;
-6. records whether admins, PR reviews, conversation resolution, or CODEOWNERS review are enforced.
+6. records whether admins, pull-request approvals, conversation resolution, or CODEOWNERS review are enforced.

@@ -22,7 +22,7 @@ Current merged scope:
 | Evidence Report Contract Versioning + CI Gate | Merged | Expose `MXOS-REPORT-1.0` report metadata and enforce focused evidence/report CI workflow |
 | Governance Hardening & Required Review Policy | Current | Document branch protection, release review model, and CODEOWNERS routing draft |
 
-This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope. The current `main` branch governance is documented in `docs/MATRIX_OS_GOVERNANCE_POLICY.md`: the evidence/report quality gate is enforced as a strict required status check, while required GitHub PR reviews and conversation resolution are not currently enforced.
+This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope. The current `main` branch governance is documented in `docs/MATRIX_OS_GOVERNANCE_POLICY.md`: the evidence/report quality gate is enforced as a strict required status check, while required GitHub pull-request approvals and conversation resolution are not currently enforced.
 
 ## Current CLI
 
@@ -123,7 +123,7 @@ Merged:
 
 Current:
 
-- Governance Hardening & Required Review Policy: document enforced `Evidence/report focused gate`, lightweight branch protection, review-role policy, and CODEOWNERS routing draft; no new required PR reviews, runtime execution, dashboard, MCP runtime, production audit retention, or rule enforcement
+- Governance Hardening & Required Review Policy: document enforced `Evidence/report focused gate`, lightweight branch protection, review-role policy, and CODEOWNERS routing draft; no new required pull-request approvals, runtime execution, dashboard, MCP runtime, production audit retention, or rule enforcement
 
 Planned:
 
