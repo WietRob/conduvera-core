@@ -2,7 +2,7 @@
 
 Status: authoritative documentation inventory for the architecture/documentation index slice.
 
-This inventory classifies existing and newly authoritative documents after PR #4, #5, #6, and #7. Historical documents remain available for context, but current implementation guidance should start from the authoritative docs listed here.
+This inventory classifies authoritative and historical Matrix OS documents across the current release train. Historical documents remain available for context, but current implementation guidance should start from the authoritative docs listed here.
 
 | File | Current role | Action | Reason |
 |---|---|---|---|
