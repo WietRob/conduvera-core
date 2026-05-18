@@ -1,0 +1,16 @@
+Matrix UI Route Plan Viewer Stub
+Schema: matrix-ui-route-plan-view.v1
+Source schema: route-plan.v1
+Intent: Run agent task with evidence capture
+Chosen candidate: hermes
+Candidate ranking: hermes, opencode, pi-agent-harness, agent-evidence-plane
+Evidence requirements: change_request.evidence.generated, accountable_change.evidence.generated, agent.run.completed
+Approval gate: CCC/AAL approval before any future execution
+Fail closed: no
+Unknown capabilities: none
+Execute now: no
+Runtime execution: no
+Production dashboard claim: no
+Non-execution boundary: No runner, shell command, editor integration, MCP server, Pi Agent Harness, Hermes, OpenCode, or evidence adapter is executed by this dry-run planner.
+Display boundary: Display-only view over an existing route-plan JSON artifact; no live runtime, adapter, shell, or dashboard is started.
+Operator snapshot: route-plan handoff is display-only and evidence-first.
