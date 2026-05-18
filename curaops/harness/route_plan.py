@@ -8,6 +8,7 @@ external evidence producers. Output is a planning/evidence contract only.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from curaops.harness.gateway import HarnessGatewayRegistry
 
@@ -256,6 +257,56 @@ def plan_route(intent: OperatorIntent | str) -> RoutePlan:
     if any(term in text for term in ("convert external evidence", "evidence conversion", "external evidence")):
         return _plan_evidence_conversion(operator_intent)
     return _fail_closed(operator_intent)
+
+
+def route_plan_to_dict(plan: RoutePlan) -> dict[str, Any]:
+    """Return a stable machine-readable dry-run route-plan contract."""
+
+    return {
+        "schema_version": "route-plan.v1",
+        "intent": {
+            "text": plan.intent.text,
+            "actor": plan.intent.actor,
+            "correlation_id": plan.intent.correlation_id,
+        },
+        "chosen_candidate_id": plan.chosen_candidate_id,
+        "execute_now": plan.execute_now,
+        "fail_closed": plan.fail_closed,
+        "required_approval_gate": plan.required_approval_gate,
+        "non_execution_boundary": plan.non_execution_boundary,
+        "required_evidence_outputs": list(plan.required_evidence_outputs),
+        "unknown_capabilities": list(plan.unknown_capabilities),
+        "candidates": [
+            {
+                "candidate_id": candidate.candidate_id,
+                "name": candidate.name,
+                "candidate_type": candidate.candidate_type,
+                "rank": candidate.rank,
+                "runtime_enabled": candidate.runtime_enabled,
+                "selection_reason": candidate.selection_reason,
+                "capability_matches": [
+                    {
+                        "capability_id": match.capability_id,
+                        "matched": match.matched,
+                        "reason": match.reason,
+                    }
+                    for match in candidate.capability_matches
+                ],
+                "what_would_execute_later": candidate.what_would_execute_later,
+                "not_executed_now": candidate.not_executed_now,
+            }
+            for candidate in plan.candidates
+        ],
+        "steps": [
+            {
+                "step_id": step.step_id,
+                "description": step.description,
+                "expected_output": step.expected_output,
+                "execute_now": step.execute_now,
+            }
+            for step in plan.steps
+        ],
+    }
 
 
 def render_route_plan(plan: RoutePlan) -> str:

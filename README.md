@@ -23,7 +23,7 @@ Current merged scope:
 | Governance Hardening & Required Review Policy | Merged | Document branch protection, release review model, and CODEOWNERS routing draft |
 | Governance Enforcement Decision | Merged | Decide required approval vs operational Kanban; keep settings unchanged for now |
 | Operator Workflow Vertical Slice | Merged | Read-only harness status connecting evidence, adapters, gateway descriptors, and Matrix UI attach point |
-| Runtime Decision / Dry-Run Gateway | Current | Descriptor-only route planner from operator intent to candidate ranking, evidence plan, and approval gate |
+| Runtime Decision / Dry-Run Gateway | Merged | Descriptor-only route planner from operator intent to candidate ranking, evidence plan, and approval gate |
 
 This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope. The current `main` branch governance is documented in `docs/MATRIX_OS_GOVERNANCE_POLICY.md`: the evidence/report quality gate is enforced as a strict required status check, while required GitHub pull-request approvals and conversation resolution are not currently enforced.
 
@@ -47,6 +47,8 @@ python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
 python3 -m curaops.cli.main evidence report-contract
 python3 -m curaops.cli.main harness status --events tests/fixtures/evidence/operator_report/product_coherence.events.jsonl
 python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture"
+python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json
+python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json --output route-plan.json
 ```
 
 Root command namespaces:
