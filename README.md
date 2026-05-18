@@ -50,6 +50,7 @@ python3 -m curaops.cli.main harness status --events tests/fixtures/evidence/oper
 python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture"
 python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json
 python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json --output route-plan.json
+python3 -m curaops.cli.main harness route-plan-view --input tests/fixtures/harness/route_plan/agent-task.json
 ```
 
 Root command namespaces:
@@ -108,7 +109,7 @@ Module-specific docs:
 | Operator Workflow | `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`, `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md`, `curaops/harness/operator_status.py`, `tests/test_harness_operator_status.py` |
 | Governance Policy | `docs/MATRIX_OS_GOVERNANCE_POLICY.md`, `CODEOWNERS`, `.github/workflows/matrix-os-evidence-quality.yml` |
 | Product Coherence Scenarios | `docs/MATRIX_OS_PRODUCT_COHERENCE.md`, `tests/test_product_coherence_scenarios.py` |
-| Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `docs/ADR_RUNTIME_DECISION_AND_DRY_RUN_GATEWAY.md`, `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md`, `curaops/harness/gateway.py`, `curaops/harness/route_plan.py`, `tests/test_harness_route_plan.py`, `tests/test_route_plan_golden_fixtures.py`, `tests/fixtures/harness/route_plan/` |
+| Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `docs/ADR_RUNTIME_DECISION_AND_DRY_RUN_GATEWAY.md`, `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md`, `curaops/harness/gateway.py`, `curaops/harness/route_plan.py`, `curaops/harness/route_plan_viewer.py`, `tests/test_harness_route_plan.py`, `tests/test_route_plan_golden_fixtures.py`, `tests/test_matrix_ui_route_plan_viewer.py`, `tests/fixtures/harness/route_plan/` |
 | UI Value Map / Provenance | `docs/MATRIX_OS_UI_VALUE_MAP.md`, `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` |
 
 ## Historical docs

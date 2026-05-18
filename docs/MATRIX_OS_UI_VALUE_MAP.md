@@ -25,7 +25,8 @@ This document does not rewrite the UI and does not claim a production dashboard.
 | Product information | Candidate UI place | Why |
 |---|---|---|
 | CR status | Sidebar badge or status panel | operators need change intent before acting |
-| Evidence timeline | Main content panel / split pane | shows who/what/when evidence across modules |
+| Evidence requirements | Main content panel / split pane | shows required handoff evidence before any future execution |
+| Route-plan candidate ranking | Code editor / split pane | displays existing `route-plan.v1` JSON artifacts as a read-only route-plan viewer stub |
 | Runner status | Process monitor / terminal surface | maps naturally to running/pending/exited tools |
 | Editor/Zed-like workflow | Code editor / split pane | attach requirement and CR context to files |
 | Approval inbox | Sidebar + main approval panel | future safety/change approvals without shell interception |
@@ -58,4 +59,4 @@ This slice intentionally does not:
 
 ## Validation
 
-Current UI/widget tests still pass. `tests/test_product_coherence_scenarios.py` verifies that the scaffold manifest still exposes the original Matrix UI, Matrix rain path, terminal/process/file/editor surfaces, and no-UI-rewrite/no-production-dashboard exclusions.
+Current UI/widget tests still pass. `tests/test_product_coherence_scenarios.py` verifies that the scaffold manifest still exposes the original Matrix UI, Matrix rain path, terminal/process/file/editor surfaces, and no-UI-rewrite/no-production-dashboard exclusions. `tests/test_matrix_ui_route_plan_viewer.py` verifies the read-only route-plan viewer stub consumes existing `route-plan.v1` fixtures and renders intent, chosen candidate, candidate ranking, evidence requirements, approval gate, and non-execution boundaries without live runtime or dashboard claims.

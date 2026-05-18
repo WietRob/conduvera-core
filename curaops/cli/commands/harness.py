@@ -10,6 +10,7 @@ from rich.console import Console
 
 from curaops.harness.operator_status import build_harness_operator_status, render_harness_operator_status
 from curaops.harness.route_plan import OperatorIntent, plan_route, render_route_plan, route_plan_to_dict
+from curaops.harness.route_plan_viewer import build_route_plan_view, render_route_plan_view
 
 console = Console(width=200)
 harness_app = typer.Typer(help="Read-only Matrix OS harness operator workflow views")
@@ -72,3 +73,22 @@ def route_plan(
 
     if plan.fail_closed:
         raise typer.Exit(2)
+
+
+@harness_app.command("route-plan-view")
+def route_plan_view(
+    input_path: Path = typer.Option(
+        ...,
+        "--input",
+        help="Existing route-plan.v1 JSON file to render as a display-only Matrix UI handoff view.",
+    ),
+) -> None:
+    """Render a read-only Matrix UI route-plan viewer stub from existing JSON."""
+
+    try:
+        view = build_route_plan_view(input_path)
+    except Exception as exc:
+        console.print(f"[red]route-plan-view failed[/red]: {exc}")
+        raise typer.Exit(1) from exc
+
+    console.print(render_route_plan_view(view), markup=False, end="")
