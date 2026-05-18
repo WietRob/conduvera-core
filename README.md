@@ -22,7 +22,8 @@ Current merged scope:
 | Evidence Report Contract Versioning + CI Gate | Merged | Expose `MXOS-REPORT-1.0` report metadata and enforce focused evidence/report CI workflow |
 | Governance Hardening & Required Review Policy | Merged | Document branch protection, release review model, and CODEOWNERS routing draft |
 | Governance Enforcement Decision | Merged | Decide required approval vs operational Kanban; keep settings unchanged for now |
-| Operator Workflow Vertical Slice | Current | Read-only harness status connecting evidence, adapters, gateway descriptors, and Matrix UI attach point |
+| Operator Workflow Vertical Slice | Merged | Read-only harness status connecting evidence, adapters, gateway descriptors, and Matrix UI attach point |
+| Runtime Decision / Dry-Run Gateway | Current | Descriptor-only route planner from operator intent to candidate ranking, evidence plan, and approval gate |
 
 This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope. The current `main` branch governance is documented in `docs/MATRIX_OS_GOVERNANCE_POLICY.md`: the evidence/report quality gate is enforced as a strict required status check, while required GitHub pull-request approvals and conversation resolution are not currently enforced.
 
@@ -45,6 +46,7 @@ python3 -m curaops.cli.main evidence convert-failure-loop --help
 python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
 python3 -m curaops.cli.main evidence report-contract
 python3 -m curaops.cli.main harness status --events tests/fixtures/evidence/operator_report/product_coherence.events.jsonl
+python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture"
 ```
 
 Root command namespaces:
@@ -58,7 +60,7 @@ Root command namespaces:
 | `aspice` | ASPICE Support Utilities |
 | `scaffold` | UI/MCP/editor scaffolding manifest |
 | `evidence` | Evidence backbone validate/summarize/convert/discovery/report utilities |
-| `harness` | Read-only operator status over evidence, adapters, gateway descriptors, and UI attach point |
+| `harness` | Read-only operator status and descriptor-only dry-run route plans over evidence, adapters, gateway descriptors, and UI attach points |
 
 ## Authoritative docs
 
@@ -83,7 +85,8 @@ Start here:
 17. `docs/RELEASE_TRAIN_STATUS.md`
 18. `docs/MATRIX_OS_GOVERNANCE_POLICY.md`
 19. `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`
-20. `docs/DOCUMENTATION_INVENTORY.md`
+20. `docs/ADR_RUNTIME_DECISION_AND_DRY_RUN_GATEWAY.md`
+21. `docs/DOCUMENTATION_INVENTORY.md`
 
 Module-specific docs:
 
@@ -101,7 +104,7 @@ Module-specific docs:
 | Operator Workflow | `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`, `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md`, `curaops/harness/operator_status.py`, `tests/test_harness_operator_status.py` |
 | Governance Policy | `docs/MATRIX_OS_GOVERNANCE_POLICY.md`, `CODEOWNERS`, `.github/workflows/matrix-os-evidence-quality.yml` |
 | Product Coherence Scenarios | `docs/MATRIX_OS_PRODUCT_COHERENCE.md`, `tests/test_product_coherence_scenarios.py` |
-| Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `curaops/harness/gateway.py` |
+| Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `docs/ADR_RUNTIME_DECISION_AND_DRY_RUN_GATEWAY.md`, `curaops/harness/gateway.py`, `curaops/harness/route_plan.py`, `tests/test_harness_route_plan.py` |
 | UI Value Map / Provenance | `docs/MATRIX_OS_UI_VALUE_MAP.md`, `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` |
 
 ## Historical docs
@@ -129,10 +132,13 @@ Merged:
 - PR #17 Evidence Report Golden Fixtures
 - PR #18 Evidence Report Contract Versioning + CI Gate
 - PR #19 Governance Hardening & Required Review Policy
+- PR #20 Governance Enforcement Decision
+- PR #21 Operator Workflow Vertical Slice
+- PR #22 Pi Agent Harness Evaluation
 
 Current:
 
-- Operator Workflow Vertical Slice: read-only `harness status` view over evidence, adapter registry, harness gateway descriptors, and Matrix UI attach point
+- Runtime Decision / Dry-Run Gateway: descriptor-only route planning with candidate ranking, evidence outputs, approval gates, and no runtime execution
 
 Planned:
 

@@ -120,6 +120,18 @@ _RUNNERS: tuple[RunnerDescriptor, ...] = (
         observable_events=("gate.run.completed", "failure.observed"),
         external_boundary="standalone local environment; future approval adapter only; not executed by Matrix OS",
     ),
+    RunnerDescriptor(
+        runner_id="pi-agent-harness",
+        name="Pi Agent Harness Boundary",
+        runner_family="agent-harness-runtime-candidate",
+        execution_status="future-adapter-contract-only",
+        runtime_enabled=False,
+        observable_events=("agent.run.started", "agent.run.completed", "agent.run.failed"),
+        external_boundary=(
+            "earendil-works/pi descriptor only; future runtime backend candidate; "
+            "not Raspberry Pi hardware; not executed by Matrix OS"
+        ),
+    ),
 )
 
 _TOOLS: tuple[ToolDescriptor, ...] = (
@@ -239,7 +251,11 @@ class HarnessGatewayRegistry:
     def external_project_boundaries(self) -> dict[str, str]:
         """Return concise external ownership boundaries for product docs/tests."""
 
-        boundaries = {runner.runner_id: runner.external_boundary.split("; not executed by Matrix OS")[0] for runner in self.runners if runner.runner_id != "local-shell"}
+        boundaries = {
+            runner.runner_id: runner.external_boundary.split("; not executed by Matrix OS")[0].split("; not Raspberry Pi hardware")[0]
+            for runner in self.runners
+            if runner.runner_id != "local-shell"
+        }
         boundaries["zed-mcp"] = "standalone editor/plugin/runtime; no hardcoded CCC/AAL/Evidence logic"
         for tool in self.tools:
             boundaries[tool.tool_id] = tool.external_boundary
