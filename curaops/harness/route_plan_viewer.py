@@ -37,6 +37,46 @@ def _require_route_plan_v1(payload: dict[str, Any], source: Path) -> None:
     if schema_version != "route-plan.v1":
         raise ValueError(f"{source}: expected route-plan.v1, got {schema_version!r}")
 
+    required_fields = {
+        "intent",
+        "chosen_candidate_id",
+        "execute_now",
+        "fail_closed",
+        "required_approval_gate",
+        "non_execution_boundary",
+        "required_evidence_outputs",
+        "unknown_capabilities",
+        "candidates",
+        "steps",
+    }
+    missing_fields = sorted(required_fields - payload.keys())
+    if missing_fields:
+        raise ValueError(f"{source}: missing route-plan.v1 fields: {', '.join(missing_fields)}")
+    if payload["execute_now"] is not False:
+        raise ValueError(f"{source}: route-plan.v1 execute_now must be false")
+    if not isinstance(payload["intent"], dict) or not isinstance(payload["intent"].get("text"), str):
+        raise ValueError(f"{source}: route-plan.v1 intent.text must be present")
+    if not isinstance(payload["required_approval_gate"], str) or not payload["required_approval_gate"]:
+        raise ValueError(f"{source}: route-plan.v1 required_approval_gate must be present")
+    if not isinstance(payload["non_execution_boundary"], str) or not payload["non_execution_boundary"]:
+        raise ValueError(f"{source}: route-plan.v1 non_execution_boundary must be present")
+    if not isinstance(payload["candidates"], list):
+        raise ValueError(f"{source}: route-plan.v1 candidates must be a list")
+    if not isinstance(payload["steps"], list):
+        raise ValueError(f"{source}: route-plan.v1 steps must be a list")
+    for index, candidate in enumerate(payload["candidates"]):
+        if not isinstance(candidate, dict):
+            raise ValueError(f"{source}: route-plan.v1 candidate {index} must be an object")
+        if not isinstance(candidate.get("candidate_id"), str):
+            raise ValueError(f"{source}: route-plan.v1 candidate {index} candidate_id must be present")
+        if candidate.get("runtime_enabled") is not False:
+            raise ValueError(f"{source}: route-plan.v1 candidate {candidate.get('candidate_id')} runtime_enabled must be false")
+    for index, step in enumerate(payload["steps"]):
+        if not isinstance(step, dict):
+            raise ValueError(f"{source}: route-plan.v1 step {index} must be an object")
+        if step.get("execute_now") is not False:
+            raise ValueError(f"{source}: route-plan.v1 step {step.get('step_id', index)} execute_now must be false")
+
 
 def build_route_plan_view(input_path: Path) -> MatrixUiRoutePlanView:
     """Build a display-only Matrix UI route-plan view from an existing JSON artifact."""

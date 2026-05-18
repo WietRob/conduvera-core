@@ -84,3 +84,36 @@ def test_route_plan_view_rejects_non_route_plan_schema(tmp_path: Path) -> None:
     assert result.exit_code == 1
     assert "route-plan-view failed" in result.output
     assert "expected route-plan.v1" in result.output
+
+
+def test_route_plan_view_rejects_execution_enabled_source_contract(tmp_path: Path) -> None:
+    bad_input = tmp_path / "execution-enabled-route-plan.json"
+    bad_input.write_text(
+        """
+        {
+          "schema_version": "route-plan.v1",
+          "intent": {"text": "Run agent task with evidence capture"},
+          "chosen_candidate_id": "hermes",
+          "execute_now": true,
+          "fail_closed": false,
+          "required_approval_gate": "CCC/AAL approval before any future execution",
+          "non_execution_boundary": "No runner is executed.",
+          "required_evidence_outputs": [],
+          "unknown_capabilities": [],
+          "candidates": [
+            {"candidate_id": "hermes", "rank": 1, "runtime_enabled": true}
+          ],
+          "steps": [
+            {"step_id": "bad", "execute_now": true}
+          ]
+        }
+        """.strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(app, ["harness", "route-plan-view", "--input", str(bad_input)])
+
+    assert result.exit_code == 1
+    assert "route-plan-view failed" in result.output
+    assert "route-plan.v1 execute_now must be false" in result.output
