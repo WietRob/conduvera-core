@@ -21,7 +21,8 @@ Current merged scope:
 | Evidence Report Golden Fixtures | Merged | Regression-lock operator report outputs with deterministic golden evidence |
 | Evidence Report Contract Versioning + CI Gate | Merged | Expose `MXOS-REPORT-1.0` report metadata and enforce focused evidence/report CI workflow |
 | Governance Hardening & Required Review Policy | Merged | Document branch protection, release review model, and CODEOWNERS routing draft |
-| Governance Enforcement Decision | Current | Decide required approval vs operational Kanban; keep settings unchanged for now |
+| Governance Enforcement Decision | Merged | Decide required approval vs operational Kanban; keep settings unchanged for now |
+| Operator Workflow Vertical Slice | Current | Read-only harness status connecting evidence, adapters, gateway descriptors, and Matrix UI attach point |
 
 This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope. The current `main` branch governance is documented in `docs/MATRIX_OS_GOVERNANCE_POLICY.md`: the evidence/report quality gate is enforced as a strict required status check, while required GitHub pull-request approvals and conversation resolution are not currently enforced.
 
@@ -43,6 +44,7 @@ python3 -m curaops.cli.main evidence convert-safety-guard --help
 python3 -m curaops.cli.main evidence convert-failure-loop --help
 python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
 python3 -m curaops.cli.main evidence report-contract
+python3 -m curaops.cli.main harness status --events tests/fixtures/evidence/operator_report/product_coherence.events.jsonl
 ```
 
 Root command namespaces:
@@ -56,6 +58,7 @@ Root command namespaces:
 | `aspice` | ASPICE Support Utilities |
 | `scaffold` | UI/MCP/editor scaffolding manifest |
 | `evidence` | Evidence backbone validate/summarize/convert/discovery/report utilities |
+| `harness` | Read-only operator status over evidence, adapters, gateway descriptors, and UI attach point |
 
 ## Authoritative docs
 
@@ -75,10 +78,12 @@ Start here:
 12. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
 13. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
 14. `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`
-15. `docs/RELEASE_TRAIN_STATUS.md`
-16. `docs/MATRIX_OS_GOVERNANCE_POLICY.md`
-17. `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`
-18. `docs/DOCUMENTATION_INVENTORY.md`
+15. `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`
+16. `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md`
+17. `docs/RELEASE_TRAIN_STATUS.md`
+18. `docs/MATRIX_OS_GOVERNANCE_POLICY.md`
+19. `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`
+20. `docs/DOCUMENTATION_INVENTORY.md`
 
 Module-specific docs:
 
@@ -93,6 +98,7 @@ Module-specific docs:
 | Evidence Adapter Registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`, `curaops/evidence/adapters/registry.py` |
 | failure-driven-loop Thin Adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`, `curaops/evidence/adapters/failure_loop.py` |
 | Evidence Operator Reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`, `curaops/evidence/reporting.py`, `tests/fixtures/evidence/operator_report/`, `tests/test_evidence_report_contract_version.py` |
+| Operator Workflow | `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`, `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md`, `curaops/harness/operator_status.py`, `tests/test_harness_operator_status.py` |
 | Governance Policy | `docs/MATRIX_OS_GOVERNANCE_POLICY.md`, `CODEOWNERS`, `.github/workflows/matrix-os-evidence-quality.yml` |
 | Product Coherence Scenarios | `docs/MATRIX_OS_PRODUCT_COHERENCE.md`, `tests/test_product_coherence_scenarios.py` |
 | Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `curaops/harness/gateway.py` |
@@ -126,8 +132,9 @@ Merged:
 
 Current:
 
-- Governance Enforcement Decision: record that required GitHub pull-request approvals, CODEOWNERS owner review, conversation resolution, and admin enforcement stay non-enforced for now; keep strict `Evidence/report focused gate` plus operational Kanban review
+- Operator Workflow Vertical Slice: read-only `harness status` view over evidence, adapter registry, harness gateway descriptors, and Matrix UI attach point
 
 Planned:
 
-- Later focused adapter slices for Safety Guard, agent-evidence-plane, CAS, peekxd, OpenCode plugin, and ai-router
+- Future UI/TUI panel for the same operator status model
+- Later focused adapter slices for CAS, peekxd, OpenCode plugin, and ai-router

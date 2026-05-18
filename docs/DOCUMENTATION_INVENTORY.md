@@ -20,6 +20,8 @@ This inventory classifies authoritative and historical Matrix OS documents acros
 | `docs/MATRIX_OS_UI_VALUE_MAP.md` | Authoritative original UI value map | Create | Maps preserved TUI surfaces to future CR/evidence/runner/editor use without UI rewrite or dashboard claim |
 | `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` | Authoritative provenance note | Create | Separates confirmed Matrix UI lineage facts from UNKNOWN Pi/fork claims |
 | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md` | Authoritative evidence report layer | Update | Defines read-only text/Markdown/JSON operator reports, `MXOS-REPORT-1.0` contract versioning, golden-output regression fixtures, and the focused CI quality gate without runtime or production-audit claims |
+| `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md` | Authoritative operator workflow framing | Create | Records the product-coherence check required before coding the read-only operator status slice |
+| `docs/MATRIX_OS_OPERATOR_WORKFLOW.md` | Authoritative operator workflow slice | Create | Explains `harness status`, connected modules, UI attach point, and read-only boundaries |
 | `docs/MATRIX_OS_GOVERNANCE_POLICY.md` | Authoritative governance policy | Update | Documents verified branch protection, required evidence/report status check, review roles, CODEOWNERS routing draft, and links to the enforcement decision |
 | `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md` | Authoritative governance decision record | Create | Records the required approval vs operational Kanban decision and keeps settings unchanged for now |
 | `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md` | Authoritative command/module index | Create | Needed navigable index for compliance, accountability, ASPICE, and CLI commands |
@@ -61,11 +63,13 @@ This inventory classifies authoritative and historical Matrix OS documents acros
 12. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
 13. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
 14. `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`
-15. `docs/MATRIX_OS_GOVERNANCE_POLICY.md`
-16. `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`
-17. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
-18. `docs/RELEASE_TRAIN_STATUS.md`
-19. Module-specific docs for CCC, AAL, and ASPICE as needed
+15. `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md`
+16. `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`
+17. `docs/MATRIX_OS_GOVERNANCE_POLICY.md`
+18. `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`
+19. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
+20. `docs/RELEASE_TRAIN_STATUS.md`
+21. Module-specific docs for CCC, AAL, and ASPICE as needed
 
 ## Deprecated-document rule
 
