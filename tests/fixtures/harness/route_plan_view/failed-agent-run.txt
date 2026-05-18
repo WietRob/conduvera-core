@@ -1,0 +1,16 @@
+Matrix UI Route Plan Viewer Stub
+Schema: matrix-ui-route-plan-view.v1
+Source schema: route-plan.v1
+Intent: review failed agent run and propose rule
+Chosen candidate: failure-driven-loop
+Candidate ranking: failure-driven-loop, agent-evidence-plane
+Evidence requirements: failure.observed, rule.proposed
+Approval gate: Human review before any rule adoption or enforcement
+Fail closed: no
+Unknown capabilities: none
+Execute now: no
+Runtime execution: no
+Production dashboard claim: no
+Non-execution boundary: No runner, shell command, editor integration, MCP server, Pi Agent Harness, Hermes, OpenCode, or evidence adapter is executed by this dry-run planner.
+Display boundary: Display-only view over an existing route-plan JSON artifact; no live runtime, adapter, shell, or dashboard is started.
+Operator snapshot: failed-run review; rule proposal is evidence-only and is not enforced.

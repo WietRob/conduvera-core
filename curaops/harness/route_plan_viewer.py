@@ -110,6 +110,18 @@ def _render_list(values: list[str]) -> str:
     return ", ".join(values) if values else "none"
 
 
+def _operator_snapshot_note(view: MatrixUiRoutePlanView) -> str:
+    if view.chosen_candidate_id == "failure-driven-loop":
+        return "Operator snapshot: failed-run review; rule proposal is evidence-only and is not enforced."
+    if view.chosen_candidate_id == "matrix-ui-code-editor":
+        return "Operator snapshot: future UI handoff boundary; display-only Matrix UI/editor surface, not a live panel."
+    if view.chosen_candidate_id == "safety-guard":
+        return "Operator snapshot: destructive action boundary; safety evidence is required before any future action."
+    if view.fail_closed:
+        return "Operator snapshot: fail-closed; human route decision required before any future action."
+    return "Operator snapshot: route-plan handoff is display-only and evidence-first."
+
+
 def render_route_plan_view(view: MatrixUiRoutePlanView) -> str:
     """Render the Matrix UI route-plan view stub for terminal/operator inspection."""
 
@@ -131,6 +143,7 @@ def render_route_plan_view(view: MatrixUiRoutePlanView) -> str:
             f"Production dashboard claim: {'yes' if view.dashboard_claim else 'no'}",
             f"Non-execution boundary: {view.non_execution_boundary}",
             f"Display boundary: {view.display_boundary}",
+            _operator_snapshot_note(view),
             "",
         ]
     )
