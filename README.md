@@ -143,11 +143,16 @@ Merged:
 - PR #21 Operator Workflow Vertical Slice
 - PR #22 Pi Agent Harness Evaluation
 
+- PR #23 Runtime Decision / Dry-Run Gateway
+- PR #24 Route Plan JSON Output
+- PR #25 Route Plan Golden Fixtures & Operator Handoff Contract
+- PR #26 Minimal Matrix UI Route-Plan Viewer Stub
+
 Current:
 
-- Runtime Decision / Dry-Run Gateway: descriptor-only route planning with candidate ranking, evidence outputs, approval gates, and no runtime execution
+- PR #27 Route-Plan Viewer Golden Outputs & Operator Snapshot Pack: exact read-only viewer snapshots for future Matrix UI panel consumers, with no live UI integration or runtime execution
 
 Planned:
 
-- Future UI/TUI panel for the same operator status model
+- PR #28 Minimal Textual Route-Plan Panel Model
 - Later focused adapter slices for CAS, peekxd, OpenCode plugin, and ai-router

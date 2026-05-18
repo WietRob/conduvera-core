@@ -35,6 +35,10 @@ jobs:
           tests/test_failure_loop_adapter.py
           tests/test_product_coherence_scenarios.py
           tests/test_harness_gateway_contract.py
+          tests/test_harness_route_plan.py
+          tests/test_matrix_ui_route_plan_viewer.py
+          tests/test_route_plan_golden_fixtures.py
+          tests/test_route_plan_viewer_golden_outputs.py
           tests/test_evidence_operator_report.py
           tests/test_evidence_report_golden_outputs.py
           tests/test_evidence_report_contract_version.py
@@ -63,10 +67,14 @@ jobs:
         run: >-
           python -m ruff check
           curaops/evidence
+          curaops/harness/route_plan_viewer.py
           curaops/cli/commands/evidence.py
+          curaops/cli/commands/harness.py
           tests/test_evidence_operator_report.py
           tests/test_evidence_report_golden_outputs.py
           tests/test_evidence_report_contract_version.py
+          tests/test_matrix_ui_route_plan_viewer.py
+          tests/test_route_plan_viewer_golden_outputs.py
 
       - name: Check whitespace in tracked diff
         run: git diff --check
