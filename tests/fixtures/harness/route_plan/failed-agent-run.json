@@ -1,0 +1,78 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "failure-driven-loop",
+      "candidate_type": "evidence-tool-descriptor",
+      "capability_matches": [
+        {
+          "capability_id": "convert_evidence",
+          "matched": true,
+          "reason": "translation-only evidence path"
+        },
+        {
+          "capability_id": "approve_block",
+          "matched": true,
+          "reason": "failed run review maps to failure-loop evidence and rule proposal"
+        }
+      ],
+      "name": "failure-driven-loop",
+      "not_executed_now": "failure-driven-loop is not executed or launched; only evidence requirements are planned.",
+      "rank": 1,
+      "runtime_enabled": false,
+      "selection_reason": "failed run review maps to failure-loop evidence and rule proposal",
+      "what_would_execute_later": "Future workflow could consume failure-driven-loop output after explicit producer run outside this planner."
+    },
+    {
+      "candidate_id": "agent-evidence-plane",
+      "candidate_type": "evidence-tool-descriptor",
+      "capability_matches": [
+        {
+          "capability_id": "convert_evidence",
+          "matched": true,
+          "reason": "translation-only evidence path"
+        },
+        {
+          "capability_id": "approve_block",
+          "matched": true,
+          "reason": "agent-run evidence may be needed as input context"
+        }
+      ],
+      "name": "agent-evidence-plane",
+      "not_executed_now": "agent-evidence-plane is not executed or launched; only evidence requirements are planned.",
+      "rank": 2,
+      "runtime_enabled": false,
+      "selection_reason": "agent-run evidence may be needed as input context",
+      "what_would_execute_later": "Future workflow could consume agent-evidence-plane output after explicit producer run outside this planner."
+    }
+  ],
+  "chosen_candidate_id": "failure-driven-loop",
+  "execute_now": false,
+  "fail_closed": false,
+  "intent": {
+    "actor": "operator",
+    "correlation_id": null,
+    "text": "review failed agent run and propose rule"
+  },
+  "non_execution_boundary": "No runner, shell command, editor integration, MCP server, Pi Agent Harness, Hermes, OpenCode, or evidence adapter is executed by this dry-run planner.",
+  "required_approval_gate": "Human review before any rule adoption or enforcement",
+  "required_evidence_outputs": [
+    "failure.observed",
+    "rule.proposed"
+  ],
+  "schema_version": "route-plan.v1",
+  "steps": [
+    {
+      "description": "Plan failure evidence review",
+      "execute_now": false,
+      "expected_output": "failure.observed",
+      "step_id": "collect-failure"
+    },
+    {
+      "description": "Plan non-enforced rule proposal",
+      "execute_now": false,
+      "expected_output": "rule.proposed evidence-only",
+      "step_id": "propose-rule"
+    }
+  ],
+  "unknown_capabilities": []
+}

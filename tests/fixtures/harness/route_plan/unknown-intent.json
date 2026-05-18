@@ -1,0 +1,26 @@
+{
+  "candidates": [],
+  "chosen_candidate_id": null,
+  "execute_now": false,
+  "fail_closed": true,
+  "intent": {
+    "actor": "operator",
+    "correlation_id": null,
+    "text": "make the thing better somehow"
+  },
+  "non_execution_boundary": "No runner, shell command, editor integration, MCP server, Pi Agent Harness, Hermes, OpenCode, or evidence adapter is executed by this dry-run planner.",
+  "required_approval_gate": "Human route decision required",
+  "required_evidence_outputs": [],
+  "schema_version": "route-plan.v1",
+  "steps": [
+    {
+      "description": "Unknown operator intent; require human route decision",
+      "execute_now": false,
+      "expected_output": "human.decision.required",
+      "step_id": "fail-closed"
+    }
+  ],
+  "unknown_capabilities": [
+    "intent.classification"
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "safety-guard",
+      "candidate_type": "evidence-tool-descriptor",
+      "capability_matches": [
+        {
+          "capability_id": "convert_evidence",
+          "matched": true,
+          "reason": "translation-only evidence path"
+        },
+        {
+          "capability_id": "approve_block",
+          "matched": true,
+          "reason": "dangerous/destructive operation requires safety evidence first"
+        }
+      ],
+      "name": "CuraOps Safety Guard",
+      "not_executed_now": "CuraOps Safety Guard is not executed or launched; only evidence requirements are planned.",
+      "rank": 1,
+      "runtime_enabled": false,
+      "selection_reason": "dangerous/destructive operation requires safety evidence first",
+      "what_would_execute_later": "Future workflow could consume CuraOps Safety Guard output after explicit producer run outside this planner."
+    },
+    {
+      "candidate_id": "local-shell",
+      "candidate_type": "runner-descriptor",
+      "capability_matches": [
+        {
+          "capability_id": "route-planning",
+          "matched": true,
+          "reason": "future shell boundary remains blocked until safety and approval gates pass"
+        },
+        {
+          "capability_id": "evidence-plan",
+          "matched": true,
+          "reason": "would require translated EventEnvelope evidence before future execution"
+        }
+      ],
+      "name": "Local Shell Runner Boundary",
+      "not_executed_now": "Local Shell Runner Boundary is descriptor-only and not executed by Matrix OS now.",
+      "rank": 2,
+      "runtime_enabled": false,
+      "selection_reason": "future shell boundary remains blocked until safety and approval gates pass",
+      "what_would_execute_later": "Future reviewed adapter could route to Local Shell Runner Boundary after CCC/AAL/safety gates."
+    }
+  ],
+  "chosen_candidate_id": "safety-guard",
+  "execute_now": false,
+  "fail_closed": false,
+  "intent": {
+    "actor": "operator",
+    "correlation_id": null,
+    "text": "dangerous file operation delete production database"
+  },
+  "non_execution_boundary": "No shell command, file deletion, or external tool is executed by the dry-run planner.",
+  "required_approval_gate": "Safety Guard evidence review before any destructive action",
+  "required_evidence_outputs": [
+    "safety_guard.action.blocked"
+  ],
+  "schema_version": "route-plan.v1",
+  "steps": [
+    {
+      "description": "Classify destructive or dangerous file operation",
+      "execute_now": false,
+      "expected_output": "risk.classified",
+      "step_id": "classify-risk"
+    },
+    {
+      "description": "Require Safety Guard translated evidence",
+      "execute_now": false,
+      "expected_output": "safety_guard.action.blocked",
+      "step_id": "safety-evidence-translation"
+    },
+    {
+      "description": "Block destructive execution in dry-run",
+      "execute_now": false,
+      "expected_output": "execution.blocked",
+      "step_id": "block-execution"
+    }
+  ],
+  "unknown_capabilities": []
+}

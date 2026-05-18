@@ -1,0 +1,129 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "hermes",
+      "candidate_type": "runner-descriptor",
+      "capability_matches": [
+        {
+          "capability_id": "route-planning",
+          "matched": true,
+          "reason": "best descriptor match for agent task orchestration intent"
+        },
+        {
+          "capability_id": "evidence-plan",
+          "matched": true,
+          "reason": "would require translated EventEnvelope evidence before future execution"
+        }
+      ],
+      "name": "Hermes Agent Runner",
+      "not_executed_now": "Hermes Agent Runner is descriptor-only and not executed by Matrix OS now.",
+      "rank": 1,
+      "runtime_enabled": false,
+      "selection_reason": "best descriptor match for agent task orchestration intent",
+      "what_would_execute_later": "Future reviewed adapter could route to Hermes Agent Runner after CCC/AAL/safety gates."
+    },
+    {
+      "candidate_id": "opencode",
+      "candidate_type": "runner-descriptor",
+      "capability_matches": [
+        {
+          "capability_id": "route-planning",
+          "matched": true,
+          "reason": "coding-agent descriptor also matches code-change workflow"
+        },
+        {
+          "capability_id": "evidence-plan",
+          "matched": true,
+          "reason": "would require translated EventEnvelope evidence before future execution"
+        }
+      ],
+      "name": "OpenCode Runner",
+      "not_executed_now": "OpenCode Runner is descriptor-only and not executed by Matrix OS now.",
+      "rank": 2,
+      "runtime_enabled": false,
+      "selection_reason": "coding-agent descriptor also matches code-change workflow",
+      "what_would_execute_later": "Future reviewed adapter could route to OpenCode Runner after CCC/AAL/safety gates."
+    },
+    {
+      "candidate_id": "pi-agent-harness",
+      "candidate_type": "runner-descriptor",
+      "capability_matches": [
+        {
+          "capability_id": "route-planning",
+          "matched": true,
+          "reason": "Pi concepts are descriptor-only future backend candidates"
+        },
+        {
+          "capability_id": "evidence-plan",
+          "matched": true,
+          "reason": "would require translated EventEnvelope evidence before future execution"
+        }
+      ],
+      "name": "Pi Agent Harness Boundary",
+      "not_executed_now": "Pi Agent Harness Boundary is descriptor-only and not executed by Matrix OS now.",
+      "rank": 3,
+      "runtime_enabled": false,
+      "selection_reason": "Pi concepts are descriptor-only future backend candidates",
+      "what_would_execute_later": "Future reviewed adapter could route to Pi Agent Harness Boundary after CCC/AAL/safety gates."
+    },
+    {
+      "candidate_id": "agent-evidence-plane",
+      "candidate_type": "evidence-tool-descriptor",
+      "capability_matches": [
+        {
+          "capability_id": "convert_evidence",
+          "matched": true,
+          "reason": "translation-only evidence path"
+        },
+        {
+          "capability_id": "approve_block",
+          "matched": true,
+          "reason": "agent evidence conversion would be required after a future run"
+        }
+      ],
+      "name": "agent-evidence-plane",
+      "not_executed_now": "agent-evidence-plane is not executed or launched; only evidence requirements are planned.",
+      "rank": 4,
+      "runtime_enabled": false,
+      "selection_reason": "agent evidence conversion would be required after a future run",
+      "what_would_execute_later": "Future workflow could consume agent-evidence-plane output after explicit producer run outside this planner."
+    }
+  ],
+  "chosen_candidate_id": "hermes",
+  "execute_now": false,
+  "fail_closed": false,
+  "intent": {
+    "actor": "operator",
+    "correlation_id": null,
+    "text": "Run agent task with evidence capture"
+  },
+  "non_execution_boundary": "No runner, shell command, editor integration, MCP server, Pi Agent Harness, Hermes, OpenCode, or evidence adapter is executed by this dry-run planner.",
+  "required_approval_gate": "CCC/AAL approval before any future execution",
+  "required_evidence_outputs": [
+    "change_request.evidence.generated",
+    "accountable_change.evidence.generated",
+    "agent.run.completed"
+  ],
+  "schema_version": "route-plan.v1",
+  "steps": [
+    {
+      "description": "Classify as AI-assisted code-change route",
+      "execute_now": false,
+      "expected_output": "route.intent.classified",
+      "step_id": "classify-intent"
+    },
+    {
+      "description": "Require CCC/AAL approval before future execution",
+      "execute_now": false,
+      "expected_output": "approval.required",
+      "step_id": "require-approval"
+    },
+    {
+      "description": "Plan accountable change and agent-run evidence outputs",
+      "execute_now": false,
+      "expected_output": "evidence.plan",
+      "step_id": "plan-evidence"
+    }
+  ],
+  "unknown_capabilities": []
+}

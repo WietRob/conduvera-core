@@ -1,0 +1,77 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "matrix-ui-code-editor",
+      "candidate_type": "display-surface-descriptor",
+      "capability_matches": [
+        {
+          "capability_id": "display_attach",
+          "matched": true,
+          "reason": "display/attach-only surface"
+        },
+        {
+          "capability_id": "observe",
+          "matched": true,
+          "reason": "read-only operator view over existing evidence/status"
+        }
+      ],
+      "name": "Original Matrix UI code editor surface",
+      "not_executed_now": "Original Matrix UI code editor surface is not opened, launched, or claimed as a production dashboard.",
+      "rank": 1,
+      "runtime_enabled": false,
+      "selection_reason": "original Matrix UI/editor surface can display operator route state",
+      "what_would_execute_later": "Future UI could display route/evidence status from Matrix OS APIs."
+    },
+    {
+      "candidate_id": "zed-mcp-future",
+      "candidate_type": "display-surface-descriptor",
+      "capability_matches": [
+        {
+          "capability_id": "display_attach",
+          "matched": true,
+          "reason": "display/attach-only surface"
+        },
+        {
+          "capability_id": "observe",
+          "matched": true,
+          "reason": "read-only operator view over existing evidence/status"
+        }
+      ],
+      "name": "Zed/MCP future editor surface",
+      "not_executed_now": "Zed/MCP future editor surface is not opened, launched, or claimed as a production dashboard.",
+      "rank": 2,
+      "runtime_enabled": false,
+      "selection_reason": "future external editor surface remains descriptor-only",
+      "what_would_execute_later": "Future UI could display route/evidence status from Matrix OS APIs."
+    }
+  ],
+  "chosen_candidate_id": "matrix-ui-code-editor",
+  "execute_now": false,
+  "fail_closed": false,
+  "intent": {
+    "actor": "operator",
+    "correlation_id": null,
+    "text": "operator wants UI view of harness status"
+  },
+  "non_execution_boundary": "Display/attach-only route; original Matrix UI preserved; no production dashboard claim.",
+  "required_approval_gate": "No execution approval requested for display-only dry-run",
+  "required_evidence_outputs": [
+    "harness.status.view"
+  ],
+  "schema_version": "route-plan.v1",
+  "steps": [
+    {
+      "description": "Plan read-only UI/status view",
+      "execute_now": false,
+      "expected_output": "harness.status.view",
+      "step_id": "prepare-view"
+    },
+    {
+      "description": "Preserve original Matrix UI/editor surfaces",
+      "execute_now": false,
+      "expected_output": "ui.surface.preserved",
+      "step_id": "preserve-ui"
+    }
+  ],
+  "unknown_capabilities": []
+}
