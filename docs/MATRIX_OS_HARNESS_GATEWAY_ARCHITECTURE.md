@@ -1,6 +1,6 @@
 # Matrix OS Harness Gateway Architecture
 
-Status: generic contract for future Matrix OS harness/gateway integrations.
+Status: generic contract for future Matrix OS harness/gateway integrations. This now includes a descriptor-only dry-run route planner; no runtime execution is implemented.
 
 This document defines how Matrix OS can later launch, observe, approve/block, and convert evidence from external runners/tools without hardcoding any runner into Compliance Change Control, Accountable Agent Layer, ASPICE, or Evidence Backbone.
 
@@ -32,10 +32,11 @@ Descriptors:
 | Descriptor | Purpose |
 |---|---|
 | `GatewayCapability` | names what Matrix OS can launch/observe/approve/convert later |
-| `RunnerDescriptor` | describes future runner families such as Hermes/OpenCode/local shell |
+| `RunnerDescriptor` | describes future runner families such as Hermes/OpenCode/local shell/Pi Agent Harness |
 | `ToolDescriptor` | describes evidence producers, safety tools, and computer-use tools |
 | `EditorSurfaceDescriptor` | describes Matrix UI and future editor/MCP surfaces |
 | `HarnessGatewayRegistry` | stable fail-closed registry of the descriptors |
+| `OperatorIntent` / `RoutePlan` | dry-run route planning from operator intent to ranked descriptors, evidence outputs, and approval gate |
 
 ## Capability boundaries
 
@@ -53,6 +54,7 @@ Descriptors:
 | Hermes | agent orchestrator | future-adapter-contract-only | standalone; not executed by Matrix OS |
 | OpenCode | coding agent | future-adapter-contract-only | standalone; not executed by Matrix OS |
 | local shell | shell | future-adapter-contract-only | no shell interception or execution in this slice |
+| Pi Agent Harness | agent-harness runtime candidate | future-adapter-contract-only | `earendil-works/pi` descriptor only; not Raspberry Pi hardware; not executed by Matrix OS |
 
 ## Registered tool/capability surfaces
 
@@ -75,6 +77,30 @@ Zed/MCP is a future adapter candidate, not an implementation in this slice.
 | CCC/AAL/Evidence | remain runner/editor agnostic |
 
 Matrix OS must not hardcode Zed-specific logic into CCC, AAL, ASPICE, or Evidence Backbone. A future Zed route should attach through gateway descriptors and an explicit adapter PR.
+
+## Dry-run route planner
+
+Implemented in:
+
+```text
+curaops/harness/route_plan.py
+```
+
+CLI:
+
+```bash
+python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture"
+```
+
+The planner maps an operator intent to ranked descriptor candidates, required evidence outputs, and a required approval gate. It always renders `execute_now: false`. Unknown intent fails closed and requires human route decision.
+
+| Intent family | Typical selected descriptor | Required proof |
+|---|---|---|
+| AI-assisted code change / agent task | `hermes`, with `opencode` and `pi-agent-harness` as descriptor candidates | CCC/AAL plus `agent.run.completed` evidence plan |
+| Dangerous file operation | `safety-guard` evidence path before any shell boundary | `safety_guard.action.blocked` or reviewed safety evidence |
+| Failed agent run | `failure-driven-loop` evidence path | `failure.observed` and `rule.proposed` evidence-only; no enforcement |
+| Operator UI view | original Matrix UI/editor surface | display/attach-only plan; no production dashboard claim |
+| Unknown intent | no candidate | fail closed; human route decision required |
 
 ## Future integration route
 
@@ -108,4 +134,4 @@ This slice does not implement:
 
 ## Validation
 
-`tests/test_harness_gateway_contract.py` verifies that descriptors are generic, fail closed on unknown ids, keep external projects standalone, and do not enable runtimes.
+`tests/test_harness_gateway_contract.py` verifies that descriptors are generic, fail closed on unknown ids, keep external projects standalone, and do not enable runtimes. `tests/test_harness_route_plan.py` verifies operator-value dry-run scenarios, candidate ranking, evidence requirements, approval gates, fail-closed unknown intent handling, and CLI smoke output.

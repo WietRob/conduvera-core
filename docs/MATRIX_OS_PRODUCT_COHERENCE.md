@@ -22,6 +22,7 @@ Matrix OS is now more than a package baseline plus separate utilities. The coher
 | Evidence Operator Reports | Read-only reports that answer product-coherence questions from validated evidence streams |
 | Evidence Report Golden Fixtures | Deterministic EventEnvelope fixture plus expected text/Markdown/JSON outputs for report regression |
 | Evidence Report Contract Versioning + CI Gate | Explicit `MXOS-REPORT-1.0` contract metadata plus focused CI workflow for evidence/report gates |
+| Runtime Decision / Dry-Run Gateway | ADR plus route-plan CLI translating operator intent to ranked descriptor candidates, evidence plan, and approval gate with `execute_now=false` |
 
 ## Product thesis
 
@@ -33,7 +34,7 @@ The harness has value when an operator can answer questions that no single modul
 | What risky action was blocked, why, and by which producer? | Safety Guard Adapter + Evidence Backbone + summary CLI |
 | What failure was observed and what rule was proposed without enforcing it? | failure-driven-loop Adapter + Evidence Backbone |
 | Which requirement/test/code traceability gap exists? | ASPICE Support + Evidence Backbone |
-| Where could this be shown later? | UI scaffolding + Harness Gateway descriptors |
+| Matrix OS route plan for an operator intent | Dry-run Gateway route planner + registry descriptors + evidence plan |
 
 ## Gaps closed by the combination
 
@@ -54,6 +55,7 @@ The harness has value when an operator can answer questions that no single modul
 | Production dashboard | Open; explicitly not claimed |
 | MCP server runtime | Open; contract/scaffolding only |
 | Real Hermes/OpenCode/Zed runner execution | Open; future adapter work |
+| Pi Agent Harness execution/fork | Open by decision; borrow concepts only, descriptor-only candidate |
 | Production audit retention/cloud persistence | Open; local JSONL only |
 | Security hardening | Open; not implemented by this slice |
 | Automatic rule enforcement | Open by design; proposed rules are not enforced |
@@ -96,7 +98,7 @@ The product-value scenario pack is implemented in `tests/test_product_coherence_
 | Was any proposed rule enforced? | No: `enforced=false`, `policy_action=none` |
 | Which adapter produced which evidence? | Evidence Adapter Registry descriptors, producers, and operator report adapter counts |
 | Which external project remains standalone? | Gateway boundaries and adapter docs |
-| Which Matrix OS surface could show the result later? | UI value map and Gateway editor surface descriptors |
+| Matrix OS dry-run route plan | `harness route-plan` ranks descriptor candidates, requires evidence/approval gates, and keeps `execute_now=false` |
 
 ## Operator report layer
 

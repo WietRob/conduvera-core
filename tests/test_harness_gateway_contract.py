@@ -20,6 +20,7 @@ def test_gateway_registry_lists_generic_runner_families_without_runtime_executio
         "hermes",
         "opencode",
         "local-shell",
+        "pi-agent-harness",
     }
     assert all(runner.execution_status == "future-adapter-contract-only" for runner in registry.runners)
     assert all(not runner.runtime_enabled for runner in registry.runners)
@@ -56,6 +57,7 @@ def test_gateway_external_projects_remain_standalone() -> None:
 
     assert external["hermes"] == "standalone; future runner adapter only"
     assert external["opencode"] == "standalone; future runner adapter only"
+    assert external["pi-agent-harness"] == "earendil-works/pi descriptor only; future runtime backend candidate"
     assert external["zed-mcp"] == "standalone editor/plugin/runtime; no hardcoded CCC/AAL/Evidence logic"
     assert external["peekxd"] == "standalone computer-use tool; future capability descriptor only"
     assert external["agent-evidence-plane"] == "standalone evidence producer; translation-only adapter exists"
@@ -75,6 +77,6 @@ def test_gateway_unknown_lookup_fails_closed() -> None:
 
 
 def test_gateway_module_level_lists_are_stable_views() -> None:
-    assert len(list_runners()) == 3
+    assert len(list_runners()) == 4
     assert len(list_tools()) == 4
     assert len(list_editor_surfaces()) == 2

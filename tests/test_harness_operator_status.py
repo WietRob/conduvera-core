@@ -120,7 +120,7 @@ def test_harness_operator_status_connects_evidence_adapters_gateway_and_ui(tmp_p
         "safety-guard",
         "failure-loop",
     }
-    assert {runner.runner_id for runner in status.runners} == {"hermes", "opencode", "local-shell"}
+    assert {runner.runner_id for runner in status.runners} == {"hermes", "opencode", "local-shell", "pi-agent-harness"}
     assert status.ui_attach_point.surface_id == "matrix-ui-code-editor"
     assert status.boundaries["read_only"] is True
     assert status.boundaries["runtime_execution"] is False
