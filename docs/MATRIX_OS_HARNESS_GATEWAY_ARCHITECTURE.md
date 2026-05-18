@@ -93,9 +93,10 @@ CLI:
 python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture"
 python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json
 python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json --output route-plan.json
+python3 -m curaops.cli.main harness route-plan-view --input tests/fixtures/harness/route_plan/agent-task.json
 ```
 
-The planner maps an operator intent to ranked descriptor candidates, required evidence outputs, and a required approval gate. It always renders `execute_now: false`. Text output is for operators; `--format json` emits the stable `route-plan.v1` machine-readable contract, and `--output` writes that dry-run contract to a file without executing any candidate. `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md` defines the operator handoff schema and canonical fixtures under `tests/fixtures/harness/route_plan/`. Unknown intent fails closed and requires human route decision.
+The planner maps an operator intent to ranked descriptor candidates, required evidence outputs, and a required approval gate. It always renders `execute_now: false`. Text output is for operators; `--format json` emits the stable `route-plan.v1` machine-readable contract, and `--output` writes that dry-run contract to a file without executing any candidate. `route-plan-view` is a read-only Matrix UI viewer stub over an existing route-plan JSON artifact; it renders intent, chosen candidate, candidate ranking, evidence requirements, approval gate, and non-execution boundary without starting a runtime or claiming a production dashboard. `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md` defines the operator handoff schema and canonical fixtures under `tests/fixtures/harness/route_plan/`. Unknown intent fails closed and requires human route decision.
 
 | Intent family | Typical selected descriptor | Required proof |
 |---|---|---|
@@ -137,4 +138,4 @@ This slice does not implement:
 
 ## Validation
 
-`tests/test_harness_gateway_contract.py` verifies that descriptors are generic, fail closed on unknown ids, keep external projects standalone, and do not enable runtimes. `tests/test_harness_route_plan.py` verifies operator-value dry-run scenarios, candidate ranking, evidence requirements, approval gates, fail-closed unknown intent handling, stable JSON contract output, `--output` file writing, and CLI smoke output. `tests/test_route_plan_golden_fixtures.py` verifies exact `route-plan.v1` golden fixture matches for canonical operator handoff scenarios.
+`tests/test_harness_gateway_contract.py` verifies that descriptors are generic, fail closed on unknown ids, keep external projects standalone, and do not enable runtimes. `tests/test_harness_route_plan.py` verifies operator-value dry-run scenarios, candidate ranking, evidence requirements, approval gates, fail-closed unknown intent handling, stable JSON contract output, `--output` file writing, and CLI smoke output. `tests/test_route_plan_golden_fixtures.py` verifies exact `route-plan.v1` golden fixture matches for canonical operator handoff scenarios. `tests/test_matrix_ui_route_plan_viewer.py` verifies the read-only viewer stub consumes those fixtures without runtime execution or dashboard claims.
