@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from typer.testing import CliRunner
 
 from curaops.cli.main import app
-from curaops.harness.route_plan import OperatorIntent, plan_route, render_route_plan
+from curaops.harness.route_plan import OperatorIntent, plan_route, render_route_plan, route_plan_to_dict
 
 runner = CliRunner()
 
@@ -84,3 +87,90 @@ def test_route_plan_render_and_cli_smoke_show_dry_run_boundaries() -> None:
     assert "DRY-RUN ROUTE PLAN" in result.output
     assert "execute_now: false" in result.output
     assert "pi-agent-harness" in result.output
+
+
+def test_route_plan_to_dict_is_stable_machine_readable_contract() -> None:
+    plan = plan_route(OperatorIntent(text="Run agent task with evidence capture", correlation_id="route-123"))
+
+    payload = route_plan_to_dict(plan)
+
+    assert payload["schema_version"] == "route-plan.v1"
+    assert payload["intent"] == {
+        "text": "Run agent task with evidence capture",
+        "actor": "operator",
+        "correlation_id": "route-123",
+    }
+    assert payload["execute_now"] is False
+    assert payload["fail_closed"] is False
+    assert payload["chosen_candidate_id"] == "hermes"
+    assert payload["required_approval_gate"] == "CCC/AAL approval before any future execution"
+    assert "agent.run.completed" in payload["required_evidence_outputs"]
+    assert payload["candidates"][0]["candidate_id"] == "hermes"
+    assert payload["candidates"][0]["runtime_enabled"] is False
+    assert payload["candidates"][0]["capability_matches"][0] == {
+        "capability_id": "route-planning",
+        "matched": True,
+        "reason": "best descriptor match for agent task orchestration intent",
+    }
+    assert payload["steps"][0] == {
+        "step_id": "classify-intent",
+        "description": "Classify as AI-assisted code-change route",
+        "expected_output": "route.intent.classified",
+        "execute_now": False,
+    }
+
+
+def test_route_plan_cli_json_format_emits_parseable_contract_only() -> None:
+    result = runner.invoke(
+        app,
+        ["harness", "route-plan", "--intent", "Run agent task with evidence capture", "--format", "json"],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["schema_version"] == "route-plan.v1"
+    assert payload["intent"]["text"] == "Run agent task with evidence capture"
+    assert payload["execute_now"] is False
+    assert payload["chosen_candidate_id"] == "hermes"
+    assert payload["candidates"][2]["candidate_id"] == "pi-agent-harness"
+    assert payload["candidates"][2]["runtime_enabled"] is False
+    assert "DRY-RUN ROUTE PLAN" not in result.output
+
+
+def test_route_plan_cli_output_writes_json_file_without_execution() -> None:
+    with runner.isolated_filesystem():
+        output_path = Path("route-plan.json")
+        result = runner.invoke(
+            app,
+            [
+                "harness",
+                "route-plan",
+                "--intent",
+                "dangerous file operation delete production database",
+                "--format",
+                "json",
+                "--output",
+                str(output_path),
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert result.output == f"Wrote dry-run route plan: {output_path}\n"
+        payload = json.loads(output_path.read_text(encoding="utf-8"))
+        assert payload["chosen_candidate_id"] == "safety-guard"
+        assert payload["execute_now"] is False
+        assert payload["required_evidence_outputs"] == ["safety_guard.action.blocked"]
+
+
+def test_route_plan_cli_json_unknown_intent_still_fails_closed_with_exit_2() -> None:
+    result = runner.invoke(
+        app,
+        ["harness", "route-plan", "--intent", "make the thing better somehow", "--format", "json"],
+    )
+
+    assert result.exit_code == 2
+    payload = json.loads(result.output)
+    assert payload["fail_closed"] is True
+    assert payload["chosen_candidate_id"] is None
+    assert payload["unknown_capabilities"] == ["intent.classification"]
+    assert payload["execute_now"] is False

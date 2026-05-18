@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import typer
 from rich.console import Console
 
 from curaops.harness.operator_status import build_harness_operator_status, render_harness_operator_status
-from curaops.harness.route_plan import OperatorIntent, plan_route, render_route_plan
+from curaops.harness.route_plan import OperatorIntent, plan_route, render_route_plan, route_plan_to_dict
 
 console = Console(width=200)
 harness_app = typer.Typer(help="Read-only Matrix OS harness operator workflow views")
@@ -39,10 +40,35 @@ def route_plan(
         "--intent",
         help="Operator intent to translate into a non-executing dry-run route plan.",
     ),
+    output_format: str = typer.Option(
+        "text",
+        "--format",
+        help="Output format: text or json.",
+    ),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        help="Optional path to write the route plan output. Parent directories are created if needed.",
+    ),
 ) -> None:
     """Translate an operator intent into a descriptor-only dry-run route plan."""
 
     plan = plan_route(OperatorIntent(text=intent))
-    console.print(render_route_plan(plan), markup=False, end="")
+    normalized_format = output_format.lower()
+    if normalized_format == "json":
+        rendered = json.dumps(route_plan_to_dict(plan), indent=2, sort_keys=True) + "\n"
+    elif normalized_format == "text":
+        rendered = render_route_plan(plan)
+    else:
+        console.print(f"[red]Unsupported route-plan format[/red]: {output_format}")
+        raise typer.Exit(1)
+
+    if output is not None:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(rendered, encoding="utf-8")
+        console.print(f"Wrote dry-run route plan: {output}", markup=False)
+    else:
+        console.print(rendered, markup=False, end="")
+
     if plan.fail_closed:
         raise typer.Exit(2)
