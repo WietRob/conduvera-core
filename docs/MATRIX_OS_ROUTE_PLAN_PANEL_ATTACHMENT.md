@@ -9,10 +9,10 @@ This slice makes the route-plan panel discoverable from the preserved Matrix UI 
 The attachment path is:
 
 ```text
-Sidebar Route Plan button -> MatrixOS route_plan view -> MatrixRoutePlanPanel.from_route_plan_file(...) -> stable panel snapshot contract
+Sidebar Route Plan button -> MatrixOS route_plan view -> route-plan artifact selector -> MatrixRoutePlanPanel.from_route_plan_file(...) -> stable panel snapshot contract
 ```
 
-The view uses the existing `MatrixRoutePlanPanel` and the canonical `agent-task.json` route-plan fixture as a non-live demonstration artifact.
+The view resolves its default artifact through `curaops.harness.route_plan_artifacts.default_route_plan_artifact()`. The default remains `agent-task`, but tests can select any canonical artifact id through `MatrixOS._create_route_plan_panel_view(artifact_id)`.
 
 ## Implemented UI surface
 
@@ -21,7 +21,8 @@ The view uses the existing `MatrixRoutePlanPanel` and the canonical `agent-task.
 - a `Route Plan` sidebar button with id `btn_route_plan`,
 - a `route_plan` view factory in `MatrixOS._create_view_widget(...)`,
 - `MatrixOS.action_show_route_plan()` status/update dispatch,
-- button dispatch from `btn_route_plan` to the non-live panel view.
+- button dispatch from `btn_route_plan` to the non-live panel view,
+- selector-backed artifact resolution for the five canonical route-plan fixtures.
 
 The rendered content is still produced from the validated route-plan panel model and panel golden snapshot contract.
 
@@ -30,7 +31,7 @@ The rendered content is still produced from the validated route-plan panel model
 Matrix OS can now expose a discoverable route-plan panel surface in the existing Textual UI shell while preserving the no-runtime contract:
 
 ```text
-route-plan.v1 JSON -> panel model -> panel renderer -> non-live Matrix UI view factory
+route-plan.v1 JSON -> artifact selector -> selected artifact path -> panel model -> panel renderer -> non-live Matrix UI view factory
 ```
 
 This closes the previous gap between a standalone panel model and an app-discoverable UI route.
@@ -43,7 +44,10 @@ This attachment does not implement:
 - agent execution,
 - live runner state,
 - interactive Textual behavior,
-- dynamic route-plan loading,
+- arbitrary filesystem browsing,
+- user-upload loading,
+- live file watching,
+- new route-plan generation,
 - Hermes/OpenCode/Zed/MCP implementation,
 - adapter expansion,
 - shell interception,
@@ -60,6 +64,9 @@ The route-plan panel remains display-only. `Runtime execution: no`, `Shell execu
 - the route-plan panel is discoverable from the sidebar,
 - the Matrix app can create the `route_plan` view without starting a live runtime,
 - the app-created panel matches the stable panel snapshot contract,
+- all five canonical artifacts can be selected and matched to their panel snapshots,
+- unknown artifact ids fail closed,
+- the default `route_plan` view still resolves to `agent-task`,
 - the sidebar button dispatches to the non-live panel view,
 - the attachment does not create new route plans or execute anything.
 
@@ -67,4 +74,4 @@ Existing panel model, panel golden-output, viewer, route-plan, and widget tests 
 
 ## Future path
 
-A later slice may add a richer fixture selector or non-live route-plan artifact picker. That should remain display-only until a separate reviewed runtime-execution design exists.
+A later slice may add read-only UI state showing the currently selected artifact and a non-interactive selector list. That should remain display-only until a separate reviewed runtime-execution design exists.

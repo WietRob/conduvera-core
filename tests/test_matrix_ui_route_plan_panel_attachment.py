@@ -48,6 +48,51 @@ def test_matrix_app_route_plan_panel_matches_stable_snapshot_contract() -> None:
     assert widget.renderable == expected
 
 
+def test_matrix_app_route_plan_panel_view_can_select_agent_task_artifact() -> None:
+    widget = MatrixOS()._create_route_plan_panel_view("agent-task")
+    expected = (PANEL_FIXTURE_DIR / "agent-task.txt").read_text(encoding="utf-8")
+
+    assert widget.renderable == expected
+
+
+def test_matrix_app_route_plan_panel_view_can_select_dangerous_file_operation_artifact() -> None:
+    widget = MatrixOS()._create_route_plan_panel_view("dangerous-file-operation")
+    expected = (PANEL_FIXTURE_DIR / "dangerous-file-operation.txt").read_text(encoding="utf-8")
+
+    assert widget.renderable == expected
+
+
+def test_matrix_app_route_plan_panel_view_can_select_failed_agent_run_artifact() -> None:
+    widget = MatrixOS()._create_route_plan_panel_view("failed-agent-run")
+    expected = (PANEL_FIXTURE_DIR / "failed-agent-run.txt").read_text(encoding="utf-8")
+
+    assert widget.renderable == expected
+
+
+def test_matrix_app_route_plan_panel_view_can_select_operator_ui_view_artifact() -> None:
+    widget = MatrixOS()._create_route_plan_panel_view("operator-ui-view")
+    expected = (PANEL_FIXTURE_DIR / "operator-ui-view.txt").read_text(encoding="utf-8")
+
+    assert widget.renderable == expected
+
+
+def test_matrix_app_route_plan_panel_view_can_select_unknown_intent_artifact() -> None:
+    widget = MatrixOS()._create_route_plan_panel_view("unknown-intent")
+    expected = (PANEL_FIXTURE_DIR / "unknown-intent.txt").read_text(encoding="utf-8")
+
+    assert widget.renderable == expected
+    assert widget.panel_model.fail_closed is True
+
+
+def test_matrix_app_route_plan_panel_view_fails_closed_for_unknown_artifact_id() -> None:
+    try:
+        MatrixOS()._create_route_plan_panel_view("not-a-fixture")
+    except KeyError as exc:
+        assert "Unknown route-plan artifact" in str(exc)
+    else:  # pragma: no cover - explicit fail-closed assertion
+        raise AssertionError("unknown artifact id should fail closed")
+
+
 def test_route_plan_button_dispatches_to_non_live_panel_view(monkeypatch) -> None:
     app = MatrixOS()
     calls: list[tuple[str, str]] = []
