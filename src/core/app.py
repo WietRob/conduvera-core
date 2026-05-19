@@ -10,6 +10,7 @@ import sys
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from curaops.harness.route_plan_artifacts import default_route_plan_artifact, get_route_plan_artifact
 from src.ui.widgets.matrix_rain import MatrixRain
 from src.ui.widgets.file_browser import FileBrowser
 from src.ui.widgets.process_monitor import ProcessMonitor
@@ -283,11 +284,7 @@ class MatrixOS(App):
                 classes="view"
             ),
             "monitoring": lambda: self._create_monitoring_view(),
-            "route_plan": lambda: MatrixRoutePlanPanel.from_route_plan_file(
-                Path(__file__).parent.parent.parent / "tests" / "fixtures" / "harness" / "route_plan" / "agent-task.json",
-                id="route-plan-panel-view",
-                classes="view",
-            ),
+            "route_plan": lambda: self._create_route_plan_panel_view(),
             "welcome": lambda: Container(
                 Label(
                     "[bold bright_green]╔═══════════════════════════════════════════╗[/]\n"
@@ -344,6 +341,16 @@ class MatrixOS(App):
         from src.ui.widgets.monitoring_dashboard import MonitoringDashboard
 
         return MonitoringDashboard(id="monitoring-dashboard-view", classes="view")
+
+    def _create_route_plan_panel_view(self, artifact_id: str | None = None) -> MatrixRoutePlanPanel:
+        """Create a non-live route-plan panel from the canonical artifact selector."""
+
+        artifact = get_route_plan_artifact(artifact_id) if artifact_id else default_route_plan_artifact()
+        return MatrixRoutePlanPanel.from_route_plan_file(
+            artifact.path,
+            id="route-plan-panel-view",
+            classes="view",
+        )
 
     def action_show_terminal(self) -> None:
         """Show terminal view."""

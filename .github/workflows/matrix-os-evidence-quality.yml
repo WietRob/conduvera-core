@@ -41,6 +41,7 @@ jobs:
           tests/test_route_plan_viewer_golden_outputs.py
           tests/test_route_plan_panel_model.py
           tests/test_route_plan_panel_golden_outputs.py
+          tests/test_route_plan_artifact_selector.py
           tests/test_matrix_ui_route_plan_panel_attachment.py
           tests/test_evidence_operator_report.py
           tests/test_evidence_report_golden_outputs.py
@@ -75,6 +76,7 @@ jobs:
           curaops/cli/commands/harness.py
           src/core/app.py
           src/ui/widgets/route_plan_panel.py
+          curaops/harness/route_plan_artifacts.py
           tests/test_evidence_operator_report.py
           tests/test_evidence_report_golden_outputs.py
           tests/test_evidence_report_contract_version.py
@@ -82,6 +84,7 @@ jobs:
           tests/test_route_plan_viewer_golden_outputs.py
           tests/test_route_plan_panel_model.py
           tests/test_route_plan_panel_golden_outputs.py
+          tests/test_route_plan_artifact_selector.py
           tests/test_matrix_ui_route_plan_panel_attachment.py
 
       - name: Check whitespace in tracked diff
