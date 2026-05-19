@@ -26,7 +26,7 @@ This document does not rewrite the UI and does not claim a production dashboard.
 |---|---|---|
 | CR status | Sidebar badge or status panel | operators need change intent before acting |
 | Evidence requirements | Main content panel / split pane | shows required handoff evidence before any future execution |
-| Route-plan candidate ranking | Code editor / split pane | displays existing `route-plan.v1` JSON artifacts as a read-only route-plan viewer stub with exact operator snapshot fixtures |
+| Route-plan candidate ranking | Code editor / split pane | displays existing `route-plan.v1` JSON artifacts as a read-only route-plan viewer stub and non-interactive Textual-compatible panel model with exact operator snapshot fixtures |
 | Runner status | Process monitor / terminal surface | maps naturally to running/pending/exited tools |
 | Editor/Zed-like workflow | Code editor / split pane | attach requirement and CR context to files |
 | Approval inbox | Sidebar + main approval panel | future safety/change approvals without shell interception |
@@ -50,7 +50,7 @@ Zed/MCP remains future adapter work.
 This slice intentionally does not:
 
 - rewrite `src/core/app.py`,
-- change Textual widget behavior,
+- change Textual widget behavior outside the route-plan panel model,
 - build a production dashboard,
 - implement an MCP server,
 - implement Zed runtime integration,
@@ -59,4 +59,4 @@ This slice intentionally does not:
 
 ## Validation
 
-Current UI/widget tests still pass. `tests/test_product_coherence_scenarios.py` verifies that the scaffold manifest still exposes the original Matrix UI, Matrix rain path, terminal/process/file/editor surfaces, and no-UI-rewrite/no-production-dashboard exclusions. `tests/test_matrix_ui_route_plan_viewer.py` verifies the read-only route-plan viewer stub consumes existing `route-plan.v1` fixtures and renders intent, chosen candidate, candidate ranking, evidence requirements, approval gate, and non-execution boundaries without live runtime or dashboard claims. `tests/test_route_plan_viewer_golden_outputs.py` locks the operator snapshots that a future non-interactive UI panel can consume.
+Current UI/widget tests still pass. `tests/test_product_coherence_scenarios.py` verifies that the scaffold manifest still exposes the original Matrix UI, Matrix rain path, terminal/process/file/editor surfaces, and no-UI-rewrite/no-production-dashboard exclusions. `tests/test_matrix_ui_route_plan_viewer.py` verifies the read-only route-plan viewer stub consumes existing `route-plan.v1` fixtures and renders intent, chosen candidate, candidate ranking, evidence requirements, approval gate, and non-execution boundaries without live runtime or dashboard claims. `tests/test_route_plan_viewer_golden_outputs.py` locks the operator snapshots that a future non-interactive UI panel can consume. `tests/test_route_plan_panel_model.py` verifies the Textual-compatible route-plan panel model can be built and its widget shell constructed without running a live app.

@@ -3,8 +3,6 @@ from textual.widgets import Static, Button
 from textual.containers import VerticalScroll, Horizontal
 from textual.reactive import reactive
 from textual.message import Message
-from rich.text import Text
-from rich.markdown import Markdown
 from pathlib import Path
 import subprocess
 import time
@@ -392,7 +390,7 @@ class AIAssistant(VerticalScroll):
         try:
             indicator = self.query_one("#ai-thinking-indicator")
             indicator.remove()
-        except:
+        except Exception:
             pass
 
         # Show response
@@ -433,7 +431,7 @@ class AIAssistant(VerticalScroll):
         try:
             indicator = self.query_one("#ai-thinking-indicator")
             indicator.remove()
-        except:
+        except Exception:
             pass
 
         self.mount(

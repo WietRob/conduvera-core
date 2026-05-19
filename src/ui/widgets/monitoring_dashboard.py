@@ -1,11 +1,9 @@
 """Advanced Monitoring Dashboard - Unified system, docker, process, and AI budget monitoring."""
-from textual.widgets import Static, DataTable
-from textual.containers import VerticalScroll, Horizontal, Vertical, Container
+from textual.widgets import Static
+from textual.containers import VerticalScroll
 from textual.reactive import reactive
 from textual.message import Message
-from rich.text import Text
-from rich.table import Table as RichTable
-from typing import List, Dict, Any
+from typing import Dict, Any
 import psutil
 import subprocess
 import json

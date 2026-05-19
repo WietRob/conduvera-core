@@ -1,13 +1,12 @@
 """Docker/Container Manager widget."""
-from textual.widgets import DataTable, Static
-from textual.containers import VerticalScroll, Horizontal
+from textual.widgets import Static
+from textual.containers import VerticalScroll
 from textual.reactive import reactive
 from textual.message import Message
 from rich.text import Text
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 import subprocess
 import json
-from datetime import datetime
 from src.utils.logger import logger
 
 
@@ -303,7 +302,7 @@ class DockerManager(VerticalScroll):
             else:
                 color = "green"
             return Text(percent_str, style=color)
-        except:
+        except Exception:
             return Text(percent_str, style="white")
 
     def show_error(self, error: str) -> None:

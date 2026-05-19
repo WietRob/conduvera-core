@@ -1,13 +1,10 @@
 """Database Browser widget with multi-DB support."""
-from textual.widgets import Static, DataTable, Input
-from textual.containers import VerticalScroll, Horizontal
+from textual.widgets import Static
+from textual.containers import VerticalScroll
 from textual.reactive import reactive
 from textual.message import Message
-from rich.text import Text
-from rich.table import Table as RichTable
 from typing import List, Dict, Any, Optional
 import subprocess
-import json
 from src.utils.logger import logger
 
 

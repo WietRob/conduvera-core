@@ -25,7 +25,8 @@ Current merged scope:
 | Operator Workflow Vertical Slice | Merged | Read-only harness status connecting evidence, adapters, gateway descriptors, and Matrix UI attach point |
 | Runtime Decision / Dry-Run Gateway | Merged | Descriptor-only route planner from operator intent to candidate ranking, evidence plan, and approval gate |
 | Route Plan Golden Fixtures & Operator Handoff Contract | Merged | Regression-lock `route-plan.v1` JSON handoff fixtures for future UI/automation consumers without runtime execution |
-| Route-Plan Viewer Golden Outputs & Operator Snapshot Pack | Current | Regression-lock read-only route-plan viewer snapshots for future Matrix UI panel consumers without live UI/runtime execution |
+| Route-Plan Viewer Golden Outputs & Operator Snapshot Pack | Merged | Regression-lock read-only route-plan viewer snapshots for future Matrix UI panel consumers without live UI/runtime execution |
+| Minimal Textual Route-Plan Panel Model | Current | Provide a non-interactive Textual-compatible panel model over validated `route-plan.v1` fixtures without live UI/runtime execution |
 
 This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope. The current `main` branch governance is documented in `docs/MATRIX_OS_GOVERNANCE_POLICY.md`: the evidence/report quality gate is enforced as a strict required status check, while required GitHub pull-request approvals and conversation resolution are not currently enforced.
 
@@ -93,7 +94,8 @@ Start here:
 20. `docs/ADR_RUNTIME_DECISION_AND_DRY_RUN_GATEWAY.md`
 21. `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md`
 22. `docs/MATRIX_OS_ROUTE_PLAN_VIEWER_OUTPUTS.md`
-23. `docs/DOCUMENTATION_INVENTORY.md`
+23. `docs/MATRIX_OS_ROUTE_PLAN_PANEL_MODEL.md`
+24. `docs/DOCUMENTATION_INVENTORY.md`
 
 Module-specific docs:
 
@@ -111,7 +113,7 @@ Module-specific docs:
 | Operator Workflow | `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`, `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md`, `curaops/harness/operator_status.py`, `tests/test_harness_operator_status.py` |
 | Governance Policy | `docs/MATRIX_OS_GOVERNANCE_POLICY.md`, `CODEOWNERS`, `.github/workflows/matrix-os-evidence-quality.yml` |
 | Product Coherence Scenarios | `docs/MATRIX_OS_PRODUCT_COHERENCE.md`, `tests/test_product_coherence_scenarios.py` |
-| Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `docs/ADR_RUNTIME_DECISION_AND_DRY_RUN_GATEWAY.md`, `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md`, `docs/MATRIX_OS_ROUTE_PLAN_VIEWER_OUTPUTS.md`, `curaops/harness/gateway.py`, `curaops/harness/route_plan.py`, `curaops/harness/route_plan_viewer.py`, `tests/test_harness_route_plan.py`, `tests/test_route_plan_golden_fixtures.py`, `tests/test_matrix_ui_route_plan_viewer.py`, `tests/test_route_plan_viewer_golden_outputs.py`, `tests/fixtures/harness/route_plan/`, `tests/fixtures/harness/route_plan_view/` |
+| Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `docs/ADR_RUNTIME_DECISION_AND_DRY_RUN_GATEWAY.md`, `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md`, `docs/MATRIX_OS_ROUTE_PLAN_VIEWER_OUTPUTS.md`, `docs/MATRIX_OS_ROUTE_PLAN_PANEL_MODEL.md`, `curaops/harness/gateway.py`, `curaops/harness/route_plan.py`, `curaops/harness/route_plan_viewer.py`, `src/ui/widgets/route_plan_panel.py`, `tests/test_harness_route_plan.py`, `tests/test_route_plan_golden_fixtures.py`, `tests/test_matrix_ui_route_plan_viewer.py`, `tests/test_route_plan_viewer_golden_outputs.py`, `tests/test_route_plan_panel_model.py`, `tests/fixtures/harness/route_plan/`, `tests/fixtures/harness/route_plan_view/` |
 | UI Value Map / Provenance | `docs/MATRIX_OS_UI_VALUE_MAP.md`, `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` |
 
 ## Historical docs
@@ -148,11 +150,13 @@ Merged:
 - PR #25 Route Plan Golden Fixtures & Operator Handoff Contract
 - PR #26 Minimal Matrix UI Route-Plan Viewer Stub
 
+- PR #27 Route-Plan Viewer Golden Outputs & Operator Snapshot Pack
+
 Current:
 
-- PR #27 Route-Plan Viewer Golden Outputs & Operator Snapshot Pack: exact read-only viewer snapshots for future Matrix UI panel consumers, with no live UI integration or runtime execution
+- PR #28 Minimal Textual Route-Plan Panel Model: non-interactive Textual-compatible panel model over validated route-plan fixtures, with no live UI integration or runtime execution
 
 Planned:
 
-- PR #28 Minimal Textual Route-Plan Panel Model
+- PR #29 Route-Plan Panel Golden Render Fixtures
 - Later focused adapter slices for CAS, peekxd, OpenCode plugin, and ai-router
