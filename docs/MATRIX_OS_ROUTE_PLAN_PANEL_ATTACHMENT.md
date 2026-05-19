@@ -12,7 +12,7 @@ The attachment path is:
 Sidebar Route Plan button -> MatrixOS route_plan view -> route-plan artifact selector -> MatrixRoutePlanPanel.from_route_plan_file(...) -> stable panel snapshot contract
 ```
 
-The view resolves its default artifact through `curaops.harness.route_plan_artifacts.default_route_plan_artifact()`. The default remains `agent-task`, but tests can select any canonical artifact id through `MatrixOS._create_route_plan_panel_view(artifact_id)`. The app helper also prepends read-only picker state so the panel path displays the selected artifact id, label, scenario, available artifacts, and no-runtime/no-browser boundaries before the stable panel body.
+The view resolves its default artifact through `curaops.harness.route_plan_artifacts.default_route_plan_artifact()`. The default remains `agent-task`, but tests can select any canonical artifact id through `MatrixOS._create_route_plan_panel_view(artifact_id)`. The app helper also prepends a read-only picker/list widget render so the panel path displays the selected artifact id, label, scenario, available artifacts, selected marker, and no-runtime/no-browser boundaries before the stable panel body.
 
 ## Implemented UI surface
 
@@ -23,7 +23,7 @@ The view resolves its default artifact through `curaops.harness.route_plan_artif
 - `MatrixOS.action_show_route_plan()` status/update dispatch,
 - button dispatch from `btn_route_plan` to the non-live panel view,
 - selector-backed artifact resolution for the five canonical route-plan fixtures,
-- read-only picker state rendering for selected artifact id, label, scenario, available artifacts, and boundaries.
+- read-only picker/list widget rendering for selected artifact id, label, scenario, selected marker, available artifacts, and boundaries.
 
 The rendered content is still produced from the validated route-plan panel model and panel golden snapshot contract.
 
@@ -66,7 +66,7 @@ The route-plan panel remains display-only. `Runtime execution: no`, `Shell execu
 - the Matrix app can create the `route_plan` view without starting a live runtime,
 - the app-created panel matches the stable panel snapshot contract,
 - all five canonical artifacts can be selected and matched to their panel snapshots,
-- selected artifact id, label, and scenario are displayed in the non-live panel render path,
+- selected artifact id, label, scenario, and selected marker are displayed in the non-live panel render path,
 - unknown artifact ids fail closed,
 - the default `route_plan` view still resolves to `agent-task`,
 - the sidebar button dispatches to the non-live panel view,
@@ -76,4 +76,4 @@ Existing panel model, panel golden-output, viewer, route-plan, and widget tests 
 
 ## Future path
 
-A later slice may add non-live artifact picker interaction or selector list display refinement. That should remain display-only until a separate reviewed runtime-execution design exists.
+A later slice may add non-live selected-artifact preview switching. That should remain construction-time/in-memory and display-only until a separate reviewed runtime-execution design exists.
