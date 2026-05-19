@@ -21,8 +21,9 @@ from src.ui.widgets.docker_manager import DockerManager
 from src.ui.widgets.api_client import APIClient
 from src.ui.widgets.database_browser import DatabaseBrowser
 from src.ui.widgets.git_manager import GitManager
-from src.ui.widgets.split_pane import SplitPane, EditorTerminalSplit
+from src.ui.widgets.split_pane import EditorTerminalSplit
 from src.ui.widgets.monitoring_dashboard import MonitoringDashboard
+from src.ui.widgets.route_plan_panel import MatrixRoutePlanPanel
 from src.utils.config import get_config
 from src.utils.logger import logger
 
@@ -75,6 +76,7 @@ class Sidebar(VerticalScroll):
         yield Button("✏️  Code Editor", id="btn_editor")
         yield Button("🔀 Split View", id="btn_split")
         yield Button("🤖 AI Assistant", id="btn_ai")
+        yield Button("🧭 Route Plan", id="btn_route_plan")
 
         yield Static("")
         yield Label("[dim green]── Dev Tools ──────────[/]")
@@ -302,6 +304,11 @@ class MatrixOS(App):
                 id="monitoring-dashboard-view",
                 classes="view"
             ),
+            "route_plan": lambda: MatrixRoutePlanPanel.from_route_plan_file(
+                Path(__file__).parent.parent.parent / "tests" / "fixtures" / "harness" / "route_plan" / "agent-task.json",
+                id="route-plan-panel-view",
+                classes="view",
+            ),
             "welcome": lambda: Container(
                 Label(
                     "[bold bright_green]╔═══════════════════════════════════════════╗[/]\n"
@@ -379,6 +386,11 @@ class MatrixOS(App):
         self.switch_view("monitoring")
         self.update_status("📈 [bold green]Monitoring Dashboard loaded[/] - Unified system, docker, and process monitoring")
 
+    def action_show_route_plan(self) -> None:
+        """Show non-live route-plan panel view."""
+        self.switch_view("route_plan")
+        self.update_status("🧭 [bold green]Route Plan Panel loaded[/] - Display-only snapshot, no runtime execution")
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button press events."""
         button_id = event.button.id
@@ -398,6 +410,7 @@ class MatrixOS(App):
                 self.switch_view("ai"),
                 self.update_status("🤖 [bold green]Neo's AI Assistant ready[/] - Ask me anything!")
             ),
+            "btn_route_plan": lambda: self.action_show_route_plan(),
             "btn_git": lambda: (
                 self.switch_view("git"),
                 self.update_status("🔧 [bold green]Git Matrix loaded[/] - Visual git interface with diff viewer")
