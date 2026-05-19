@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from textual.widgets import Static
 
@@ -123,7 +124,8 @@ class MatrixRoutePlanPanel(Static):
 
     def __init__(self, panel_model: MatrixRoutePlanPanelModel, **kwargs) -> None:
         self.panel_model = panel_model
-        self.artifact_picker_state = None
+        self.artifact_picker_state: Any = None
+        self.artifact_picker_renderable = ""
         self.renderable = render_route_plan_panel_text(panel_model)
         super().__init__(self.renderable, **kwargs)
 

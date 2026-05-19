@@ -68,7 +68,8 @@ def test_matrix_app_route_plan_panel_view_displays_selected_artifact_state() -> 
     assert widget.artifact_picker_state.selected_artifact_id == "dangerous-file-operation"
     assert widget.artifact_picker_state.selected_label == "Dangerous file operation safety gate"
     assert widget.artifact_picker_state.selected_scenario == "dangerous file operation"
-    assert "Route Plan Artifact Picker State" in widget.renderable
+    assert "Route Plan Artifact Picker" in widget.renderable
+    assert "▶ dangerous-file-operation" in widget.renderable
     assert "Selected artifact: dangerous-file-operation" in widget.renderable
     assert "Selected scenario: dangerous file operation" in widget.renderable
     assert "Runtime execution: no" in widget.renderable

@@ -6,7 +6,7 @@ Status: non-live UI state for the canonical route-plan artifact picker.
 
 The route-plan panel now carries explicit read-only picker state so operators can see which canonical artifact is selected before reading the panel body.
 
-This slice does not add live switching. It only exposes deterministic state for the selected artifact and the available canonical artifact ids.
+This slice does not add live switching. It only exposes deterministic state for the selected artifact and the available canonical artifact ids. The follow-up widget slice renders that state as a visible Textual-compatible picker/list with a selected marker; see `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_PICKER_WIDGET.md`.
 
 ## Data path
 
@@ -14,7 +14,7 @@ This slice does not add live switching. It only exposes deterministic state for 
 artifact id
 -> RoutePlanArtifact registry
 -> RoutePlanArtifactPickerState
--> rendered picker state
+-> MatrixRoutePlanArtifactPicker widget/list render
 -> MatrixRoutePlanPanel renderable prefix
 -> existing panel snapshot body
 ```
@@ -74,4 +74,5 @@ This picker state does not:
 ## Validation
 
 - `tests/test_route_plan_artifact_picker_state.py`
+- `tests/test_route_plan_artifact_picker_widget.py`
 - `tests/test_matrix_ui_route_plan_panel_attachment.py`
