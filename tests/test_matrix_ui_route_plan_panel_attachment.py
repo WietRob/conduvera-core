@@ -45,42 +45,55 @@ def test_matrix_app_route_plan_panel_matches_stable_snapshot_contract() -> None:
     widget = app._create_view_widget("route_plan")
     expected = (PANEL_FIXTURE_DIR / "agent-task.txt").read_text(encoding="utf-8")
 
-    assert widget.renderable == expected
+    assert expected in widget.renderable
 
 
 def test_matrix_app_route_plan_panel_view_can_select_agent_task_artifact() -> None:
     widget = MatrixOS()._create_route_plan_panel_view("agent-task")
     expected = (PANEL_FIXTURE_DIR / "agent-task.txt").read_text(encoding="utf-8")
 
-    assert widget.renderable == expected
+    assert expected in widget.renderable
 
 
 def test_matrix_app_route_plan_panel_view_can_select_dangerous_file_operation_artifact() -> None:
     widget = MatrixOS()._create_route_plan_panel_view("dangerous-file-operation")
     expected = (PANEL_FIXTURE_DIR / "dangerous-file-operation.txt").read_text(encoding="utf-8")
 
-    assert widget.renderable == expected
+    assert expected in widget.renderable
+
+
+def test_matrix_app_route_plan_panel_view_displays_selected_artifact_state() -> None:
+    widget = MatrixOS()._create_route_plan_panel_view("dangerous-file-operation")
+
+    assert widget.artifact_picker_state.selected_artifact_id == "dangerous-file-operation"
+    assert widget.artifact_picker_state.selected_label == "Dangerous file operation safety gate"
+    assert widget.artifact_picker_state.selected_scenario == "dangerous file operation"
+    assert "Route Plan Artifact Picker State" in widget.renderable
+    assert "Selected artifact: dangerous-file-operation" in widget.renderable
+    assert "Selected scenario: dangerous file operation" in widget.renderable
+    assert "Runtime execution: no" in widget.renderable
+    assert "Arbitrary filesystem browser: no" in widget.renderable
 
 
 def test_matrix_app_route_plan_panel_view_can_select_failed_agent_run_artifact() -> None:
     widget = MatrixOS()._create_route_plan_panel_view("failed-agent-run")
     expected = (PANEL_FIXTURE_DIR / "failed-agent-run.txt").read_text(encoding="utf-8")
 
-    assert widget.renderable == expected
+    assert expected in widget.renderable
 
 
 def test_matrix_app_route_plan_panel_view_can_select_operator_ui_view_artifact() -> None:
     widget = MatrixOS()._create_route_plan_panel_view("operator-ui-view")
     expected = (PANEL_FIXTURE_DIR / "operator-ui-view.txt").read_text(encoding="utf-8")
 
-    assert widget.renderable == expected
+    assert expected in widget.renderable
 
 
 def test_matrix_app_route_plan_panel_view_can_select_unknown_intent_artifact() -> None:
     widget = MatrixOS()._create_route_plan_panel_view("unknown-intent")
     expected = (PANEL_FIXTURE_DIR / "unknown-intent.txt").read_text(encoding="utf-8")
 
-    assert widget.renderable == expected
+    assert expected in widget.renderable
     assert widget.panel_model.fail_closed is True
 
 

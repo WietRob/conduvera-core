@@ -10,7 +10,12 @@ import sys
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from curaops.harness.route_plan_artifacts import default_route_plan_artifact, get_route_plan_artifact
+from curaops.harness.route_plan_artifacts import (
+    build_route_plan_artifact_picker_state,
+    default_route_plan_artifact,
+    get_route_plan_artifact,
+    render_route_plan_artifact_picker_state,
+)
 from src.ui.widgets.matrix_rain import MatrixRain
 from src.ui.widgets.file_browser import FileBrowser
 from src.ui.widgets.process_monitor import ProcessMonitor
@@ -346,11 +351,16 @@ class MatrixOS(App):
         """Create a non-live route-plan panel from the canonical artifact selector."""
 
         artifact = get_route_plan_artifact(artifact_id) if artifact_id else default_route_plan_artifact()
-        return MatrixRoutePlanPanel.from_route_plan_file(
+        picker_state = build_route_plan_artifact_picker_state(artifact.artifact_id)
+        widget = MatrixRoutePlanPanel.from_route_plan_file(
             artifact.path,
             id="route-plan-panel-view",
             classes="view",
         )
+        widget.artifact_picker_state = picker_state
+        widget.renderable = render_route_plan_artifact_picker_state(picker_state) + widget.renderable
+        widget.update(widget.renderable)
+        return widget
 
     def action_show_terminal(self) -> None:
         """Show terminal view."""

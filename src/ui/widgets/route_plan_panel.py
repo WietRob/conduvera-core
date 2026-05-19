@@ -123,6 +123,7 @@ class MatrixRoutePlanPanel(Static):
 
     def __init__(self, panel_model: MatrixRoutePlanPanelModel, **kwargs) -> None:
         self.panel_model = panel_model
+        self.artifact_picker_state = None
         self.renderable = render_route_plan_panel_text(panel_model)
         super().__init__(self.renderable, **kwargs)
 

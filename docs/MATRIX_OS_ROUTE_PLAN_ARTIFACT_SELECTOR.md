@@ -44,7 +44,7 @@ MatrixOS._create_route_plan_panel_view("dangerous-file-operation")
 
 ## Why this matters
 
-The non-live route-plan panel is now useful across the five canonical operator scenarios instead of being hardcoded to `agent-task.json`. Future UI work can present the artifact list as a read-only selector without scraping CLI output or browsing arbitrary files.
+The non-live route-plan panel is now useful across the five canonical operator scenarios instead of being hardcoded to `agent-task.json`. Future UI work can present the artifact list as a read-only selector without scraping CLI output or browsing arbitrary files. `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_PICKER_UI_STATE.md` defines the follow-up UI state that displays selected artifact id, label, scenario, available artifacts, and no-runtime/no-browser boundaries in the non-live panel path.
 
 ## Boundaries
 
@@ -67,4 +67,5 @@ Unknown artifact ids fail closed with `KeyError`.
 ## Validation
 
 - `tests/test_route_plan_artifact_selector.py`
+- `tests/test_route_plan_artifact_picker_state.py`
 - `tests/test_matrix_ui_route_plan_panel_attachment.py`
