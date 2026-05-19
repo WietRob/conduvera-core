@@ -16,13 +16,9 @@ from src.ui.widgets.process_monitor import ProcessMonitor
 from src.ui.widgets.system_info import SystemInfoPanel
 from src.ui.widgets.terminal import Terminal
 from src.ui.widgets.code_editor import CodeEditor
-from src.ui.widgets.ai_assistant import AIAssistant
-from src.ui.widgets.docker_manager import DockerManager
-from src.ui.widgets.api_client import APIClient
-from src.ui.widgets.database_browser import DatabaseBrowser
 from src.ui.widgets.git_manager import GitManager
-from src.ui.widgets.split_pane import SplitPane, EditorTerminalSplit
-from src.ui.widgets.monitoring_dashboard import MonitoringDashboard
+from src.ui.widgets.split_pane import EditorTerminalSplit
+from src.ui.widgets.route_plan_panel import MatrixRoutePlanPanel
 from src.utils.config import get_config
 from src.utils.logger import logger
 
@@ -75,6 +71,7 @@ class Sidebar(VerticalScroll):
         yield Button("✏️  Code Editor", id="btn_editor")
         yield Button("🔀 Split View", id="btn_split")
         yield Button("🤖 AI Assistant", id="btn_ai")
+        yield Button("🧭 Route Plan", id="btn_route_plan")
 
         yield Static("")
         yield Label("[dim green]── Dev Tools ──────────[/]")
@@ -266,28 +263,15 @@ class MatrixOS(App):
                 id="split-view",
                 classes="view"
             ),
-            "ai": lambda: AIAssistant(
-                id="ai-assistant-view",
-                classes="view"
-            ),
+            "ai": lambda: self._create_ai_assistant_view(),
             "git": lambda: GitManager(
                 repo_path=Path.cwd(),
                 id="git-manager-view",
                 classes="view"
             ),
-            "docker": lambda: DockerManager(
-                refresh_interval=5.0,
-                id="docker-manager-view",
-                classes="view"
-            ),
-            "api": lambda: APIClient(
-                id="api-client-view",
-                classes="view"
-            ),
-            "database": lambda: DatabaseBrowser(
-                id="database-browser-view",
-                classes="view"
-            ),
+            "docker": lambda: self._create_docker_view(),
+            "api": lambda: self._create_api_view(),
+            "database": lambda: self._create_database_view(),
             "processes": lambda: ProcessMonitor(
                 refresh_interval=2.0,
                 max_processes=50,
@@ -298,9 +282,11 @@ class MatrixOS(App):
                 id="system-info-view",
                 classes="view"
             ),
-            "monitoring": lambda: MonitoringDashboard(
-                id="monitoring-dashboard-view",
-                classes="view"
+            "monitoring": lambda: self._create_monitoring_view(),
+            "route_plan": lambda: MatrixRoutePlanPanel.from_route_plan_file(
+                Path(__file__).parent.parent.parent / "tests" / "fixtures" / "harness" / "route_plan" / "agent-task.json",
+                id="route-plan-panel-view",
+                classes="view",
             ),
             "welcome": lambda: Container(
                 Label(
@@ -323,6 +309,41 @@ class MatrixOS(App):
 
         creator = widgets.get(view_name)
         return creator() if creator else None
+
+    def _create_ai_assistant_view(self):
+        """Create AI assistant view lazily so route-plan tests do not import optional HTTP clients."""
+
+        from src.ui.widgets.ai_assistant import AIAssistant
+
+        return AIAssistant(id="ai-assistant-view", classes="view")
+
+    def _create_docker_view(self):
+        """Create Docker view lazily."""
+
+        from src.ui.widgets.docker_manager import DockerManager
+
+        return DockerManager(refresh_interval=5.0, id="docker-manager-view", classes="view")
+
+    def _create_api_view(self):
+        """Create API client view lazily."""
+
+        from src.ui.widgets.api_client import APIClient
+
+        return APIClient(id="api-client-view", classes="view")
+
+    def _create_database_view(self):
+        """Create database browser view lazily."""
+
+        from src.ui.widgets.database_browser import DatabaseBrowser
+
+        return DatabaseBrowser(id="database-browser-view", classes="view")
+
+    def _create_monitoring_view(self):
+        """Create monitoring view lazily so MatrixOS import remains lightweight."""
+
+        from src.ui.widgets.monitoring_dashboard import MonitoringDashboard
+
+        return MonitoringDashboard(id="monitoring-dashboard-view", classes="view")
 
     def action_show_terminal(self) -> None:
         """Show terminal view."""
@@ -379,6 +400,11 @@ class MatrixOS(App):
         self.switch_view("monitoring")
         self.update_status("📈 [bold green]Monitoring Dashboard loaded[/] - Unified system, docker, and process monitoring")
 
+    def action_show_route_plan(self) -> None:
+        """Show non-live route-plan panel view."""
+        self.switch_view("route_plan")
+        self.update_status("🧭 [bold green]Route Plan Panel loaded[/] - Display-only snapshot, no runtime execution")
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button press events."""
         button_id = event.button.id
@@ -398,6 +424,7 @@ class MatrixOS(App):
                 self.switch_view("ai"),
                 self.update_status("🤖 [bold green]Neo's AI Assistant ready[/] - Ask me anything!")
             ),
+            "btn_route_plan": lambda: self.action_show_route_plan(),
             "btn_git": lambda: (
                 self.switch_view("git"),
                 self.update_status("🔧 [bold green]Git Matrix loaded[/] - Visual git interface with diff viewer")
