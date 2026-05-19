@@ -2,10 +2,8 @@
 from textual.widget import Widget
 from textual.reactive import reactive
 from rich.text import Text
-from rich.table import Table
 import psutil
 import time
-from datetime import datetime
 
 
 class SystemInfoPanel(Widget):

@@ -1,14 +1,11 @@
 """Git Integration widget with visual diff and status."""
-from textual.widgets import Static, DataTable, Tree
-from textual.containers import VerticalScroll, Horizontal, Vertical
+from textual.widgets import Static
+from textual.containers import VerticalScroll
 from textual.reactive import reactive
 from textual.message import Message
-from rich.text import Text
-from rich.syntax import Syntax
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Optional, Tuple
 import subprocess
 import re
-from datetime import datetime
 from pathlib import Path
 from src.utils.logger import logger
 

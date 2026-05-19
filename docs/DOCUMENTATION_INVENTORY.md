@@ -19,6 +19,7 @@ This inventory classifies authoritative and historical Matrix OS documents acros
 | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md` | Authoritative generic gateway boundary | Create | Defines Hermes/OpenCode/Zed/MCP/local-shell/peekxd future descriptors without runtime execution |
 | `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md` | Authoritative route-plan handoff contract | Create | Defines stable `route-plan.v1` JSON fixtures for future UI/automation consumers without runtime execution |
 | `docs/MATRIX_OS_ROUTE_PLAN_VIEWER_OUTPUTS.md` | Authoritative route-plan viewer snapshot contract | Create | Defines exact read-only `route-plan-view` operator outputs for future UI panel consumers without live UI/runtime execution |
+| `docs/MATRIX_OS_ROUTE_PLAN_PANEL_MODEL.md` | Authoritative route-plan panel model contract | Create | Defines non-interactive Textual-compatible panel model over validated route-plan fixtures without live UI/runtime execution |
 | `docs/MATRIX_OS_UI_VALUE_MAP.md` | Authoritative original UI value map | Create | Maps preserved TUI surfaces to future CR/evidence/runner/editor use without UI rewrite or dashboard claim |
 | `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` | Authoritative provenance note | Create | Separates confirmed Matrix UI lineage facts from UNKNOWN Pi/fork claims |
 | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md` | Authoritative evidence report layer | Update | Defines read-only text/Markdown/JSON operator reports, `MXOS-REPORT-1.0` contract versioning, golden-output regression fixtures, and the focused CI quality gate without runtime or production-audit claims |
@@ -58,22 +59,23 @@ This inventory classifies authoritative and historical Matrix OS documents acros
 5. `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`
 6. `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md`
 7. `docs/MATRIX_OS_ROUTE_PLAN_VIEWER_OUTPUTS.md`
-8. `docs/MATRIX_OS_UI_VALUE_MAP.md`
-9. `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md`
-10. `docs/MATRIX_OS_SCAFFOLDING.md`
-11. `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`
-12. `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
-13. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
-14. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
-15. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
-16. `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`
-17. `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md`
-18. `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`
-19. `docs/MATRIX_OS_GOVERNANCE_POLICY.md`
-20. `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`
-21. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
-22. `docs/RELEASE_TRAIN_STATUS.md`
-23. Module-specific docs for CCC, AAL, and ASPICE as needed
+8. `docs/MATRIX_OS_ROUTE_PLAN_PANEL_MODEL.md`
+9. `docs/MATRIX_OS_UI_VALUE_MAP.md`
+10. `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md`
+11. `docs/MATRIX_OS_SCAFFOLDING.md`
+12. `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`
+13. `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`
+14. `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`
+15. `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
+16. `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`
+17. `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`
+18. `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md`
+19. `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`
+20. `docs/MATRIX_OS_GOVERNANCE_POLICY.md`
+21. `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`
+22. `docs/COMPLIANCE_ACCOUNTABILITY_INDEX.md`
+23. `docs/RELEASE_TRAIN_STATUS.md`
+24. Module-specific docs for CCC, AAL, and ASPICE as needed
 
 ## Deprecated-document rule
 

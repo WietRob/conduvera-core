@@ -1,10 +1,8 @@
 """HTTP/REST API Client widget (Postman-style TUI)."""
-from textual.widgets import Static, Input, TextArea
-from textual.containers import VerticalScroll, Horizontal, Vertical
+from textual.widgets import Static
+from textual.containers import VerticalScroll
 from textual.reactive import reactive
 from textual.message import Message
-from rich.text import Text
-from rich.syntax import Syntax
 from typing import Dict, Any, Optional
 import json
 import time
@@ -192,7 +190,7 @@ class APIClient(VerticalScroll):
             parsed_body = response_body
             try:
                 parsed_body = json.loads(response_body)
-            except:
+            except Exception:
                 pass
 
             response_data = {
