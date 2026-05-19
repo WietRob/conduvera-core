@@ -54,6 +54,23 @@ _ARTIFACT_METADATA = {
 
 
 @dataclass(frozen=True)
+class RoutePlanArtifactPickerState:
+    """Read-only UI state for the canonical route-plan artifact picker."""
+
+    schema_version: str
+    artifacts: list[RoutePlanArtifact]
+    selected_artifact_id: str
+    selected_label: str
+    selected_scenario: str
+    boundary: str
+    runtime_execution: bool
+    dynamic_user_file_loading: bool
+    arbitrary_filesystem_browser: bool
+    route_plan_generation: bool
+    dashboard_claim: bool
+
+
+@dataclass(frozen=True)
 class RoutePlanArtifact:
     """Descriptor for a canonical non-live route-plan artifact."""
 
@@ -101,3 +118,52 @@ def default_route_plan_artifact() -> RoutePlanArtifact:
         if artifact.default_selected:
             return artifact
     raise RuntimeError("No default route-plan artifact configured")
+
+
+def build_route_plan_artifact_picker_state(
+    selected_artifact_id: str | None = None,
+) -> RoutePlanArtifactPickerState:
+    """Build read-only UI state for the canonical artifact picker."""
+
+    artifacts = list_route_plan_artifacts()
+    selected = (
+        get_route_plan_artifact(selected_artifact_id)
+        if selected_artifact_id
+        else default_route_plan_artifact()
+    )
+    return RoutePlanArtifactPickerState(
+        schema_version="route-plan-artifact-picker.v1",
+        artifacts=artifacts,
+        selected_artifact_id=selected.artifact_id,
+        selected_label=selected.label,
+        selected_scenario=selected.scenario,
+        boundary="read-only selector; display-only; no runtime execution",
+        runtime_execution=False,
+        dynamic_user_file_loading=False,
+        arbitrary_filesystem_browser=False,
+        route_plan_generation=False,
+        dashboard_claim=False,
+    )
+
+
+def render_route_plan_artifact_picker_state(state: RoutePlanArtifactPickerState) -> str:
+    """Render deterministic read-only picker state for UI snapshot tests."""
+
+    available = ", ".join(artifact.artifact_id for artifact in state.artifacts)
+    return "\n".join(
+        [
+            "Route Plan Artifact Picker State",
+            f"Schema: {state.schema_version}",
+            f"Selected artifact: {state.selected_artifact_id}",
+            f"Selected label: {state.selected_label}",
+            f"Selected scenario: {state.selected_scenario}",
+            f"Available artifacts: {available}",
+            f"Runtime execution: {'yes' if state.runtime_execution else 'no'}",
+            f"Dynamic user file loading: {'yes' if state.dynamic_user_file_loading else 'no'}",
+            f"Arbitrary filesystem browser: {'yes' if state.arbitrary_filesystem_browser else 'no'}",
+            f"Route-plan generation: {'yes' if state.route_plan_generation else 'no'}",
+            f"Dashboard claim: {'yes' if state.dashboard_claim else 'no'}",
+            f"Picker boundary: {state.boundary}",
+            "",
+        ]
+    )
