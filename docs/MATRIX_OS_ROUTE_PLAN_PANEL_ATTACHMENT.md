@@ -9,10 +9,10 @@ This slice makes the route-plan panel discoverable from the preserved Matrix UI 
 The attachment path is:
 
 ```text
-Sidebar Route Plan button -> MatrixOS route_plan view -> route-plan artifact selector -> MatrixRoutePlanPanel.from_route_plan_file(...) -> stable panel snapshot contract
+Sidebar Route Plan button -> MatrixOS route_plan view -> route-plan artifact selector -> selection preview helper -> MatrixRoutePlanPanel(...) -> stable panel snapshot contract
 ```
 
-The view resolves its default artifact through `curaops.harness.route_plan_artifacts.default_route_plan_artifact()`. The default remains `agent-task`, but tests can select any canonical artifact id through `MatrixOS._create_route_plan_panel_view(artifact_id)`. The app helper also prepends a read-only picker/list widget render so the panel path displays the selected artifact id, label, scenario, available artifacts, selected marker, and no-runtime/no-browser boundaries before the stable panel body.
+The view resolves its default artifact through `curaops.harness.route_plan_artifacts.default_route_plan_artifact()`. The default remains `agent-task`, but tests can select any canonical artifact id through `MatrixOS._create_route_plan_panel_view(artifact_id)`. The app helper uses the construction-only selection preview helper and prepends a read-only picker/list widget render so the panel path displays the selected artifact id, label, scenario, available artifacts, selected marker, and no-runtime/no-browser boundaries before the selected artifact's stable panel body.
 
 ## Implemented UI surface
 
@@ -76,4 +76,4 @@ Existing panel model, panel golden-output, viewer, route-plan, and widget tests 
 
 ## Future path
 
-A later slice may add non-live selected-artifact preview switching. That should remain construction-time/in-memory and display-only until a separate reviewed runtime-execution design exists.
+A later slice may attach this preview model to a reviewed UI interaction. Runtime execution, file loading, route-plan generation, and dashboard behavior remain out of scope until a separate reviewed design exists.

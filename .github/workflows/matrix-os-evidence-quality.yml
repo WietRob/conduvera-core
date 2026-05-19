@@ -44,6 +44,7 @@ jobs:
           tests/test_route_plan_artifact_selector.py
           tests/test_route_plan_artifact_picker_state.py
           tests/test_route_plan_artifact_picker_widget.py
+          tests/test_route_plan_artifact_picker_selection_preview.py
           tests/test_matrix_ui_route_plan_panel_attachment.py
           tests/test_evidence_operator_report.py
           tests/test_evidence_report_golden_outputs.py
@@ -90,6 +91,7 @@ jobs:
           tests/test_route_plan_artifact_selector.py
           tests/test_route_plan_artifact_picker_state.py
           tests/test_route_plan_artifact_picker_widget.py
+          tests/test_route_plan_artifact_picker_selection_preview.py
           tests/test_matrix_ui_route_plan_panel_attachment.py
 
       - name: Check whitespace in tracked diff

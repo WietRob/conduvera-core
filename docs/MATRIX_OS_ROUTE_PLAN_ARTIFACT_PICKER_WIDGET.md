@@ -15,6 +15,7 @@ Module:
 Public construction helpers:
 
 - `build_route_plan_artifact_picker_model(selected_artifact_id: str | None = None)`
+- `build_route_plan_artifact_selection_preview(selected_artifact_id: str)`
 - `render_route_plan_artifact_picker_text(model)`
 - `MatrixRoutePlanArtifactPicker.from_selected_artifact(artifact_id)`
 
@@ -54,6 +55,8 @@ RoutePlanArtifact registry
 
 The picker widget does not duplicate selector metadata. It reads through the existing `curaops.harness.route_plan_artifacts` registry/state helpers.
 
+`build_route_plan_artifact_selection_preview(...)` is the construction-time switching helper. It combines the selected picker model with the selected artifact's existing route-plan panel model/render, so tests and future harness callers can prove that changing the canonical artifact changes the marker, id/label/scenario, and panel body without starting a live Textual app.
+
 ## Boundaries
 
 This widget does not add:
@@ -75,4 +78,5 @@ This widget does not add:
 ## Validation
 
 - `tests/test_route_plan_artifact_picker_widget.py`
+- `tests/test_route_plan_artifact_picker_selection_preview.py`
 - `tests/test_matrix_ui_route_plan_panel_attachment.py`

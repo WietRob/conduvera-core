@@ -14,6 +14,12 @@ from textual.widgets import Static
 from curaops.harness.route_plan_artifacts import (
     RoutePlanArtifact,
     build_route_plan_artifact_picker_state,
+    get_route_plan_artifact,
+)
+from src.ui.widgets.route_plan_panel import (
+    MatrixRoutePlanPanelModel,
+    build_route_plan_panel,
+    render_route_plan_panel_text,
 )
 
 
@@ -82,6 +88,62 @@ def render_route_plan_artifact_picker_text(model: MatrixRoutePlanArtifactPickerM
             f"Widget boundary: {model.widget_boundary}",
             "",
         ]
+    )
+
+
+@dataclass(frozen=True)
+class MatrixRoutePlanArtifactSelectionPreview:
+    """Construction-only selected-artifact preview over picker and panel state."""
+
+    selected_artifact_id: str
+    selected_label: str
+    selected_scenario: str
+    picker_model: MatrixRoutePlanArtifactPickerModel
+    panel_model: MatrixRoutePlanPanelModel
+    picker_renderable: str
+    panel_renderable: str
+    renderable: str
+    runtime_execution: bool
+    dynamic_user_file_loading: bool
+    arbitrary_filesystem_browser: bool
+    route_plan_generation: bool
+    dashboard_claim: bool
+    preview_boundary: str
+
+
+def build_route_plan_artifact_selection_preview(
+    selected_artifact_id: str,
+) -> MatrixRoutePlanArtifactSelectionPreview:
+    """Build an in-memory preview for a canonical selected route-plan artifact.
+
+    The helper reuses the canonical artifact registry plus existing picker/panel
+    model builders. It never starts Textual, browses files, generates route
+    plans, executes candidates, or claims dashboard behavior.
+    """
+
+    artifact = get_route_plan_artifact(selected_artifact_id)
+    picker_model = build_route_plan_artifact_picker_model(artifact.artifact_id)
+    panel_model = build_route_plan_panel(artifact.path)
+    picker_renderable = render_route_plan_artifact_picker_text(picker_model)
+    panel_renderable = render_route_plan_panel_text(panel_model)
+    return MatrixRoutePlanArtifactSelectionPreview(
+        selected_artifact_id=picker_model.selected_artifact_id,
+        selected_label=picker_model.selected_label,
+        selected_scenario=picker_model.selected_scenario,
+        picker_model=picker_model,
+        panel_model=panel_model,
+        picker_renderable=picker_renderable,
+        panel_renderable=panel_renderable,
+        renderable=picker_renderable + panel_renderable,
+        runtime_execution=False,
+        dynamic_user_file_loading=False,
+        arbitrary_filesystem_browser=False,
+        route_plan_generation=False,
+        dashboard_claim=False,
+        preview_boundary=(
+            "Construction-only in-memory selected-artifact preview; no live Textual app, "
+            "runtime, file browser, route-plan generation, or dashboard is started."
+        ),
     )
 
 
