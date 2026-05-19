@@ -125,3 +125,9 @@ class MatrixRoutePlanPanel(Static):
         self.panel_model = panel_model
         self.renderable = render_route_plan_panel_text(panel_model)
         super().__init__(self.renderable, **kwargs)
+
+    @classmethod
+    def from_route_plan_file(cls, path: Path, **kwargs) -> MatrixRoutePlanPanel:
+        """Construct a display-only panel widget from an existing route-plan file."""
+
+        return cls(build_route_plan_panel(path), **kwargs)

@@ -30,7 +30,7 @@ The implementation lives in `src/ui/widgets/route_plan_panel.py`:
 - `MatrixRoutePlanPanelModel`
 - `build_route_plan_panel(input_path)`
 - `render_route_plan_panel_text(model)`
-- `MatrixRoutePlanPanel`
+- `MatrixRoutePlanPanel.from_route_plan_file(input_path)`
 
 `MatrixRoutePlanPanel` is a non-interactive Textual `Static` widget shell. Tests construct it without running a live app.
 
@@ -88,4 +88,4 @@ This slice does not implement:
 
 ## Future path
 
-The next focused slice can add exact panel-render golden fixtures. A later slice may attach the panel to an actual Matrix UI route only after explicit review. That future route should remain display-only until a separate reviewed runtime-execution design exists.
+The next focused slice can attach the panel to an actual Matrix UI route only after explicit review. That future route should remain display-only until a separate reviewed runtime-execution design exists.

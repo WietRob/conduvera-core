@@ -1,0 +1,17 @@
+Matrix UI Route Plan Panel Model
+Schema: matrix-ui-route-plan-panel.v1
+Source schema: route-plan.v1
+Intent: operator wants UI view of harness status
+Chosen candidate: matrix-ui-code-editor
+Candidate ranking: matrix-ui-code-editor, zed-mcp-future
+Evidence requirements: harness.status.view
+Approval gate: No execution approval requested for display-only dry-run
+Fail closed: no
+Unknown capabilities: none
+Runtime execution: no
+Shell execution: no
+Destructive command path: no
+Production dashboard claim: no
+Non-execution boundary: Display/attach-only route; original Matrix UI preserved; no production dashboard claim.
+Panel boundary: Display-only Textual-compatible panel model; no live UI route, runtime, adapter, shell, destructive command path, or dashboard is started.
+Operator snapshot: future UI handoff boundary; display-only Matrix UI/editor surface, not a live panel.
