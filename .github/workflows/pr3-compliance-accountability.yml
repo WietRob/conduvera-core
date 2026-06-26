@@ -1,0 +1,78 @@
+name: PR3 Compliance and Accountability Gates
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - feature/compliance-change-control-accountability
+  workflow_dispatch:
+
+jobs:
+  compliance-accountability:
+    name: Compliance Change Control / Accountable Agent Layer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Packaging contract tests
+        run: python -m pytest tests/test_packaging_contract.py
+
+      - name: Compliance Change Control tests
+        run: python -m pytest curaops/skills/change_request/tests
+
+      - name: Accountable Agent Layer tests
+        run: python -m pytest curaops/skills/accountable_agent/tests
+
+      - name: ASPICE conflict detector tests
+        run: python -m pytest curaops/skills/aspice_conflict_detector/test_conflict_detector.py
+
+      - name: ASPICE link manager tests
+        run: python -m pytest curaops/skills/aspice_link_manager/tests
+
+      - name: Combined compliance/accountability/ASPICE gate
+        run: >-
+          python -m pytest
+          curaops/skills/change_request/tests
+          curaops/skills/accountable_agent/tests
+          curaops/skills/aspice_conflict_detector/test_conflict_detector.py
+          curaops/skills/aspice_link_manager/tests
+
+      - name: CLI smoke
+        run: |
+          python -m curaops.cli.main --help
+          python -m curaops.cli.main cr --help
+          python -m curaops.cli.main accountable --help
+
+      - name: Prohibited shorthand grep
+        run: |
+          python - <<'PY'
+          import pathlib, sys
+          terms = ["Context " + x for x in "ABC"] + ["C" + "/B", "A" + "/B" + "/C"]
+          hits = []
+          for path in pathlib.Path('.').rglob('*'):
+              if '.git' in path.parts or not path.is_file():
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              for lineno, line in enumerate(text.splitlines(), 1):
+                  low = line.lower()
+                  if any(term.lower() in low for term in terms):
+                      hits.append(f"{path}:{lineno}:{line}")
+          if hits:
+              print('\n'.join(hits))
+              sys.exit(1)
+          PY

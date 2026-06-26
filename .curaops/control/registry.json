@@ -1,0 +1,21 @@
+{
+  "agents": {
+    "Batman": {
+      "agent_id": "Batman",
+      "tool": "manual",
+      "task": "TASK-I198",
+      "issue": 200,
+      "worktree": "/home/roberto_schmidt/projects/matrix-os/.ai/worktrees/Batman-TASK-I198",
+      "session": "",
+      "gate_profile": "frontend_ui",
+      "status": "stopped",
+      "scope_files": [],
+      "credentials_ref": {},
+      "blocked_reason": "",
+      "ready_evidence": {},
+      "created_at": "2026-05-04T18:35:31.997405+00:00",
+      "updated_at": "2026-05-04T18:36:00.437552+00:00"
+    }
+  },
+  "version": "0.1.0"
+}

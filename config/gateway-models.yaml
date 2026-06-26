@@ -1,0 +1,28 @@
+# gateway-models.yaml
+# Loaded by curaops/control/gateway/config.py via _load_yaml()
+# Key: model-name -> profile, backend, max_tokens, context_length
+
+models:
+  glm-deep:
+    profile: local_deep
+    backend: openai_compatible
+    max_tokens: 8192
+    context_length: 32768
+
+  qwen-light:
+    profile: local_light
+    backend: openai_compatible
+    max_tokens: 4096
+    context_length: 16384
+
+  gpt-5.5:
+    profile: cloud_public
+    backend: openai
+    max_tokens: 16384
+    context_length: 128000
+
+  glm-deep-sensitive:
+    profile: local_only_sensitive
+    backend: openai_compatible
+    max_tokens: 8192
+    context_length: 32768

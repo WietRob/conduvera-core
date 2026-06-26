@@ -1,8 +1,8 @@
 # Architecture Package: Compliance Change Control — Authoritative
 
-**Status:** AUTHORITATIVE
-**Version:** 2.0.0
-**Date:** 2026-04-11
+**Status:** AUTHORITATIVE  
+**Version:** 2.0.0  
+**Date:** 2026-04-11  
 **Scope:** Requirement-linked Change Request workflow for regulated development
 
 ---
@@ -103,50 +103,50 @@ From `/home/roberto_schmidt/projects/CuraOps_Framework`:
 @dataclass
 class ChangeRequest:
     """Canonical Change Request entity."""
-
+    
     # Identity
     id: str                           # CR-[0-9]{3,}
-
+    
     # Metadata
     title: str                        # 10-80 chars
     status: CRStatus
     created: datetime
     requester: str
-
+    
     # Content
     problem: str                      # min 50 chars
     justification: str                # min 20 chars
-
+    
     # Classification
     change_type: str = "feature"      # feature, bugfix, refactor, test, docs
     requirement_linkage_type: Optional[str] = None  # existing_ref, updated_ref, new_ref
-
+    
     # Impact
     impact_level: List[ImpactLevel] = field(default_factory=list)
     requirement_refs: List[str] = field(default_factory=list)
     safety_impact: SafetyImpact = SafetyImpact.NONE
     compliance_impact: Optional[List[str]] = None
-
+    
     # Lifecycle
     reviewer: Optional[str] = None
     approval_date: Optional[datetime] = None
     approval_comment: Optional[str] = None
-
+    
     # Implementation
     affected_files: List[str] = field(default_factory=list)
     affected_verifications: List[str] = field(default_factory=list)  # TC-{TYPE}-{Nr} IDs
     commits: List[str] = field(default_factory=list)
-
+    
     # Evidence
     evidence_refs: List[str] = field(default_factory=list)
-
+    
     # Emergency
     is_emergency: bool = False
     incident_id: Optional[str] = None
     severity: Optional[str] = None
     rollback_plan: Optional[str] = None
     post_mortem_date: Optional[datetime] = None
-
+    
     # Storage
     file_path: Optional[Path] = None
 

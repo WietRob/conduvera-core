@@ -3,8 +3,8 @@
 > **Status:** AUTHORITATIVE — Compliance Change Control (C) only.
 > B implementation is in [ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md](./ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md).
 
-**Version:** 2.0.0
-**Date:** 2026-04-19
+**Version:** 2.0.0  
+**Date:** 2026-04-19  
 **Source:** COMPLIANCE_CHANGE_CONTROL_PROCESS.md + COMPLIANCE_CHANGE_CONTROL_RULES.md
 
 ---
@@ -193,16 +193,16 @@ class SafetyImpact(Enum):
 @dataclass
 class ChangeRequest:
     """Canonical Change Request entity."""
-
+    
     # Identity
     id: str                           # CR-[0-9]{3,}
-
+    
     # Metadata
     title: str                        # 10-80 chars
     status: CRStatus
     created: datetime
     requester: str
-
+    
     # Content
     problem: str                      # min 50 chars
     justification: str                # min 20 chars
@@ -210,36 +210,36 @@ class ChangeRequest:
     # Classification
     change_type: str = "feature"      # feature, bugfix, refactor, test, docs
     requirement_linkage_type: Optional[str] = None  # existing_ref, updated_ref, new_ref
-
+    
     # Impact
     impact_level: List[ImpactLevel]
     requirement_refs: List[str]       # min 1
     safety_impact: SafetyImpact
     compliance_impact: Optional[List[str]] = None
-
+    
     # Lifecycle
     reviewer: Optional[str] = None
     approval_date: Optional[datetime] = None
     approval_comment: Optional[str] = None
-
+    
     # Implementation
     affected_files: List[str] = field(default_factory=list)
     affected_verifications: List[str] = field(default_factory=list)
     commits: List[str] = field(default_factory=list)
-
+    
     # Evidence
     evidence_refs: List[str] = field(default_factory=list)
-
+    
     # Emergency
     is_emergency: bool = False
     incident_id: Optional[str] = None
     severity: Optional[str] = None
     rollback_plan: Optional[str] = None
     post_mortem_date: Optional[datetime] = None
-
+    
     # Bugfix metadata (required at CLOSED for bugfix — C-RULES §8.1)
     root_cause_category: Optional[str] = None  # impl_bug, req_ambiguous, req_missing, arch_bug, sys_bug
-
+    
     # Storage
     file_path: Optional[Path] = None
 
@@ -285,7 +285,7 @@ class VerificationCase:
 
 class CRStateMachine:
     """Implements exact transition matrix from COMPLIANCE_CHANGE_CONTROL_PROCESS.md Section C."""
-
+    
     VALID_TRANSITIONS = {
         CRStatus.DRAFT: {CRStatus.SUBMITTED, CRStatus.REJECTED},
         CRStatus.SUBMITTED: {CRStatus.APPROVED, CRStatus.REJECTED, CRStatus.DRAFT},
@@ -296,10 +296,10 @@ class CRStateMachine:
         CRStatus.REJECTED: {CRStatus.DRAFT},
         CRStatus.EMERGENCY: {CRStatus.SUBMITTED},
     }
-
+    
     MANDATORY_FIELDS = {
         CRStatus.DRAFT: {"id", "title", "status", "created", "requester"},
-        CRStatus.SUBMITTED: {"id", "title", "status", "created", "requester",
+        CRStatus.SUBMITTED: {"id", "title", "status", "created", "requester", 
                              "problem", "justification", "change_type",
                              "impact_level", "requirement_refs", "safety_impact"},
         CRStatus.APPROVED: {"id", "title", "status", "created", "requester",
@@ -307,23 +307,23 @@ class CRStateMachine:
                            "requirement_refs", "safety_impact", "reviewer", "approval_date"},
         # ... etc
     }
-
+    
     def can_transition(self, cr: ChangeRequest, to_status: CRStatus) -> bool:
         """Check if transition is valid."""
         return to_status in self.VALID_TRANSITIONS.get(cr.status, set())
-
-    def transition(self, cr: ChangeRequest, to_status: CRStatus,
+    
+    def transition(self, cr: ChangeRequest, to_status: CRStatus, 
                    actor: str, context: dict) -> ChangeRequest:
         """Execute transition with validation."""
         if not self.can_transition(cr, to_status):
             raise InvalidTransitionError(f"Cannot transition {cr.status} → {to_status}")
-
+        
         # Validate mandatory fields for target state
         required = self.MANDATORY_FIELDS.get(to_status, set())
         missing = self._check_fields(cr, required)
         if missing:
             raise MissingFieldsError(f"Missing fields for {to_status}: {missing}")
-
+        
         # Execute transition
         cr.status = to_status
         return cr
@@ -339,7 +339,7 @@ from typing import List, Tuple
 
 class CRValidator:
     """Implements validation rules from COMPLIANCE_CHANGE_CONTROL_PROCESS.md."""
-
+    
     ID_PATTERNS = {
         "CR": r"^CR-[0-9]{3,}$",
         "SYS-REQ": r"^SYS-REQ-[0-9]+$",
@@ -351,19 +351,19 @@ class CRValidator:
         "TC-SYSIT": r"^TC-SYSIT-[0-9]+$",
         "TC-SYST": r"^TC-SYST-[0-9]+$",
     }
-
+    
     def validate_id_format(self, ref: str) -> Tuple[bool, str]:
         """Validate requirement ID format."""
         for prefix, pattern in self.ID_PATTERNS.items():
             if re.match(pattern, ref):
                 return True, prefix
         return False, f"Invalid ID format: {ref}"
-
+    
     def validate_impact_classification(self, cr) -> List[dict]:
         """Detect impact level from requirement refs."""
         issues = []
         detected_levels = set()
-
+        
         for ref in cr.requirement_refs:
             if ref.startswith("SYS-REQ-"):
                 detected_levels.add("SYS")
@@ -371,23 +371,23 @@ class CRValidator:
                 detected_levels.add("ARCH")
             elif ref.startswith("SW-REQ-"):
                 detected_levels.add("SW")
-
+        
         # Check required levels present
         if "SYS" in detected_levels and "SYS" not in cr.impact_level:
             issues.append({
                 "severity": "WARNING",
                 "message": "SYS-REQ detected but impact_level missing SYS"
             })
-
+        
         return issues
-
+    
     def validate_derivation_obligations(self, cr) -> List[dict]:
         """Check derivation obligations."""
         issues = []
-
+        
         sys_reqs = [r for r in cr.requirement_refs if r.startswith("SYS-REQ-")]
         sw_reqs = [r for r in cr.requirement_refs if r.startswith("SW-REQ-")]
-
+        
         # Rule: SYS-REQ must have SW-REQ children
         if sys_reqs and not sw_reqs:
             issues.append({
@@ -395,7 +395,7 @@ class CRValidator:
                 "message": "SYS-REQ present but no SW-REQ (derivation obligation)",
                 "rule": "SYS-REQ must derive 1-7 SW-REQs"
             })
-
+        
         return issues
 
     def validate_bugfix_rules(self, cr) -> List[dict]:
@@ -410,7 +410,7 @@ class CRValidator:
                     "message": "Bugfix CR has no SW-REQ in requirement_refs",
                     "rule": "C-RULES §9.1: Every functional bugfix links to SW-REQ"
                 })
-
+            
             # requirement_linkage_type must be set for bugfix
             if not cr.requirement_linkage_type:
                 issues.append({
@@ -418,14 +418,14 @@ class CRValidator:
                     "message": "Bugfix CR missing requirement_linkage_type",
                     "rule": "C-RULES §9.7: bugfix must declare linkage type"
                 })
-
+            
             # new_ref requires APPROVED new SW-REQ
             if cr.requirement_linkage_type == "new_ref":
                 # Check that any new SW-REQ is APPROVED before CR moves past SUBMITTED
                 for ref in sw_reqs:
                     # This would call the requirement service in production
                     pass
-
+            
             # At IMPLEMENTED: must have affected_verifications
             if cr.status == CRStatus.IMPLEMENTED and not cr.affected_verifications:
                 issues.append({
@@ -433,7 +433,7 @@ class CRValidator:
                     "message": "Bugfix CR at IMPLEMENTED with no VerificationCases",
                     "rule": "C-RULES §9.4: at least one regression VerificationCase per SW-REQ"
                 })
-
+        
         return issues
 ```
 
@@ -449,13 +449,13 @@ from pathlib import Path
 
 class CREvidenceGenerator:
     """Generate machine-readable evidence."""
-
+    
     EVIDENCE_DIR = Path("changes/evidence")
-
+    
     def generate(self, cr: ChangeRequest) -> Path:
         """Generate evidence file."""
         self.EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
-
+        
         evidence = {
             "schema_version": "CCC-1.1.0",
             "cr_id": cr.id,
@@ -480,20 +480,20 @@ class CREvidenceGenerator:
                 "date": cr.approval_date.isoformat() if cr.approval_date else None
             } if cr.reviewer else None
         }
-
+        
         # Bugfix-specific evidence fields
         if cr.change_type == "bugfix":
             evidence["regression_verification_ids"] = cr.affected_verifications
-
+        
         # Add hash
         evidence_str = json.dumps(evidence, sort_keys=True)
         evidence["hash"] = f"sha256:{hashlib.sha256(evidence_str.encode()).hexdigest()}"
-
+        
         # Write file
         filename = f"{cr.id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
         filepath = self.EVIDENCE_DIR / filename
         filepath.write_text(json.dumps(evidence, indent=2))
-
+        
         return filepath
 ```
 
@@ -606,7 +606,7 @@ curaops verification validate-type TC-SVT-001 SW-REQ-001
         /\
        /  \     Integration Tests (End-to-End)
       /____\         10 tests
-     /      \
+     /      \   
     /________\    Component Tests (State Machine)
    /          \      30 tests
   /____________\
@@ -664,13 +664,13 @@ def test_e2e_cr_lifecycle():
     # Create CR
     result = runner.invoke(cli, ["cr", "create", "--title", ...])
     cr_id = extract_id(result.output)
-
+    
     # Submit
     runner.invoke(cli, ["cr", "submit", cr_id])
-
+    
     # Approve
     runner.invoke(cli, ["cr", "approve", cr_id, "--reviewer", "lead"])
-
+    
     # Verify status
     result = runner.invoke(cli, ["cr", "status", cr_id])
     assert "approved" in result.output

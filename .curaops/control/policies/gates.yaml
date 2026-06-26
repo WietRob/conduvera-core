@@ -1,0 +1,70 @@
+# CuraOps-Control Gate Profiles
+#
+# Profiles define which gates are required/excluded for different change classes.
+# SKIPPED gates are NEVER treated as PASS.
+# Agents must pass ALL required gates to declare READY.
+#
+# Usage:
+#   matrix-cli gate profiles
+#   matrix-cli agent boot Batman --gate-profile frontend_ui
+
+gate_profiles:
+  default:
+    description: "Default profile — core gates for any change"
+    required:
+      - dirty_worktree
+      - scope_check
+    not_required: []
+
+  frontend_ui:
+    description: "Frontend/UI changes — typecheck + visual smoke, no backend integration"
+    required:
+      - dirty_worktree
+      - scope_check
+      - typecheck
+    not_required:
+      - full_backend_sync_suite
+      - db_integration
+
+  full_stack:
+    description: "Full-stack changes — all gates required"
+    required:
+      - dirty_worktree
+      - scope_check
+      - typecheck
+      - class_tests
+      - finish_gate
+    not_required: []
+
+  bugfix:
+    description: "Bugfix — focused gates, must not regress"
+    required:
+      - dirty_worktree
+      - scope_check
+      - class_tests
+    not_required:
+      - typecheck
+
+  hotfix:
+    description: "Hotfix — minimal gates, fast path"
+    required:
+      - dirty_worktree
+    not_required:
+      - typecheck
+      - class_tests
+
+  test_only:
+    description: "Test-only changes — no typecheck needed"
+    required:
+      - dirty_worktree
+      - scope_check
+    not_required:
+      - typecheck
+
+# Credentials references (not secrets — just pointers)
+# The harness stores references, tools manage their own auth.
+credentials:
+  github: "gh-auth"
+  sonarqube: "~/.config/curaops/sonar.env"
+  opencode: "tool-managed"
+  local_qwen: "http://localhost:8001/v1"

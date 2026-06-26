@@ -1,137 +1,153 @@
-# Compliance and Accountability Index
+# Compliance & Accountability Documentation Index
 
-Status: authoritative documentation index for the merged Matrix OS compliance stack, scaffolding surface, and evidence backbone.
+**Status:** OFFICIAL  
+**Version:** 4.0.0  
+**Date:** 2026-04-19
 
-This document maps the currently merged compliance/accountability modules and their public entry points. It is descriptive only; it does not claim production readiness.
+---
 
-## Merged modules
+## Quick Navigation
 
-| Module | Merged in | Runtime package | CLI namespace | Responsibility |
-|---|---:|---|---|---|
-| Foundation / Packaging / CLI Baseline | PR #4 | `curaops` | root CLI | Python package baseline, import contract, CLI shell, `version`, `doctor` |
-| Compliance Change Control | PR #5 | `curaops.skills.change_request` | `cr` | Change Request lifecycle, validation, evidence generation, verification-case management |
-| Accountable Agent Layer | PR #6 | `curaops.skills.accountable_agent` | `accountable` | AI-assisted change accountability gates, CR linkage validation, accountability evidence |
-| ASPICE Support Utilities | PR #7 | `curaops.skills.aspice_conflict_detector`, `curaops.skills.aspice_link_manager` | `aspice` | Traceability support, conflict detection, link updates, traceability matrix support |
-| Evidence Backbone Adapter Contract | Current | `curaops.evidence` | `evidence` | Harness-side evidence event envelope, local JSONL store, validation/summarization |
-| agent-evidence-plane Thin Adapter | Current | `curaops.evidence.adapters.agent_evidence_plane` | `evidence convert-agent-plane` | Convert a small supported external JSONL subset into Matrix OS events |
-| Safety Guard Adapter Contract | Current | `curaops.evidence.adapters.safety_guard` | `evidence convert-safety-guard` | Convert compatible trust/safety result JSONL into Matrix OS events |
-| Evidence Adapter Registry | Current | `curaops.evidence.adapters.registry` | `evidence adapters`, `evidence adapter show` | Discover registered evidence adapters and their explicit event/input contracts |
-| failure-driven-loop Thin Adapter | PR #14 | `curaops.evidence.adapters.failure_loop` | `evidence convert-failure-loop` | Convert compatible failure-loop result JSONL into Matrix OS evidence events; proposed rules are evidence only |
-| Product Coherence & Harness Gateway Validation | PR #15 | `curaops.harness.gateway`, scenario tests | test/docs | Validate operator scenarios, generic gateway descriptors, UI value map, provenance note |
-| Evidence Operator Report Pack | PR #16 | `curaops.evidence.reporting` | `evidence report` | Render operator-readable text/Markdown/JSON reports over validated evidence streams |
-| Evidence Report Golden Fixtures | PR #17 | `curaops.evidence.reporting`, fixtures | tests | Regression contract comparing deterministic product-coherence evidence to expected report outputs |
-| Evidence Report Contract Versioning + CI Gate | PR #18 | `curaops.evidence.reporting`, GitHub Actions | `evidence report-contract`, CI | Explicit `MXOS-REPORT-1.0` report metadata and enforced evidence/report quality workflow |
-| Governance Hardening & Required Review Policy | PR #19 | docs, `CODEOWNERS` | policy | Documents branch protection, release review model, and CODEOWNERS routing without adding hard pull-request approval enforcement |
-| Governance Enforcement Decision | Current | docs | policy | Records the decision to keep GitHub approvals, CODEOWNERS owner review, conversation resolution, and admin enforcement non-enforced for now |
+| Need | Document |
+|------|----------|
+| **Compliance Change Control Rules** | [COMPLIANCE_CHANGE_CONTROL_RULES.md](./COMPLIANCE_CHANGE_CONTROL_RULES.md) |
+| **Compliance Change Control Process** | [COMPLIANCE_CHANGE_CONTROL_PROCESS.md](./COMPLIANCE_CHANGE_CONTROL_PROCESS.md) |
+| **Compliance Change Control Implementation** | [COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md) |
+| **Compliance Change Control Architecture** | [COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md](./COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md) |
+| **Accountable Agent Layer Rules** | [ACCOUNTABLE_AGENT_LAYER_RULES.md](./ACCOUNTABLE_AGENT_LAYER_RULES.md) |
+| **Accountable Agent Layer Process** | [ACCOUNTABLE_AGENT_LAYER_PROCESS.md](./ACCOUNTABLE_AGENT_LAYER_PROCESS.md) |
+| **Accountable Agent Layer Implementation** | [ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md](./ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md) |
+| **Accountable Agent Layer Architecture** | [ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md](./ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md) |
 
-## CLI command index
+---
 
-Verified CLI namespaces:
+## Authoritative Documents (Source of Truth)
 
-```bash
-python3 -m curaops.cli.main --help
-python3 -m curaops.cli.main cr --help
-python3 -m curaops.cli.main accountable --help
-python3 -m curaops.cli.main aspice --help
-python3 -m curaops.cli.main scaffold --help
-python3 -m curaops.cli.main evidence --help
+### Compliance Change Control
+
+| Document | Purpose | Status |
+|----------|---------|--------|
+| [COMPLIANCE_CHANGE_CONTROL_RULES.md](./COMPLIANCE_CHANGE_CONTROL_RULES.md) | Binding rules for CR workflow | ✅ AUTHORITATIVE |
+| [COMPLIANCE_CHANGE_CONTROL_PROCESS.md](./COMPLIANCE_CHANGE_CONTROL_PROCESS.md) | State machines, transitions, evidence | ✅ AUTHORITATIVE |
+| [COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md) | Module design, schemas, DoD (Compliance Change Control only) | ✅ AUTHORITATIVE |
+| [COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md](./COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md) | Architecture package | ✅ AUTHORITATIVE |
+
+### Accountable Agent Layer
+
+| Document | Purpose | Status |
+|----------|---------|--------|
+| [ACCOUNTABLE_AGENT_LAYER_RULES.md](./ACCOUNTABLE_AGENT_LAYER_RULES.md) | Blocking rules, intervention logic | ✅ AUTHORITATIVE |
+| [ACCOUNTABLE_AGENT_LAYER_PROCESS.md](./ACCOUNTABLE_AGENT_LAYER_PROCESS.md) | Intervention points, state machine | ✅ AUTHORITATIVE |
+| [ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md](./ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md) | Module design, schemas, DoD (Accountable Agent Layer only) | ✅ AUTHORITATIVE |
+| [ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md](./ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md) | Architecture, dependency on Compliance Change Control, DoD | ✅ AUTHORITATIVE |
+
+---
+
+## Legacy Mixed Documents (Deprecated — Do Not Extend)
+
+> **⚠️ WARNING:** These documents contain mixed Compliance Change Control + Accountable Agent Layer content. Do not modify or extend. Use authoritative docs above.
+
+| Document | Content | Replacement |
+|----------|---------|-------------|
+| [COMPLIANCE_CHANGE_CONTROL_RULES_BINDING.md](./COMPLIANCE_CHANGE_CONTROL_RULES_BINDING.md) | Mixed Compliance Change Control + Accountable Agent Layer rules | Use separate RULES.md files |
+| [COMPLIANCE_CHANGE_CONTROL_PROCESS_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_PROCESS_CONTRACT.md) | Mixed Compliance Change Control + Accountable Agent Layer process | Use separate PROCESS.md files |
+| [COMPLIANCE_ACCOUNTABILITY_ARCHITECTURE.md](./COMPLIANCE_ACCOUNTABILITY_ARCHITECTURE.md) | Mixed C+B architecture | Use Compliance Change Control Architecture + Accountable Agent Layer Architecture |
+| [COMPLIANCE_ACCOUNTABILITY_SPECIFICATION.md](./COMPLIANCE_ACCOUNTABILITY_SPECIFICATION.md) | Mixed operational spec | Use Compliance Change Control Process + Accountable Agent Layer Process |
+
+---
+
+## Domain Language
+
+### Official Names
+
+| Concept | Official Name | Legacy (deprecated) |
+|---------|---------------|---------------------|
+| Safety Guard | Safety Guard | Historical module identifier only; do not use shorthand in public docs |
+| Compliance Change Control | Compliance Change Control | Historical module identifier only; do not use shorthand in public docs |
+| Accountable Agent Layer | Accountable Agent Layer | Historical module identifier only; do not use shorthand in public docs |
+
+### Canonical Verification Model
+
+| Entity | Types | ID Patterns | Defined In |
+|--------|-------|-------------|------------|
+| VerificationCase | unit, software_integration, software_verification, system_integration, system_verification | TC-UT-*, TC-SIT-*, TC-SVT-*, TC-SYSIT-*, TC-SYST-* | C-RULES §4.4, C-PROCESS §B.3 |
+| Evidence / VerificationResult | Execution result artifact | Per CR evidence file | C-PROCESS §B.4 |
+
+**Separation:** VerificationCase = specification. Evidence/VerificationResult = execution result.
+
+### Repository Locations
+
+```
+/home/roberto_schmidt/projects/
+├── curaops-safety-guard/          # Safety Guard (standalone)
+└── matrix-os/                     # Compliance & Accountability
+    ├── curaops/skills/
+    │   ├── change_request/        # Compliance Change Control
+    │   ├── accountable_agent/     # Accountable Agent Layer
+    │   └── aspice_link_manager/   # Shared Link Management
+    └── docs/
+        ├── COMPLIANCE_CHANGE_CONTROL_*.md   # Compliance Change Control docs (authoritative)
+        ├── ACCOUNTABLE_AGENT_LAYER_*.md     # Accountable Agent Layer docs (authoritative)
+        └── COMPLIANCE_ACCOUNTABILITY_*.md   # Mixed (legacy, do not extend)
 ```
 
-Root commands:
+---
 
-| Command | Purpose |
-|---|---|
-| `version` | Print baseline CLI version |
-| `doctor` | Run minimal package/import smoke check |
-| `cr` | Compliance Change Control lifecycle |
-| `accountable` | Accountable Agent Layer checks/evidence |
-| `aspice` | ASPICE Support Utilities |
-| `scaffold` | Matrix OS UI/MCP/editor scaffolding |
-| `evidence` | Matrix OS evidence backbone validation/summarization |
+## Reading Order
 
-Compliance Change Control commands:
+### For Compliance Change Control Implementation:
+1. [COMPLIANCE_CHANGE_CONTROL_RULES.md](./COMPLIANCE_CHANGE_CONTROL_RULES.md) — what is required
+2. [COMPLIANCE_CHANGE_CONTROL_PROCESS.md](./COMPLIANCE_CHANGE_CONTROL_PROCESS.md) — how it works
+3. [COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md) — how to build it
+4. [COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md](./COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md) — system design
 
-| Command | Purpose |
-|---|---|
-| `cr create` | Create a Change Request in DRAFT or EMERGENCY state |
-| `cr submit` | Transition DRAFT/EMERGENCY to SUBMITTED |
-| `cr approve` | Transition SUBMITTED to APPROVED |
-| `cr reject` | Transition to REJECTED |
-| `cr start` | Transition APPROVED to IN_PROGRESS |
-| `cr complete` | Transition IN_PROGRESS to IMPLEMENTED |
-| `cr verify` | Transition IMPLEMENTED to VERIFIED after evidence generation |
-| `cr close` | Transition VERIFIED to CLOSED |
-| `cr revise` | Transition REJECTED to DRAFT |
-| `cr status` | Show CR status and details |
-| `cr list` | List Change Requests |
-| `cr evidence` | Generate CCC evidence for a CR |
-| `cr validate` | Validate a CR against C rules |
-| `cr verification` | Manage verification cases |
+### For Accountable Agent Layer Implementation:
+1. [ACCOUNTABLE_AGENT_LAYER_RULES.md](./ACCOUNTABLE_AGENT_LAYER_RULES.md) — blocking rules
+2. [ACCOUNTABLE_AGENT_LAYER_PROCESS.md](./ACCOUNTABLE_AGENT_LAYER_PROCESS.md) — intervention workflow
+3. [ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md](./ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md) — how to build it
+4. [ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md](./ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md) — system design
 
-Accountable Agent Layer commands:
+---
 
-| Command | Purpose |
-|---|---|
-| `accountable pre-flight` | Run the AAL pre-flight gate before AI-assisted work |
-| `accountable preflight` | Alias for `pre-flight` |
-| `accountable register` | Register an accountable AI-assisted change |
-| `accountable validate` | Validate accountable change links |
-| `accountable evidence` | Generate accountable-change evidence |
+## Document Status Summary
 
-ASPICE Support Utility commands:
+| Category | Count | Documents |
+|----------|-------|-----------|
+| **Authoritative Compliance Change Control** | 4 | RULES, PROCESS, IMPLEMENTATION_CONTRACT, ARCHITECTURE |
+| **Authoritative Accountable Agent Layer** | 4 | RULES, PROCESS, IMPLEMENTATION, ARCHITECTURE |
+| **Legacy Mixed** | 4 | RULES_BINDING, PROCESS_CONTRACT, ACCOUNTABILITY_ARCH, ACCOUNTABILITY_SPEC |
+| **Index** | 1 | This file |
 
-| Command | Purpose |
-|---|---|
-| `aspice check` | Check ASPICE traceability conflicts |
-| `aspice link` | Link a requirement document to an implementation file |
-| `aspice update-all` | Update bidirectional traceability links for Markdown documents |
+**Total:** 13 documents
 
-Scaffolding commands:
+---
 
-| Command | Purpose |
-|---|---|
-| `scaffold status` | Show UI/MCP/editor scaffolding status without launching runtime services |
-| `scaffold show ui` | Show original Matrix UI scaffold details and source-path checks |
-| `scaffold show mcp` | Show MCP contract-only scaffold details |
-| `scaffold show editor` | Show editor scaffold details and source-path checks |
+## Shared-Interface Sections
 
-Evidence backbone commands:
+The following sections are intentionally duplicated across C and B authoritative docs because they describe the shared repo structure and interface:
 
-| Command | Purpose |
-|---|---|
-| `evidence` | Evidence backbone utilities |
-| `evidence adapters` | List registered Matrix OS evidence adapters |
-| `evidence adapter show` | Show one evidence adapter descriptor; unknown ids fail closed |
-| `evidence validate` | Validate a Matrix OS evidence event JSONL stream |
-| `evidence summarize` | Summarize a valid Matrix OS evidence event JSONL stream |
-| `evidence report` | Render an operator-readable evidence report from a valid Matrix OS event JSONL stream |
-| `evidence report-contract` | Print the stable Evidence Operator Report contract version |
-| `evidence convert-agent-plane` | Convert compatible agent-evidence-plane JSONL events into Matrix OS evidence JSONL |
-| `evidence convert-safety-guard` | Convert compatible Safety Guard result JSONL into Matrix OS evidence JSONL |
-| `evidence convert-failure-loop` | Convert compatible failure-loop result JSONL into Matrix OS evidence JSONL |
+| Section | Compliance Change Control Location | Accountable Agent Layer Location |
+|---------|------------|------------|
+| Module Ownership Matrix | IMPLEMENTATION_CONTRACT B.2 | IMPLEMENTATION Section B |
+| Directory Structure | IMPLEMENTATION_CONTRACT B.3 | IMPLEMENTATION Section B |
+| Exit Codes | IMPLEMENTATION_CONTRACT G.3 | IMPLEMENTATION D.2 |
 
-## Authoritative module docs
+---
 
-| Area | Authoritative docs |
-|---|---|
-| Overall architecture | `docs/MATRIX_OS_ARCHITECTURE.md`, `docs/MATRIX_OS_MODULE_BOUNDARIES.md` |
-| Product coherence / scenarios | `docs/MATRIX_OS_PRODUCT_COHERENCE.md`, `tests/test_product_coherence_scenarios.py` |
-| Harness gateway contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `curaops/harness/gateway.py` |
-| UI value map / provenance | `docs/MATRIX_OS_UI_VALUE_MAP.md`, `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` |
-| MCP / UI / Editor scaffolding | `docs/MATRIX_OS_SCAFFOLDING.md` |
-| Evidence backbone | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md` |
-| agent-evidence-plane thin adapter | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md` |
-| Safety Guard adapter contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md` |
-| Evidence adapter registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md` |
-| failure-driven-loop thin adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md` |
-| Evidence operator reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`, `tests/test_evidence_operator_report.py`, `tests/test_evidence_report_golden_outputs.py`, `tests/test_evidence_report_contract_version.py` |
-| Governance policy | `docs/MATRIX_OS_GOVERNANCE_POLICY.md`, `docs/MATRIX_OS_GOVERNANCE_ENFORCEMENT_DECISION.md`, `CODEOWNERS`, `.github/workflows/matrix-os-evidence-quality.yml` |
-| Release train | `docs/RELEASE_TRAIN_STATUS.md` |
-| Compliance/accountability index | this file |
-| Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_ARCHITECTURE.md`, `docs/COMPLIANCE_CHANGE_CONTROL_PROCESS.md`, `docs/COMPLIANCE_CHANGE_CONTROL_RULES.md`, `docs/COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md` |
-| Accountable Agent Layer | `docs/ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md`, `docs/ACCOUNTABLE_AGENT_LAYER_PROCESS.md`, `docs/ACCOUNTABLE_AGENT_LAYER_RULES.md`, `docs/ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md` |
-| ASPICE utilities | `curaops/skills/aspice_conflict_detector/SKILL.md`, `curaops/skills/aspice_link_manager/README.md` |
+## Naming History
 
-## Non-goals in the current merged stack
+| Date | Action |
+|------|--------|
+| 2026-04-10 | Normalized from internal shorthand to professional names |
+| 2026-04-10 | Split mixed documents into authoritative C-only and B-only |
+| 2026-04-10 | Extracted B implementation from C-IMPL to ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md |
+| 2026-04-10 | Extracted B architecture from ACCOUNTABILITY-ARCH to ACCOUNTABLE_AGENT_LAYER_ARCHITECTURE.md |
+| 2026-04-10 | Cleaned cross-contamination: C-IMPL is now C-only, Accountable Agent Layer Implementation is now B-only |
+| 2026-04-19 | Applied bugfix-policy hardening (D1-D22, E1-E12) and level-specific VerificationCase model |
+| 2026-04-19 | Bumped all docs to v2.0.0 (C-RULES/PROCESS/ARCHITECTURE were already v2.0.0) |
+| 2026-04-19 | Compliance Change Control Implementation Contract synced from v1.0.0 to v2.0.0 |
+| 2026-04-19 | B docs bumped from v1.0.0 to v2.0.0 with bugfix-specific blocks/warnings/evidence |
 
-The merged stack is not a production certification claim. UI/MCP/editor support is currently discovery-only scaffolding, and the evidence backbone plus thin external adapters are local Matrix OS harness-side contracts. The report layer is read-only over existing evidence. The gateway descriptors are declarative future boundaries only. It does not include an MCP server runtime, UI rewrite, production dashboard, IDE plugin, language-server integration, agent execution bridge, real Hermes/OpenCode/Zed execution, shell interception, destructive command execution, automatic rule enforcement, production audit retention, cloud persistence, or external certification. Broad Safety Guard runtime work, broad agent-evidence-plane product work, CAS/peekxd/OpenCode/ai-router adapters, and deployment hardening remain outside the current merged stack.
+---
+
+**END OF INDEX**

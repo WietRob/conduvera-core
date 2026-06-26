@@ -3,9 +3,9 @@
 > **⚠️ LEGACY NOTICE:** This replaces the mixed COMPLIANCE_CHANGE_CONTROL_PROCESS_CONTRACT.md.
 > For Accountable Agent Layer process, see ACCOUNTABLE_AGENT_LAYER_PROCESS.md.
 
-**Status:** AUTHORITATIVE
-**Version:** 2.0.0
-**Date:** 2026-04-11
+**Status:** AUTHORITATIVE  
+**Version:** 2.0.0  
+**Date:** 2026-04-11  
 **Scope:** Compliance Change Control ONLY
 
 ---

@@ -1,0 +1,28 @@
+# CuraOps-Control AI Gateway Profile Configuration
+# Regel: cloud_fallback ist standardmaessig verboten (false), muss explizit erlaubt werden.
+
+profiles:
+  local_deep:
+    provider: openai_compatible
+    base_url: "http://inference-server:8001/v1"
+    model: "glm-deep"
+    cloud_fallback: false
+
+  local_light:
+    provider: openai_compatible
+    base_url: "http://inference-server:8002/v1"
+    model: "qwen-light"
+    cloud_fallback: false
+
+  cloud_public:
+    provider: openai
+    model: "gpt-5.5"
+    cloud_fallback: true
+    max_daily_cost_eur: 10
+
+  local_only_sensitive:
+    provider: openai_compatible
+    base_url: "http://inference-server:8001/v1"
+    model: "glm-deep"
+    cloud_fallback: false
+    sensitive: true
