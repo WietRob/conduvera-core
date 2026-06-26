@@ -100,7 +100,10 @@ def test_cli_json_output_matches_agent_task_golden_fixture() -> None:
 
 
 def test_cli_json_output_file_matches_agent_task_golden_fixture() -> None:
-    with runner.isolated_filesystem():
+    import tempfile
+    import os
+    with tempfile.TemporaryDirectory() as tmpdir:
+        os.chdir(tmpdir)
         output_path = Path("route-plan.json")
         result = runner.invoke(
             app,

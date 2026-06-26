@@ -138,7 +138,10 @@ def test_route_plan_cli_json_format_emits_parseable_contract_only() -> None:
 
 
 def test_route_plan_cli_output_writes_json_file_without_execution() -> None:
-    with runner.isolated_filesystem():
+    import tempfile
+    import os
+    with tempfile.TemporaryDirectory() as tmpdir:
+        os.chdir(tmpdir)
         output_path = Path("route-plan.json")
         result = runner.invoke(
             app,
