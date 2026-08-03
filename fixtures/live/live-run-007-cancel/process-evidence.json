@@ -1,0 +1,11 @@
+{
+  "run_id": "live-run-007-cancel",
+  "pid": 596621,
+  "pgid": 596621,
+  "create_time": "Mo Aug  3 14:20:47 2026",
+  "process_group_isolation": true,
+  "cancel_signal": "SIGKILL an eigene PGID",
+  "exitcode": -9,
+  "process_after_signal": "beendet",
+  "foreign_process_invariant": true
+}

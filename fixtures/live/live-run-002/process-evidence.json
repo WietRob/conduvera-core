@@ -1,0 +1,43 @@
+{
+  "run_id": "live-run-002",
+  "goal_contract": "CONDUVERA-GOAL-1.0",
+  "harness": "hermes (real, new managed process)",
+  "pid": 584703,
+  "pgid": 584703,
+  "create_time": "Mo Aug  3 14:13:58 2026",
+  "process_group_isolation": true,
+  "stdin_isolation": "DEVNULL (kein TTY)",
+  "hermes_home": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/hermes-home/profiles/fixture-live",
+  "gateway": "http://127.0.0.1:4000/v1 (Live-LiteLLM dream-litellm, unverändert)",
+  "gateway_model": "local/default",
+  "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+  "route_manifest_source": "/home/roberto_schmidt/.local/share/ai-stack/routes/local-mode.yaml",
+  "exitcode": 0,
+  "response": "HTTP 400: No connected db.",
+  "response_exact": false,
+  "foreign_process_invariant": true,
+  "foreign_processes_before": [
+    "   1729  Fr Jul 31 07:36:48 2026 hermes",
+    "   1732  Fr Jul 31 07:36:48 2026 opencode",
+    "   6950  Fr Jul 31 07:36:56 2026 hermes",
+    "   6968  Fr Jul 31 07:36:56 2026 hermes",
+    " 364995  Fr Jul 31 11:20:09 2026 hermes",
+    "2584354  Sa Aug  1 10:01:55 2026 codex",
+    "2600619  Sa Aug  1 10:10:51 2026 codex-code-mode",
+    "2618328  Sa Aug  1 10:18:38 2026 codex",
+    "2632528  Sa Aug  1 10:24:14 2026 codex",
+    "2634938  Sa Aug  1 10:24:50 2026 codex"
+  ],
+  "foreign_processes_after": [
+    "   1729  Fr Jul 31 07:36:48 2026 hermes",
+    "   1732  Fr Jul 31 07:36:48 2026 opencode",
+    "   6950  Fr Jul 31 07:36:56 2026 hermes",
+    "   6968  Fr Jul 31 07:36:56 2026 hermes",
+    " 364995  Fr Jul 31 11:20:09 2026 hermes",
+    "2584354  Sa Aug  1 10:01:55 2026 codex",
+    "2600619  Sa Aug  1 10:10:51 2026 codex-code-mode",
+    "2618328  Sa Aug  1 10:18:38 2026 codex",
+    "2632528  Sa Aug  1 10:24:14 2026 codex",
+    "2634938  Sa Aug  1 10:24:50 2026 codex"
+  ]
+}

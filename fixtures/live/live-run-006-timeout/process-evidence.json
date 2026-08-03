@@ -1,0 +1,12 @@
+{
+  "run_id": "live-run-006-timeout",
+  "pid": 596261,
+  "pgid": 596261,
+  "create_time": "Mo Aug  3 14:20:35 2026",
+  "process_group_isolation": true,
+  "signal_sequence": "SIGTERM -> grace 15s -> SIGKILL nur bei Bedarf",
+  "termination_phase": "after_sigterm",
+  "exitcode": 0,
+  "process_after_signal": "beendet",
+  "foreign_process_invariant": true
+}

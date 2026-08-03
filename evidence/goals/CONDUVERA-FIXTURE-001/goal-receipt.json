@@ -2,69 +2,153 @@
   "goal_contract": "CONDUVERA-GOAL-1.0",
   "contract_hash": "sha256:d9824e6d3f2db5b8bc55a2e74c790a622f87b8bacc0b42e21c5a82f1619eb7ee",
   "goal_id": "CONDUVERA-FIXTURE-001",
-  "task_id": "TASK-03997DB7",
-  "attempt_id": "ATT-330D7561",
-  "session_id": "mxfix_9aeedf774d78",
-  "status": "completed",
-  "final_status": "COMPLETED: task=TASK-03997DB7 attempt=ATT-330D7561 session=mxfix_9aeedf774d78 evidence=ATT-330D7561-SES-6F0C1D0F.json",
-  "model_binding": {
-    "kind": "gateway_alias",
-    "selector": "workload/fixture",
-    "auth_domain": "litellm",
-    "backend_family": "openai",
-    "model": "fixture-model-1"
+  "overall_status": "OPERATIONAL",
+  "status_components": {
+    "GOAL_CONTRACT_FOUNDATION": "PASS",
+    "MANAGED_FIXTURE_SIMULATION": "PASS",
+    "LIVE_HERMES_ADAPTER": "PASS",
+    "LIVE_ODS_LITELLM_REQUEST": "PASS",
+    "PROCESS_BOUNDARY": "PASS",
+    "CROSS_HARNESS_BINDING": "PASS",
+    "LIVE_RUNTIME_CUTOVER": "NOT_STARTED"
   },
-  "evidence_paths": [
-    "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/run/evidence/TASK-03997DB7/ATT-330D7561-SES-6F0C1D0F.json"
-  ],
+  "live_run": {
+    "run_id": "live-run-005",
+    "pid": 595774,
+    "pgid": 595774,
+    "create_time": "Mo Aug  3 14:20:19 2026",
+    "process_group_isolation": true,
+    "exitcode": 0,
+    "response": "CONDUVERA_FIXTURE_OK",
+    "response_exact": true,
+    "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+    "foreign_process_invariant": true
+  },
   "dod_matrix": {
-    "DoD-01": {
+    "DOD-LIVE-01": {
       "result": "PASS",
-      "evidence": "contracts/goal-execution.v1.yaml + goal-execution.v1.schema.json + test_dod01_contract_files_exist_and_equivalent"
+      "check": "receipt_correction",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/receipt_correction.out",
+      "evidence_sha256": "sha256:607fb3625f7fe00944cce53e767e318fe212350770bc85e6a75e49b27b5ad25a",
+      "note": "Statusinflation korrigiert (TEILBESTANDEN, Live-Gates evidence-basiert); self-Referenz auf externes Artefakt aufgelöst (Reviewer-Finding 1)"
     },
-    "DoD-02": {
+    "DOD-LIVE-02": {
       "result": "PASS",
-      "evidence": "test_dod02_incomplete_goal_rejected (exit 2, MISSING_REQUIRED_FIELD)"
+      "check": "adapter_boundary",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/adapter_boundary.out",
+      "output_sha256": "sha256:0e96d7ca7406320840ee2e704cbada03e2fe4b6d6aea1d667b4f685b07e7e24d",
+      "note": "kein direkter Import; dynamischer Loader + physische Abwesenheit fail-closed (5 Tests)"
     },
-    "DoD-03": {
+    "DOD-LIVE-03": {
       "result": "PASS",
-      "evidence": "test_dod03_bindings_reference_same_contract_and_hash (AGENTS.md + templates/pi-binding.md)"
+      "check": "hermes_live_bootstrap",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/live-run-009-bootstrap/bootstrap-output.txt",
+      "evidence_sha256": "sha256:dec4f79d7cefde4d8bd42b025727dd1374c2b0286fa5f641a9a90de0fd7be704",
+      "exitcode": 0,
+      "note": "reale neue Hermes-Fixture-Session (frisches HERMES_HOME, kein Chat-Kontext) extrahierte CONTRACT_ID + CONTRACT_HASH aus AGENTS.md"
     },
-    "DoD-04": {
+    "DOD-LIVE-04": {
       "result": "PASS",
-      "evidence": "test_dod04_fresh_process_bootstrap_receipt (frischer Prozess, kein Chat-Kontext)"
+      "check": "live_litellm_inference",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/live-run-005/process-evidence.json",
+      "evidence_sha256": "sha256:a2af6cc446dc4552d444d62290419f6a660b6b4ff73f5470e01a94fd90cb36a4",
+      "gateway": "http://127.0.0.1:4000/v1 (Live-LiteLLM dream-litellm, unverändert)",
+      "gateway_model": "workload/local",
+      "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+      "route_manifest": "/home/roberto_schmidt/.local/share/ai-stack/routes/local-mode.yaml",
+      "note": "direkter LiteLLM-Call bestätigt Modellidentität (curl-Antwort: Qwen3.6-35B-A3B-UD-Q4_K_M.gguf)"
     },
-    "DoD-05": {
+    "DOD-LIVE-05": {
       "result": "PASS",
-      "evidence": "realer Fixture-Lauf + test_dod05_e2e_and_dod06_timeout_cancel"
+      "check": "mxos_evidence_response",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/live-run-005/mxos-evidence-live-run-005.json",
+      "evidence_sha256": "sha256:66845801dcab37e5b21e45d191ccdc9fb7ec8c5dcfefe1f4c132bb95c4253087",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "note": "Antwort CONDUVERA_FIXTURE_OK als MXOS-EVIDENCE-1.0.0-Envelope gespeichert (kein zweites Schema)"
     },
-    "DoD-06": {
+    "DOD-LIVE-06": {
       "result": "PASS",
-      "evidence": "test_dod05_e2e_and_dod06_timeout_cancel (nur Managed-Session)"
+      "check": "real_timeout_cancel",
+      "timeout_evidence": {
+        "path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/live-run-006-timeout/process-evidence.json",
+        "sha256": "sha256:99a564416e5c5c74f9914b6002a9d9c115056e60d5ad9165618e87139716547b",
+        "detail": {
+          "run_id": "live-run-006-timeout",
+          "pid": 596261,
+          "pgid": 596261,
+          "create_time": "Mo Aug  3 14:20:35 2026",
+          "process_group_isolation": true,
+          "signal_sequence": "SIGTERM -> grace 15s -> SIGKILL nur bei Bedarf",
+          "termination_phase": "after_sigterm",
+          "exitcode": 0,
+          "process_after_signal": "beendet",
+          "foreign_process_invariant": true
+        }
+      },
+      "cancel_evidence": {
+        "path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/live-run-007-cancel/process-evidence.json",
+        "sha256": "sha256:b566a3b443a388994c452b9e78799df6538e1877a5181f7f3a45cb5138d4a60e",
+        "detail": {
+          "run_id": "live-run-007-cancel",
+          "pid": 596621,
+          "pgid": 596621,
+          "create_time": "Mo Aug  3 14:20:47 2026",
+          "process_group_isolation": true,
+          "cancel_signal": "SIGKILL an eigene PGID",
+          "exitcode": -9,
+          "process_after_signal": "beendet",
+          "foreign_process_invariant": true
+        }
+      },
+      "note": "SIGTERM (exit 0) und SIGKILL (exit -9) an EIGENE PGID; Foreign-Invarianz OK in beiden"
     },
-    "DoD-07": {
+    "DOD-LIVE-07": {
       "result": "PASS",
-      "evidence": "test_reconcile_idempotent_no_duplicate_events"
+      "check": "restart_reconcile",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/live-run-008-reconcile/reconcile-evidence.json",
+      "evidence_sha256": "sha256:d917d916297e71c19681ce8805c441b5617e9ead6777aaf12321313bf8414def",
+      "note": "neuer Controller-Prozess liest Ledger, verifiziert create_time+PGID, keine EXTERNAL, keine Duplikate"
     },
-    "DoD-08": {
+    "DOD-LIVE-08": {
       "result": "PASS",
-      "evidence": "test_dod08_disabled_adapter_clean + test_disabled_adapter_runner_ends_cleanly (CAPABILITY_UNAVAILABLE)"
+      "check": "adapter_disable_vs_removal",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/adapter_boundary.out",
+      "evidence_sha256": "sha256:0e96d7ca7406320840ee2e704cbada03e2fe4b6d6aea1d667b4f685b07e7e24d",
+      "exitcode": 0,
+      "note": "disable (enabled:false) und removal (Modul nicht importierbar) getrennt getestet; Core startet; ODS unberührt (Reviewer-Finding 2)"
     },
-    "DoD-09": {
+    "DOD-LIVE-09": {
       "result": "PASS",
-      "evidence": "test_dod09_no_private_imports_no_vendoring + test_no_private_cross_repo_imports"
+      "check": "regression_full",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full.out",
+      "output_sha256": "sha256:d33b680b4ee085ad2bd691f49e7822b7fd42cc2dc6851d9d5ba220f3311ffa28",
+      "note": "237 passed"
     },
-    "DoD-10": {
-      "result": "PASS",
-      "evidence": "232 passed (vollständige Regression)"
+    "DOD-LIVE-10": {
+      "result": "APPROVE",
+      "check": "independent_review",
+      "reviewer_sessions": [
+        "deleg_859998f4 (Review 1: REQUEST_FIX, tragende Claims verifiziert)",
+        "deleg_e62a61a4 (Review 2: REQUEST_FIX, 2 P2-Findings)",
+        "deleg_3da2a026 (Review 3: APPROVE, 0 Findings, 14 SHA nachgerechnet 0 Mismatch)"
+      ],
+      "verdict_file": "evidence/goals/CONDUVERA-FIXTURE-001/reviewer-verdict-3.md"
     },
-    "DoD-11": {
+    "DOD-LIVE-11": {
       "result": "PASS",
-      "evidence": "evidence/goals/CONDUVERA-FIXTURE-001/goal-receipt.json (diese Datei)"
+      "check": "evidence_based_receipt",
+      "note": "alle PASS-Werte aus evidence/checks/*.out + process-evidence.json + SHA-256 berechnet; keine hart kodierten Werte"
     },
-    "DoD-12": {
+    "DOD-LIVE-12": {
       "result": "PASS",
-      "evidence": "Roberto_Brain: nur bewiesene Status (VERSIONED_LEGACY_BASELINE DONE etc.)"
+      "check": "status_gate",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/status_gate.out",
+      "evidence_sha256": "sha256:f0b3329eec628f1dd6f6e3046fb96287621067f8515f1f15e0df0065ec9d359e",
+      "exitcode": 0,
+      "note": "DOD-LIVE-01..11 vollständig PASS (inkl. unabhängigem APPROVE review-3); OPERATIONAL-Status gesetzt; externes Artefakt statt self-reference"
     }
   },
   "invariants": {
@@ -80,14 +164,63 @@
     "adapters_are_removable": "PASS",
     "products_remain_standalone": "PASS"
   },
-  "rollback_verified": true,
-  "rollback_note": "Alle Änderungen im Worktree matrix-os-wt-goal-contract (Branch task/goal-contract-fixture); main unberührt; Feature-Flag CONDUVERA_FIXTURE_ENABLED deaktivierbar",
-  "architecture_position": {
-    "control_plane": "conduvera_core",
-    "execution_module": "buildroom_internal",
-    "runtime_authority": "ods",
-    "secrets_authority": "bws",
-    "harness": "hermes (fixture adapter, managed only)"
-  },
-  "generated_at": "2026-08-03"
+  "evidence_checks": [
+    {
+      "check": "regression_full",
+      "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m pytest -q --no-header -p no:cacheprovider",
+      "exitcode": 0,
+      "timestamp": "2026-08-03T12:22:22.184031+00:00",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full.out",
+      "output_sha256": "sha256:d33b680b4ee085ad2bd691f49e7822b7fd42cc2dc6851d9d5ba220f3311ffa28"
+    },
+    {
+      "check": "goal_lint_valid",
+      "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m curaops.cli.main goal lint evidence/goals/CONDUVERA-FIXTURE-001/goal.yaml",
+      "exitcode": 0,
+      "timestamp": "2026-08-03T12:22:22.262428+00:00",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/goal_lint_valid.out",
+      "output_sha256": "sha256:a81caecb9756c1268eadaf69329bfdd84670d3d2a9350c106338565dd3ca9d8e"
+    },
+    {
+      "check": "goal_lint_incomplete",
+      "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m curaops.cli.main goal lint /tmp/incomplete-goal.yaml",
+      "exitcode": 2,
+      "timestamp": "2026-08-03T12:22:22.335516+00:00",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/goal_lint_incomplete.out",
+      "output_sha256": "sha256:2337ed569aa04a6b6e8ceb9a71293aa1ea8a0970ec02265eb7b2c8dbe143ca0d"
+    },
+    {
+      "check": "bootstrap_receipt",
+      "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m curaops.cli.main bootstrap receipt --goal-id CONDUVERA-FIXTURE-001",
+      "exitcode": 0,
+      "timestamp": "2026-08-03T12:22:22.409309+00:00",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/bootstrap_receipt.out",
+      "output_sha256": "sha256:54bca9bfaaab991bf5d0a76f7c28691b72a71f926a31155189c84767c7a2f2a1"
+    },
+    {
+      "check": "adapter_boundary",
+      "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m pytest -q tests/buildroom/test_adapter_boundary.py",
+      "exitcode": 0,
+      "timestamp": "2026-08-03T12:22:22.560637+00:00",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/adapter_boundary.out",
+      "output_sha256": "sha256:0e96d7ca7406320840ee2e704cbada03e2fe4b6d6aea1d667b4f685b07e7e24d"
+    },
+    {
+      "check": "goal_contract_tests",
+      "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m pytest -q tests/goal/",
+      "exitcode": 0,
+      "timestamp": "2026-08-03T12:22:22.798385+00:00",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/goal_contract_tests.out",
+      "output_sha256": "sha256:f83d9d610e658c2588951f9d5fcf5eb6869412bb3ff4984e533ea0cdb5fce58f"
+    },
+    {
+      "check": "fixture_slice_tests",
+      "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m pytest -q tests/buildroom/test_fixture_slice.py",
+      "exitcode": 0,
+      "timestamp": "2026-08-03T12:22:22.941636+00:00",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/fixture_slice_tests.out",
+      "output_sha256": "sha256:7b3b0d5a921d7788afd5d0591f4f23616773499e68d52f759b0a65c29bc0ff2c"
+    }
+  ],
+  "generated_at": "2026-08-03T12:22:40.859267+00:00"
 }

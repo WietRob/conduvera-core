@@ -1,0 +1,14 @@
+{
+  "schema": "conduvera.ledger.v1",
+  "managed_session": {
+    "pid": 597595,
+    "pgid": 597595,
+    "create_time": "Mo Aug  3 14:21:02 2026",
+    "harness": "hermes",
+    "state": "running"
+  },
+  "external_sessions": [],
+  "events_booked": [
+    "fixture.run.started"
+  ]
+}

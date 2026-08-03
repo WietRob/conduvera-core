@@ -1,0 +1,13 @@
+{
+  "run_id": "live-run-008-reconcile",
+  "phase1": {
+    "pid": 597595,
+    "pgid": 597595,
+    "create_time": "Mo Aug  3 14:21:02 2026",
+    "ledger": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/reconcile-ledger.json"
+  },
+  "phase2_controller_output": "live_create: Mo Aug  3 14:21:02 2026\nledger_create: Mo Aug  3 14:21:02 2026\npid_match: check-ok\npgid_now: 597595\npgid_match: True\noverrides_external: True\nevents_booked: ['fixture.run.started']",
+  "cleanup": "SIGTERM an eigene PGID (keine fremde Session berührt)",
+  "session_after_cleanup": "beendet",
+  "duplicate_events": "keine (neuer Controller bucht keine neuen Events, liest nur)"
+}

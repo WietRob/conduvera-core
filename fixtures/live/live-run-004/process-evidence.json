@@ -1,0 +1,19 @@
+{
+  "run_id": "live-run-004",
+  "goal_contract": "CONDUVERA-GOAL-1.0",
+  "harness": "hermes (real, new managed process)",
+  "pid": 594269,
+  "pgid": 594269,
+  "create_time": "Mo Aug  3 14:19:30 2026",
+  "process_group_isolation": true,
+  "stdin_isolation": "DEVNULL",
+  "hermes_home": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/hermes-home/profiles/fixture-live",
+  "gateway": "http://127.0.0.1:4000/v1 (Live-LiteLLM dream-litellm)",
+  "gateway_model": "workload/local",
+  "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+  "route_manifest_source": "/home/roberto_schmidt/.local/share/ai-stack/routes/local-mode.yaml",
+  "exitcode": 0,
+  "response": "HTTP 400: No connected db.",
+  "response_exact": false,
+  "foreign_process_invariant": true
+}

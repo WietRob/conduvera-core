@@ -1,0 +1,16 @@
+GOAL INVALID (MISSING_REQUIRED_FIELD)
+  missing required field(s): non_goals, definition_of_done, verifikation, 
+rollback, modularitaet, architektur_invarianten, stop_bedingungen, 
+abschluss_evidence
+  field: non_goals
+{
+  "ok": false,
+  "contract_id": "CONDUVERA-GOAL-1.0",
+  "error": {
+    "code": "MISSING_REQUIRED_FIELD",
+    "message": "missing required field(s): non_goals, definition_of_done, 
+verifikation, rollback, modularitaet, architektur_invarianten, stop_bedingungen,
+abschluss_evidence",
+    "field": "non_goals"
+  }
+}

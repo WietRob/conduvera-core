@@ -1,0 +1,20 @@
+{
+  "run_id": "live-run-005",
+  "goal_contract": "CONDUVERA-GOAL-1.0",
+  "harness": "hermes (real, new managed process)",
+  "pid": 595774,
+  "pgid": 595774,
+  "create_time": "Mo Aug  3 14:20:19 2026",
+  "process_group_isolation": true,
+  "stdin_isolation": "DEVNULL",
+  "hermes_home": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/hermes-home/profiles/fixture-live",
+  "gateway": "http://127.0.0.1:4000/v1 (Live-LiteLLM dream-litellm, unverändert)",
+  "gateway_model": "workload/local",
+  "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+  "route_manifest_source": "/home/roberto_schmidt/.local/share/ai-stack/routes/local-mode.yaml",
+  "response_sha256": "sha256:c8a786cab2621aba8724e063b6f391edcbb431f43228959a03c507c3eae90a8b",
+  "exitcode": 0,
+  "response": "CONDUVERA_FIXTURE_OK",
+  "response_exact": true,
+  "foreign_process_invariant": true
+}

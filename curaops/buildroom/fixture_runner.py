@@ -30,7 +30,11 @@ from typing import Any
 import yaml
 
 from curaops.evidence.contract import EventEnvelope, SCHEMA_VERSION
-from curaops.harness.hermes_adapter import HarnessCapabilityUnavailable, HermesAdapter
+from curaops.harness.registry import (
+    HarnessAdapterProtocol,
+    HarnessAdapterRegistry,
+    HarnessCapabilityUnavailableError,
+)
 
 
 @dataclass
@@ -56,17 +60,38 @@ class FixtureRunner:
         *,
         fixture_dir: str | Path,
         route_manifest: str | Path,
-        adapter: HermesAdapter,
+        adapter: HarnessAdapterProtocol | None = None,
+        adapter_registry: str | Path | None = None,
         producer: dict[str, Any],
         feature_flag: bool = True,
     ):
         self.fixture_dir = Path(fixture_dir).expanduser().resolve()
         self.route_manifest = Path(route_manifest).expanduser().resolve()
-        self.adapter = adapter
         self.producer = producer
         self.feature_flag = feature_flag
         self._ledger_path = self.fixture_dir / "state" / "run-ledger.json"
         self._events: list[EventEnvelope] = []
+
+        # Adapter loading: never a concrete import. Either an injected
+        # protocol-conforming adapter (tests) or a dynamic registry load.
+        if adapter is not None:
+            self._adapter = adapter
+            self._adapter_source = "injected"
+        elif adapter_registry is not None:
+            registry = HarnessAdapterRegistry(adapter_registry)
+            try:
+                self._adapter = registry.load_adapter("hermes")
+                self._adapter_source = "registry:hermes"
+            except HarnessCapabilityUnavailableError as exc:
+                self._adapter = None
+                self._adapter_error = exc
+                self._adapter_source = "unavailable"
+        else:
+            self._adapter = None
+            self._adapter_error = HarnessCapabilityUnavailableError(
+                "hermes", "no adapter injected and no adapter_registry provided"
+            )
+            self._adapter_source = "unavailable"
 
     # -- public API -------------------------------------------------------
 
@@ -102,6 +127,23 @@ class FixtureRunner:
             return result
 
         # 2) Harness adapter start (managed fixture session)
+        # Adapter may be unavailable (registry missing/disabled/module absent):
+        # fail-closed to CAPABILITY_UNAVAILABLE, never an ImportError.
+        if self._adapter is None:
+            exc = getattr(self, "_adapter_error", None)
+            reason = exc.reason if exc is not None else "adapter unavailable"
+            result = FixtureRunResult(
+                task_id=task_id, attempt_id=attempt_id, session_id=session_id,
+                status="cap_unavailable", model_binding=binding,
+                error="CAPABILITY_UNAVAILABLE",
+                final_status_readable=f"CAPABILITY_UNAVAILABLE: {reason}",
+            )
+            self._emit("fixture.run.failed", payload={
+                "task_id": task_id, "code": "CAPABILITY_UNAVAILABLE", "reason": reason,
+            })
+            result.events = [e.to_dict() for e in self._events]
+            return result
+
         worktree = self.fixture_dir / "worktrees" / session_id
         worktree.mkdir(parents=True, exist_ok=True)
         self._emit("fixture.run.started", payload={
@@ -110,13 +152,13 @@ class FixtureRunner:
         })
 
         try:
-            start = self.adapter.start_session(
+            start = self._adapter.start_session(
                 agent_id="fixture-agent",
                 worktree=str(worktree),
                 task=task_description,
                 config={"model_binding": binding},
             )
-        except HarnessCapabilityUnavailable as exc:
+        except HarnessCapabilityUnavailableError as exc:
             result = FixtureRunResult(
                 task_id=task_id, attempt_id=attempt_id, session_id=session_id,
                 status="cap_unavailable", model_binding=binding,
@@ -154,7 +196,7 @@ class FixtureRunner:
 
         # 3) Evidence collection + persistence
         adapter_session_id = start.detail.get("session_id", session_id)
-        evidence = self.adapter.collect_evidence(adapter_session_id)
+        evidence = self._adapter.collect_evidence(adapter_session_id)
         evidence_path = self._persist_evidence(task_id, attempt_id, session_id, evidence)
         self._emit("fixture.run.completed", payload={
             "task_id": task_id, "attempt_id": attempt_id, "session_id": session_id,
@@ -176,7 +218,7 @@ class FixtureRunner:
 
     def timeout(self, session_id: str) -> FixtureRunResult:
         """Timeout ONLY the managed fixture session."""
-        r = self.adapter.timeout_session(session_id)
+        r = self._adapter.timeout_session(session_id)
         status = "timed_out"
         if not r.success:
             status = "failed"
@@ -189,7 +231,7 @@ class FixtureRunner:
 
     def cancel(self, session_id: str) -> FixtureRunResult:
         """Cancel ONLY the managed fixture session."""
-        r = self.adapter.cancel_session(session_id)
+        r = self._adapter.cancel_session(session_id)
         status = "cancelled"
         if not r.success:
             status = "failed"

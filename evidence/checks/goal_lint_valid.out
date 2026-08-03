@@ -1,0 +1,19 @@
+                           CONDUVERA-GOAL-1.0 — valid                           
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Feld           ┃ Wert                                                        ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ goal_id        │ CONDUVERA-FIXTURE-001                                       │
+│ contract_id    │ CONDUVERA-GOAL-1.0                                          │
+│ contract_hash  │ sha256:d9824e6d3f2db5b8bc55a2e74c790a622f87b8bacc0b42e21c5… │
+│ DoD-Einträge   │ 12                                                          │
+│ Verifikationen │ 16                                                          │
+│ Invarianten    │ adapters_are_removable, buildroom_is_internal_module,       │
+│                │ bws_is_secrets_authority, capabilities_are_adapter_bound,   │
+│                │ exactly_one_control_plane, harnesses_are_replaceable,       │
+│                │ no_parallel_state_writer, no_private_cross_repo_imports,    │
+│                │ no_second_evidence_schema, ods_is_runtime_authority,        │
+│                │ products_remain_standalone                                  │
+└────────────────┴─────────────────────────────────────────────────────────────┘
+OK: goal_id=CONDUVERA-FIXTURE-001 
+contract_hash=sha256:d9824e6d3f2db5b8bc55a2e74c790a622f87b8bacc0b42e21c5a82f1619
+eb7ee

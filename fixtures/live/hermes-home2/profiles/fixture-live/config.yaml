@@ -1,0 +1,15 @@
+model:
+  default: workload/local
+  provider: custom:litellm
+  context_length: 65536
+providers:
+  litellm:
+    api: http://127.0.0.1:4000/v1
+    name: litellm
+    key_env: LITELLM_API_KEY
+    transport: chat_completions
+agent:
+  verify_on_stop: false
+display:
+  tool_progress: none
+_config_version: 33

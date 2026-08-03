@@ -1,0 +1,12 @@
+{
+  "pid": 530335,
+  "pgid": 530335,
+  "create_time": "Mo Aug  3 14:06:15 2026       00:00",
+  "exitcode": 0,
+  "response": "HTTP 400: No connected db.",
+  "response_exact": false,
+  "foreign_invariant": true,
+  "hermes_home": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/hermes-home/profiles/fixture-live",
+  "route": "workload/local",
+  "gateway": "http://127.0.0.1:4000/v1"
+}

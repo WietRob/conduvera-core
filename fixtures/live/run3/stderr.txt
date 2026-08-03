@@ -1,0 +1,1 @@
+hermes -z: agent failed: Unknown provider 'custom:litellm'. Check 'hermes model' for available providers, or run 'hermes doctor' to diagnose config issues.

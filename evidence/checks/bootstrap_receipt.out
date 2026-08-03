@@ -1,0 +1,10 @@
+{
+  "goal_contract": "CONDUVERA-GOAL-1.0",
+  "contract_hash": 
+"sha256:d9824e6d3f2db5b8bc55a2e74c790a622f87b8bacc0b42e21c5a82f1619eb7ee",
+  "authority_map_version": "2026-08-01",
+  "goal_id": "CONDUVERA-FIXTURE-001",
+  "loaded": true,
+  "schema_version": "1.0",
+  "generated_at": "2026-08-03T12:22:22.396789+00:00"
+}
