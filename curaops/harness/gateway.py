@@ -8,6 +8,8 @@ registering MCP tools, executing shell commands, or mutating external projects.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -201,14 +203,40 @@ _EDITOR_SURFACES: tuple[EditorSurfaceDescriptor, ...] = (
 )
 
 
-@dataclass(frozen=True)
+@dataclass
 class HarnessGatewayRegistry:
-    """Stable declarative registry for generic Matrix OS harness boundaries."""
+    """Stable declarative registry for generic Matrix OS harness boundaries.
+
+    SINGLE registry authority (DOD-03): the declarative descriptors
+    (runners/tools/editor surfaces/capabilities) AND the runtime adapter
+    loader (HarnessAdapterRegistry) live in this one class. There is no
+    second independent registry — the runtime loader is a component of the
+    gateway registry and resolves adapter entry points for the same harness
+    ids declared here.
+    """
 
     runners: tuple[RunnerDescriptor, ...]
     tools: tuple[ToolDescriptor, ...]
     editor_surfaces: tuple[EditorSurfaceDescriptor, ...]
     capabilities: tuple[GatewayCapability, ...]
+
+    def __init__(
+        self,
+        *,
+        runners: tuple[RunnerDescriptor, ...] | None = None,
+        tools: tuple[ToolDescriptor, ...] | None = None,
+        editor_surfaces: tuple[EditorSurfaceDescriptor, ...] | None = None,
+        capabilities: tuple[GatewayCapability, ...] | None = None,
+        adapter_registry_path: str | Path | None = None,
+    ):
+        self.runners = runners if runners is not None else _RUNNERS
+        self.tools = tools if tools is not None else _TOOLS
+        self.editor_surfaces = editor_surfaces if editor_surfaces is not None else _EDITOR_SURFACES
+        self.capabilities = capabilities if capabilities is not None else _GATEWAY_CAPABILITIES
+        # Runtime adapter loading is PART of this registry (single authority).
+        from curaops.harness.registry import HarnessAdapterRegistry
+
+        self.adapters = HarnessAdapterRegistry(adapter_registry_path) if adapter_registry_path else None
 
     @classmethod
     def default(cls) -> "HarnessGatewayRegistry":
@@ -219,7 +247,19 @@ class HarnessGatewayRegistry:
             tools=_TOOLS,
             editor_surfaces=_EDITOR_SURFACES,
             capabilities=_GATEWAY_CAPABILITIES,
+            adapter_registry_path=Path.cwd() / "contracts" / "harness-registry.yaml",
         )
+
+    def load_adapter(self, adapter_id: str) -> Any:
+        """Resolve a runtime adapter through the single registry authority.
+
+        Fail-closed: missing/disabled/unavailable -> CAPABILITY_UNAVAILABLE.
+        """
+        if self.adapters is None:
+            from curaops.harness.registry import HarnessAdapterRegistry
+
+            self.adapters = HarnessAdapterRegistry(Path.cwd() / "contracts" / "harness-registry.yaml")
+        return self.adapters.load_adapter(adapter_id)
 
     def get_runner(self, runner_id: str) -> RunnerDescriptor:
         """Return a runner descriptor or fail closed for unknown runner ids."""

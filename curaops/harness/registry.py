@@ -77,10 +77,20 @@ class AdapterRegistration:
 
 
 class HarnessAdapterRegistry:
-    """Versioned adapter registry (contracts/harness-registry.yaml)."""
+    """Versioned adapter registry (contracts/harness-registry.yaml).
 
-    def __init__(self, registry_path: str | Path):
-        self.registry_path = Path(registry_path).expanduser().resolve()
+    Runtime adapter loader component of the SINGLE registry authority
+    (HarnessGatewayRegistry, DOD-03). Not an independent second registry —
+    it is owned by the gateway registry and resolves adapter entry points
+    for the same harness ids the gateway declares.
+    """
+
+    def __init__(self, registry_path: str | Path | None = None):
+        self.registry_path = (
+            Path(registry_path).expanduser().resolve()
+            if registry_path
+            else Path.cwd() / "contracts" / "harness-registry.yaml"
+        )
 
     def _load(self) -> dict[str, AdapterRegistration]:
         try:

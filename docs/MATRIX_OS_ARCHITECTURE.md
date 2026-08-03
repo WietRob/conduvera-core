@@ -1,18 +1,36 @@
 # Matrix OS Architecture
 
-Status: authoritative architecture overview for the merged Matrix OS state including UI/MCP/editor scaffolding and the evidence backbone contract.
+Status: authoritative architecture overview for the merged Matrix OS state including UI/MCP/editor scaffolding and the evidence backbone contract. The canonical system diagram (current browser/access plane + future Console/Workspace plane + Core/Buildroom/Harness/Model/ODS planes) lives in `docs/CONDUVERA_ARCHITECTURE_DIAGRAM.md` (Mermaid: `docs/architecture.mmd`).
 
-Matrix OS is currently a Python package and CLI-based harness/control plane for compliance-oriented agent workflows. The merged runtime focuses on package structure, Change Request control, accountable AI-assisted change gates, ASPICE traceability support, evidence contracts, translation-only external evidence adapters, and declarative UI/gateway boundaries.
+Matrix OS is currently a Python package and CLI-based harness/control plane for compliance-oriented agent workflows. The merged runtime focuses on package structure, Change Request control, accountable AI-assisted change gates, ASPICE traceability support, evidence contracts, translation-only external evidence adapters, declarative UI/gateway boundaries, and the Conduvera Core + internal Buildroom module + versioned harness adapters (CONDUVERA-GOAL-1.0).
 
-This document describes the current merged repository state. It is not a production-readiness statement and does not describe planned UI/MCP/editor or external-adapter features as already implemented.
+This document describes the current merged repository state. It is not a production-readiness statement and does not describe planned UI/MCP/editor or external-adapter features as already implemented. GPU-mode switching is exclusively `ai-stack model use` (ODS/ai-stack is the sole runtime/model/GPU authority; `workload/local` exists only in text mode; BWS remains the sole secrets authority).
 
 ## Current architecture
 
 ```text
-Matrix OS Harness
+Matrix OS / Conduvera Core
 ├── Foundation / Packaging / CLI Baseline
 │   ├── Python package: curaops
-│   └── CLI entrypoint: python3 -m curaops.cli.main
+│   └── CLI entrypoints: python3 -m curaops.cli.main, matrix-cli, conduvera
+├── Goal Execution Contract (CONDUVERA-GOAL-1.0)
+│   ├── contracts/goal-execution.v1.yaml + schema.json
+│   ├── contracts/architecture-invariants.v1.yaml
+│   ├── Validator: conduvera goal lint (fail-closed, exit 2)
+│   └── Bootstrap-Receipt: conduvera bootstrap receipt
+├── Internal Buildroom Module
+│   ├── curaops/buildroom/fixture_runner.py (managed fixture runner,
+│   │   trace: goal→task→attempt→session→adapter→PID/PGID→route→model→event)
+│   ├── curaops/buildroom/legacy_state.py (read-only legacy reader)
+│   └── Ledger: conduvera.ledger.v1 = TEST-FIXTURE scope only (DOD-04)
+├── Harness Gateway (EINE Registry-Authority, DOD-03)
+│   ├── curaops/harness/gateway.py: HarnessGatewayRegistry
+│   │   (descriptors + runtime adapter loader as one authority)
+│   ├── curaops/harness/registry.py: runtime adapter loader (component
+│   │   of the gateway registry, NOT a second registry)
+│   └── curaops/harness/hermes_adapter.py: versioned adapter that OWNS
+│       the complete managed-session lifecycle (HERMES_HOME, process
+│       spawn, PID/PGID/create_time, workload/local binding; DOD-01)
 ├── Compliance Change Control
 │   ├── Package: curaops.skills.change_request
 │   └── CLI: matrix CLI namespace `cr`
@@ -25,13 +43,10 @@ Matrix OS Harness
 │   └── CLI: matrix CLI namespace `aspice`
 └── Evidence Backbone Adapter Contract
     ├── Package: curaops.evidence
-    ├── Store: changes/evidence/events.jsonl
+    ├── Schema: MXOS-EVIDENCE-1.0.0 (single evidence schema)
     ├── Adapters: agent-evidence-plane, Safety Guard, failure-loop
     ├── Registry: curaops.evidence.adapters.registry
     └── CLI: matrix CLI namespace `evidence`
-└── Harness Gateway Contract
-    ├── Package: curaops.harness.gateway
-    └── Scope: descriptors only; no runtime execution
 ```
 
 ## Module responsibilities

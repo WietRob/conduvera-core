@@ -64,11 +64,15 @@ class FixtureRunner:
         adapter_registry: str | Path | None = None,
         producer: dict[str, Any],
         feature_flag: bool = True,
+        goal_id: str = "CONDUVERA-FIXTURE-001",
+        live: bool = False,
     ):
         self.fixture_dir = Path(fixture_dir).expanduser().resolve()
         self.route_manifest = Path(route_manifest).expanduser().resolve()
         self.producer = producer
         self.feature_flag = feature_flag
+        self.goal_id = goal_id
+        self.live = live
         self._ledger_path = self.fixture_dir / "state" / "run-ledger.json"
         self._events: list[EventEnvelope] = []
 
@@ -107,8 +111,10 @@ class FixtureRunner:
         task_id = f"TASK-{uuid.uuid4().hex[:8].upper()}"
         attempt_id = f"ATT-{uuid.uuid4().hex[:8].upper()}"
         session_id = f"SES-{uuid.uuid4().hex[:8].upper()}"
+        trace_id = f"TRACE-{uuid.uuid4().hex[:10].upper()}"
 
         self._emit("fixture.attempt.bound", payload={
+            "goal_id": self.goal_id, "trace_id": trace_id,
             "task_id": task_id, "attempt_id": attempt_id, "session_id": session_id,
             "task": task_description[:200],
         })
@@ -147,6 +153,7 @@ class FixtureRunner:
         worktree = self.fixture_dir / "worktrees" / session_id
         worktree.mkdir(parents=True, exist_ok=True)
         self._emit("fixture.run.started", payload={
+            "goal_id": self.goal_id, "trace_id": trace_id,
             "task_id": task_id, "attempt_id": attempt_id, "session_id": session_id,
             "harness": "hermes", "model_binding": binding,
         })
@@ -156,7 +163,12 @@ class FixtureRunner:
                 agent_id="fixture-agent",
                 worktree=str(worktree),
                 task=task_description,
-                config={"model_binding": binding},
+                config={
+                    "model_binding": binding,
+                    "trace_id": trace_id,
+                    "live": self.live,
+                    "route": binding.get("selector", "workload/local"),
+                },
             )
         except HarnessCapabilityUnavailableError as exc:
             result = FixtureRunResult(
@@ -194,13 +206,53 @@ class FixtureRunner:
             result.events = [e.to_dict() for e in self._events]
             return result
 
-        # 3) Evidence collection + persistence
+        # 3) Wait for the managed process (bounded), then collect evidence.
         adapter_session_id = start.detail.get("session_id", session_id)
+        handle = start.detail
+        try:
+            # Bounded wait: the HermesAdapter exposes wait_for_completion on the
+            # concrete adapter (injected or registry-loaded); unknown adapters
+            # are skipped (their sessions complete synchronously).
+            wait = getattr(self._adapter, "wait_for_completion", None)
+            if wait is not None:
+                wait(adapter_session_id, timeout_s=self._adapter._task_timeout_s)
+        except Exception:
+            pass
+
         evidence = self._adapter.collect_evidence(adapter_session_id)
         evidence_path = self._persist_evidence(task_id, attempt_id, session_id, evidence)
+
+        # Model identity from ODS route manifest (read-only, live)
+        model_identity = self._model_identity_from_manifest(binding.get("selector", ""))
+
+        trace = {
+            "goal_id": self.goal_id,
+            "trace_id": trace_id,
+            "task_id": task_id,
+            "attempt_id": attempt_id,
+            "session_id": session_id,
+            "adapter_id": "hermes",
+            "adapter_version": "hermes-adapter.v1",
+            "pid": handle.get("pid"),
+            "pgid": handle.get("pgid"),
+            "create_time": handle.get("create_time"),
+            "route": handle.get("route") or binding.get("selector"),
+            "model_identity": model_identity,
+            "evidence_event": "fixture.run.completed",
+        }
+        self._trace = trace
+        state_dir = self.fixture_dir / "state"
+        state_dir.mkdir(parents=True, exist_ok=True)
+        (state_dir / "call-trace.json").write_text(
+            json.dumps(trace, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+
         self._emit("fixture.run.completed", payload={
+            "goal_id": self.goal_id, "trace_id": trace_id,
             "task_id": task_id, "attempt_id": attempt_id, "session_id": session_id,
             "harness_session_id": adapter_session_id,
+            "pid": handle.get("pid"), "pgid": handle.get("pgid"),
+            "route": trace["route"], "model_identity": model_identity,
             "status": "completed", "evidence_path": str(evidence_path),
         })
 
@@ -210,6 +262,7 @@ class FixtureRunner:
             evidence_paths=[str(evidence_path)],
             final_status_readable=(
                 f"COMPLETED: task={task_id} attempt={attempt_id} session={adapter_session_id} "
+                f"pid={handle.get('pid')} pgid={handle.get('pgid')} route={trace['route']} "
                 f"evidence={evidence_path.name}"
             ),
         )
@@ -314,6 +367,30 @@ class FixtureRunner:
                 }
         return None
 
+    def _model_identity_from_manifest(self, selector: str) -> str:
+        """Read the live upstream model identity for a route (read-only).
+
+        For workload/local the authoritative identity lives in the ODS
+        ai-stack dynamic manifest (local-mode.yaml). Falls back to the
+        route fixture manifest model field otherwise.
+        """
+        try:
+            live = Path.home() / ".local/share/ai-stack/routes/local-mode.yaml"
+            if live.is_file():
+                data = yaml.safe_load(live.read_text(encoding="utf-8")) or {}
+                for r in data.get("routes", []):
+                    if isinstance(r, dict) and r.get("model_name") == selector:
+                        return str(r.get("upstream_model", "")) or ""
+            data = yaml.safe_load(self.route_manifest.read_text(encoding="utf-8")) or {}
+            routes = data.get("routes", data)
+            if isinstance(routes, dict):
+                cfg = routes.get(selector)
+                if isinstance(cfg, dict):
+                    return str(cfg.get("model", ""))
+        except Exception:
+            pass
+        return ""
+
     def _persist_evidence(self, task_id: str, attempt_id: str, session_id: str, evidence: dict[str, Any]) -> Path:
         ev_dir = self.fixture_dir / "evidence" / task_id
         ev_dir.mkdir(parents=True, exist_ok=True)
@@ -330,12 +407,31 @@ class FixtureRunner:
         return path
 
     def _load_ledger(self) -> dict[str, Any]:
+        """Load the reconcile ledger (TEST-FIXTURE scope only, DOD-04).
+
+        conduvera.ledger.v1 is NOT a productive state schema. The ledger
+        lives under the fixture_dir and is explicitly marked with
+        ledger_scope: test_fixture — it never becomes a parallel writer to
+        Registry v2 / the canonical session state.
+        """
         if self._ledger_path.is_file():
             try:
-                return json.loads(self._ledger_path.read_text(encoding="utf-8"))
+                data = json.loads(self._ledger_path.read_text(encoding="utf-8"))
+                data.setdefault("ledger_scope", "test_fixture")
+                data.setdefault("schema", "conduvera.ledger.v1")
+                data.setdefault("bound_to", "curaops.harness.gateway.HarnessGatewayRegistry")
+                return data
             except Exception:
-                return {"attempts": []}
-        return {"attempts": []}
+                return {
+                    "attempts": [], "ledger_scope": "test_fixture",
+                    "schema": "conduvera.ledger.v1",
+                    "bound_to": "curaops.harness.gateway.HarnessGatewayRegistry",
+                }
+        return {
+            "attempts": [], "ledger_scope": "test_fixture",
+            "schema": "conduvera.ledger.v1",
+            "bound_to": "curaops.harness.gateway.HarnessGatewayRegistry",
+        }
 
     def _ledger_fingerprint(self, ledger: dict[str, Any]) -> str:
         attempts = ledger.get("attempts", [])

@@ -140,11 +140,23 @@ def test_dod09_no_private_imports_no_vendoring():
     import curaops.harness.hermes_adapter as ha
     import inspect
 
-    for mod in (fr, ha):
+    # Core (runner) must never import private legacy internals or spawn
+    # processes. The adapter is the ONLY module allowed to spawn Hermes
+    # (DOD-01: it owns the live start), so subprocess is permitted there
+    # but private legacy imports remain forbidden everywhere.
+    for mod in (fr,):
         src = inspect.getsource(mod)
         for forbidden in ("buildroom_core", "buildroom_execution", "manual_authorization",
                           "fleet_router", "peekxd_", "subprocess", "os.system"):
             assert forbidden not in src, f"{mod.__name__} uses forbidden: {forbidden}"
+    for mod in (ha,):
+        src = inspect.getsource(mod)
+        for forbidden in ("buildroom_core", "buildroom_execution", "manual_authorization",
+                          "fleet_router", "peekxd_"):
+            assert forbidden not in src, f"{mod.__name__} imports private legacy: {forbidden}"
+        # The adapter MUST own the spawn (DOD-01)
+        assert "subprocess.Popen" in src
+        assert "start_new_session=True" in src
 
 
 # --- DoD-11: goal-receipt contains full DoD matrix -----------------------

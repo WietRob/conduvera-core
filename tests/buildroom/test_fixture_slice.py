@@ -163,15 +163,26 @@ def test_evidence_receipt_written(runner):
 
 
 def test_no_private_cross_repo_imports():
-    """Static scan: fixture runner + adapter must not import private internals."""
+    """Static scan: runner must not import private internals or spawn.
+
+    The adapter is the ONLY module that may spawn Hermes (DOD-01), so
+    subprocess is permitted there; private legacy imports are forbidden
+    everywhere.
+    """
     import inspect
 
     from curaops.buildroom import fixture_runner as fr
     from curaops.harness import hermes_adapter as ha
 
-    for mod in (fr, ha):
+    for mod in (fr,):
+        src = inspect.getsource(mod)
+        for forbidden in ("buildroom_core", "buildroom_execution", "peekxd_",
+                          "manual_authorization", "fleet_router", "subprocess"):
+            assert forbidden not in src, f"{mod.__name__} must not use: {forbidden}"
+    for mod in (ha,):
         src = inspect.getsource(mod)
         for forbidden in ("buildroom_core", "buildroom_execution", "peekxd_",
                           "manual_authorization", "fleet_router"):
             assert forbidden not in src, f"{mod.__name__} imports private legacy: {forbidden}"
-        assert "subprocess" not in src, f"{mod.__name__} must not spawn subprocesses"
+        # The adapter owns the live spawn (DOD-01)
+        assert "subprocess.Popen" in src

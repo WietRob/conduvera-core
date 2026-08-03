@@ -1,0 +1,30 @@
+{
+  "run_id": "core-run-001",
+  "goal_contract": "CONDUVERA-GOAL-1.0",
+  "call_path": "FixtureRunner -> HarnessAdapterRegistry (Komponente von HarnessGatewayRegistry) -> HermesAdapter.start_session(live=true) -> Hermes CLI (isolierte HERMES_HOME) -> Live-LiteLLM :4000 -> workload/local -> Qwen3.6-35B-A3B-UD-Q4_K_M.gguf -> MXOS-EVIDENCE-1.0.0",
+  "trace": {
+    "goal_id": "CONDUVERA-FIXTURE-001",
+    "trace_id": "TRACE-AD305C2FAF",
+    "task_id": "TASK-C6CEA8F6",
+    "attempt_id": "ATT-EE1839EB",
+    "session_id": "SES-4C7782B9",
+    "adapter_id": "hermes",
+    "adapter_version": "hermes-adapter.v1",
+    "pid": 1066026,
+    "pgid": 1066026,
+    "create_time": "Mo Aug  3 16:45:37 2026",
+    "route": "workload/local",
+    "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+    "evidence_event": "fixture.run.completed"
+  },
+  "response": "CONDUVERA_FIXTURE_OK",
+  "response_exact": true,
+  "response_file": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/core-run/worktrees/SES-4C7782B9/mxfix_42da3b0a7cf3.response.txt",
+  "response_sha256": "sha256:c8a786cab2621aba8724e063b6f391edcbb431f43228959a03c507c3eae90a8b",
+  "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+  "route": "workload/local",
+  "pid": 1066026,
+  "pgid": 1066026,
+  "process_group_isolation": true,
+  "run_script": "fixtures/live/run_core_fixture.py (Exit 0, reproduzierbar)"
+}

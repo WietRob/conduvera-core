@@ -3,56 +3,40 @@
     "check": "regression_full",
     "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m pytest -q --no-header -p no:cacheprovider",
     "exitcode": 0,
-    "timestamp": "2026-08-03T12:22:22.184031+00:00",
+    "timestamp": "2026-08-03T14:46:12.504164+00:00",
     "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full.out",
-    "output_sha256": "sha256:d33b680b4ee085ad2bd691f49e7822b7fd42cc2dc6851d9d5ba220f3311ffa28"
+    "output_sha256": "sha256:8406a6b0408fabe2a76dd69cad10856036063d91d136f831b88818aad7e008a8"
+  },
+  {
+    "check": "core_internal_seam_tests",
+    "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m pytest -q tests/buildroom/test_core_internal_seam.py",
+    "exitcode": 0,
+    "timestamp": "2026-08-03T14:46:12.649253+00:00",
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/core_internal_seam_tests.out",
+    "output_sha256": "sha256:1698cf53738fece3fc128f68a2005bf90098cb09ffc528d80a18fe683159d622"
+  },
+  {
+    "check": "ui_access_plane_tests",
+    "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m pytest -q tests/test_ui_access_plane.py",
+    "exitcode": 0,
+    "timestamp": "2026-08-03T14:46:12.764774+00:00",
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/ui_access_plane_tests.out",
+    "output_sha256": "sha256:71288863ec9567395a647dd0c8fbf0e2048bee72283202612ad6f90a7a526ef3"
   },
   {
     "check": "goal_lint_valid",
     "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m curaops.cli.main goal lint evidence/goals/CONDUVERA-FIXTURE-001/goal.yaml",
     "exitcode": 0,
-    "timestamp": "2026-08-03T12:22:22.262428+00:00",
+    "timestamp": "2026-08-03T14:46:12.848037+00:00",
     "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/goal_lint_valid.out",
     "output_sha256": "sha256:a81caecb9756c1268eadaf69329bfdd84670d3d2a9350c106338565dd3ca9d8e"
   },
   {
-    "check": "goal_lint_incomplete",
-    "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m curaops.cli.main goal lint /tmp/incomplete-goal.yaml",
-    "exitcode": 2,
-    "timestamp": "2026-08-03T12:22:22.335516+00:00",
-    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/goal_lint_incomplete.out",
-    "output_sha256": "sha256:2337ed569aa04a6b6e8ceb9a71293aa1ea8a0970ec02265eb7b2c8dbe143ca0d"
-  },
-  {
-    "check": "bootstrap_receipt",
-    "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m curaops.cli.main bootstrap receipt --goal-id CONDUVERA-FIXTURE-001",
+    "check": "cross_doc_terminology",
+    "command": "cat /home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/cross_doc_terminology.out",
     "exitcode": 0,
-    "timestamp": "2026-08-03T12:22:22.409309+00:00",
-    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/bootstrap_receipt.out",
-    "output_sha256": "sha256:54bca9bfaaab991bf5d0a76f7c28691b72a71f926a31155189c84767c7a2f2a1"
-  },
-  {
-    "check": "adapter_boundary",
-    "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m pytest -q tests/buildroom/test_adapter_boundary.py",
-    "exitcode": 0,
-    "timestamp": "2026-08-03T12:22:22.560637+00:00",
-    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/adapter_boundary.out",
-    "output_sha256": "sha256:0e96d7ca7406320840ee2e704cbada03e2fe4b6d6aea1d667b4f685b07e7e24d"
-  },
-  {
-    "check": "goal_contract_tests",
-    "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m pytest -q tests/goal/",
-    "exitcode": 0,
-    "timestamp": "2026-08-03T12:22:22.798385+00:00",
-    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/goal_contract_tests.out",
-    "output_sha256": "sha256:f83d9d610e658c2588951f9d5fcf5eb6869412bb3ff4984e533ea0cdb5fce58f"
-  },
-  {
-    "check": "fixture_slice_tests",
-    "command": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/.venv/bin/python -m pytest -q tests/buildroom/test_fixture_slice.py",
-    "exitcode": 0,
-    "timestamp": "2026-08-03T12:22:22.941636+00:00",
-    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/fixture_slice_tests.out",
-    "output_sha256": "sha256:7b3b0d5a921d7788afd5d0591f4f23616773499e68d52f759b0a65c29bc0ff2c"
+    "timestamp": "2026-08-03T14:46:12.850301+00:00",
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/cross_doc_terminology.out",
+    "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
   }
 ]
