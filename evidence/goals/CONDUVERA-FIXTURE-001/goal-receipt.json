@@ -140,7 +140,10 @@
     "DOD-LIVE-11": {
       "result": "PASS",
       "check": "evidence_based_receipt",
-      "note": "alle PASS-Werte aus evidence/checks/*.out + process-evidence.json + SHA-256 berechnet; keine hart kodierten Werte"
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/evidence_based_receipt.out",
+      "evidence_sha256": "sha256:fac8924824c2b442ce0d988eab0db3060ca681083b138bb5415573322d2ad813",
+      "exitcode": 0,
+      "note": "Meta-Claim: alle PASS-Werte aus evidence/checks/*.out + process-evidence.json + SHA-256 berechnet; keine hart kodierten Werte (Review-1-F3 adressiert)"
     },
     "DOD-LIVE-12": {
       "result": "PASS",
