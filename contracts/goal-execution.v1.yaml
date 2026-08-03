@@ -1,0 +1,73 @@
+# CONDUVERA-GOAL-1.0 — Goal Execution Contract (machine-readable SSoT)
+# Human SSoT: Roberto_Brain/20_Areas/Dev_Infrastructure/ODS_Integration/Goal_Execution_Contract.md
+# Validator: conduvera goal lint <goal-file>
+contract:
+  id: CONDUVERA-GOAL-1.0
+  schema_version: "1.0"
+  path: contracts/goal-execution.v1.yaml
+  authority: Roberto_Brain
+  authority_map_version: "2026-08-01"
+
+required_fields:
+  - goal_id
+  - title
+  - architekturposition
+  - scope
+  - non_goals
+  - definition_of_done
+  - verifikation
+  - rollback
+  - modularitaet
+  - architektur_invarianten
+  - stop_bedingungen
+  - abschluss_evidence
+
+architecture_invariants:
+  exactly_one_control_plane:
+    description: Conduvera Core ist die einzige Task-/Session-/Harness-/Evidence-/Policy-Autorität.
+    enforce: fail_closed
+  buildroom_is_internal_module:
+    description: Buildroom ist ein internes, gebundenes Modul von Conduvera Core; keine zweite Control Plane, kein separates Produkt.
+    enforce: fail_closed
+  ods_is_runtime_authority:
+    description: ODS ist die alleinige Runtime-, Service-, Modell- und Ressourcen-Authority.
+    enforce: fail_closed
+  bws_is_secrets_authority:
+    description: BWS ist die Secrets-Authority; keine Secrets in Registry/State.
+    enforce: fail_closed
+  harnesses_are_replaceable:
+    description: Hermes/Codex/OpenCode/Pi sind austauschbar und werden nur über versionierte Adapter aufgerufen.
+    enforce: fail_closed
+  capabilities_are_adapter_bound:
+    description: Capability-Engines (PeekXD/n8n/ComfyUI/Voice/RAG) werden nur über explizite Adapter/Verträge integriert, nie absorbiert.
+    enforce: fail_closed
+  no_private_cross_repo_imports:
+    description: Keine Imports aus privaten Interna anderer Repositories.
+    enforce: fail_closed
+  no_second_evidence_schema:
+    description: Evidence wird ausschließlich im MXOS-EVIDENCE-1.0.0-Envelope gespeichert; kein zweites Schema.
+    enforce: fail_closed
+  no_parallel_state_writer:
+    description: Ein State-Owner pro Ledger/Session; kein paralleles Schreiben auf Buildroom- oder Registry-State.
+    enforce: fail_closed
+  adapters_are_removable:
+    description: Adapter-Entfernung (z. B. Hermes-Adapter deaktiviert) beschädigt Conduvera Core/ODS nicht; strukturiertes CAPABILITY_UNAVAILABLE statt Importfehler.
+    enforce: fail_closed
+  products_remain_standalone:
+    description: Eigenständige Produkte (PeekXD, Safety Guard, failure-driven-loop, OpenCode-Plugin) bleiben unabhängig; kein Vendoring.
+    enforce: fail_closed
+
+stop_conditions:
+  - "Ein laufender manueller Prozess müsste kontrolliert werden → sofort BLOCKED."
+  - "Eine zweite Task-/Session-/Evidence-Authority entstünde → sofort BLOCKED."
+  - "Ein privater Cross-Repo-Import wäre nötig → sofort BLOCKED."
+  - "Ein destruktives State-Migrationsverfahren wäre nötig → sofort BLOCKED."
+  - "ODS- oder Auth-Routing müsste außerhalb des genehmigten Scope geändert werden → sofort BLOCKED."
+  - "Das E2E-Fixture ist nicht ohne Produktrepo-Mutation ausführbar → sofort BLOCKED."
+
+rollback:
+  - "Alle Änderungen in eigenem Task-Worktree; keine main-Änderung ohne Review."
+  - "Legacy-Buildroom bleibt vollständig nutzbar."
+  - "Neuer Fixture-Pfad ist per Feature-Flag deaktivierbar."
+  - "Vertrags-/Validator-Änderungen sind mit einem Commit rückrollbar."
+  - "Kein Datenformat wird destruktiv migriert; bei Schemakonflikt Lauf blockieren und bestehenden Vertrag versioniert erweitern."

@@ -1,0 +1,11 @@
+# ODS/LiteLLM route manifest (FIXTURE — read-only test copy, keine Live-Daten)
+# Quelle der Struktur: ~/.config/ai-stack/routes/workloads.yaml (re-deriviert 2026-08-01)
+routes:
+  workload/fixture:
+    model: fixture-model-1
+    backend: openai
+    auth_domain: litellm
+  workload/fixture-alt:
+    model: fixture-model-2
+    backend: openai
+    auth_domain: litellm

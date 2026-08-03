@@ -1,0 +1,5 @@
+fixture task: Managed fixture: Core→Buildroom→Hermes→ODS/LiteLLM→MXOS-Evidence→status
+agent: fixture-agent
+session: mxfix_9aeedf774d78
+model_binding: {'kind': 'gateway_alias', 'selector': 'workload/fixture', 'auth_domain': 'litellm', 'backend_family': 'openai', 'model': 'fixture-model-1'}
+status: ok

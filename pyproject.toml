@@ -46,6 +46,7 @@ dev = [
 matrix-os = "src.core.app:main"
 mxos = "src.core.app:main"
 matrix-cli = "curaops.cli.main:main"
+conduvera = "curaops.cli.main:main"
 
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]

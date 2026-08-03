@@ -36,6 +36,16 @@ ADAPTER_EVENT_TYPES = {
     # schema (MXOS-EVIDENCE-1.0.0); no new schema introduced.
     "buildroom.legacy.inventory.completed",
     "buildroom.legacy.readiness.completed",
+    # Managed fixture run (CONDUVERA-GOAL-1.0, first vertical slice):
+    # task/attempt/session lifecycle events for the internal Buildroom module.
+    "fixture.run.started",
+    "fixture.run.completed",
+    "fixture.run.failed",
+    "fixture.run.timed_out",
+    "fixture.run.cancelled",
+    "fixture.run.reconciled",
+    "fixture.attempt.bound",
+    "fixture.attempt.restarted",
 }
 EVENT_TYPES = CORE_EVENT_TYPES | ADAPTER_EVENT_TYPES
 SEVERITIES = {"debug", "info", "warning", "error", "critical"}

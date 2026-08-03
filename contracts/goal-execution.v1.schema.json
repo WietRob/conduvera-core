@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contracts/goal-execution.v1.schema.json",
+  "title": "CONDUVERA-GOAL-1.0 Goal Execution Contract Schema",
+  "description": "JSON-Schema für Goal-Dateien nach CONDUVERA-GOAL-1.0. Fail-closed: fehlende Pflichtfelder oder Verstöße führen zu strukturiertem Fehler.",
+  "type": "object",
+  "required": [
+    "goal_id",
+    "title",
+    "architekturposition",
+    "scope",
+    "non_goals",
+    "definition_of_done",
+    "verifikation",
+    "rollback",
+    "modularitaet",
+    "architektur_invarianten",
+    "stop_bedingungen",
+    "abschluss_evidence"
+  ],
+  "properties": {
+    "contract": {
+      "type": "object",
+      "properties": {
+        "id": { "const": "CONDUVERA-GOAL-1.0" },
+        "schema_version": { "const": "1.0" }
+      },
+      "required": ["id", "schema_version"]
+    },
+    "goal_id": {
+      "type": "string",
+      "pattern": "^CONDUVERA-[A-Z0-9-]{3,64}$"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "architekturposition": {
+      "type": "object",
+      "properties": {
+        "control_plane": { "const": "conduvera_core" },
+        "execution_module": { "const": "buildroom_internal" },
+        "runtime_authority": { "const": "ods" },
+        "secrets_authority": { "const": "bws" }
+      },
+      "required": ["control_plane", "execution_module", "runtime_authority", "secrets_authority"]
+    },
+    "scope": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "non_goals": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "definition_of_done": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "beschreibung", "verifikation"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^DoD-\\d+$" },
+          "beschreibung": { "type": "string", "minLength": 1 },
+          "verifikation": { "type": "string", "minLength": 1 }
+        }
+      },
+      "minItems": 1
+    },
+    "verifikation": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "rollback": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "modularitaet": {
+      "type": "object",
+      "properties": {
+        "products_standalone": { "type": "boolean", "const": true },
+        "no_vendoring": { "type": "boolean", "const": true },
+        "adapters_use_public_contracts": { "type": "boolean", "const": true }
+      },
+      "required": ["products_standalone", "no_vendoring", "adapters_use_public_contracts"]
+    },
+    "architektur_invarianten": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 11
+    },
+    "stop_bedingungen": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "abschluss_evidence": {
+      "type": "string",
+      "pattern": "^evidence/goals/"
+    }
+  },
+  "additionalProperties": true
+}

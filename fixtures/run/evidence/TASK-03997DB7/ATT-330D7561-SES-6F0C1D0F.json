@@ -1,0 +1,93 @@
+{
+  "schema_version": "MXOS-EVIDENCE-1.0.0",
+  "task_id": "TASK-03997DB7",
+  "attempt_id": "ATT-330D7561",
+  "session_id": "SES-6F0C1D0F",
+  "evidence": {
+    "session_id": "mxfix_9aeedf774d78",
+    "status": "completed",
+    "artifacts": [
+      {
+        "path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/run/worktrees/SES-6F0C1D0F/artifacts/mxfix_9aeedf774d78.txt",
+        "sha256": "sha256:1762767d5c5f1286f8b44284dc89abeafa989d237ebe9acc7137c7dcfe2a9e9d"
+      }
+    ],
+    "model_binding": {
+      "kind": "gateway_alias",
+      "selector": "workload/fixture",
+      "auth_domain": "litellm",
+      "backend_family": "openai",
+      "model": "fixture-model-1"
+    },
+    "ok": true
+  },
+  "events": [
+    {
+      "schema_version": "MXOS-EVIDENCE-1.0.0",
+      "event_id": "mxev_1620601ce3c74100a27c4e901d3cdbdb",
+      "event_type": "fixture.attempt.bound",
+      "occurred_at": "2026-08-03T10:40:13Z",
+      "producer": {
+        "name": "conduvera-core",
+        "version": "0.1.0"
+      },
+      "subject": {
+        "kind": "fixture.run",
+        "component": "buildroom.internal"
+      },
+      "severity": "info",
+      "payload": {
+        "task_id": "TASK-03997DB7",
+        "attempt_id": "ATT-330D7561",
+        "session_id": "SES-6F0C1D0F",
+        "task": "Managed fixture: Core→Buildroom→Hermes→ODS/LiteLLM→MXOS-Evidence→status"
+      },
+      "integrity": {
+        "algorithm": "sha256",
+        "hash_excludes": [
+          "event_hash",
+          "integrity.hash"
+        ],
+        "hash": "sha256:b0ad423ae38b1ea909938101c731f4f51257a9a2911312e0fb22fd3b0e84b8eb"
+      },
+      "event_hash": "sha256:b0ad423ae38b1ea909938101c731f4f51257a9a2911312e0fb22fd3b0e84b8eb"
+    },
+    {
+      "schema_version": "MXOS-EVIDENCE-1.0.0",
+      "event_id": "mxev_2673f99a95944a019d23428514747353",
+      "event_type": "fixture.run.started",
+      "occurred_at": "2026-08-03T10:40:13Z",
+      "producer": {
+        "name": "conduvera-core",
+        "version": "0.1.0"
+      },
+      "subject": {
+        "kind": "fixture.run",
+        "component": "buildroom.internal"
+      },
+      "severity": "info",
+      "payload": {
+        "task_id": "TASK-03997DB7",
+        "attempt_id": "ATT-330D7561",
+        "session_id": "SES-6F0C1D0F",
+        "harness": "hermes",
+        "model_binding": {
+          "kind": "gateway_alias",
+          "selector": "workload/fixture",
+          "auth_domain": "litellm",
+          "backend_family": "openai",
+          "model": "fixture-model-1"
+        }
+      },
+      "integrity": {
+        "algorithm": "sha256",
+        "hash_excludes": [
+          "event_hash",
+          "integrity.hash"
+        ],
+        "hash": "sha256:4c5d1ee2d5c380f687e6b3001a473c351173de25467ad4213a59606752d32af1"
+      },
+      "event_hash": "sha256:4c5d1ee2d5c380f687e6b3001a473c351173de25467ad4213a59606752d32af1"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+# CONDUVERA-GOAL-1.0 — Architecture Invariants (machine-readable)
+# Jede Invariante muss in einem Goal-Lauf PASS sein; Verletzung = BLOCKED.
+invariants:
+  exactly_one_control_plane:
+    check: "nur Conduvera Core besitzt Task-/Session-/Harness-/Evidence-/Policy-Autorität"
+    source: Authority_Map.md
+  buildroom_is_internal_module:
+    check: "Buildroom ist internes Modul; kein separates Produkt, keine zweite Autorität"
+    source: Buildroom_Migration_Matrix.md
+  ods_is_runtime_authority:
+    check: "ODS ist alleinige Runtime-/Service-/Modell-/Ressourcen-Authority; Core mutiert ODS nicht"
+    source: Authority_Map.md
+  bws_is_secrets_authority:
+    check: "Secrets nur via BWS; keine Secrets in Goal-/Evidence-/Registry-Dateien"
+    source: Authority_Map.md
+  harnesses_are_replaceable:
+    check: "Harness-Aufrufe nur über versionierte Adapter; Adapter-Deaktivierung = CAPABILITY_UNAVAILABLE"
+    source: Goal_Execution_Contract.md
+  capabilities_are_adapter_bound:
+    check: "Capability-Engines nur über explizite Adapter/Verträge"
+    source: Product_Modularity_Contract.md
+  no_private_cross_repo_imports:
+    check: "keine Imports aus privaten Interna anderer Repos (statischer Scan)"
+    source: Product_Modularity_Contract.md
+  no_second_evidence_schema:
+    check: "nur MXOS-EVIDENCE-1.0.0-Envelope; keine neuen Schemas"
+    source: Contract_Reuse_Matrix.md
+  no_parallel_state_writer:
+    check: "ein State-Owner; kein paralleles Schreiben auf Buildroom-/Registry-State"
+    source: Authority_Map.md
+  adapters_are_removable:
+    check: "Adapter-Entfernung beschädigt Core/ODS nicht; fail-closed strukturierter Fehler"
+    source: Goal_Execution_Contract.md
+  products_remain_standalone:
+    check: "kein Vendoring; Produkte (PeekXD, Safety Guard, …) nicht in Core kopiert"
+    source: Product_Modularity_Contract.md

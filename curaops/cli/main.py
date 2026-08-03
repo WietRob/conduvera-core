@@ -10,8 +10,10 @@ from rich.console import Console
 
 from curaops.cli.commands.accountable import accountable_app
 from curaops.cli.commands.aspice import aspice_app
+from curaops.cli.commands.bootstrap import app as bootstrap_app
 from curaops.cli.commands.cr import cr_app
 from curaops.cli.commands.evidence import evidence_app
+from curaops.cli.commands.goal import app as goal_app
 from curaops.cli.commands.harness import harness_app
 from curaops.cli.commands.scaffold import scaffold_app
 
@@ -29,6 +31,8 @@ app.add_typer(aspice_app, name="aspice", help="ASPICE support utilities - tracea
 app.add_typer(evidence_app, name="evidence", help="Matrix OS evidence backbone contract utilities")
 app.add_typer(harness_app, name="harness", help="Read-only Matrix OS harness operator workflow")
 app.add_typer(scaffold_app, name="scaffold", help="Matrix OS UI/MCP/editor scaffolding")
+app.add_typer(goal_app, name="goal", help="CONDUVERA-GOAL-1.0 goal contract validation")
+app.add_typer(bootstrap_app, name="bootstrap", help="CONDUVERA-GOAL-1.0 bootstrap receipt")
 
 
 @app.command("version")

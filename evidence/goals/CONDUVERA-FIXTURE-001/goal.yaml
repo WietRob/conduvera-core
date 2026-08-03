@@ -1,0 +1,116 @@
+contract:
+  id: CONDUVERA-GOAL-1.0
+  schema_version: "1.0"
+
+goal_id: CONDUVERA-FIXTURE-001
+title: "Managed-Fixture-Lauf über das interne Buildroom-Modul mit Hermes-Adapter"
+
+architekturposition:
+  control_plane: conduvera_core
+  execution_module: buildroom_internal
+  runtime_authority: ods
+  secrets_authority: bws
+
+scope:
+  - "Ungefährlicher vertikaler Fixture-Lauf: Core → Buildroom-Modul → Hermes-Adapter → ODS/LiteLLM → MXOS-EVIDENCE → finaler Status"
+  - "Fixture nutzt dediziertes Fixture-Verzeichnis und harmlose Textartefakte; kein Produktrepo wird verändert"
+  - "Proof-of-Concept des Goal-Execution-Contracts (CONDUVERA-GOAL-1.0) an einem realen Lauf"
+
+non_goals:
+  - "Kein UI-Großumbau"
+  - "Kein Naming-Gate, kein Repo-Rename"
+  - "Kein Pi-Start, keine ComfyUI-/n8n-/Voice-Erweiterung"
+  - "Keine Buildroom-Komplettmigration, kein Release-Controller"
+  - "Keine Löschung historischer Buildroom-Dateien"
+  - "Keine Mutation laufender manueller Codex-/Hermes-/OpenCode-Sessions"
+
+definition_of_done:
+  - id: DoD-01
+    beschreibung: "CONDUVERA-GOAL-1.0 existiert als menschliche und maschinenlesbare SSoT; beide Darstellungen sind per Contract-Test äquivalent."
+    verifikation: "conduvera goal lint contracts/goal-execution.v1.yaml + Validator-Test prüfen"
+  - id: DoD-02
+    beschreibung: "Ein Goal ohne DoD oder ohne Verifikation wird vom Validator nachweislich abgelehnt."
+    verifikation: "Negativtest: unvollständiges Goal → exit code 2 + strukturierter Fehler"
+  - id: DoD-03
+    beschreibung: "Hermes-, Codex-, OpenCode- und Pi-Bindings referenzieren dieselbe Contract-ID und denselben Hash."
+    verifikation: "AGENTS.md-Bindung + Hash-Konsistenz-Test"
+  - id: DoD-04
+    beschreibung: "Eine vollständig neue Test-Session kann ohne alten Chat-Kontext den Vertrag finden, laden und ihr Bootstrap-Receipt erzeugen."
+    verifikation: "Bootstrap-Test in frischem Prozess ohne Session-Kontext"
+  - id: DoD-05
+    beschreibung: "Der Managed-Fixture-Lauf funktioniert end-to-end: Core → Buildroom → Hermes → ODS/LiteLLM → Evidence → finaler Status."
+    verifikation: "realer Fixture-E2E-Test"
+  - id: DoD-06
+    beschreibung: "Timeout und Cancel beenden ausschließlich die Managed-Fixture-Session; keine fremden oder manuellen Sessions werden berührt."
+    verifikation: "Timeout-Test + Cancel-/Prozessgrenzen-Test"
+  - id: DoD-07
+    beschreibung: "Restart/Reconcile stellt den korrekten Attempt-/Session-Zustand wieder her, ohne Events doppelt zu buchen oder eine neue Authority einzuführen."
+    verifikation: "Restart-/Reconcile-Test + Duplicate-Event-Test"
+  - id: DoD-08
+    beschreibung: "Der deaktivierte Hermes-Adapter lässt sich entfernen, ohne Core oder ODS zu beschädigen; Fehler ist strukturiert und fail-closed."
+    verifikation: "Adapter-disable-/Uninstall-Test"
+  - id: DoD-09
+    beschreibung: "Keine privaten Cross-Repo-Imports, kein Vendoring und kein paralleles State-Schreiben werden durch statische und Laufzeittests nachgewiesen."
+    verifikation: "Dependency-Scan + State-Single-Writer-Test"
+  - id: DoD-10
+    beschreibung: "Vollständige bestehende Regression ist grün."
+    verifikation: "vollständige pytest-Regression"
+  - id: DoD-11
+    beschreibung: "goal-receipt.json enthält alle DoD-Ergebnisse, Evidence-Pfade, Architektur-Invarianten und den verifizierten Rollback."
+    verifikation: "Receipt-Schema-Test + unabhängige Review"
+  - id: DoD-12
+    beschreibung: "Die Gesamtarchitektur-Dokumentation wird nur mit tatsächlich bewiesenen Ergebnissen aktualisiert. Nicht implementierte Teile bleiben ausdrücklich DESIGNED oder OPEN."
+    verifikation: "Doku-Status-Review im Abschlussbericht"
+
+verifikation:
+  - "Schema-/Contract-Tests für CONDUVERA-GOAL-1.0"
+  - "Negativtest: unvollständiges Goal wird abgelehnt"
+  - "Bootstrap-Test in frischem Prozess ohne Session-Kontext"
+  - "Harness-Adapter-Contract-Test"
+  - "Model-Binding-/LiteLLM-Contract-Test"
+  - "realer Fixture-E2E-Test"
+  - "Timeout-Test"
+  - "Cancel-/Prozessgrenzen-Test"
+  - "Restart-/Reconcile-Test"
+  - "Duplicate-Event-Test"
+  - "Evidence-Hash-/Schema-Test"
+  - "Adapter-disable-/Uninstall-Test"
+  - "Dependency-Scan auf private Cross-Repo-Imports"
+  - "State-Single-Writer-Test"
+  - "vollständige Regression"
+  - "unabhängige Review des Abschluss-Receipts"
+
+rollback:
+  - "Alle Änderungen in eigenem Task-Worktree; keine main-Änderung ohne Review"
+  - "Legacy-Buildroom bleibt vollständig nutzbar"
+  - "Neuer Fixture-Pfad ist per Feature-Flag deaktivierbar (CONDUVERA_FIXTURE_ENABLED)"
+  - "Vertrags-/Validator-Änderungen sind mit einem Commit rückrollbar"
+  - "Kein Datenformat wird destruktiv migriert"
+
+modularitaet:
+  products_standalone: true
+  no_vendoring: true
+  adapters_use_public_contracts: true
+
+architektur_invarianten:
+  - exactly_one_control_plane
+  - buildroom_is_internal_module
+  - ods_is_runtime_authority
+  - bws_is_secrets_authority
+  - harnesses_are_replaceable
+  - capabilities_are_adapter_bound
+  - no_private_cross_repo_imports
+  - no_second_evidence_schema
+  - no_parallel_state_writer
+  - adapters_are_removable
+  - products_remain_standalone
+
+stop_bedingungen:
+  - "Ein laufender manueller Prozess müsste kontrolliert werden → sofort BLOCKED"
+  - "Eine zweite Task-/Session-/Evidence-Authority entstünde → sofort BLOCKED"
+  - "Ein privater Cross-Repo-Import wäre nötig → sofort BLOCKED"
+  - "Ein destruktives State-Migrationsverfahren wäre nötig → sofort BLOCKED"
+  - "ODS- oder Auth-Routing müsste außerhalb des genehmigten Scope geändert werden → sofort BLOCKED"
+  - "Das E2E-Fixture ist nicht ohne Produktrepo-Mutation ausführbar → sofort BLOCKED"
+
+abschluss_evidence: evidence/goals/CONDUVERA-FIXTURE-001/goal-receipt.json

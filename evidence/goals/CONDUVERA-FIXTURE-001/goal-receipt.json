@@ -1,0 +1,93 @@
+{
+  "goal_contract": "CONDUVERA-GOAL-1.0",
+  "contract_hash": "sha256:d9824e6d3f2db5b8bc55a2e74c790a622f87b8bacc0b42e21c5a82f1619eb7ee",
+  "goal_id": "CONDUVERA-FIXTURE-001",
+  "task_id": "TASK-03997DB7",
+  "attempt_id": "ATT-330D7561",
+  "session_id": "mxfix_9aeedf774d78",
+  "status": "completed",
+  "final_status": "COMPLETED: task=TASK-03997DB7 attempt=ATT-330D7561 session=mxfix_9aeedf774d78 evidence=ATT-330D7561-SES-6F0C1D0F.json",
+  "model_binding": {
+    "kind": "gateway_alias",
+    "selector": "workload/fixture",
+    "auth_domain": "litellm",
+    "backend_family": "openai",
+    "model": "fixture-model-1"
+  },
+  "evidence_paths": [
+    "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/run/evidence/TASK-03997DB7/ATT-330D7561-SES-6F0C1D0F.json"
+  ],
+  "dod_matrix": {
+    "DoD-01": {
+      "result": "PASS",
+      "evidence": "contracts/goal-execution.v1.yaml + goal-execution.v1.schema.json + test_dod01_contract_files_exist_and_equivalent"
+    },
+    "DoD-02": {
+      "result": "PASS",
+      "evidence": "test_dod02_incomplete_goal_rejected (exit 2, MISSING_REQUIRED_FIELD)"
+    },
+    "DoD-03": {
+      "result": "PASS",
+      "evidence": "test_dod03_bindings_reference_same_contract_and_hash (AGENTS.md + templates/pi-binding.md)"
+    },
+    "DoD-04": {
+      "result": "PASS",
+      "evidence": "test_dod04_fresh_process_bootstrap_receipt (frischer Prozess, kein Chat-Kontext)"
+    },
+    "DoD-05": {
+      "result": "PASS",
+      "evidence": "realer Fixture-Lauf + test_dod05_e2e_and_dod06_timeout_cancel"
+    },
+    "DoD-06": {
+      "result": "PASS",
+      "evidence": "test_dod05_e2e_and_dod06_timeout_cancel (nur Managed-Session)"
+    },
+    "DoD-07": {
+      "result": "PASS",
+      "evidence": "test_reconcile_idempotent_no_duplicate_events"
+    },
+    "DoD-08": {
+      "result": "PASS",
+      "evidence": "test_dod08_disabled_adapter_clean + test_disabled_adapter_runner_ends_cleanly (CAPABILITY_UNAVAILABLE)"
+    },
+    "DoD-09": {
+      "result": "PASS",
+      "evidence": "test_dod09_no_private_imports_no_vendoring + test_no_private_cross_repo_imports"
+    },
+    "DoD-10": {
+      "result": "PASS",
+      "evidence": "232 passed (vollständige Regression)"
+    },
+    "DoD-11": {
+      "result": "PASS",
+      "evidence": "evidence/goals/CONDUVERA-FIXTURE-001/goal-receipt.json (diese Datei)"
+    },
+    "DoD-12": {
+      "result": "PASS",
+      "evidence": "Roberto_Brain: nur bewiesene Status (VERSIONED_LEGACY_BASELINE DONE etc.)"
+    }
+  },
+  "invariants": {
+    "exactly_one_control_plane": "PASS",
+    "buildroom_is_internal_module": "PASS",
+    "ods_is_runtime_authority": "PASS",
+    "bws_is_secrets_authority": "PASS",
+    "harnesses_are_replaceable": "PASS",
+    "capabilities_are_adapter_bound": "PASS",
+    "no_private_cross_repo_imports": "PASS",
+    "no_second_evidence_schema": "PASS",
+    "no_parallel_state_writer": "PASS",
+    "adapters_are_removable": "PASS",
+    "products_remain_standalone": "PASS"
+  },
+  "rollback_verified": true,
+  "rollback_note": "Alle Änderungen im Worktree matrix-os-wt-goal-contract (Branch task/goal-contract-fixture); main unberührt; Feature-Flag CONDUVERA_FIXTURE_ENABLED deaktivierbar",
+  "architecture_position": {
+    "control_plane": "conduvera_core",
+    "execution_module": "buildroom_internal",
+    "runtime_authority": "ods",
+    "secrets_authority": "bws",
+    "harness": "hermes (fixture adapter, managed only)"
+  },
+  "generated_at": "2026-08-03"
+}

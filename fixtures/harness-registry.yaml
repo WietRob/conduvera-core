@@ -1,0 +1,14 @@
+# Harness adapter registry (CONDUVERA-GOAL-1.0)
+# Adapter-Entfernung/Deaktivierung muss Core/ODS nicht beschädigen:
+# disabled → strukturiertes CAPABILITY_UNAVAILABLE (fail-closed).
+adapters:
+  hermes:
+    enabled: true
+    version: hermes-adapter.v1
+    contract: CONDUVERA-GOAL-1.0
+  codex_cli:
+    enabled: false
+    status: disabled_by_owner
+  opencode_cli:
+    enabled: false
+    status: disabled_by_owner
