@@ -73,6 +73,7 @@ fixtures/live/**/*.stderr.txt
 fixtures/live/**/agent.log
 fixtures/live/**/errors.log
 fixtures/live/**/*.response.txt
+fixtures/live/**/response.txt
 fixtures/live/**/worktrees/
 *.db
 *.db-wal
