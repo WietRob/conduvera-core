@@ -4,14 +4,15 @@
   "goal_id": "CONDUVERA-FIXTURE-001",
   "overall_status": "TEILBESTANDEN",
   "status_components": {
-    "GOAL_CONTRACT_FOUNDATION": "PASS",
-    "DYNAMIC_ADAPTER_BOUNDARY": "PASS",
-    "LIVE_HERMES_LITELLM_PROBE": "PASS",
-    "CORE_INTERNAL_ADAPTER_MANAGED_RUN": "PASS",
+    "CORE_INTERNAL_MANAGED_HERMES_SLICE": "LIVE_PROVEN_CANDIDATE",
+    "CORE_INTERNAL_MANAGED_HERMES_SLICE_OPERATIONAL": "NOT_YET",
+    "FINAL_COMMIT_SEMANTIC_REVIEW": "NOT_PROVEN",
     "REAL_BUILDROOM_EXECUTION_PATH": "NOT_PROVEN",
     "BUILDROOM_ABSORPTION": "NOT_STARTED",
     "LIVE_RUNTIME_CUTOVER": "NOT_STARTED",
-    "GESAMT": "TEILBESTANDEN"
+    "FULL_SYSTEM": "TEILBESTANDEN",
+    "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN",
+    "OPERATIONAL_PRODUCTION": "NOT_YET"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -176,6 +177,108 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-03T14:46:52.563700+00:00",
-  "correction_note": "Korrigiert 2026-08-03 (Goal close-core-adapter-seam): Der vorherige Slice bewies die Live-Hermes-Session ueber ein externes Skript (subprocess.Popen ausserhalb des Adapters). CORE_INTERNAL_ADAPTER_MANAGED_RUN ist NOT_PROVEN, bis HermesAdapter.start_session() die Session selbst aus dem Core-Pfad startet. Kein globales OPERATIONAL."
+  "generated_at": "2026-08-03T19:10:41.312727+00:00",
+  "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
+  "hardening_dod_matrix": {
+    "DOD-H01": {
+      "result": "PASS",
+      "check": "core_knows_only_public_gateway_contract",
+      "evidence_path": "tests/buildroom/test_hardening.py::test_dod01_runner_source_has_no_concrete_adapter_import"
+    },
+    "DOD-H02": {
+      "result": "PASS",
+      "check": "no_private_field_getattr_broad_except",
+      "evidence_path": "tests/buildroom/test_hardening.py::test_dod02_runner_has_no_private_field_access"
+    },
+    "DOD-H03": {
+      "result": "PASS",
+      "check": "registry_cwd_independent_only_via_gateway",
+      "evidence_path": "tests/buildroom/test_hardening.py (resolve_registry_path: explizit→Env→Package; negativ: fremdes cwd)"
+    },
+    "DOD-H04": {
+      "result": "PASS",
+      "check": "simulation_live_trennung_execution_mode",
+      "evidence_path": "tests/buildroom/test_hardening.py::test_dod04_*; Mode in Events/Receipts"
+    },
+    "DOD-H05": {
+      "result": "PASS",
+      "check": "fingerprint_vor_jedem_signal",
+      "evidence_path": "tests/buildroom/test_hardening.py::test_dod05_fingerprint_mismatch_no_signal; hermes_adapter.py _fingerprint_ok"
+    },
+    "DOD-H06": {
+      "result": "PASS",
+      "check": "term_grace_kill_pgid_leer",
+      "evidence_path": "hermes_adapter.py timeout_session (SIGTERM→3s Grace→SIGKILL nur wenn Mitglieder; pgid_remaining) + live-run-005/006/007 Evidence"
+    },
+    "DOD-H07": {
+      "result": "PASS",
+      "check": "5x_live_ohne_zombie_orphan",
+      "evidence_path": "fixtures/live/run5/live-5x-evidence.json (PASS 5/5, 0 Zombie, 0 Orphan, 0 PGID-Rest, 0 Foreign)"
+    },
+    "DOD-H08": {
+      "result": "PASS",
+      "check": "env_allowlist_secret_redaction",
+      "evidence_path": "tests/buildroom/test_hardening.py::test_dod08_env_allowlist_drops_foreign_secrets; _build_hermes_env"
+    },
+    "DOD-H09": {
+      "result": "PASS",
+      "check": "portable_tests_ohne_private_pfade",
+      "evidence_path": "tests/test_ui_access_plane.py (CONDUVERA_BRAIN_ROOT parametriert, skip wenn ungesetzt); keine /home/roberto Hardcodes in Tests"
+    },
+    "DOD-H10": {
+      "result": "PASS",
+      "check": "live_und_unit_fixtures_getrennt",
+      "evidence_path": "fixtures/ods/route-manifest.fixture.yaml (fixture-model, kein Qwen) vs fixtures/live/core-run/route-snapshot/route-manifest.snapshot.yaml (live, Qwen, SHA)"
+    },
+    "DOD-H11": {
+      "result": "PASS",
+      "check": "evidence_allowlist_commit",
+      "evidence_path": ".gitignore (hermes-home/state.db/cache/response/stderr ignored); 37 Hygiene-Artefakte aus 852f340 entfernt"
+    },
+    "DOD-H12": {
+      "result": "PASS",
+      "check": "diagramm_codex_cli_vs_oauth_getrennt",
+      "evidence_path": "docs/CONDUVERA_ARCHITECTURE_DIAGRAM.md + docs/architecture.mmd (Codex CLI→~/.codex→direkt; Hermes/OpenCode→LiteLLM oauth/codex-*→CLIProxyAPI; KEIN native-OAuth-Ausdruck)"
+    },
+    "DOD-H13": {
+      "result": "PASS",
+      "check": "volle_regression",
+      "evidence_path": "evidence/checks/regression_full.out (266 passed, 1 skipped)"
+    },
+    "DOD-H14": {
+      "result": "PENDING",
+      "check": "frischer_unabhaengiger_semantischer_review_auf_exakt_finalem_commit"
+    },
+    "DOD-H15": {
+      "result": "PENDING",
+      "check": "worktree_clean_kein_merge_kein_cutover_kein_port"
+    }
+  },
+  "hardening_evidence": {
+    "live_5x": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/run5/live-5x-evidence.json",
+    "core_live_hardened": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/core-run/core-run-evidence.json",
+    "route_snapshot": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/core-run/route-snapshot/route-manifest.snapshot.yaml",
+    "hardening_tests": "tests/buildroom/test_hardening.py (14 Tests)",
+    "regression": "evidence/checks/regression_full.out"
+  },
+  "hardening_evidence_checks": [
+    {
+      "check": "regression_full_harden",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_harden.out",
+      "output_sha256": "sha256:17157998f5caadb6357f5241e6041e945eaa011a66b0644448e23b005d1fba13"
+    },
+    {
+      "check": "hardening_tests",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/hardening_tests.out",
+      "output_sha256": "sha256:19991ff1b5d6004c54edc99ee9d90444b45855bbc590e2fd911191426511f7fb"
+    },
+    {
+      "check": "core_internal_seam_tests",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/core_internal_seam_tests.out",
+      "output_sha256": "sha256:1698cf53738fece3fc128f68a2005bf90098cb09ffc528d80a18fe683159d622"
+    }
+  ]
 }

@@ -128,7 +128,7 @@ def test_dod02_call_path_correlated(tmp_path):
 
     runner = FixtureRunner(
         fixture_dir=fixture_dir,
-        route_manifest=FIXTURES / "ods" / "route-manifest.yaml",
+        route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         adapter=RecordingAdapter(),
         producer={"name": "t", "version": "1"},
         goal_id="CONDUVERA-FIXTURE-001",
@@ -215,7 +215,7 @@ def test_dod04_ledger_test_fixture_scope(tmp_path):
 
     runner = FixtureRunner(
         fixture_dir=fixture_dir,
-        route_manifest=FIXTURES / "ods" / "route-manifest.yaml",
+        route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         adapter=Shim(),
         producer={"name": "t", "version": "1"},
     )

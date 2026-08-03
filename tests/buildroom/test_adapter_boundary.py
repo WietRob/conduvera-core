@@ -31,7 +31,7 @@ def _runner_with(tmp_path, registry_content: str) -> FixtureRunner:
     fixture_dir.mkdir(parents=True, exist_ok=True)
     return FixtureRunner(
         fixture_dir=fixture_dir,
-        route_manifest=FIXTURES / "ods" / "route-manifest.yaml",
+        route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         adapter_registry=reg,
         producer={"name": "t", "version": "1"},
     )
@@ -97,7 +97,7 @@ def test_runner_without_registry_no_hidden_fallback(tmp_path):
     fixture_dir.mkdir(parents=True, exist_ok=True)
     runner = FixtureRunner(
         fixture_dir=fixture_dir,
-        route_manifest=FIXTURES / "ods" / "route-manifest.yaml",
+        route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         producer={"name": "t", "version": "1"},
     )
     result = runner.run("task")

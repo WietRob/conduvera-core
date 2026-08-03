@@ -38,11 +38,19 @@ flowchart TD
     subgraph MODEL["Model Plane (LiteLLM)"]
         M1["LiteLLM Gateway :4000"]
         M2["workload/local (nur text-Modus)"]
-        M3["native Codex-CLI-Route (OAuth, getrennt)"]
+        M3["Hermes/OpenCode -> LiteLLM oauth/codex-* -> CLIProxyAPI -> geteilter Codex-OAuth-Broker"]
         H1 --> M1
         H2 --> M1
-        H3 -.-> M3
         M1 --> M2
+    end
+
+    subgraph CODEXROUTE["Codex CLI eigene Auth-/Backend-Route"]
+        C1["Codex CLI Harness"]
+        C2["~/.codex eigener Auth-Store (kein LiteLLM-OAuth)"]
+        C3["direkter Backend-Pfad"]
+        H3 --> C1
+        C1 --> C2
+        C2 --> C3
     end
 
     subgraph ODS["ODS / ai-stack (Runtime-/GPU-/Service-Authority)"]
@@ -94,7 +102,7 @@ flowchart TD
 
 | Invariante | Darstellung |
 |---|---|
-| Codex CLI ≠ Codex OAuth | H3 (Adapter) → M3 (OAuth-Route) getrennt; CLIProxyAPI nur Broker (O3) |
+| Codex CLI ≠ Codex OAuth | Codex CLI (H3) → ~/.codex eigener Auth-Store (C2) → direkter Backend-Pfad (C3); Hermes/OpenCode → LiteLLM oauth/codex-* → CLIProxyAPI (geteilter Broker, M3); KEIN Ausdruck „native Codex-CLI-Route (OAuth)" |
 | Buildroom/Conduvera wechseln NIE implizit GPU-Modi | O1 ist einzige Schnittstelle; kein Pfeil CORE→O1 außer via ODS-Runbook |
 | `ai-stack model use` ist die einzige Moduswechsel-Schnittstelle | O1 explizit; Dashboard (UI1) hat KEINEN Modellwechsel-Pfeil |
 | `workload/local` existiert nur im text-Modus | M2 mit „nur text-Modus" annotiert |
@@ -104,8 +112,9 @@ flowchart TD
 | Owner Card/dream-session für ODS-Hermes | UI3 annotiert |
 | OpenCode als Host-Service | UI5 annotiert |
 | n8n mit separatem Login | UI4 annotiert |
-| Conduvera Workspace ersetzt Open WebUI NOCH NICHT | Z2 annotiert (NOT_DECIDED) |
+| Conduvera Workspace ersetzt Open WebUI NOCH NICHT | Z2 annotiert (NOT_DECIDED; keine Festbindung an Hermes oder Open WebUI) |
 | Browser-UI-E2E getrennt von Backend-E2E | UI-Ebene (UI_AKT) vs. Core/Backend getrennt |
+| Capability-Fluss | Core/Harness → Capability-Adapter → ComfyUI/RAG/Voice/n8n/… UND Capability → MXOS-EVIDENCE (Evidence-Fluss explizit) |
 
 ## Statuswahrheit (UI/Access, 2026-08-03)
 

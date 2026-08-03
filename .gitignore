@@ -57,6 +57,27 @@ logs/
 *.yml.local
 config/local.yaml
 
+# Runtime-generated artifacts (evidence hygiene: only allowlisted evidence
+# is committed; HERMES_HOME state, caches, DBs and logs stay out of Git)
+fixtures/live/**/hermes-home/
+fixtures/live/**/hermes-home*/
+fixtures/live/**/state.db
+fixtures/live/**/auth.lock
+fixtures/live/**/cache/
+fixtures/live/**/.skills_prompt_snapshot.json
+fixtures/live/**/SOUL.md
+fixtures/live/**/MEMORY.md
+fixtures/live/**/USER.md
+fixtures/live/**/stderr.txt
+fixtures/live/**/*.stderr.txt
+fixtures/live/**/agent.log
+fixtures/live/**/errors.log
+fixtures/live/**/*.response.txt
+fixtures/live/**/worktrees/
+*.db
+*.db-wal
+*.db-shm
+
 # Other
 .env
 .env.local

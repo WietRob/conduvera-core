@@ -3,11 +3,12 @@
 Core must never import a concrete adapter. This module defines:
 
 - HarnessAdapterProtocol: the public, versioned contract every harness
-  adapter implements.
-- HarnessAdapterRegistry: the versioned entry-point layer that loads
-  adapters by id from contracts/harness-registry.yaml.
-- Dynamic import by entry point: the adapter module is imported ONLY when
-  the registry entry is present AND enabled.
+  adapter implements (including await_completion and execution_mode).
+- ExecutionMode: SIMULATION vs LIVE — never a silent default.
+- AdapterErrorCode: structured fail-closed error codes.
+- HarnessAdapterRegistry: INTERNAL implementation-detail loader, owned by
+  the single public entry point HarnessGatewayService (gateway.py). Core/
+  Runner/CLI must NOT use this class directly.
 
 Fail-closed rules:
 - registry entry missing            -> CAPABILITY_UNAVAILABLE (no adapter)
@@ -20,7 +21,10 @@ Fail-closed rules:
 from __future__ import annotations
 
 import importlib
+import os
 from dataclasses import dataclass, field
+from enum import Enum
+from importlib import resources
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
@@ -37,6 +41,40 @@ class HarnessCapabilityUnavailableError(Exception):
         self.reason = reason
         self.code = "CAPABILITY_UNAVAILABLE"
         super().__init__(f"{adapter_id}: {reason}")
+
+
+class ExecutionMode(str, Enum):
+    """Execution mode — never a silent default.
+
+    SIMULATION: deterministic, no real process/model; may NEVER satisfy
+        operational/live gates.
+    LIVE: real managed process via the real ODS/LiteLLM path; the only mode
+        the productive Core path accepts.
+    """
+
+    SIMULATION = "SIMULATION"
+    LIVE = "LIVE"
+
+    @classmethod
+    def require(cls, value: Any) -> "ExecutionMode":
+        """Coerce and validate; fail closed on unknown/empty values."""
+        if isinstance(value, ExecutionMode):
+            return value
+        if isinstance(value, str):
+            for m in cls:
+                if m.value == value.upper():
+                    return m
+        raise ValueError(f"Unknown execution mode: {value!r} (must be SIMULATION|LIVE)")
+
+
+class AdapterErrorCode(str, Enum):
+    """Structured fail-closed error codes for adapter/lifecycle results."""
+
+    ADAPTER_PROTOCOL_ERROR = "ADAPTER_PROTOCOL_ERROR"
+    MODEL_IDENTITY_UNVERIFIED = "MODEL_IDENTITY_UNVERIFIED"
+    SESSION_WAIT_FAILED = "SESSION_WAIT_FAILED"
+    CAPABILITY_UNAVAILABLE = "CAPABILITY_UNAVAILABLE"
+    PROCESS_FINGERPRINT_MISMATCH = "PROCESS_FINGERPRINT_MISMATCH"
 
 
 @runtime_checkable
@@ -62,6 +100,17 @@ class HarnessAdapterProtocol(Protocol):
 
     def timeout_session(self, session_id: str) -> AdapterResult: ...
 
+    def await_completion(
+        self, session_id: str, timeout_policy: dict[str, Any] | None = None
+    ) -> AdapterResult:
+        """Block until the managed session finishes or the policy expires.
+
+        timeout_policy keys (optional): wait_s, grace_s. Returns a structured
+        AdapterResult (success + status in detail). Never raises on a managed
+        session wait; foreign sessions are never touched.
+        """
+        ...
+
     def collect_evidence(self, session_id: str) -> dict[str, Any]: ...
 
 
@@ -76,21 +125,58 @@ class AdapterRegistration:
     version: str = ""
 
 
-class HarnessAdapterRegistry:
-    """Versioned adapter registry (contracts/harness-registry.yaml).
+# -- Config resolution: explicit path -> controlled env -> package resource ----
 
-    Runtime adapter loader component of the SINGLE registry authority
-    (HarnessGatewayRegistry, DOD-03). Not an independent second registry —
-    it is owned by the gateway registry and resolves adapter entry points
-    for the same harness ids the gateway declares.
+_REGISTRY_ENV_VAR = "CONDUVERA_HARNESS_REGISTRY"
+_PACKAGE_REGISTRY = "contracts/harness-registry.yaml"
+
+
+def resolve_registry_path(
+    explicit: str | Path | None = None,
+) -> Path:
+    """Resolve the registry config deterministically (never Path.cwd()).
+
+    Priority:
+      1. explicit path (caller-supplied, e.g. fixtures/harness-registry.yaml)
+      2. CONDUVERA_HARNESS_REGISTRY env var (controlled)
+      3. package resource contracts/harness-registry.yaml (installed)
+    Raises FileNotFoundError if none exists (fail closed, no cwd fallback).
+    """
+    candidates: list[Path] = []
+    if explicit is not None:
+        candidates.append(Path(explicit).expanduser())
+    env_val = os.environ.get(_REGISTRY_ENV_VAR, "").strip()
+    if env_val:
+        candidates.append(Path(env_val).expanduser())
+    for cand in candidates:
+        if cand.is_file():
+            return cand.resolve()
+    # Package resource (importlib.resources) — installed environment.
+    try:
+        pkg_res = resources.files("curaops.harness") / _PACKAGE_REGISTRY
+        if pkg_res.is_file():
+            return Path(str(pkg_res))
+        # Fall back to the repo-relative package file when running from source.
+        repo_rel = Path(__file__).resolve().parent.parent.parent / "contracts" / "harness-registry.yaml"
+        if repo_rel.is_file():
+            return repo_rel.resolve()
+    except Exception:
+        pass
+    raise FileNotFoundError(
+        f"harness registry not resolvable (explicit={explicit!r}, env={_REGISTRY_ENV_VAR!r})"
+    )
+
+
+class HarnessAdapterRegistry:
+    """INTERNAL implementation-detail adapter loader.
+
+    Owned exclusively by HarnessGatewayService (gateway.py) — the single
+    public entry point. Core/Runner/CLI must not instantiate this class
+    directly (DOD-03); use HarnessGatewayService.from_registry(...).
     """
 
     def __init__(self, registry_path: str | Path | None = None):
-        self.registry_path = (
-            Path(registry_path).expanduser().resolve()
-            if registry_path
-            else Path.cwd() / "contracts" / "harness-registry.yaml"
-        )
+        self.registry_path = resolve_registry_path(registry_path)
 
     def _load(self) -> dict[str, AdapterRegistration]:
         try:
@@ -116,7 +202,7 @@ class HarnessAdapterRegistry:
         return self._load()
 
     def load_adapter(self, adapter_id: str) -> Any:
-        """Dynamically load an adapter.
+        """Dynamically load an adapter (internal — call via gateway service).
 
         Raises HarnessCapabilityUnavailableError (never ImportError) for:
         - missing registry entry,

@@ -1,0 +1,20 @@
+[
+  {
+    "check": "regression_full_harden",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_harden.out",
+    "output_sha256": "sha256:17157998f5caadb6357f5241e6041e945eaa011a66b0644448e23b005d1fba13"
+  },
+  {
+    "check": "hardening_tests",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/hardening_tests.out",
+    "output_sha256": "sha256:19991ff1b5d6004c54edc99ee9d90444b45855bbc590e2fd911191426511f7fb"
+  },
+  {
+    "check": "core_internal_seam_tests",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/core_internal_seam_tests.out",
+    "output_sha256": "sha256:1698cf53738fece3fc128f68a2005bf90098cb09ffc528d80a18fe683159d622"
+  }
+]

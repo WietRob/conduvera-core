@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Any
 
 from curaops.control.adapters.base import AdapterResult, BaseAdapter
+from curaops.harness.registry import AdapterErrorCode
 
 
 class HarnessCapabilityUnavailable(Exception):
@@ -59,6 +60,7 @@ class SessionHandle:
     route: str = "workload/local"
     model_identity: str = ""
     trace_id: str = ""
+    execution_mode: str = "SIMULATION"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -75,7 +77,52 @@ class SessionHandle:
             "route": self.route,
             "model_identity": self.model_identity,
             "trace_id": self.trace_id,
+            "execution_mode": self.execution_mode,
         }
+
+
+# -- Environment allowlist (DOD-08): the Hermes child must NOT inherit the
+#    full parent environment. Only explicitly allowlisted variables pass;
+#    no other tokens/keys/cookies are forwarded. LITELLM_API_KEY is only
+#    forwarded as a reference to the existing injection when already present.
+_ENV_ALLOWLIST = {
+    "PATH",
+    "HOME",
+    "HERMES_HOME",
+    "HERMES_PROFILE",
+    "HERMES_CONFIG",
+    "HERMES_ENV",
+    "LITELLM_API_KEY",
+    "LANG",
+    "LC_ALL",
+    "LC_CTYPE",
+    "TZ",
+    "USER",
+    "LOGNAME",
+    "SHELL",
+    "TERM",
+}
+
+
+def _build_hermes_env(hermes_home: Path) -> dict[str, str]:
+    """Build the child environment from the allowlist only (no secrets leak).
+
+    The Hermes child sees PATH, HOME, HERMES_* config pointers, locale/
+    runtime fields, and LITELLM_API_KEY (existing injection, referenced not
+    printed). Every other parent variable — including any other secret
+    tokens/cookies — is dropped.
+    """
+    env: dict[str, str] = {}
+    for key in _ENV_ALLOWLIST:
+        val = os.environ.get(key)
+        if val is not None:
+            env[key] = val
+    env["HERMES_HOME"] = str(hermes_home)
+    if "PATH" not in env:
+        env["PATH"] = "/usr/local/bin:/usr/bin:/bin"
+    if "HOME" not in env:
+        env["HOME"] = str(Path.home())
+    return env
 
 
 @dataclass
@@ -95,7 +142,10 @@ class HermesAdapter(BaseAdapter):
     name = "hermes"
     adapter_version = "hermes-adapter.v1"
 
-    FIXTURE_PROMPT = "Antworte exakt mit CONDUVERA_FIXTURE_OK."
+    FIXTURE_PROMPT = (
+        "Antworte mit genau einem Wort, ohne Punkt, ohne Anführungszeichen, "
+        "ohne weitere Zeichen: CONDUVERA_FIXTURE_OK"
+    )
 
     def __init__(
         self,
@@ -184,13 +234,16 @@ class HermesAdapter(BaseAdapter):
         wt.mkdir(parents=True, exist_ok=True)
         started_at = datetime.now(timezone.utc).isoformat()
 
-        live = bool(config.get("live", False))
+        # Execution mode: SIMULATION vs LIVE — never a silent default.
+        from curaops.harness.registry import ExecutionMode
+
+        mode = ExecutionMode.require(config.get("execution_mode", ExecutionMode.SIMULATION))
         route = str(config.get("route", self._route))
 
-        if not live:
-            # SIMULATOR mode (unit tests / dry runs): write a harmless text
-            # artifact, never spawn a process. The live spawn is only taken
-            # when the caller explicitly requests it (live verification).
+        if mode is not ExecutionMode.LIVE:
+            # SIMULATION (unit tests / dry runs): write a harmless text
+            # artifact, never spawn a process. Simulation NEVER satisfies
+            # operational/live gates.
             handle = SessionHandle(
                 session_id=session_id,
                 pid=0, pgid=0, create_time="",
@@ -201,13 +254,15 @@ class HermesAdapter(BaseAdapter):
                 output_path="",
                 route=route,
                 trace_id=trace_id,
+                execution_mode=mode.value,
             )
             out_dir = wt / "artifacts"
             out_dir.mkdir(parents=True, exist_ok=True)
             output_path = out_dir / f"{session_id}.txt"
             output_path.write_text(
                 f"fixture task: {task}\nagent: {agent_id}\nsession: {session_id}\n"
-                f"model_binding: {config.get('model_binding', {})}\nstatus: simulated\n",
+                f"model_binding: {config.get('model_binding', {})}\n"
+                f"execution_mode: {mode.value}\nstatus: simulated\n",
                 encoding="utf-8",
             )
             handle.output_path = str(output_path)
@@ -217,7 +272,7 @@ class HermesAdapter(BaseAdapter):
             )
             return AdapterResult(
                 success=True,
-                message="hermes fixture session (simulated)",
+                message=f"hermes fixture session ({mode.value})",
                 detail=handle.to_dict(),
             )
 
@@ -225,13 +280,12 @@ class HermesAdapter(BaseAdapter):
         hermes_home = wt / "hermes-home" / "profiles" / "fixture-live"
         hermes_home.mkdir(parents=True, exist_ok=True)
         (hermes_home / "config.yaml").write_text(
-            _FIXTURE_CONFIG_TEMPLATE.format(route=self._route),
+            _FIXTURE_CONFIG_TEMPLATE.format(route=route),
             encoding="utf-8",
         )
 
-        # 2) Spawn Hermes ourselves (own process group, no TTY)
-        env = dict(os.environ)
-        env["HERMES_HOME"] = str(hermes_home)
+        # 2) Spawn Hermes ourselves (own process group, no TTY, allowlisted env)
+        env = _build_hermes_env(hermes_home)
         prompt = config.get("prompt", self.FIXTURE_PROMPT)
         response_path = wt / f"{session_id}.response.txt"
         proc = subprocess.Popen(
@@ -263,8 +317,9 @@ class HermesAdapter(BaseAdapter):
             status="running",
             started_at=started_at,
             output_path=str(response_path),
-            route=self._route,
+            route=route,
             trace_id=trace_id,
+            execution_mode=mode.value,
         )
         self._sessions[session_id] = HermesAdapterState(
             handle=handle,
@@ -331,6 +386,128 @@ class HermesAdapter(BaseAdapter):
         except (ChildProcessError, ProcessLookupError):
             pass
 
+    def _fingerprint_ok(self, handle: SessionHandle) -> bool:
+        """Verify PID exists and create_time matches the handle (DOD-05).
+
+        Ownership = MANAGED: the session was started by this adapter and its
+        handle carries the exact create_time recorded at spawn. A mismatch
+        means the PID was reused by an unrelated process — no signal may be
+        sent (PROCESS_FINGERPRINT_MISMATCH).
+        """
+        if handle.pid <= 0:
+            return False
+        try:
+            ps = subprocess.run(
+                ["ps", "-o", "lstart=", "-p", str(handle.pid)],
+                capture_output=True, text=True, timeout=5,
+            )
+            live = ps.stdout.strip()
+        except Exception:
+            return False
+        if not live:
+            return False
+        if handle.create_time and live and handle.create_time.strip() == live:
+            return True
+        return False
+
+    def _pgid_members(self, handle: SessionHandle) -> list[int]:
+        """List current PGID members (read-only; never signals)."""
+        try:
+            ps = subprocess.run(
+                ["ps", "-eo", "pid,pgid", "--no-headers"],
+                capture_output=True, text=True, timeout=5,
+            )
+            members = []
+            for line in ps.stdout.splitlines():
+                parts = line.split()
+                if len(parts) == 2 and parts[1] == str(handle.pgid):
+                    members.append(int(parts[0]))
+            return members
+        except Exception:
+            return []
+
+    def await_completion(
+        self,
+        session_id: str,
+        timeout_policy: dict[str, Any] | None = None,
+    ) -> AdapterResult:
+        """Block until the managed session completes (contract method, DOD-01).
+
+        timeout_policy keys: wait_s (default self._task_timeout_s),
+        grace_s (default 3). Returns a structured AdapterResult; a wait that
+        cannot proceed returns SESSION_WAIT_FAILED — never a silent pass.
+        """
+        policy = timeout_policy or {}
+        wait_s = float(policy.get("wait_s", self._task_timeout_s))
+        state = self._sessions.get(session_id)
+        if state is None or state.handle is None:
+            return AdapterResult(
+                success=False,
+                message=f"unknown session {session_id}",
+                detail={"code": "UNKNOWN_SESSION"},
+            )
+        handle = state.handle
+        if handle.pid <= 0:
+            # Simulator handle — completed synchronously.
+            return AdapterResult(
+                success=True,
+                message=f"session {session_id} completed (simulated)",
+                detail={"session_id": session_id, "status": "completed", "pid": 0},
+            )
+        if not self._fingerprint_ok(handle):
+            return AdapterResult(
+                success=False,
+                message=f"session {session_id} fingerprint mismatch (PID reuse?)",
+                detail={"code": AdapterErrorCode.PROCESS_FINGERPRINT_MISMATCH.value},
+            )
+        deadline = time.monotonic() + wait_s
+        while time.monotonic() < deadline:
+            # Reap first: a zombie (state Z) still answers os.kill(pid, 0),
+            # so we must waitpid() to collect it before checking liveness.
+            try:
+                waited, status = os.waitpid(handle.pid, os.WNOHANG)
+                if waited == handle.pid:
+                    handle.exitcode = os.waitstatus_to_exitcode(status)
+                    handle.status = "completed" if handle.exitcode == 0 else "failed"
+                    handle.finished_at = datetime.now(timezone.utc).isoformat()
+                    return AdapterResult(
+                        success=True,
+                        message=f"session {session_id} {handle.status} (exit {handle.exitcode})",
+                        detail={"session_id": session_id, "status": handle.status,
+                                "exitcode": handle.exitcode, "pid": handle.pid},
+                    )
+            except ChildProcessError:
+                if handle.exitcode is not None:
+                    return AdapterResult(
+                        success=True,
+                        message=f"session {session_id} already finished ({handle.status})",
+                        detail={"session_id": session_id, "status": handle.status,
+                                "exitcode": handle.exitcode},
+                    )
+            except ProcessLookupError:
+                handle.exitcode = 0
+                handle.status = "completed"
+                handle.finished_at = datetime.now(timezone.utc).isoformat()
+                return AdapterResult(
+                    success=True,
+                    message=f"session {session_id} completed",
+                    detail={"session_id": session_id, "status": "completed", "exitcode": 0},
+                )
+            try:
+                os.kill(handle.pid, 0)
+                time.sleep(0.3)
+            except ProcessLookupError:
+                break
+            except PermissionError:
+                time.sleep(0.3)
+        # Deadline reached with the process still present.
+        return AdapterResult(
+            success=False,
+            message=f"session {session_id} wait timed out after {wait_s}s",
+            detail={"code": AdapterErrorCode.SESSION_WAIT_FAILED.value,
+                    "session_id": session_id, "status": handle.status},
+        )
+
     def status_session(self, session_id: str) -> AdapterResult:
         """Return the managed session status (structured, never foreign)."""
         try:
@@ -352,7 +529,15 @@ class HermesAdapter(BaseAdapter):
             return AdapterResult(
                 success=True,
                 message=f"session {session_id} status {handle.status}",
-                detail={"session_id": session_id, "status": handle.status, "pid": 0, "pgid": 0},
+                detail={"session_id": session_id, "status": handle.status,
+                        "pid": 0, "pgid": 0, "execution_mode": handle.execution_mode},
+            )
+        if not self._fingerprint_ok(handle):
+            return AdapterResult(
+                success=False,
+                message=f"session {session_id} fingerprint mismatch (PID reuse?)",
+                detail={"code": AdapterErrorCode.PROCESS_FINGERPRINT_MISMATCH.value,
+                        "session_id": session_id},
             )
         alive = True
         try:
@@ -365,11 +550,13 @@ class HermesAdapter(BaseAdapter):
         return AdapterResult(
             success=True,
             message=f"session {session_id} status {status}",
-            detail={"session_id": session_id, "status": status, "pid": handle.pid, "pgid": handle.pgid},
+            detail={"session_id": session_id, "status": status,
+                    "pid": handle.pid, "pgid": handle.pgid,
+                    "execution_mode": handle.execution_mode},
         )
 
     def cancel_session(self, session_id: str) -> AdapterResult:
-        """Cancel ONLY the managed session (SIGKILL to its own PGID)."""
+        """Cancel ONLY the managed session (SIGKILL to its own verified PGID)."""
         try:
             self._require_enabled()
         except HarnessCapabilityUnavailable as exc:
@@ -392,6 +579,13 @@ class HermesAdapter(BaseAdapter):
                 message=f"session {session_id} cancelled (simulated)",
                 detail=handle.to_dict(),
             )
+        if not self._fingerprint_ok(handle):
+            return AdapterResult(
+                success=False,
+                message=f"session {session_id} fingerprint mismatch — no signal sent",
+                detail={"code": AdapterErrorCode.PROCESS_FINGERPRINT_MISMATCH.value,
+                        "session_id": session_id},
+            )
         try:
             os.killpg(handle.pgid, signal.SIGKILL)
         except ProcessLookupError:
@@ -405,7 +599,11 @@ class HermesAdapter(BaseAdapter):
         )
 
     def timeout_session(self, session_id: str) -> AdapterResult:
-        """Timeout ONLY the managed session (SIGTERM -> grace -> SIGKILL)."""
+        """Timeout ONLY the managed session (SIGTERM -> grace -> SIGKILL).
+
+        SIGKILL is only sent if PGID members remain after the grace period
+        (DOD-06). The whole PGID must be verifiably empty afterwards.
+        """
         try:
             self._require_enabled()
         except HarnessCapabilityUnavailable as exc:
@@ -428,21 +626,37 @@ class HermesAdapter(BaseAdapter):
                 message=f"session {session_id} timed out (simulated)",
                 detail=handle.to_dict(),
             )
+        if not self._fingerprint_ok(handle):
+            return AdapterResult(
+                success=False,
+                message=f"session {session_id} fingerprint mismatch — no signal sent",
+                detail={"code": AdapterErrorCode.PROCESS_FINGERPRINT_MISMATCH.value,
+                        "session_id": session_id},
+            )
         try:
             os.killpg(handle.pgid, signal.SIGTERM)
         except ProcessLookupError:
             pass
-        time.sleep(3)
-        try:
-            os.killpg(handle.pgid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
+        grace_s = 3
+        time.sleep(grace_s)
+        members = self._pgid_members(handle)
+        if members:
+            # SIGKILL only if PGID members still exist after grace (DOD-06).
+            try:
+                os.killpg(handle.pgid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            time.sleep(0.5)
+        remaining = self._pgid_members(handle)
         handle.status = "timed_out"
         handle.finished_at = datetime.now(timezone.utc).isoformat()
         return AdapterResult(
             success=True,
-            message=f"session {session_id} timed out (own PGID {handle.pgid})",
-            detail=handle.to_dict(),
+            message=(
+                f"session {session_id} timed out (own PGID {handle.pgid}; "
+                f"remaining={len(remaining)})"
+            ),
+            detail={**handle.to_dict(), "pgid_remaining": remaining},
         )
 
     def collect_evidence(self, session_id: str) -> dict[str, Any]:

@@ -4,14 +4,15 @@
 Call-Path (beweisbar, DOD-01/02):
 
     FixtureRunner.run()
-      └─ HarnessAdapterRegistry.load_adapter("hermes")
-         (Komponente der einzigen Registry-Authority HarnessGatewayRegistry)
-      └─ HermesAdapter.start_session(live=True)
+      └─ HarnessGatewayService (einziger öffentlicher Entry Point; cwd-
+         unabhängige Registry-Auflösung: expliziter Pfad → Env → Package)
+      └─ HermesAdapter.start_session(execution_mode=LIVE)
            ├─ isoliertes HERMES_HOME erzeugen (config custom:litellm + workload/local)
-           ├─ Hermes CLI selbst spawnen (subprocess.Popen, start_new_session=True)
+           ├─ Hermes CLI selbst spawnen (subprocess.Popen, start_new_session,
+           │  Env-Allowlist — erbt NICHT die komplette Parent-Environment)
            ├─ PID/PGID/create_time erfassen → SessionHandle(trace_id)
            └─ Hermes → Live-LiteLLM :4000 → workload/local → Qwen → CONDUVERA_FIXTURE_OK
-      └─ wait_for_completion + collect_evidence
+      └─ await_completion (Vertragsmethode) + collect_evidence
       └─ Trace-Kette goal→task→attempt→session→adapter→pid→pgid→route→model→event
          → state/call-trace.json + MXOS-EVIDENCE-1.0.0
 
@@ -30,25 +31,27 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from curaops.buildroom.fixture_runner import FixtureRunner  # noqa: E402
-from curaops.harness.gateway import HarnessGatewayRegistry  # noqa: E402
+from curaops.harness.gateway import HarnessGatewayService  # noqa: E402
+from curaops.harness.registry import ExecutionMode  # noqa: E402
 
 
 def main() -> int:
-    gateway = HarnessGatewayRegistry(
-        adapter_registry_path=ROOT / "fixtures" / "harness-registry.yaml"
+    # Einziger öffentlicher Entry Point — cwd-unabhängige Registry-Auflösung.
+    gateway = HarnessGatewayService(
+        registry_path=ROOT / "fixtures" / "harness-registry.yaml",
+        execution_mode=ExecutionMode.LIVE.value,
     )
-    adapter = gateway.load_adapter("hermes")
 
     runner = FixtureRunner(
         fixture_dir=ROOT / "fixtures" / "live" / "core-run",
-        route_manifest=ROOT / "fixtures" / "ods" / "route-manifest.yaml",
-        adapter=adapter,
+        route_manifest=ROOT / "fixtures" / "ods" / "route-manifest.fixture.yaml",
+        gateway=gateway,
         producer={"name": "conduvera-core", "version": "0.1.0"},
         goal_id="CONDUVERA-FIXTURE-001",
-        live=True,
+        execution_mode=ExecutionMode.LIVE.value,
     )
     result = runner.run(
-        "Managed fixture: Core→Buildroom→Registry→Adapter→Hermes→LiteLLM→workload/local"
+        "Managed fixture: Core→Buildroom→Gateway→Adapter→Hermes→LiteLLM→workload/local"
     )
     print(f"STATUS: {result.status}")
     print(f"FINAL: {result.final_status_readable}")

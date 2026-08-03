@@ -99,7 +99,7 @@ def test_dod05_e2e_and_dod06_timeout_cancel(tmp_path):
     adapter = HermesAdapter(registry_path=reg, fixture_worktree=tmp_path / "wt")
     runner = FixtureRunner(
         fixture_dir=tmp_path / "fx",
-        route_manifest=ROOT / "fixtures/ods/route-manifest.yaml",
+        route_manifest=ROOT / "fixtures/ods/route-manifest.fixture.yaml",
         adapter=adapter,
         producer={"name": "t", "version": "1"},
     )
@@ -124,7 +124,7 @@ def test_dod08_disabled_adapter_clean(tmp_path):
     adapter = HermesAdapter(registry_path=reg, fixture_worktree=tmp_path / "wt")
     runner = FixtureRunner(
         fixture_dir=tmp_path / "fx",
-        route_manifest=ROOT / "fixtures/ods/route-manifest.yaml",
+        route_manifest=ROOT / "fixtures/ods/route-manifest.fixture.yaml",
         adapter=adapter,
         producer={"name": "t", "version": "1"},
     )
@@ -170,7 +170,7 @@ def test_dod11_receipt_contains_dod_matrix(tmp_path):
     adapter = HermesAdapter(registry_path=reg, fixture_worktree=tmp_path / "wt")
     runner = FixtureRunner(
         fixture_dir=tmp_path / "fx",
-        route_manifest=ROOT / "fixtures/ods/route-manifest.yaml",
+        route_manifest=ROOT / "fixtures/ods/route-manifest.fixture.yaml",
         adapter=adapter,
         producer={"name": "t", "version": "1"},
     )

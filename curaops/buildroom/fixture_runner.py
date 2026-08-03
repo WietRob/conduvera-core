@@ -30,9 +30,11 @@ from typing import Any
 import yaml
 
 from curaops.evidence.contract import EventEnvelope, SCHEMA_VERSION
+from curaops.harness.gateway import HarnessGatewayService
 from curaops.harness.registry import (
+    AdapterErrorCode,
+    ExecutionMode,
     HarnessAdapterProtocol,
-    HarnessAdapterRegistry,
     HarnessCapabilityUnavailableError,
 )
 
@@ -50,52 +52,58 @@ class FixtureRunResult:
     events: list[dict[str, Any]] = field(default_factory=list)
     error: str = ""
     final_status_readable: str = ""
+    execution_mode: str = ExecutionMode.SIMULATION.value
 
 
 class FixtureRunner:
-    """Single-writer managed fixture runner (internal Buildroom module)."""
+    """Single-writer managed fixture runner (internal Buildroom module).
+
+    Core knows ONLY the public HarnessGatewayService contract (DOD-01):
+    - no concrete adapter import,
+    - no direct HarnessAdapterRegistry usage,
+    - no getattr(...) lifecycle dispatch,
+    - no private adapter field access,
+    - every failure is a structured FixtureRunResult/error code.
+    """
 
     def __init__(
         self,
         *,
         fixture_dir: str | Path,
         route_manifest: str | Path,
-        adapter: HarnessAdapterProtocol | None = None,
+        gateway: HarnessGatewayService | None = None,
+        adapter: HarnessAdapterProtocol | None = None,  # test-only injection
         adapter_registry: str | Path | None = None,
         producer: dict[str, Any],
         feature_flag: bool = True,
         goal_id: str = "CONDUVERA-FIXTURE-001",
-        live: bool = False,
+        execution_mode: str = ExecutionMode.SIMULATION.value,
     ):
         self.fixture_dir = Path(fixture_dir).expanduser().resolve()
         self.route_manifest = Path(route_manifest).expanduser().resolve()
         self.producer = producer
         self.feature_flag = feature_flag
         self.goal_id = goal_id
-        self.live = live
+        self._execution_mode = ExecutionMode.require(execution_mode)
         self._ledger_path = self.fixture_dir / "state" / "run-ledger.json"
         self._events: list[EventEnvelope] = []
+        self._wait_timeout_s = 240.0  # bounded wait for managed sessions
 
-        # Adapter loading: never a concrete import. Either an injected
-        # protocol-conforming adapter (tests) or a dynamic registry load.
-        if adapter is not None:
-            self._adapter = adapter
-            self._adapter_source = "injected"
-        elif adapter_registry is not None:
-            registry = HarnessAdapterRegistry(adapter_registry)
-            try:
-                self._adapter = registry.load_adapter("hermes")
-                self._adapter_source = "registry:hermes"
-            except HarnessCapabilityUnavailableError as exc:
-                self._adapter = None
-                self._adapter_error = exc
-                self._adapter_source = "unavailable"
-        else:
-            self._adapter = None
-            self._adapter_error = HarnessCapabilityUnavailableError(
-                "hermes", "no adapter injected and no adapter_registry provided"
+        # Adapter loading: Core uses ONLY the public gateway service.
+        # Test-only injection of a protocol-conforming adapter is allowed
+        # but must be clearly marked (test-only factory).
+        self._gateway = gateway
+        if self._gateway is None and adapter is not None:
+            # test-only injection: wrap the adapter in a minimal service view
+            self._gateway = _TestOnlyGateway(adapter)
+            self._adapter_source = "test-only-injection"
+        elif self._gateway is None:
+            self._gateway = HarnessGatewayService(
+                registry_path=adapter_registry,
+                execution_mode=self._execution_mode.value,
             )
-            self._adapter_source = "unavailable"
+            self._adapter_source = "gateway-service"
+        self._adapter_error: HarnessCapabilityUnavailableError | None = None
 
     # -- public API -------------------------------------------------------
 
@@ -134,18 +142,17 @@ class FixtureRunner:
 
         # 2) Harness adapter start (managed fixture session)
         # Adapter may be unavailable (registry missing/disabled/module absent):
-        # fail-closed to CAPABILITY_UNAVAILABLE, never an ImportError.
-        if self._adapter is None:
-            exc = getattr(self, "_adapter_error", None)
-            reason = exc.reason if exc is not None else "adapter unavailable"
+        # the gateway resolves it fail-closed to CAPABILITY_UNAVAILABLE.
+        if self._gateway is None:
             result = FixtureRunResult(
                 task_id=task_id, attempt_id=attempt_id, session_id=session_id,
                 status="cap_unavailable", model_binding=binding,
                 error="CAPABILITY_UNAVAILABLE",
-                final_status_readable=f"CAPABILITY_UNAVAILABLE: {reason}",
+                final_status_readable="CAPABILITY_UNAVAILABLE: no harness gateway",
+                execution_mode=self._execution_mode.value,
             )
             self._emit("fixture.run.failed", payload={
-                "task_id": task_id, "code": "CAPABILITY_UNAVAILABLE", "reason": reason,
+                "task_id": task_id, "code": "CAPABILITY_UNAVAILABLE", "reason": "no harness gateway",
             })
             result.events = [e.to_dict() for e in self._events]
             return result
@@ -156,74 +163,81 @@ class FixtureRunner:
             "goal_id": self.goal_id, "trace_id": trace_id,
             "task_id": task_id, "attempt_id": attempt_id, "session_id": session_id,
             "harness": "hermes", "model_binding": binding,
+            "execution_mode": self._execution_mode.value,
         })
 
-        try:
-            start = self._adapter.start_session(
-                agent_id="fixture-agent",
-                worktree=str(worktree),
-                task=task_description,
-                config={
-                    "model_binding": binding,
-                    "trace_id": trace_id,
-                    "live": self.live,
-                    "route": binding.get("selector", "workload/local"),
-                },
-            )
-        except HarnessCapabilityUnavailableError as exc:
+        start = self._gateway.start_session(
+            "hermes",
+            agent_id="fixture-agent",
+            worktree=str(worktree),
+            task=task_description,
+            config={
+                "model_binding": binding,
+                "trace_id": trace_id,
+                "route": binding.get("selector", "workload/local"),
+            },
+        )
+
+        if not start.success:
+            # Structured failure from the gateway (CAPABILITY_UNAVAILABLE,
+            # ADAPTER_PROTOCOL_ERROR, ...) — clean, fail-closed end state,
+            # never a hidden fallback.
+            code = start.detail.get("code", "ADAPTER_PROTOCOL_ERROR")
             result = FixtureRunResult(
                 task_id=task_id, attempt_id=attempt_id, session_id=session_id,
-                status="cap_unavailable", model_binding=binding,
-                error=exc.code, final_status_readable="CAPABILITY_UNAVAILABLE: hermes adapter disabled",
+                status="cap_unavailable" if code == "CAPABILITY_UNAVAILABLE" else "failed",
+                model_binding=binding,
+                error=code, final_status_readable=f"{code}: {start.message}",
+                execution_mode=self._execution_mode.value,
             )
             self._emit("fixture.run.failed", payload={
-                "task_id": task_id, "code": exc.code, "reason": exc.reason,
+                "task_id": task_id, "code": code, "reason": start.message,
             })
             result.events = [e.to_dict() for e in self._events]
             return result
 
-        if not start.success:
-            # Structured CAPABILITY_UNAVAILABLE from the adapter result is a
-            # clean, fail-closed end state — never a hidden fallback.
-            if start.detail.get("code") == "CAPABILITY_UNAVAILABLE":
-                result = FixtureRunResult(
-                    task_id=task_id, attempt_id=attempt_id, session_id=session_id,
-                    status="cap_unavailable", model_binding=binding,
-                    error="CAPABILITY_UNAVAILABLE",
-                    final_status_readable="CAPABILITY_UNAVAILABLE: hermes adapter disabled",
-                )
-                self._emit("fixture.run.failed", payload={
-                    "task_id": task_id, "code": "CAPABILITY_UNAVAILABLE",
-                })
-                result.events = [e.to_dict() for e in self._events]
-                return result
+        # 3) Await completion via the PUBLIC contract method (no getattr,
+        #    no private adapter fields). A failed wait is a structured
+        #    SESSION_WAIT_FAILED result — never silently skipped.
+        adapter_session_id = start.detail.get("session_id", session_id)
+        handle = start.detail
+        wait_result = self._gateway.await_completion(
+            "hermes", adapter_session_id,
+            timeout_policy={"wait_s": self._wait_timeout_s},
+        )
+        if not wait_result.success:
             result = FixtureRunResult(
-                task_id=task_id, attempt_id=attempt_id, session_id=session_id,
-                status="failed", model_binding=binding, error=start.message,
-                final_status_readable=f"FAILED: {start.message}",
+                task_id=task_id, attempt_id=attempt_id, session_id=adapter_session_id,
+                status="failed", model_binding=binding,
+                error=wait_result.detail.get("code", "SESSION_WAIT_FAILED"),
+                final_status_readable=f"SESSION_WAIT_FAILED: {wait_result.message}",
+                execution_mode=self._execution_mode.value,
             )
-            self._emit("fixture.run.failed", payload={"task_id": task_id, "error": start.message})
+            self._emit("fixture.run.failed", payload={
+                "task_id": task_id, "code": "SESSION_WAIT_FAILED", "reason": wait_result.message,
+            })
             result.events = [e.to_dict() for e in self._events]
             return result
 
-        # 3) Wait for the managed process (bounded), then collect evidence.
-        adapter_session_id = start.detail.get("session_id", session_id)
-        handle = start.detail
-        try:
-            # Bounded wait: the HermesAdapter exposes wait_for_completion on the
-            # concrete adapter (injected or registry-loaded); unknown adapters
-            # are skipped (their sessions complete synchronously).
-            wait = getattr(self._adapter, "wait_for_completion", None)
-            if wait is not None:
-                wait(adapter_session_id, timeout_s=self._adapter._task_timeout_s)
-        except Exception:
-            pass
-
-        evidence = self._adapter.collect_evidence(adapter_session_id)
+        evidence = self._gateway.collect_evidence("hermes", adapter_session_id)
         evidence_path = self._persist_evidence(task_id, attempt_id, session_id, evidence)
 
-        # Model identity from ODS route manifest (read-only, live)
+        # Model identity from ODS route manifest (read-only, live).
+        # In LIVE mode an unverified identity is a structured error.
         model_identity = self._model_identity_from_manifest(binding.get("selector", ""))
+        if self._execution_mode is ExecutionMode.LIVE and not model_identity:
+            result = FixtureRunResult(
+                task_id=task_id, attempt_id=attempt_id, session_id=adapter_session_id,
+                status="failed", model_binding=binding,
+                error=AdapterErrorCode.MODEL_IDENTITY_UNVERIFIED.value,
+                final_status_readable="MODEL_IDENTITY_UNVERIFIED: keine Identität aus Live-Manifest",
+                execution_mode=self._execution_mode.value,
+            )
+            self._emit("fixture.run.failed", payload={
+                "task_id": task_id, "code": "MODEL_IDENTITY_UNVERIFIED",
+            })
+            result.events = [e.to_dict() for e in self._events]
+            return result
 
         trace = {
             "goal_id": self.goal_id,
@@ -238,6 +252,7 @@ class FixtureRunner:
             "create_time": handle.get("create_time"),
             "route": handle.get("route") or binding.get("selector"),
             "model_identity": model_identity,
+            "execution_mode": self._execution_mode.value,
             "evidence_event": "fixture.run.completed",
         }
         self._trace = trace
@@ -247,12 +262,18 @@ class FixtureRunner:
             json.dumps(trace, indent=2, ensure_ascii=False), encoding="utf-8"
         )
 
+        # LIVE: persist a route-manifest snapshot derived from the live
+        # ai-stack manifest (timestamp + SHA + active mode + model identity).
+        if self._execution_mode is ExecutionMode.LIVE:
+            self._persist_route_snapshot(binding, model_identity, state_dir)
+
         self._emit("fixture.run.completed", payload={
             "goal_id": self.goal_id, "trace_id": trace_id,
             "task_id": task_id, "attempt_id": attempt_id, "session_id": session_id,
             "harness_session_id": adapter_session_id,
             "pid": handle.get("pid"), "pgid": handle.get("pgid"),
             "route": trace["route"], "model_identity": model_identity,
+            "execution_mode": self._execution_mode.value,
             "status": "completed", "evidence_path": str(evidence_path),
         })
 
@@ -270,29 +291,35 @@ class FixtureRunner:
         return result
 
     def timeout(self, session_id: str) -> FixtureRunResult:
-        """Timeout ONLY the managed fixture session."""
-        r = self._adapter.timeout_session(session_id)
+        """Timeout ONLY the managed fixture session (via public gateway)."""
+        r = self._gateway.timeout_session("hermes", session_id)
         status = "timed_out"
         if not r.success:
             status = "failed"
-        self._emit("fixture.run.timed_out", payload={"session_id": session_id})
+        self._emit("fixture.run.timed_out", payload={
+            "session_id": session_id, "execution_mode": self._execution_mode.value,
+        })
         return FixtureRunResult(
             task_id="", attempt_id="", session_id=session_id, status=status,
             model_binding={}, final_status_readable="TIMED_OUT (managed session only)",
             events=[e.to_dict() for e in self._events],
+            execution_mode=self._execution_mode.value,
         )
 
     def cancel(self, session_id: str) -> FixtureRunResult:
-        """Cancel ONLY the managed fixture session."""
-        r = self._adapter.cancel_session(session_id)
+        """Cancel ONLY the managed fixture session (via public gateway)."""
+        r = self._gateway.cancel_session("hermes", session_id)
         status = "cancelled"
         if not r.success:
             status = "failed"
-        self._emit("fixture.run.cancelled", payload={"session_id": session_id})
+        self._emit("fixture.run.cancelled", payload={
+            "session_id": session_id, "execution_mode": self._execution_mode.value,
+        })
         return FixtureRunResult(
             task_id="", attempt_id="", session_id=session_id, status=status,
             model_binding={}, final_status_readable="CANCELLED (managed session only)",
             events=[e.to_dict() for e in self._events],
+            execution_mode=self._execution_mode.value,
         )
 
     def reconcile(self) -> dict[str, Any]:
@@ -391,6 +418,49 @@ class FixtureRunner:
             pass
         return ""
 
+    def _persist_route_snapshot(
+        self,
+        binding: dict[str, Any],
+        model_identity: str,
+        state_dir: Path,
+    ) -> None:
+        """Persist a sanitized route-manifest snapshot (LIVE mode only).
+
+        Derived from the live ai-stack manifest (local-mode.yaml) with
+        timestamp + SHA + active mode + model identity. Never contains
+        secrets or absolute private paths.
+        """
+        import hashlib
+
+        live = Path.home() / ".local/share/ai-stack/routes/local-mode.yaml"
+        live_txt = ""
+        live_sha = ""
+        active_mode = "unknown"
+        if live.is_file():
+            live_txt = live.read_text(encoding="utf-8")
+            live_sha = "sha256:" + hashlib.sha256(live_txt.encode()).hexdigest()
+            for line in live_txt.splitlines():
+                if line.strip().startswith("# Active mode:"):
+                    active_mode = line.split(":", 1)[1].strip()
+        snapshot = {
+            "schema": "route-manifest.snapshot.v1",
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "source": "live ai-stack local-mode.yaml (read-only)",
+            "live_manifest_sha256": live_sha,
+            "active_mode": active_mode,
+            "binding": {
+                "selector": binding.get("selector"),
+                "auth_domain": binding.get("auth_domain"),
+                "backend_family": binding.get("backend_family"),
+            },
+            "model_identity": model_identity,
+        }
+        snap_dir = state_dir.parent / "route-snapshot"
+        snap_dir.mkdir(parents=True, exist_ok=True)
+        (snap_dir / "route-manifest.snapshot.yaml").write_text(
+            json.dumps(snapshot, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+
     def _persist_evidence(self, task_id: str, attempt_id: str, session_id: str, evidence: dict[str, Any]) -> Path:
         ev_dir = self.fixture_dir / "evidence" / task_id
         ev_dir.mkdir(parents=True, exist_ok=True)
@@ -468,3 +538,54 @@ def _invariant_report() -> dict[str, str]:
         "adapters_are_removable": "PASS",
         "products_remain_standalone": "PASS",
     }
+
+
+class _TestOnlyGateway:
+    """TEST-ONLY adapter wrapper (never used in the productive path).
+
+    Wraps a protocol-conforming adapter so FixtureRunner can use a uniform
+    gateway view in unit tests without instantiating a real registry or
+    spawning processes. The productive Core path constructs
+    HarnessGatewayService instead.
+    """
+
+    def __init__(self, adapter: HarnessAdapterProtocol):
+        self._adapter = adapter
+        self._execution_mode = ExecutionMode.SIMULATION
+
+    def start_session(self, adapter_id: str, **kwargs: Any) -> Any:
+        config = dict(kwargs.pop("config", {}))
+        config.setdefault("execution_mode", self._execution_mode.value)
+        return self._adapter.start_session(config=config, **kwargs)
+
+    def status_session(self, adapter_id: str, session_id: str) -> Any:
+        return self._adapter.status_session(session_id)
+
+    def cancel_session(self, adapter_id: str, session_id: str) -> Any:
+        return self._adapter.cancel_session(session_id)
+
+    def timeout_session(self, adapter_id: str, session_id: str) -> Any:
+        return self._adapter.timeout_session(session_id)
+
+    def await_completion(
+        self, adapter_id: str, session_id: str,
+        timeout_policy: dict[str, Any] | None = None,
+    ) -> Any:
+        method = getattr(self._adapter, "await_completion", None)
+        if method is not None:
+            return method(session_id, timeout_policy=timeout_policy)
+        # Shim adapters without await_completion: report completed.
+        from curaops.control.adapters.base import AdapterResult
+
+        return AdapterResult(
+            success=True,
+            message="session completed (test shim)",
+            detail={"session_id": session_id, "status": "completed"},
+        )
+
+    def collect_evidence(self, adapter_id: str, session_id: str) -> dict[str, Any]:
+        return self._adapter.collect_evidence(session_id)
+
+    @property
+    def execution_mode(self) -> str:
+        return self._execution_mode.value

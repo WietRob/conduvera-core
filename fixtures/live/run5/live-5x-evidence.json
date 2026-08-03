@@ -1,0 +1,60 @@
+{
+  "runs": [
+    {
+      "run": 0,
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 1898125,
+      "pgid": 1898125,
+      "pgid_remaining": 0,
+      "clean": true
+    },
+    {
+      "run": 1,
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 1898274,
+      "pgid": 1898274,
+      "pgid_remaining": 0,
+      "clean": true
+    },
+    {
+      "run": 2,
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 1898372,
+      "pgid": 1898372,
+      "pgid_remaining": 0,
+      "clean": true
+    },
+    {
+      "run": 3,
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 1898504,
+      "pgid": 1898504,
+      "pgid_remaining": 0,
+      "clean": true
+    },
+    {
+      "run": 4,
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 1898649,
+      "pgid": 1898649,
+      "pgid_remaining": 0,
+      "clean": true
+    }
+  ],
+  "all_exact": true,
+  "zombies": [],
+  "orphans": [],
+  "pgid_all_empty": true,
+  "foreign_process_changed": false,
+  "verdict": "PASS 5/5"
+}

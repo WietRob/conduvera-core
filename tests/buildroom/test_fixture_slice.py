@@ -46,7 +46,7 @@ def runner(tmp_path, adapter) -> FixtureRunner:
     fixture_dir.mkdir(parents=True, exist_ok=True)
     return FixtureRunner(
         fixture_dir=fixture_dir,
-        route_manifest=FIXTURES / "ods" / "route-manifest.yaml",
+        route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         adapter=adapter,
         producer={"name": "test-runner", "version": "0.0.0"},
     )
@@ -116,7 +116,7 @@ def test_disabled_adapter_runner_ends_cleanly(disabled_adapter, tmp_path):
     fixture_dir.mkdir(parents=True, exist_ok=True)
     runner = FixtureRunner(
         fixture_dir=fixture_dir,
-        route_manifest=FIXTURES / "ods" / "route-manifest.yaml",
+        route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         adapter=disabled_adapter,
         producer={"name": "t", "version": "1"},
     )
@@ -140,7 +140,7 @@ def test_feature_flag_disables_fixture(tmp_path, adapter):
     fixture_dir.mkdir(parents=True, exist_ok=True)
     runner = FixtureRunner(
         fixture_dir=fixture_dir,
-        route_manifest=FIXTURES / "ods" / "route-manifest.yaml",
+        route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         adapter=adapter,
         producer={"name": "t", "version": "1"},
         feature_flag=False,

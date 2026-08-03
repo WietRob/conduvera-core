@@ -1,0 +1,16 @@
+# ODS/LiteLLM route manifest (FIXTURE — deterministisch, maschinenunabhängig)
+# Struktur-Abstraktion: workload/local ist die Buildroom-Abstraktion fuer
+# local/default und existiert NUR im text-Modus (ai-stack model use text).
+# KEINE konkrete Modellidentitaet hier — die Modellidentitaet kommt live aus
+# dem ai-stack local-mode.yaml und wird als route-manifest.snapshot.yaml
+# unter evidence/live/<run-id>/ abgelegt. Unit-Tests haengen damit nicht vom
+# installierten Qwen-Modell ab (DOD-10).
+routes:
+  workload/local:
+    model: fixture-model-local
+    backend: openai
+    auth_domain: litellm
+  local/default:
+    model: fixture-model-default
+    backend: openai
+    auth_domain: litellm

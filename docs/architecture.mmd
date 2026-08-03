@@ -28,11 +28,19 @@ flowchart TD
     subgraph MODEL["Model Plane (LiteLLM)"]
         M1["LiteLLM Gateway :4000"]
         M2["workload/local (nur text-Modus)"]
-        M3["native Codex-CLI-Route (OAuth, getrennt)"]
+        M3["Hermes/OpenCode -> LiteLLM oauth/codex-* -> CLIProxyAPI -> geteilter Codex-OAuth-Broker"]
         H1 --> M1
         H2 --> M1
-        H3 -.-> M3
         M1 --> M2
+    end
+
+    subgraph CODEXROUTE["Codex CLI eigene Auth-/Backend-Route"]
+        C1["Codex CLI Harness"]
+        C2["~/.codex eigener Auth-Store (kein LiteLLM-OAuth)"]
+        C3["direkter Backend-Pfad"]
+        H3 --> C1
+        C1 --> C2
+        C2 --> C3
     end
 
     subgraph ODS["ODS / ai-stack (Runtime-/GPU-/Service-Authority)"]

@@ -12,7 +12,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DIAGRAM = ROOT / "docs" / "CONDUVERA_ARCHITECTURE_DIAGRAM.md"
 MMD = ROOT / "docs" / "architecture.mmd"
-BRAIN = Path("/home/roberto_schmidt/Dokumente/Obsidian Vaults/Roberto_Brain/20_Areas/Dev_Infrastructure/ODS_Integration")
+# Cross-vault documentation check is parameterized: the private brain root is
+# supplied via CONDUVERA_BRAIN_ROOT (explicit config), never hardcoded. When
+# unset, the test is skipped (portable repo suite has no machine-specific
+# vault dependency).
+BRAIN = Path(__import__("os").environ.get(
+    "CONDUVERA_BRAIN_ROOT",
+    "/nonexistent/private-brain-root-not-configured",
+))
+
+
+def _brain_available() -> bool:
+    return BRAIN.is_dir()
 
 
 def _diagram() -> str:
@@ -67,7 +78,16 @@ def test_ui_dod05_workspace_basis_not_decided():
 
 
 def test_ui_dod06_cross_document_consistency():
-    """Obsidian docs must not contradict the diagram on the five surfaces."""
+    """Obsidian docs must not contradict the diagram on the five surfaces.
+
+    Portable: skipped when CONDUVERA_BRAIN_ROOT is not configured (the
+    private vault is machine-specific; the cross-vault audit is a local
+    integration audit, not part of the portable repo suite).
+    """
+    if not _brain_available():
+        import pytest
+
+        pytest.skip("CONDUVERA_BRAIN_ROOT not configured — private vault audit")
     txt = _diagram()
     # Every surface claim in the diagram must be compatible with Current_State.md
     cs = (BRAIN / "Current_State.md").read_text(encoding="utf-8")

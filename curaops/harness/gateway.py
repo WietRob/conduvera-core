@@ -11,6 +11,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from curaops.control.adapters.base import AdapterResult
+from curaops.harness.registry import AdapterErrorCode, ExecutionMode
+
 
 @dataclass(frozen=True)
 class GatewayCapability:
@@ -240,14 +243,13 @@ class HarnessGatewayRegistry:
 
     @classmethod
     def default(cls) -> "HarnessGatewayRegistry":
-        """Return the default declarative gateway registry."""
+        """Return the default declarative gateway registry (no cwd dependency)."""
 
         return cls(
             runners=_RUNNERS,
             tools=_TOOLS,
             editor_surfaces=_EDITOR_SURFACES,
             capabilities=_GATEWAY_CAPABILITIES,
-            adapter_registry_path=Path.cwd() / "contracts" / "harness-registry.yaml",
         )
 
     def load_adapter(self, adapter_id: str) -> Any:
@@ -258,7 +260,7 @@ class HarnessGatewayRegistry:
         if self.adapters is None:
             from curaops.harness.registry import HarnessAdapterRegistry
 
-            self.adapters = HarnessAdapterRegistry(Path.cwd() / "contracts" / "harness-registry.yaml")
+            self.adapters = HarnessAdapterRegistry(None)
         return self.adapters.load_adapter(adapter_id)
 
     def get_runner(self, runner_id: str) -> RunnerDescriptor:
@@ -324,3 +326,151 @@ def list_editor_surfaces() -> tuple[EditorSurfaceDescriptor, ...]:
     """Return editor surface descriptors."""
 
     return HarnessGatewayRegistry.default().editor_surfaces
+
+
+class HarnessGatewayService:
+    """SINGLE public entry point for harness adapters (DOD-01/03).
+
+    Core/Runner/CLI know ONLY this service — never a concrete adapter and
+    never the internal HarnessAdapterRegistry. The service:
+
+    - resolves the registry cwd-independently (explicit path -> env ->
+      package resource),
+    - loads adapters via the internal loader (fail-closed),
+    - exposes the full lifecycle incl. await_completion and execution mode,
+    - never swallows exceptions: every failure becomes a structured
+      AdapterResult with an AdapterErrorCode.
+    """
+
+    def __init__(
+        self,
+        *,
+        registry_path: str | Path | None = None,
+        execution_mode: str | ExecutionMode = ExecutionMode.LIVE,
+    ):
+        from curaops.harness.registry import (
+            ExecutionMode as _EM,
+        )
+
+        self._registry_path = registry_path
+        self._execution_mode = _EM.require(execution_mode)
+        self._adapter_cache: dict[str, Any] = {}
+        self._loader: Any = None  # lazy: resolved on first load_adapter
+
+    @classmethod
+    def from_registry(cls, registry_path: str | Path) -> "HarnessGatewayService":
+        """Construct from an explicit registry path (tests/fixtures)."""
+        return cls(registry_path=registry_path)
+
+    # -- public lifecycle -------------------------------------------------
+
+    def _get_loader(self) -> Any:
+        """Resolve the internal loader lazily (fail-closed on first use)."""
+        if self._loader is None:
+            from curaops.harness.registry import HarnessAdapterRegistry
+
+            self._loader = HarnessAdapterRegistry(self._registry_path)
+        return self._loader
+
+    def load_adapter(self, adapter_id: str) -> Any:
+        """Load an adapter (fail-closed via internal loader)."""
+        if adapter_id not in self._adapter_cache:
+            try:
+                self._adapter_cache[adapter_id] = self._get_loader().load_adapter(adapter_id)
+            except FileNotFoundError as exc:
+                # Registry not resolvable -> CAPABILITY_UNAVAILABLE (fail-closed).
+                from curaops.harness.registry import HarnessCapabilityUnavailableError
+
+                raise HarnessCapabilityUnavailableError(
+                    adapter_id, f"registry not resolvable: {exc}"
+                ) from exc
+        return self._adapter_cache[adapter_id]
+
+    def start_session(self, adapter_id: str, **kwargs: Any) -> AdapterResult:
+        """Start a session on the adapter with the service's execution mode.
+
+        The productive Core path requires LIVE; SIMULATION is only usable
+        for tests and never satisfies operational gates.
+        """
+        config = dict(kwargs.pop("config", {}))
+        config["execution_mode"] = self._execution_mode.value
+        try:
+            adapter = self.load_adapter(adapter_id)
+            return adapter.start_session(config=config, **kwargs)
+        except Exception as exc:  # structured, never silent
+            from curaops.harness.registry import HarnessCapabilityUnavailableError
+
+            if isinstance(exc, HarnessCapabilityUnavailableError):
+                return AdapterResult(
+                    success=False,
+                    message=str(exc),
+                    detail={"code": exc.code, "adapter": exc.adapter_id},
+                )
+            return AdapterResult(
+                success=False,
+                message=f"adapter protocol error: {exc}",
+                detail={"code": AdapterErrorCode.ADAPTER_PROTOCOL_ERROR.value},
+            )
+
+    def status_session(self, adapter_id: str, session_id: str) -> AdapterResult:
+        try:
+            return self.load_adapter(adapter_id).status_session(session_id)
+        except Exception as exc:
+            return AdapterResult(
+                success=False,
+                message=f"adapter protocol error: {exc}",
+                detail={"code": AdapterErrorCode.ADAPTER_PROTOCOL_ERROR.value},
+            )
+
+    def cancel_session(self, adapter_id: str, session_id: str) -> AdapterResult:
+        try:
+            return self.load_adapter(adapter_id).cancel_session(session_id)
+        except Exception as exc:
+            return AdapterResult(
+                success=False,
+                message=f"adapter protocol error: {exc}",
+                detail={"code": AdapterErrorCode.ADAPTER_PROTOCOL_ERROR.value},
+            )
+
+    def timeout_session(self, adapter_id: str, session_id: str) -> AdapterResult:
+        try:
+            return self.load_adapter(adapter_id).timeout_session(session_id)
+        except Exception as exc:
+            return AdapterResult(
+                success=False,
+                message=f"adapter protocol error: {exc}",
+                detail={"code": AdapterErrorCode.ADAPTER_PROTOCOL_ERROR.value},
+            )
+
+    def await_completion(
+        self,
+        adapter_id: str,
+        session_id: str,
+        timeout_policy: dict[str, Any] | None = None,
+    ) -> AdapterResult:
+        """Block until the managed session completes (contract method)."""
+        try:
+            return self.load_adapter(adapter_id).await_completion(
+                session_id, timeout_policy=timeout_policy
+            )
+        except Exception as exc:
+            return AdapterResult(
+                success=False,
+                message=f"session wait failed: {exc}",
+                detail={"code": AdapterErrorCode.SESSION_WAIT_FAILED.value},
+            )
+
+    def collect_evidence(self, adapter_id: str, session_id: str) -> dict[str, Any]:
+        try:
+            return self.load_adapter(adapter_id).collect_evidence(session_id)
+        except Exception as exc:
+            return {
+                "session_id": session_id,
+                "ok": False,
+                "error": AdapterErrorCode.ADAPTER_PROTOCOL_ERROR.value,
+                "message": str(exc),
+            }
+
+    @property
+    def execution_mode(self) -> str:
+        return self._execution_mode.value
