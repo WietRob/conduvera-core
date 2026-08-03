@@ -31,6 +31,11 @@ ADAPTER_EVENT_TYPES = {
     "safety_guard.action.allowed",
     "safety_guard.action.blocked",
     "safety_guard.approval.required",
+    # Buildroom legacy integration slice (read-only strangler, MXOS-RUNTIME-1):
+    # explicit event types for the frozen legacy reader. Same envelope, same
+    # schema (MXOS-EVIDENCE-1.0.0); no new schema introduced.
+    "buildroom.legacy.inventory.completed",
+    "buildroom.legacy.readiness.completed",
 }
 EVENT_TYPES = CORE_EVENT_TYPES | ADAPTER_EVENT_TYPES
 SEVERITIES = {"debug", "info", "warning", "error", "critical"}

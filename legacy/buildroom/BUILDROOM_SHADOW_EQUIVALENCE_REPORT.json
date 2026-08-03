@@ -1,0 +1,113 @@
+{
+  "legacy_backends": {
+    "native": {
+      "enabled": true
+    },
+    "codex_cli": {
+      "enabled": false,
+      "status": "disabled_by_owner",
+      "requires_explicit_owner_activation": true
+    },
+    "opencode_cli": {
+      "enabled": false,
+      "status": "disabled_by_owner",
+      "requires_explicit_owner_activation": true
+    }
+  },
+  "legacy_project_packs": {
+    "alpha": {
+      "project_name": "alpha",
+      "repo_path": "/tmp/fixture-alpha",
+      "default_branch": "main",
+      "test_command": "python3 -m pytest -q",
+      "github_repo": "WietRob/fixture-alpha",
+      "autopilot_enabled": false,
+      "delivery_mode": "engineering_finish_line",
+      "allowed_phases": [
+        "RESEARCHER",
+        "BUILDER",
+        "REVIEWER"
+      ]
+    },
+    "beta": {
+      "project_name": "beta",
+      "repo_path": "/tmp/fixture-beta",
+      "default_branch": "master",
+      "test_command": "make test",
+      "github_repo": "WietRob/fixture-beta",
+      "autopilot_enabled": true,
+      "delivery_mode": "full",
+      "allowed_phases": [
+        "DREAMER",
+        "BUILDER"
+      ]
+    }
+  },
+  "legacy_active_project": {
+    "schema_version": 1,
+    "active_project_id": "fixture-project",
+    "mode": "planning_only",
+    "selected_by": "operator",
+    "selected_at": "2026-08-03T10:00:00Z",
+    "reason": "test fixture"
+  },
+  "mxos_backends": {
+    "native": {
+      "enabled": true,
+      "status": null,
+      "requires_explicit_owner_activation": false
+    },
+    "codex_cli": {
+      "enabled": false,
+      "status": "disabled_by_owner",
+      "requires_explicit_owner_activation": true
+    },
+    "opencode_cli": {
+      "enabled": false,
+      "status": "disabled_by_owner",
+      "requires_explicit_owner_activation": true
+    }
+  },
+  "mxos_project_packs": {
+    "alpha": {
+      "default_branch": "main",
+      "test_command": "python3 -m pytest -q",
+      "autopilot_enabled": false,
+      "delivery_mode": "engineering_finish_line"
+    },
+    "beta": {
+      "default_branch": "master",
+      "test_command": "make test",
+      "autopilot_enabled": true,
+      "delivery_mode": "full"
+    }
+  },
+  "mxos_active_project": {
+    "schema_version": 1,
+    "active_project_id": "fixture-project",
+    "mode": "planning_only"
+  },
+  "differences": [],
+  "expected_normalizations": [
+    {
+      "area": "backends",
+      "field": "native.status",
+      "legacy_omitted": "status",
+      "mxos_default": null
+    },
+    {
+      "area": "backends",
+      "field": "native.requires_explicit_owner_activation",
+      "legacy_omitted": "requires_explicit_owner_activation",
+      "mxos_default": false
+    }
+  ],
+  "verdict": "PASS",
+  "generated": "2026-08-03",
+  "runner": "frozen fixtures only; no live state access",
+  "gate": {
+    "no_unexplained_semantic_mismatch": true,
+    "all_dropped_fields_documented": true,
+    "no_live_state_access_during_tests": true
+  }
+}

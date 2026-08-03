@@ -1,0 +1,27 @@
+project_name: alpha
+repo_path: /tmp/fixture-alpha
+evidence_dir: /tmp/fixture-alpha-evidence
+default_branch: main
+test_command: "python3 -m pytest -q"
+github_repo: WietRob/fixture-alpha
+autopilot_enabled: false
+delivery_mode: engineering_finish_line
+allowed_phases:
+  - RESEARCHER
+  - BUILDER
+  - REVIEWER
+profiles:
+  researcher: researcher
+  builder: builder
+  reviewer: reviewer
+execution:
+  builder_backend: native
+  reviewer_backend: native
+builder:
+  backend: native
+reviewer:
+  backend: native
+merge:
+  backend: native
+review_convergence:
+  max_review_rounds: 2

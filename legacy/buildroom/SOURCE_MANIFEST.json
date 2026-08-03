@@ -1,0 +1,1969 @@
+{
+  "schema": "buildroom-legacy-source-manifest/v1",
+  "generated": "2026-08-03",
+  "source_root": "/home/roberto_schmidt/.hermes/scripts",
+  "entries": [
+    {
+      "path": "buildroom_authorization.py",
+      "sha256": "0f5aa44efd52eee58f222007e5d45bd2c50a72a96def9a9e5ef0db1fbf78dd40",
+      "size_bytes": 1533,
+      "line_count": 44,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "argparse",
+        "buildroom_core",
+        "manual_authorization",
+        "sys"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_authorization_cli.py"
+      ],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_autopilot_runner.sh",
+      "sha256": "ec8db221d04a603e530a24b55225d08dbaf203c58173f02c8a588376f634c9ee",
+      "size_bytes": 2941,
+      "line_count": 87,
+      "kind": "wrapper",
+      "imports": [],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_backend_policy.py",
+      "sha256": "c17ed5a491b17800aa1056443da24d6f2f8843287e0c735a3d77d3e6ea0f9ac8",
+      "size_bytes": 2543,
+      "line_count": 58,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "pathlib",
+        "typing",
+        "yaml"
+      ],
+      "imported_by": [
+        "buildroom_core.py",
+        "buildroom_execution.py",
+        "tests/test_buildroom_cycle49_preflight.py"
+      ],
+      "state_reads": [
+        "read_text(encoding=\"utf-8\")) or {}"
+      ],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_core.py",
+      "sha256": "d34d781f8955b408f1611f05656c61f8322bcf7412fdf91ab17dfca2da112a19",
+      "size_bytes": 30440,
+      "line_count": 671,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "buildroom_backend_policy",
+        "buildroom_review_convergence",
+        "dataclasses",
+        "datetime",
+        "pathlib",
+        "typing",
+        "yaml"
+      ],
+      "imported_by": [
+        "buildroom_authorization.py",
+        "buildroom_loop.py",
+        "buildroom_readiness_audit.py",
+        "manual_authorization.py",
+        "peekxd_buildroom_loop_v20.py",
+        "synthetic_manual_buildroom_smoke.py",
+        "tests/test_buildroom_authorization_cli.py",
+        "tests/test_buildroom_default_branch_baseline.py",
+        "tests/test_buildroom_execution_governance.py",
+        "tests/test_buildroom_external_execution_runtime.py",
+        "tests/test_buildroom_integration_seam.py",
+        "tests/test_buildroom_manual_cli_capability.py",
+        "tests/test_buildroom_project_pack_v23_1.py",
+        "tests/test_buildroom_project_pack_v24.py",
+        "tests/test_buildroom_run_results.py",
+        "tests/test_buildroom_task_terminal_truth.py",
+        "tests/test_buildroom_terminal_failure_flow.py",
+        "tests/test_manual_authorization_capability.py"
+      ],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_cycle49_preflight.py",
+      "sha256": "c9dd4fd8b6003d972d44c6ded5ece9f387498f29d9d0422649ccc5bbd23e353b",
+      "size_bytes": 4978,
+      "line_count": 158,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imported_by": [
+        "peekxd_buildroom_loop_v20.py",
+        "tests/test_buildroom_cycle49_preflight.py"
+      ],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_execution.py",
+      "sha256": "20ab0954ac557882272a2ecb8ba7c3246ec673478739ca25f5b86976772a307f",
+      "size_bytes": 24871,
+      "line_count": 672,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "buildroom_backend_policy",
+        "dataclasses",
+        "datetime",
+        "enum",
+        "json",
+        "os",
+        "pathlib",
+        "signal",
+        "subprocess",
+        "sys",
+        "time",
+        "typing",
+        "uuid"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_external_execution_runtime.py",
+        "tests/test_buildroom_integration_seam.py"
+      ],
+      "state_reads": [
+        "read_text(encoding=\"utf-8\", errors=\"replace\").splitlines():"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "json.dump",
+        "write_bytes",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"git\"",
+        "subprocess.Popen(",
+        "subprocess.run("
+      ],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_kanban_paths.py",
+      "sha256": "02465cd9b0ed2d2cbbe188ade6d9f9e034220964a1a37143eea242853dbf4942",
+      "size_bytes": 2796,
+      "line_count": 75,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "pathlib",
+        "re",
+        "sqlite3"
+      ],
+      "imported_by": [
+        "peekxd_buildroom_loop_v20.py",
+        "tests/test_buildroom_no_progress.py",
+        "tests/test_buildroom_task_binding_cycle49.py"
+      ],
+      "state_reads": [],
+      "state_writes": [
+        "sqlite3.connect"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_loop.py",
+      "sha256": "3bc2ff6b07d3f44da7112e1ed09b13825a1bc53e7cc7a13596205f6144947e63",
+      "size_bytes": 6848,
+      "line_count": 183,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "argparse",
+        "buildroom_core",
+        "manual_authorization",
+        "peekxd_buildroom_loop_v20",
+        "sys"
+      ],
+      "imported_by": [
+        "synthetic_manual_buildroom_smoke.py",
+        "tests/test_buildroom_manual_cli_capability.py"
+      ],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_no_progress.py",
+      "sha256": "e11034326f7f47f5e70e0b5acff84ab7a06f8094689f57a8726b7b7fab7ac7a7",
+      "size_bytes": 3375,
+      "line_count": 98,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imported_by": [
+        "peekxd_buildroom_loop_v20.py",
+        "tests/test_buildroom_no_progress.py"
+      ],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_readiness_audit.py",
+      "sha256": "04eabc88a32fd5972818d76926e6e7370dcf9fb9bc8a0c54848e58e379d4497f",
+      "size_bytes": 12295,
+      "line_count": 285,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "argparse",
+        "buildroom_core",
+        "datetime",
+        "json",
+        "pathlib",
+        "re",
+        "shlex",
+        "shutil",
+        "subprocess",
+        "urllib.parse"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_readiness_audit.py"
+      ],
+      "state_reads": [
+        "read_text(encoding=\"utf-8\")).get(\"scripts\", {})"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "json.dump",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_review_convergence.py",
+      "sha256": "2043f298ddaf214afdde0b2744805fc45f35aee371a74c6f0707fab484b4f18f",
+      "size_bytes": 13765,
+      "line_count": 380,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "pathlib",
+        "re",
+        "subprocess",
+        "typing"
+      ],
+      "imported_by": [
+        "buildroom_core.py",
+        "peekxd_buildroom_loop_v20.py",
+        "tests/test_buildroom_review_convergence.py"
+      ],
+      "state_reads": [],
+      "state_writes": [
+        "json.dump"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_status.py",
+      "sha256": "e120873fb4fd2d3ec053938597dab663a1398203edb70352ea153cae70255e0d",
+      "size_bytes": 2262,
+      "line_count": 65,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "argparse",
+        "json",
+        "pathlib",
+        "subprocess",
+        "sys"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text(encoding=\"utf-8\"))"
+      ],
+      "state_writes": [],
+      "subprocesses": [
+        "subprocess.run("
+      ],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_task_binding.py",
+      "sha256": "af607e0d5c9fb2763b1309750e61abbd5ec9dfc7ed9b9809b10adf375ed3b86b",
+      "size_bytes": 4722,
+      "line_count": 140,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "re",
+        "typing"
+      ],
+      "imported_by": [
+        "peekxd_buildroom_loop_v20.py",
+        "tests/test_buildroom_task_binding_cycle49.py",
+        "tests/test_buildroom_task_terminal_truth.py"
+      ],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "buildroom_task_terminal.py",
+      "sha256": "410451d5635e426165443e6f8aa60436acd24095cb556f9808fed7a8e682284f",
+      "size_bytes": 5875,
+      "line_count": 166,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "enum",
+        "json",
+        "pathlib",
+        "re",
+        "typing"
+      ],
+      "imported_by": [
+        "peekxd_buildroom_loop_v20.py",
+        "tests/test_buildroom_task_terminal_truth.py"
+      ],
+      "state_reads": [
+        "read_text(encoding=\"utf-8\")"
+      ],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "fleet_router.py",
+      "sha256": "7a90253e65237692ff322e98226b73cfa47554a67ad17021de4bcdc5ea1bafbc",
+      "size_bytes": 13154,
+      "line_count": 364,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "json",
+        "pathlib",
+        "typing",
+        "uuid",
+        "yaml"
+      ],
+      "imported_by": [
+        "orchestrator_router_bridge.py",
+        "peekxd_buildroom_loop_v20.py",
+        "tests/test_capability_router_enforcement.py"
+      ],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir(",
+        "json.dump",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "freeze-watchdog.sh",
+      "sha256": "c7c7fdb51c8c910f913bfecc3f5130596a2da25c0f13aef8086acb156bfe8fd5",
+      "size_bytes": 1713,
+      "line_count": 51,
+      "kind": "wrapper",
+      "imports": [],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "manual_authorization.py",
+      "sha256": "48779a8ed963aef2d1c358e59e9c2cf68cbec10aa1518c7259f21ec7816814d3",
+      "size_bytes": 11152,
+      "line_count": 289,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "buildroom_core",
+        "dataclasses",
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "secrets",
+        "sys",
+        "typing"
+      ],
+      "imported_by": [
+        "buildroom_authorization.py",
+        "buildroom_loop.py",
+        "synthetic_manual_buildroom_smoke.py",
+        "tests/test_buildroom_manual_cli_capability.py",
+        "tests/test_manual_authorization_capability.py"
+      ],
+      "state_reads": [
+        "read_text().split()[3])"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "orchestrator_router_bridge.py",
+      "sha256": "d04623bd4fe9bbe6a27af77781fb0018c7397fcc873ed0ef5b8598e6f600561a",
+      "size_bytes": 2629,
+      "line_count": 67,
+      "kind": "source",
+      "imports": [
+        "fleet_router",
+        "pathlib",
+        "sys"
+      ],
+      "imported_by": [
+        "tests/test_capability_router_enforcement.py"
+      ],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_agent_loop_v051.py",
+      "sha256": "759d73e96e5472b56869ba4728065146a7eb083b9a1c0d054bbff333ea072d85",
+      "size_bytes": 11293,
+      "line_count": 280,
+      "kind": "source",
+      "imports": [
+        "argparse",
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "subprocess",
+        "sys"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(self.lock_file, \"w",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_buildroom_loop_v13.py",
+      "sha256": "373349c0103263407de9d201fc79dd99bd664c422c5532e40eab3e4a535a4cb7",
+      "size_bytes": 38050,
+      "line_count": 865,
+      "kind": "historical",
+      "imports": [
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_candidate_parser.py",
+        "tests/test_buildroom_state_machine_v13.py"
+      ],
+      "state_reads": [
+        "read_text()",
+        "read_text())"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(LOCK_FILE, \"w",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "historical",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_buildroom_loop_v14.py",
+      "sha256": "a2e93f27587a2bc28741efff711f3943d468cb76763435c266da4e226a4b2a8b",
+      "size_bytes": 41118,
+      "line_count": 865,
+      "kind": "historical",
+      "imports": [
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_provider_fallback_v14.py"
+      ],
+      "state_reads": [
+        "read_text()",
+        "read_text())"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(LOCK_FILE, \"w",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "historical",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_buildroom_loop_v15.py",
+      "sha256": "5c270894c940d5585a97cb1cbe043a03c0a930c6676a276b5eb9470b968dd8cf",
+      "size_bytes": 39409,
+      "line_count": 853,
+      "kind": "historical",
+      "imports": [
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_pr_orchestration_v15.py"
+      ],
+      "state_reads": [
+        "read_text()",
+        "read_text())"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(LOCK_FILE, \"w",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "historical",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_buildroom_loop_v16.py",
+      "sha256": "42b3370d5a38f2fa20b9e25f607a9e95147d49d6f7095ac302f0dd7a9da7af2c",
+      "size_bytes": 44096,
+      "line_count": 954,
+      "kind": "historical",
+      "imports": [
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_stop_after_phase_v16.py"
+      ],
+      "state_reads": [
+        "read_text()",
+        "read_text())"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(LOCK_FILE, \"w",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "historical",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_buildroom_loop_v17.py",
+      "sha256": "43dbdb327073cea72e58f3533247c3ce2bcc3b5eb5671c1993fafabdaa9d5f63",
+      "size_bytes": 51281,
+      "line_count": 1100,
+      "kind": "historical",
+      "imports": [
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_directive_templates_v17.py"
+      ],
+      "state_reads": [
+        "read_text()",
+        "read_text())"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(LOCK_FILE, \"w",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "historical",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_buildroom_loop_v18.py",
+      "sha256": "35302af9b55d48d9ee4720ca89eab05a98b0695bbe8c6931b59eb3fe78137426",
+      "size_bytes": 66570,
+      "line_count": 1371,
+      "kind": "historical",
+      "imports": [
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_directive_compliance_v18.py"
+      ],
+      "state_reads": [
+        "read_text()",
+        "read_text())"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(LOCK_FILE, \"w",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "historical",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_buildroom_loop_v18_1.py",
+      "sha256": "285722d281e519cf4071e21afe9902d1ebd22752de646fe24558cb878dc2a8c9",
+      "size_bytes": 65185,
+      "line_count": 1353,
+      "kind": "historical",
+      "imports": [
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_compliance_retry_flow_v18_1.py"
+      ],
+      "state_reads": [
+        "read_text()",
+        "read_text())"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(LOCK_FILE, \"w",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "historical",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_buildroom_loop_v19.py",
+      "sha256": "7a405167837340113251e2a839bfbd20709a4602383643d76b726e752e6daaa5",
+      "size_bytes": 87172,
+      "line_count": 1751,
+      "kind": "historical",
+      "imports": [
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_canonical_schema_v19.py"
+      ],
+      "state_reads": [
+        "read_text()",
+        "read_text())"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(LOCK_FILE, \"w",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "historical",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_buildroom_loop_v19_1.py",
+      "sha256": "34bf61d2d940598e85f6e33c6ae99a391788622ee0385d7cb34695d4b9847d28",
+      "size_bytes": 84899,
+      "line_count": 1722,
+      "kind": "historical",
+      "imports": [
+        "datetime",
+        "fcntl",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "time",
+        "yaml"
+      ],
+      "imported_by": [
+        "tests/test_buildroom_strict_schema_v19_1.py"
+      ],
+      "state_reads": [
+        "read_text()",
+        "read_text())"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(LOCK_FILE, \"w",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "historical",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "peekxd_buildroom_loop_v20.py",
+      "sha256": "388e015a31995e031fe89818944c95caeac17c0d9f741a62992251d37b9e5c8e",
+      "size_bytes": 145743,
+      "line_count": 2972,
+      "kind": "source",
+      "imports": [
+        "argparse",
+        "buildroom_core",
+        "buildroom_cycle49_preflight",
+        "buildroom_kanban_paths",
+        "buildroom_no_progress",
+        "buildroom_review_convergence",
+        "buildroom_task_binding",
+        "buildroom_task_terminal",
+        "datetime",
+        "enum",
+        "fcntl",
+        "fleet_router",
+        "hashlib",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "sqlite3",
+        "subprocess",
+        "sys",
+        "time",
+        "uuid",
+        "yaml"
+      ],
+      "imported_by": [
+        "buildroom_loop.py",
+        "synthetic_manual_buildroom_smoke.py",
+        "tests/test_buildroom_builder_pr_reviewer_v20.py",
+        "tests/test_buildroom_default_branch_baseline.py",
+        "tests/test_buildroom_dreamer_dispatch_v26_1.py",
+        "tests/test_buildroom_dreamer_yaml_robustness_v25_1.py",
+        "tests/test_buildroom_execution_governance.py",
+        "tests/test_buildroom_manual_cli_capability.py",
+        "tests/test_buildroom_merge_gate_truth_v24_2.py",
+        "tests/test_buildroom_no_progress.py",
+        "tests/test_buildroom_project_pack_v24.py",
+        "tests/test_buildroom_run_results.py",
+        "tests/test_buildroom_task_binding_cycle49.py",
+        "tests/test_buildroom_task_terminal_truth.py",
+        "tests/test_buildroom_terminal_failure_flow.py",
+        "tests/test_capability_router_enforcement.py"
+      ],
+      "state_reads": [
+        "read_text()",
+        "read_text())",
+        "read_text().splitlines()",
+        "read_text(encoding=\"utf-8\")",
+        "read_text(encoding=\"utf-8\"))",
+        "read_text(encoding=\"utf-8\", errors=\"replace\").splitlines()[-80:])"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "fcntl.flock",
+        "json.dump",
+        "open(LOCK_FILE, \"w",
+        "sqlite3.connect",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"gh\"",
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "retention_automation.py",
+      "sha256": "ad6f52593940de03d0708732c3736822a2f48ad245a5fba21b0426bfe63ddb37",
+      "size_bytes": 6824,
+      "line_count": 199,
+      "kind": "source",
+      "imports": [
+        "__future__",
+        "argparse",
+        "datetime",
+        "json",
+        "pathlib",
+        "typing"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text(encoding=\"utf-8\"))"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "json.dump",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "stability-watchdog-diag.sh",
+      "sha256": "ee9aa35fe7b57350be71efb77fcbf710411b74a63a40d3404e005479a07a2513",
+      "size_bytes": 3314,
+      "line_count": 112,
+      "kind": "wrapper",
+      "imports": [],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "stability-watchdog.sh",
+      "sha256": "a3b595342a312085c38b990854d1bb3aba8db7ffa7b38db9829285549d7d2812",
+      "size_bytes": 3263,
+      "line_count": 87,
+      "kind": "wrapper",
+      "imports": [],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "synthetic_manual_buildroom_smoke.py",
+      "sha256": "97b8926b7ce0a98a865cedc727c79fe4f1ede498e01331d7ce7e0e90b6d433fc",
+      "size_bytes": 10467,
+      "line_count": 239,
+      "kind": "generated",
+      "imports": [
+        "__future__",
+        "buildroom_core",
+        "buildroom_loop",
+        "contextlib",
+        "datetime",
+        "hashlib",
+        "io",
+        "json",
+        "manual_authorization",
+        "os",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "sqlite3",
+        "subprocess",
+        "tempfile"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text())",
+        "read_text().splitlines()]"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "json.dump",
+        "sqlite3.connect",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "live",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_authorization_cli.py",
+      "sha256": "4d4771d97561568e8960de28686a4b7cf2049fddeab567ef7a184881ad5c1a46",
+      "size_bytes": 2350,
+      "line_count": 77,
+      "kind": "test",
+      "imports": [
+        "buildroom_authorization",
+        "buildroom_core",
+        "pathlib",
+        "pytest"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir("
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_builder_pr_reviewer_v20.py",
+      "sha256": "5ab3e30333834f944fa7908425cba95664b6d18d148e31df9c274d47c93553c8",
+      "size_bytes": 8050,
+      "line_count": 193,
+      "kind": "test",
+      "imports": [
+        "inspect",
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "pytest",
+        "subprocess",
+        "tempfile",
+        "types",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir(",
+        "json.dump",
+        "write_text"
+      ],
+      "subprocesses": [
+        "subprocess.run("
+      ],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_candidate_parser.py",
+      "sha256": "f7fcc1b8ed9992c266b96fe90edfe319b66ac23bc1760aa7ba490a536a3f0f97",
+      "size_bytes": 10779,
+      "line_count": 293,
+      "kind": "test",
+      "imports": [
+        "datetime",
+        "os",
+        "pathlib",
+        "peekxd_buildroom_loop_v13",
+        "pytest",
+        "sys",
+        "time",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_canonical_schema_v19.py",
+      "sha256": "d9d38a909e4264b80b74bf761eb06045f19f54b64ad5681a7e549b075fc927dc",
+      "size_bytes": 23677,
+      "line_count": 978,
+      "kind": "test",
+      "imports": [
+        "pathlib",
+        "peekxd_buildroom_loop_v19",
+        "sys",
+        "tempfile",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(tmp_path) / \"evidence\"",
+        "Path(tmp_path) / \"orchestrator-state.json\""
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_compliance_retry_flow_v18_1.py",
+      "sha256": "142e80a50b02d4bf3c19590ef35bc35668eaa0f81c9a4eb7ce5509f33bae4d5d",
+      "size_bytes": 10237,
+      "line_count": 237,
+      "kind": "test",
+      "imports": [
+        "pathlib",
+        "peekxd_buildroom_loop_v18_1",
+        "sys",
+        "tempfile",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(tmp_path) / \"evidence\"",
+        "Path(tmp_path) / \"orchestrator-state.json\""
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_cycle49_preflight.py",
+      "sha256": "25dcfa486eea307723158b55865258b7c06affa0bfa91890a020ca638230be73",
+      "size_bytes": 4852,
+      "line_count": 152,
+      "kind": "test",
+      "imports": [
+        "buildroom_backend_policy",
+        "buildroom_cycle49_preflight",
+        "pytest"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_default_branch_baseline.py",
+      "sha256": "e44881ff09e7dee680a2047047fef9252fc190b2d0b7081af7bcf1c11cd11edb",
+      "size_bytes": 3897,
+      "line_count": 101,
+      "kind": "test",
+      "imports": [
+        "buildroom_core",
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "pytest",
+        "types",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text()",
+        "read_text()) == baseline"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "json.dump",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_directive_compliance_v18.py",
+      "sha256": "a79d32d4f30b574d2541239f22c4cc47898bc16f2f1b03e2aec13424edb4cceb",
+      "size_bytes": 13651,
+      "line_count": 293,
+      "kind": "test",
+      "imports": [
+        "pathlib",
+        "peekxd_buildroom_loop_v18",
+        "sys",
+        "tempfile",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(tmp_path) / \"evidence\"",
+        "Path(tmp_path) / \"orchestrator-state.json\""
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_directive_templates_v17.py",
+      "sha256": "cac6e34a24f9ff7d9943995b99521b0aad29a0af5d63ae717261ee48a547d2b2",
+      "size_bytes": 10371,
+      "line_count": 251,
+      "kind": "test",
+      "imports": [
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v17",
+        "sys",
+        "tempfile",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(tmp_path) / \"evidence\"",
+        "Path(tmp_path) / \"orchestrator-state.json\""
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_dreamer_dispatch_v26_1.py",
+      "sha256": "eb515cd51801fc63af2afddbbf8a974c900094506c5afafc7e614e19c62d4b43",
+      "size_bytes": 8612,
+      "line_count": 220,
+      "kind": "test",
+      "imports": [
+        "glob",
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(tmp_path) / \"dreamer\" / \"dreamer-cycle-36-test.md\").write_text(\"dummy dreamer\")",
+        "Path(tmp_path) / \"dreamer\").mkdir(exist_ok=True)",
+        "Path(tmpdir) / \"orchestrator-state.json\""
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_dreamer_yaml_robustness_v25_1.py",
+      "sha256": "30401e9e6bee499593ffcd7c8dbde258bf8f8f5b9575a1a387ad1e52750406cb",
+      "size_bytes": 9765,
+      "line_count": 287,
+      "kind": "test",
+      "imports": [
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(tmpdir) / \"orchestrator-state.json\"",
+        "read_text()",
+        "read_text() == orig, \"Evidence file was modified!\""
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_execution_governance.py",
+      "sha256": "35e6d0fefcb85e9304cb83d9325c073517f7fce18662463ea18a4c31d1bbce11",
+      "size_bytes": 19666,
+      "line_count": 495,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "buildroom_core",
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "pytest",
+        "unittest.mock",
+        "yaml"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text()",
+        "read_text())",
+        "read_text())[\"model\"]"
+      ],
+      "state_writes": [
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_external_execution_runtime.py",
+      "sha256": "d5763a39f537843da064d95141674f347d58536c2e147f6b2cdb616a8a714d61",
+      "size_bytes": 12972,
+      "line_count": 330,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "buildroom_core",
+        "buildroom_execution",
+        "json",
+        "os",
+        "pathlib",
+        "pytest",
+        "shutil",
+        "signal",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text())",
+        "read_text(encoding=\"utf-8\")",
+        "read_text(encoding=\"utf-8\").strip()"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "json.dump",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"git\"",
+        "subprocess.Popen(",
+        "subprocess.check_output(",
+        "subprocess.run("
+      ],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_integration_seam.py",
+      "sha256": "46490b2927654e4344e0e3e66b0f0420e24d9d1c4d659a9cd4d653edb1efd4a6",
+      "size_bytes": 12451,
+      "line_count": 260,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "buildroom_core",
+        "buildroom_execution",
+        "datetime",
+        "json",
+        "os",
+        "pathlib",
+        "pytest",
+        "shutil",
+        "subprocess",
+        "sys",
+        "time",
+        "yaml"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"git\"",
+        "subprocess.check_output(",
+        "subprocess.run("
+      ],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_manual_cli_capability.py",
+      "sha256": "f6095b4e0aa5b696d67ed02a930d8d1e41b755ca83e0903b41ba90f0967a4aa8",
+      "size_bytes": 9755,
+      "line_count": 261,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "buildroom_core",
+        "buildroom_loop",
+        "manual_authorization",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "pytest"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir("
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_merge_gate_truth_v24_2.py",
+      "sha256": "d49da35eee8496ac55a9750eb3c2691e2ec262a331d417ed5b274736a37ae7e6",
+      "size_bytes": 10625,
+      "line_count": 214,
+      "kind": "test",
+      "imports": [
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(tmp_path) / \"reviewer-evidence.md\"",
+        "Path(tmp_path) / \"test-baseline.json\"",
+        "Path(tmpdir) / \"orchestrator-state.json\"",
+        "read_text for JSON parsing)",
+        "read_text mock",
+        "read_text mock breaks baseline JSON"
+      ],
+      "state_writes": [
+        "json.dump",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_no_progress.py",
+      "sha256": "a8d695bd0d7847e431993fa76c143c73724edf40a29ff41d8a3c49317c4826a2",
+      "size_bytes": 5673,
+      "line_count": 158,
+      "kind": "test",
+      "imports": [
+        "buildroom_kanban_paths",
+        "buildroom_no_progress",
+        "pathlib",
+        "peekxd_buildroom_loop_v20"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text()"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_pr_orchestration_v15.py",
+      "sha256": "62f4c3d76b8fefa4aa10f8f6b39047668c2fcd63db8598696c403c48a31071f5",
+      "size_bytes": 8947,
+      "line_count": 199,
+      "kind": "test",
+      "imports": [
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v15",
+        "sys",
+        "tempfile",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(self.tmpdir.name) / \"orchestrator-state.json\"",
+        "Path(self.tmpdir.name) / \"test-baseline.json\"",
+        "read_text\", return_value=\"APPROVE_MERGE: looks good\"):",
+        "read_text\", return_value=\"HOLD_FOR_BOSS: needs human review\"):"
+      ],
+      "state_writes": [
+        "json.dump"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_project_pack_v23_1.py",
+      "sha256": "e40f319bfc9c54cbac818ccfe0d919fcee8107300d33a52f7f7f97c7570622ca",
+      "size_bytes": 6943,
+      "line_count": 179,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "buildroom_core",
+        "pathlib",
+        "pytest",
+        "subprocess",
+        "sys"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text()"
+      ],
+      "state_writes": [],
+      "subprocesses": [
+        "subprocess.run("
+      ],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_project_pack_v24.py",
+      "sha256": "6d1959150ce8be442826f562368c1ff28488595a58b4df6391d3729d1c92c0ce",
+      "size_bytes": 9054,
+      "line_count": 259,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "buildroom_core",
+        "peekxd_buildroom_loop_v20",
+        "textwrap",
+        "types",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_provider_fallback_v14.py",
+      "sha256": "b4a5fbff3c1c624f9f99c56e91d54f1e68130e55a85bfb99a6d579ee4eb0b01f",
+      "size_bytes": 11165,
+      "line_count": 255,
+      "kind": "test",
+      "imports": [
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v14",
+        "sys",
+        "tempfile",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(self.tmpdir.name) / \"orchestrator-state.json\""
+      ],
+      "state_writes": [],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_readiness_audit.py",
+      "sha256": "04fc68fb36246c26cc9d82f8b6f7826f8ce49c01cebbc38fa989e1ef7352d5f8",
+      "size_bytes": 6236,
+      "line_count": 150,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "buildroom_readiness_audit",
+        "pathlib",
+        "subprocess",
+        "yaml"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text())"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text",
+        "yaml.safe_dump"
+      ],
+      "subprocesses": [
+        "\"git\"",
+        "subprocess.check_output(",
+        "subprocess.run("
+      ],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_review_convergence.py",
+      "sha256": "9e75c55bce3243b7227a4f0b947372651b0a9462754ec48810c65f2209793aea",
+      "size_bytes": 6753,
+      "line_count": 190,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "buildroom_review_convergence",
+        "datetime",
+        "pathlib",
+        "pytest",
+        "subprocess"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [
+        "\"git\"",
+        "subprocess.run("
+      ],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_run_results.py",
+      "sha256": "f687e05d93a4fec1426dde7f8b1799728a1f1ca9cb323d832f125eae43d2c636",
+      "size_bytes": 8883,
+      "line_count": 211,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "ast",
+        "buildroom_core",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "pytest"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text()"
+      ],
+      "state_writes": [
+        ".mkdir("
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_state_machine_v13.py",
+      "sha256": "9444723cac0001643fe6b28b8e02fdc1b3639270145f7f57641efc719202efc7",
+      "size_bytes": 15474,
+      "line_count": 345,
+      "kind": "test",
+      "imports": [
+        "json",
+        "os",
+        "pathlib",
+        "peekxd_buildroom_loop_v13",
+        "pytest",
+        "sys",
+        "tempfile",
+        "time",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(self._tmpdir.name) / 'orchestrator-state.json')"
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_stop_after_phase_v16.py",
+      "sha256": "972d42428375e494734895aaceb448072622fba750eb0453384d2e36b4080467",
+      "size_bytes": 16018,
+      "line_count": 353,
+      "kind": "test",
+      "imports": [
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v16",
+        "sys",
+        "tempfile",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(tmpdir) / \"evidence\"",
+        "Path(tmpdir) / \"orchestrator-state.json\""
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_strict_schema_v19_1.py",
+      "sha256": "3048d37677d53648e587bf3ae40b7a2f6af99bb838992052dee5427d2792f50e",
+      "size_bytes": 23959,
+      "line_count": 768,
+      "kind": "test",
+      "imports": [
+        "pathlib",
+        "peekxd_buildroom_loop_v19_1",
+        "sys",
+        "tempfile",
+        "unittest.mock"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "Path(tmp_path) / \"evidence\"",
+        "Path(tmp_path) / \"orchestrator-state.json\""
+      ],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_task_binding_cycle49.py",
+      "sha256": "66334b6cb47d268a3744345bfb58f32e46f2b7748da283136ea89389d7b4a230",
+      "size_bytes": 6160,
+      "line_count": 162,
+      "kind": "test",
+      "imports": [
+        "buildroom_kanban_paths",
+        "buildroom_task_binding",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "pytest",
+        "types"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_task_terminal_truth.py",
+      "sha256": "94d44f676d969bc4a181aae28a8446e64a52368bd79ecd0a3c8d7a6587dd76c5",
+      "size_bytes": 8744,
+      "line_count": 210,
+      "kind": "test",
+      "imports": [
+        "buildroom_core",
+        "buildroom_task_binding",
+        "buildroom_task_terminal",
+        "json",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "pytest"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir(",
+        "json.dump",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_buildroom_terminal_failure_flow.py",
+      "sha256": "f3a52eaa0611aa31d079f69f783757fce81589cdb710a56a37b85a535de3355e",
+      "size_bytes": 3893,
+      "line_count": 97,
+      "kind": "test",
+      "imports": [
+        "buildroom_core",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "pytest"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir("
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_capability_router_enforcement.py",
+      "sha256": "c66c128e20c2b102f27154901cbc140f43d5a62452898062d6d17ce0bfe3412d",
+      "size_bytes": 8958,
+      "line_count": 240,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "fleet_router",
+        "inspect",
+        "json",
+        "orchestrator_router_bridge",
+        "pathlib",
+        "peekxd_buildroom_loop_v20",
+        "pytest",
+        "sys",
+        "unittest.mock",
+        "yaml"
+      ],
+      "imported_by": [],
+      "state_reads": [
+        "read_text()",
+        "read_text())[\"model\"]",
+        "read_text().splitlines()[-1])"
+      ],
+      "state_writes": [
+        "json.dump"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    },
+    {
+      "path": "tests/test_manual_authorization_capability.py",
+      "sha256": "5207f3d19475d641dd058231c7cc7983a14b4a8078f199e34f14f588db8d509b",
+      "size_bytes": 13163,
+      "line_count": 341,
+      "kind": "test",
+      "imports": [
+        "__future__",
+        "buildroom_core",
+        "datetime",
+        "manual_authorization",
+        "os",
+        "pathlib",
+        "pytest"
+      ],
+      "imported_by": [],
+      "state_reads": [],
+      "state_writes": [
+        ".mkdir(",
+        "write_text"
+      ],
+      "subprocesses": [],
+      "runtime_authority": "test",
+      "provenance": "local_buildroom",
+      "contains_secret_candidate": false
+    }
+  ]
+}

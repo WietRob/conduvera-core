@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "active_project_id": "fixture-project",
+  "mode": "planning_only",
+  "selected_by": "operator",
+  "selected_at": "2026-08-03T10:00:00Z",
+  "reason": "test fixture"
+}

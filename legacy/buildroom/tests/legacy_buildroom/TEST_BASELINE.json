@@ -1,0 +1,3178 @@
+{
+  "schema": "buildroom-characterization-baseline/v1",
+  "generated": "2026-08-03",
+  "runner": "pytest 9.1.1 (isolated HOME, imported legacy source, policy fixture)",
+  "totals": {
+    "tests_run": 306,
+    "pass": 270,
+    "fail": 36,
+    "not_collected_historical": 10
+  },
+  "classification_totals": {
+    "FAIL_LIVE_STATE_DEPENDENT": 35,
+    "FAIL_MISSING_ISOLATED_FIXTURE": 1
+  },
+  "entries": [
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_authorization_cli",
+      "test_name": "test_issue_cli_has_no_caller_supplied_issuer",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_authorization_cli",
+      "test_name": "test_issue_cli_resolves_pack_and_prints_only_opaque_id",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_mode_allows_builder",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_mode_allows_pr_create",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_mode_allows_reviewer",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_mode_blocks_merge",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_mode_blocks_reporter",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_stop_after_reviewer",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_builder_evidence_missing_blocks",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_builder_branch_missing_blocks",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_reviewer_evidence_missing",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_no_admin_merge_in_this_mode",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_builder_evidence_contract_fields",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_reviewer_body_contains_verdict_options",
+      "result": "FAIL",
+      "duration_s": 0.001,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_merge_phase_blocked_in_mode",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_researcher_phase_blocked_in_mode",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestBuilderPrReviewerMode",
+      "test_name": "test_dreamer_phase_blocked_in_mode",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestTestIsolation",
+      "test_name": "test_v20_tests_do_not_spawn_real_kanban_tasks",
+      "result": "PASS",
+      "duration_s": 0.186,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_builder_pr_reviewer_v20.TestTestIsolation",
+      "test_name": "test_mandatory_router_hook_is_mocked_before_real_dispatch",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_terminal_cycle48_builder_does_not_count_as_active",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_preserved_historical_task_is_not_active",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_genuine_running_project_builder_counts",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_unrelated_running_builder_is_valid_but_not_conflicting",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_cycle49_cannot_release_while_any_gate_fails[main_green]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_cycle49_cannot_release_while_any_gate_fails[no_conflicting_active_workers]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_cycle49_cannot_release_while_any_gate_fails[no_active_cycle48_worker]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_cycle49_cannot_release_while_any_gate_fails[no_ambiguous_board_binding]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_cycle49_cannot_release_while_any_gate_fails[origin_main_contains_cycle48_merge]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_cycle49_cannot_release_while_any_gate_fails[working_state_policy_passes]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_cycle49_cannot_release_while_any_gate_fails[projectpack_autonomous]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_release_is_explicit_and_does_not_dispatch_candidate",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_cycle49_preflight",
+      "test_name": "test_external_cli_backends_remain_blocked",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_default_branch_baseline",
+      "test_name": "test_main_green_uses_projectpack_default_branch[main]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_default_branch_baseline",
+      "test_name": "test_main_green_uses_projectpack_default_branch[master]",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_default_branch_baseline",
+      "test_name": "test_main_green_uses_projectpack_default_branch[integration/stable]",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_default_branch_baseline",
+      "test_name": "test_baseline_is_project_scoped_and_checks_out_default_branch[main]",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_default_branch_baseline",
+      "test_name": "test_baseline_is_project_scoped_and_checks_out_default_branch[master]",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_default_branch_baseline",
+      "test_name": "test_baseline_is_project_scoped_and_checks_out_default_branch[integration/stable]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_default_branch_baseline",
+      "test_name": "test_active_orchestrator_has_no_hardcoded_main_refs",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestDreamerDispatchReturnCheck",
+      "test_name": "test_dispatch_success_sets_waiting",
+      "result": "PASS",
+      "duration_s": 0.025,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestDreamerDispatchReturnCheck",
+      "test_name": "test_dispatch_failure_sets_blocked",
+      "result": "PASS",
+      "duration_s": 0.022,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestDreamerDispatchReturnCheck",
+      "test_name": "test_dispatch_failure_does_not_set_waiting",
+      "result": "PASS",
+      "duration_s": 0.02,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestDreamerDispatchReturnCheck",
+      "test_name": "test_dispatch_failure_no_builder_start",
+      "result": "PASS",
+      "duration_s": 0.023,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestDreamerDispatchReturnCheck",
+      "test_name": "test_dispatch_failure_no_candidate_set",
+      "result": "PASS",
+      "duration_s": 0.02,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestDreamerDispatchReturnCheck",
+      "test_name": "test_full_cycle_certification_does_not_block_dreamer",
+      "result": "PASS",
+      "duration_s": 0.02,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestDreamerDispatchReturnCheck",
+      "test_name": "test_dispatch_view_failure_sets_blocked",
+      "result": "PASS",
+      "duration_s": 0.019,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestDreamerDispatchReturnCheck",
+      "test_name": "test_no_real_kanban_task_spawned",
+      "result": "PASS",
+      "duration_s": 0.02,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestDreamerDispatchReturnCheck",
+      "test_name": "test_no_evidence_file_patched",
+      "result": "PASS",
+      "duration_s": 0.023,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestResearcherDispatchReturnCheck",
+      "test_name": "test_researcher_dispatch_failure_sets_blocked",
+      "result": "PASS",
+      "duration_s": 0.019,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestResearcherDispatchReturnCheck",
+      "test_name": "test_researcher_dispatch_success_sets_waiting",
+      "result": "PASS",
+      "duration_s": 0.02,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestBuilderDispatchReturnCheck",
+      "test_name": "test_builder_dispatch_failure_sets_blocked",
+      "result": "PASS",
+      "duration_s": 0.024,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_dispatch_v26_1.TestBuilderDispatchReturnCheck",
+      "test_name": "test_builder_dispatch_success_sets_waiting",
+      "result": "PASS",
+      "duration_s": 0.02,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestDreamerSOULYamlQuoting",
+      "test_name": "test_soul_contains_yaml_quoting_hard_rule",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestDreamerSOULYamlQuoting",
+      "test_name": "test_soul_example_shows_quoted_values",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestDreamerBodyYamlQuoting",
+      "test_name": "test_body_contains_yaml_quoting_requirement",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestYamlParseFailure",
+      "test_name": "test_unquoted_colon_fails_parse",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestYamlParseFailure",
+      "test_name": "test_parse_failure_does_not_advance_to_builder",
+      "result": "PASS",
+      "duration_s": 0.02,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestYamlParseFailure",
+      "test_name": "test_parse_failure_sets_yaml_retry_status",
+      "result": "PASS",
+      "duration_s": 0.021,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestYamlParseFailure",
+      "test_name": "test_retry_limit_blocks",
+      "result": "PASS",
+      "duration_s": 0.021,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestYamlParseFailure",
+      "test_name": "test_retry_body_includes_parse_error",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestYamlParseFailure",
+      "test_name": "test_retry_body_includes_double_quote_instruction",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestYamlParseFailure",
+      "test_name": "test_properly_quoted_parses_successfully",
+      "result": "PASS",
+      "duration_s": 0.003,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestYamlParseFailure",
+      "test_name": "test_no_real_kanban_task_spawned",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_dreamer_yaml_robustness_v25_1.TestYamlParseFailure",
+      "test_name": "test_no_existing_evidence_patched",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_missing_operating_policy_fails_closed",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_disabled_autopilot_prevents_start",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_research_only_blocks_every_phase_after_researcher",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_unknown_backend_is_rejected",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_same_external_backend_and_model_is_disabled_by_owner",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_old_structured_owner_exception_does_not_activate_external_backend",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_native_backend_is_independent_when_profiles_differ",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_distinct_native_profiles_same_explicit_model_require_owner_exception",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_same_native_profile_is_rejected",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_codex_command_is_noninteractive_sandboxed_and_structured",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_opencode_reviewer_requires_non_openai_model",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_opencode_reviewer_command_is_structured_and_read_only_role",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_complete_evidence_requires_independent_observation",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_evidence_must_match_observed_disk_and_tests",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_canonical_evidence_rejects_owner_disabled_backend[codex_cli]",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_canonical_evidence_rejects_owner_disabled_backend[opencode_cli]",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_malformed_evidence_is_rejected",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_external_backend_contract_never_grants_state_or_merge_authority",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_read_only_delegation_cannot_receive_mutation_authority",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_canonical_execution_schema_contains_required_backend_neutral_fields",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_real_peekxd_pack_retains_full_autonomous_policy",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_real_curaops_pack_has_authorized_engineering_finish_line",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_profile_contracts_contain_required_hard_rules",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_profile_preloads_match_declared_execution_contracts",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_governed_task_envelopes_require_execution_evidence_without_real_dispatch",
+      "result": "FAIL",
+      "duration_s": 0.002,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_native_backend_is_represented_by_same_command_contract",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_real_native_builder_and_reviewer_models_use_temporary_owner_exception",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_malformed_execution_markdown_blocks_phase_gate",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_valid_phase_evidence_requires_and_accepts_independent_observation",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_execution_governance",
+      "test_name": "test_disallowed_transition_does_not_mutate_orchestrator_state",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_schemas_are_versioned",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_unknown_backend_rejected",
+      "result": "PASS",
+      "duration_s": 0.012,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_invalid_role_rejected",
+      "result": "PASS",
+      "duration_s": 0.009,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_worktree_path_escape_rejected",
+      "result": "PASS",
+      "duration_s": 0.009,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_allowed_path_escape_rejected",
+      "result": "PASS",
+      "duration_s": 0.012,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_branch_and_base_mismatch_rejected",
+      "result": "PASS",
+      "duration_s": 0.023,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_codex_command_uses_argument_array_and_assigned_directory",
+      "result": "PASS",
+      "duration_s": 0.009,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_opencode_command_uses_argument_array_and_assigned_directory",
+      "result": "PASS",
+      "duration_s": 0.009,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_runner_captures_stdout_stderr_and_events",
+      "result": "PASS",
+      "duration_s": 0.028,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_nonzero_exit_reaches_failed",
+      "result": "PASS",
+      "duration_s": 0.025,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_timeout_kills_complete_process_group_and_children",
+      "result": "PASS",
+      "duration_s": 1.235,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_cancellation_kills_complete_process_group_and_children",
+      "result": "PASS",
+      "duration_s": 0.647,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_retry_lineage_is_preserved_and_budget_enforced",
+      "result": "PASS",
+      "duration_s": 0.075,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_missing_usage_and_cost_remain_unknown",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_event_parsers_capture_usage_when_backend_exposes_it",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_malformed_structured_evidence_blocks_completion",
+      "result": "PASS",
+      "duration_s": 0.024,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_disk_test_mismatch_blocks_completion",
+      "result": "PASS",
+      "duration_s": 0.024,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_builder_reviewer_identity_collision_rejected",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_native_backend_behavior_remains_unchanged",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_external_execution_runtime",
+      "test_name": "test_projectpacks_remain_native_and_only_peekxd_is_autonomous",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_native_mode_follows_legacy_path",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_missing_mode_defaults_to_native",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_external_backend_blocked_in_native_mode",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_pilot_without_pilot_id_fails_closed",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_pilot_without_expiry_fails_closed",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_expired_pilot_fails_closed",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_wrong_cycle_fails_closed",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_wrong_role_fails_closed",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_old_valid_pilot_cannot_override_owner_disable",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_pilot_id_must_match",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_external_mode_requires_activation_token",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_integration_seam_imports_and_exports",
+      "result": "PASS",
+      "duration_s": 0.058,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_external_runner_receives_only_assigned_worktree",
+      "result": "PASS",
+      "duration_s": 0.012,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_external_process_never_receives_state_authority",
+      "result": "PASS",
+      "duration_s": 0.01,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_failed_run_blocks_phase_progression",
+      "result": "PASS",
+      "duration_s": 0.01,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_timed_out_run_blocks_phase_progression",
+      "result": "PASS",
+      "duration_s": 0.009,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_no_fallback_without_configured_policy",
+      "result": "PASS",
+      "duration_s": 0.009,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_native_dogfood_path_unchanged",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_peekxd_projectpack_remains_native",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_integration_seam",
+      "test_name": "test_curaops_projectpack_enables_authorized_engineering_finish_line",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_cli_has_only_authorization_id_as_manual_proof",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_missing_capability_is_required_before_manual_dry_run",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_policy_gates_run_before_capability_consumption",
+      "result": "PASS",
+      "duration_s": 0.004,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_unconfigured_manual_project_has_exact_readiness_code",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_dry_run_consumes_preissued_capability_and_uses_its_issuer",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_exact_authorization_blockers_reach_cli[MANUAL_AUTHORIZATION_NOT_FOUND]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_exact_authorization_blockers_reach_cli[MANUAL_AUTHORIZATION_EXPIRED]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_exact_authorization_blockers_reach_cli[MANUAL_AUTHORIZATION_MISMATCH]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_exact_authorization_blockers_reach_cli[MANUAL_AUTHORIZATION_ALREADY_CONSUMED]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_non_dry_success_requires_phase_executed[PHASE_EXECUTED-0]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_non_dry_success_requires_phase_executed[LOCK_UNAVAILABLE-4]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_non_dry_success_requires_phase_executed[DISPATCH_FAILED-4]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_non_dry_success_requires_phase_executed[DISPATCH_BLOCKED-4]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_non_dry_success_requires_phase_executed[PROJECTPACK_BLOCKED-4]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_non_dry_success_requires_phase_executed[STATE_MISMATCH-4]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_non_dry_success_requires_phase_executed[PHASE_ALREADY_TERMINAL-4]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_non_dry_success_requires_phase_executed[INTERNAL_ERROR-4]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_manual_cli_capability",
+      "test_name": "test_reconciliation_phase_mismatch_prevents_consumption",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateDirtyTree",
+      "test_name": "test_blocked_reviewer_with_stale_evidence_never_reaches_merge",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateDirtyTree",
+      "test_name": "test_request_fix_verdict_never_reaches_merge",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateDirtyTree",
+      "test_name": "test_dirty_test_files_block",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateDirtyTree",
+      "test_name": "test_dirty_non_test_warns",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateBranchCheck",
+      "test_name": "test_checkout_pr_branch",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateBranchCheck",
+      "test_name": "test_cannot_checkout_blocks",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateTestCommand",
+      "test_name": "test_uses_pytest_command",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateTestFailure",
+      "test_name": "test_pr_test_failure_no_baseline_blocks",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateTestFailure",
+      "test_name": "test_pre_existing_only_allows",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateTestFailure",
+      "test_name": "test_new_failure_blocks",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_merge_gate_truth_v24_2.TestMergeGateTestFailure",
+      "test_name": "test_all_green_passes",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_no_progress",
+      "test_name": "test_first_two_identical_observations_remain_waiting",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_no_progress",
+      "test_name": "test_third_identical_observation_enters_terminal_hold",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_no_progress",
+      "test_name": "test_new_evidence_resets_counter",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_no_progress",
+      "test_name": "test_fresh_replacement_task_resets_counter",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_no_progress",
+      "test_name": "test_terminal_hold_never_merges_or_transitions_phase",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_no_progress",
+      "test_name": "test_peekxd_reviewer_reconciliation_uses_generic_terminal_hold",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_no_progress",
+      "test_name": "test_exact_board_worker_log_is_resolved_without_legacy_global_fallback",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_no_progress",
+      "test_name": "test_safety_gate_no_progress_uses_live_status_and_enters_hold",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_no_progress",
+      "test_name": "test_autopilot_runner_stops_immediately_on_terminal_hold",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_MISSING_ISOLATED_FIXTURE",
+      "dependency": "wrapper_path_buildroom_autopilot_runner.sh",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/",
+      "note": "Test liest Path(__file__).parents[1]/buildroom_autopilot_runner.sh; Wrapper liegt unter legacy/buildroom/wrappers/, nicht neben tests/."
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_01_resolve_project_peekxd_loads_yaml",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_02_resolve_project_dummy_loads_yaml",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_03_buildroom_loop_dry_run_project_peekxd",
+      "result": "FAIL",
+      "duration_s": 0.061,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_04_buildroom_loop_dry_run_project_dummy",
+      "result": "FAIL",
+      "duration_s": 0.054,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_05_no_project_without_legacy_requires_pack",
+      "result": "PASS",
+      "duration_s": 0.052,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_06_dummy_project_uses_no_peekxd_paths",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_07_evidence_dir_comes_from_project_pack",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_08_repo_path_comes_from_project_pack",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_09_state_file_comes_from_evidence_dir",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_10_branch_prefix_comes_from_project_pack",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_11_test_command_comes_from_project_pack",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_12_strategy_files_come_from_project_pack",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_13_legacy_peekxd_mode_only_with_flag",
+      "result": "PASS",
+      "duration_s": 0.056,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_14_generic_core_has_no_hardcoded_peekxd_paths_except_legacy_block",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_15_legacy_file_remains_compatibility_but_new_work_uses_buildroom_loop",
+      "result": "FAIL",
+      "duration_s": 0.056,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_project_argument_and_legacy_are_mutually_exclusive",
+      "result": "PASS",
+      "duration_s": 0.053,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_unknown_project_reports_error",
+      "result": "PASS",
+      "duration_s": 0.052,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v23_1",
+      "test_name": "test_evidence_path_helper_uses_project_pack_root",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_project_pack_loads_github_repo_field",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_project_pack_loads_repo_agnostic_template_fields",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_orchestrator_uses_pack_paths_and_github_repo",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_check_open_prs_uses_project_pack_github_repo",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_check_open_prs_fails_closed_when_inventory_command_errors",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_engineering_finish_line_does_not_require_zero_open_prs",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_main_check_rejects_untracked_even_when_synced",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_engineering_finish_line_main_check_rejects_outdated_main",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_builder_branch_prefix_comes_from_project_pack",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_custom_project_researcher_body_uses_pack_focus_areas",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_custom_project_dreamer_body_uses_pack_epic_hints",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_project_pack_v24",
+      "test_name": "test_custom_project_reporter_uses_project_name",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_readiness_audit",
+      "test_name": "test_valid_manual_and_autonomous_packs_are_classified_truthfully",
+      "result": "PASS",
+      "duration_s": 0.049,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_readiness_audit",
+      "test_name": "test_same_model_pair_is_not_described_as_independent",
+      "result": "PASS",
+      "duration_s": 0.015,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_readiness_audit",
+      "test_name": "test_duplicate_projectpack_origins_are_blocked",
+      "result": "PASS",
+      "duration_s": 0.029,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_readiness_audit",
+      "test_name": "test_implausible_test_command_blocks_readiness",
+      "result": "PASS",
+      "duration_s": 0.014,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_readiness_audit",
+      "test_name": "test_missing_strategy_input_blocks_readiness",
+      "result": "PASS",
+      "duration_s": 0.014,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_readiness_audit",
+      "test_name": "test_candidate_source_may_resolve_from_evidence_directory",
+      "result": "PASS",
+      "duration_s": 0.015,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_review_convergence",
+      "test_name": "test_second_unauthorized_initial_push_is_blocked",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_review_convergence",
+      "test_name": "test_second_correction_round_is_blocked",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_review_convergence",
+      "test_name": "test_new_task_or_solve_and_finish_does_not_reset_budget[state_change0]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_review_convergence",
+      "test_name": "test_new_task_or_solve_and_finish_does_not_reset_budget[state_change1]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_review_convergence",
+      "test_name": "test_commit_without_reference_is_blocked_before_push",
+      "result": "PASS",
+      "duration_s": 0.015,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_review_convergence",
+      "test_name": "test_immutable_remote_metadata_failure_requires_clean_replacement",
+      "result": "PASS",
+      "duration_s": 0.016,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_review_convergence",
+      "test_name": "test_product_lane_cannot_change_self_improvement_files",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_review_convergence",
+      "test_name": "test_session_compression_boundary_stops_mutation",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_review_convergence",
+      "test_name": "test_session_ninety_minute_boundary_stops_mutation",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_review_convergence",
+      "test_name": "test_green_candidate_runs_configured_range_gates",
+      "result": "PASS",
+      "duration_s": 0.016,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_result_enum_is_exact",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_run_source_has_no_bare_or_implicit_return",
+      "result": "PASS",
+      "duration_s": 0.017,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_lock_unavailable_is_explicit",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_state_mismatch_and_terminal_are_explicit",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_projectpack_and_safety_blocks_are_explicit",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_dispatch_failure_and_no_progress_are_explicit",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_successful_single_dispatch_is_phase_executed",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_pending_manual_phase_does_not_consume_authorization",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_missing_directive_does_not_consume_authorization",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_denied_next_phase_transition_is_not_false_success",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_failed_compliance_retry_dispatch_is_not_false_success",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_run_results",
+      "test_name": "test_internal_exception_returns_internal_error_and_releases_lock",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_new_task_stores_task_id_plus_board",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_orchestrator_create_show_dispatch_reconciliation_are_explicit_board",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_every_task_operation_uses_stored_board[show]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_every_task_operation_uses_stored_board[runs]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_every_task_operation_uses_stored_board[log]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_every_task_operation_uses_stored_board[context]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_every_task_operation_uses_stored_board[complete]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_every_task_operation_uses_stored_board[block]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_every_task_operation_uses_stored_board[unblock]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_every_task_operation_uses_stored_board[archive]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_every_task_operation_uses_stored_board[comment]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_create_and_dispatch_require_explicit_board",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_wrong_current_board_cannot_affect_binding",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_same_task_id_on_two_boards_is_ambiguous_for_legacy_lookup",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_current_schema_never_falls_back_to_global_log",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_historical_recovery_finds_audit_remediation",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_binding_cycle49",
+      "test_name": "test_bare_legacy_task_requires_stored_legacy_board",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_success_states_are_success_terminal[done]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_success_states_are_success_terminal[completed]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_failure_states_are_failure_terminal[blocked]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_failure_states_are_failure_terminal[gave_up]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_failure_states_are_failure_terminal[crashed]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_failure_states_are_failure_terminal[failed]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_nonterminal_states_are_pending[todo]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_nonterminal_states_are_pending[ready]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_nonterminal_states_are_pending[running]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_nonterminal_states_are_pending[waiting]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_unknown_state_fails_closed",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_blocked_reviewer_with_existing_stale_evidence_cannot_complete",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_crashed_builder_with_previous_evidence_cannot_create_pr",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_gave_up_dreamer_with_prior_candidate_evidence_cannot_advance",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_replaced_task_evidence_cannot_satisfy_fresh_task",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_same_task_id_on_wrong_board_cannot_complete",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_successful_task_with_exact_bound_evidence_completes",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_successful_task_without_evidence_enters_no_progress_path",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_pending_task_with_evidence_is_rejected",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_reviewer_requires_binding_verdict",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_orchestrator_phase_completion_uses_exact_bound_evidence",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_orchestrator_rejects_wrong_board_in_exact_bound_evidence",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_task_terminal_truth",
+      "test_name": "test_reviewer_request_fix_is_complete_but_not_merge_approval",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_terminal_failure_flow",
+      "test_name": "test_failure_terminal_immediately_holds_without_no_progress_increment[REVIEWER-blocked]",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_terminal_failure_flow",
+      "test_name": "test_failure_terminal_immediately_holds_without_no_progress_increment[BUILDER-crashed]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_terminal_failure_flow",
+      "test_name": "test_failure_terminal_immediately_holds_without_no_progress_increment[DREAMER-gave_up]",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_buildroom_terminal_failure_flow",
+      "test_name": "test_permitted_bounded_retry_replaces_immediate_hold",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_routing_rules_exist_only_in_yaml",
+      "result": "FAIL",
+      "duration_s": 0.001,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_programmer_override_selects_real_model",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_designer_canonical_without_active_override",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_frontend_without_design_is_blocked",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_reviewer_independence_selects_non_codex",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_gemma_unavailable_is_blocked_runtime",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_qwen_profiles_have_distinct_runtime_contracts",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_runtime_profile_models_match_router_policy",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_direct_dispatch_without_route_id_fails_closed",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_authorization_is_single_use_and_identity_bound",
+      "result": "FAIL",
+      "duration_s": 0.0,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_real_orchestrator_phase_methods_use_mandatory_hook",
+      "result": "PASS",
+      "duration_s": 0.023,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_capability_router_enforcement",
+      "test_name": "test_route_log_has_required_fields",
+      "result": "FAIL",
+      "duration_s": 0.001,
+      "classification": "FAIL_LIVE_STATE_DEPENDENT",
+      "dependency": "live_profiles_projectpacks",
+      "live_state_dependency": true,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_issue_returns_opaque_id_and_records_complete_binding",
+      "result": "PASS",
+      "duration_s": 0.008,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_allowed_profile_cannot_issue_its_own_capability",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_consume_is_one_shot_and_replay_fails_closed",
+      "result": "PASS",
+      "duration_s": 0.004,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_binding_mismatch_does_not_consume[project-MANUAL_AUTHORIZATION_MISMATCH]",
+      "result": "PASS",
+      "duration_s": 0.004,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_binding_mismatch_does_not_consume[phase-MANUAL_AUTHORIZATION_MISMATCH]",
+      "result": "PASS",
+      "duration_s": 0.003,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_binding_mismatch_does_not_consume[repository-MANUAL_AUTHORIZATION_MISMATCH]",
+      "result": "PASS",
+      "duration_s": 0.004,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_binding_mismatch_does_not_consume[dry_run-MANUAL_AUTHORIZATION_MISMATCH]",
+      "result": "PASS",
+      "duration_s": 0.003,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_expired_and_missing_authorizations_have_exact_codes",
+      "result": "PASS",
+      "duration_s": 0.003,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_issue_requires_orchestrator_or_owner_identity",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_issue_refuses_autonomous_or_non_finish_line_pack",
+      "result": "PASS",
+      "duration_s": 0.002,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_default_authorization_path_has_no_environment_override",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_authorization_store_rejects_file_and_parent_symlinks",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_malformed_or_unwritable_authorization_store_fails_closed",
+      "result": "PASS",
+      "duration_s": 0.001,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_environment_spoof_cannot_create_trusted_issuer[hermes]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_environment_spoof_cannot_create_trusted_issuer[codex]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_environment_spoof_cannot_create_trusted_issuer[claude]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_environment_spoof_cannot_create_trusted_issuer[opencode]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_environment_spoof_cannot_create_trusted_issuer[orchestrator]",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_direct_owner_tty_uses_kernel_process_ancestry",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "legacy.buildroom.tests.test_manual_authorization_capability",
+      "test_name": "test_unlisted_automation_between_python_and_owner_shell_is_rejected",
+      "result": "PASS",
+      "duration_s": 0.0,
+      "classification": "PASS_UNCHANGED",
+      "dependency": "none",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/"
+    },
+    {
+      "test_file": "test_buildroom_candidate_parser.py",
+      "test_name": "(collection)",
+      "result": "NOT_COLLECTED",
+      "duration_s": 0.0,
+      "classification": "OBSOLETE_HISTORICAL",
+      "dependency": "historical_v13_v19_modules",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/test_buildroom_candidate_parser.py"
+    },
+    {
+      "test_file": "test_buildroom_canonical_schema_v19.py",
+      "test_name": "(collection)",
+      "result": "NOT_COLLECTED",
+      "duration_s": 0.0,
+      "classification": "OBSOLETE_HISTORICAL",
+      "dependency": "historical_v13_v19_modules",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/test_buildroom_canonical_schema_v19.py"
+    },
+    {
+      "test_file": "test_buildroom_compliance_retry_flow_v18_1.py",
+      "test_name": "(collection)",
+      "result": "NOT_COLLECTED",
+      "duration_s": 0.0,
+      "classification": "OBSOLETE_HISTORICAL",
+      "dependency": "historical_v13_v19_modules",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/test_buildroom_compliance_retry_flow_v18_1.py"
+    },
+    {
+      "test_file": "test_buildroom_directive_compliance_v18.py",
+      "test_name": "(collection)",
+      "result": "NOT_COLLECTED",
+      "duration_s": 0.0,
+      "classification": "OBSOLETE_HISTORICAL",
+      "dependency": "historical_v13_v19_modules",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/test_buildroom_directive_compliance_v18.py"
+    },
+    {
+      "test_file": "test_buildroom_directive_templates_v17.py",
+      "test_name": "(collection)",
+      "result": "NOT_COLLECTED",
+      "duration_s": 0.0,
+      "classification": "OBSOLETE_HISTORICAL",
+      "dependency": "historical_v13_v19_modules",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/test_buildroom_directive_templates_v17.py"
+    },
+    {
+      "test_file": "test_buildroom_pr_orchestration_v15.py",
+      "test_name": "(collection)",
+      "result": "NOT_COLLECTED",
+      "duration_s": 0.0,
+      "classification": "OBSOLETE_HISTORICAL",
+      "dependency": "historical_v13_v19_modules",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/test_buildroom_pr_orchestration_v15.py"
+    },
+    {
+      "test_file": "test_buildroom_provider_fallback_v14.py",
+      "test_name": "(collection)",
+      "result": "NOT_COLLECTED",
+      "duration_s": 0.0,
+      "classification": "OBSOLETE_HISTORICAL",
+      "dependency": "historical_v13_v19_modules",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/test_buildroom_provider_fallback_v14.py"
+    },
+    {
+      "test_file": "test_buildroom_state_machine_v13.py",
+      "test_name": "(collection)",
+      "result": "NOT_COLLECTED",
+      "duration_s": 0.0,
+      "classification": "OBSOLETE_HISTORICAL",
+      "dependency": "historical_v13_v19_modules",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/test_buildroom_state_machine_v13.py"
+    },
+    {
+      "test_file": "test_buildroom_stop_after_phase_v16.py",
+      "test_name": "(collection)",
+      "result": "NOT_COLLECTED",
+      "duration_s": 0.0,
+      "classification": "OBSOLETE_HISTORICAL",
+      "dependency": "historical_v13_v19_modules",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/test_buildroom_stop_after_phase_v16.py"
+    },
+    {
+      "test_file": "test_buildroom_strict_schema_v19_1.py",
+      "test_name": "(collection)",
+      "result": "NOT_COLLECTED",
+      "duration_s": 0.0,
+      "classification": "OBSOLETE_HISTORICAL",
+      "dependency": "historical_v13_v19_modules",
+      "live_state_dependency": false,
+      "evidence_path": "legacy/buildroom/tests/test_buildroom_strict_schema_v19_1.py"
+    }
+  ]
+}

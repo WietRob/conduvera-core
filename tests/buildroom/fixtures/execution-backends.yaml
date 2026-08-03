@@ -1,0 +1,11 @@
+execution_backends:
+  native:
+    enabled: true
+  codex_cli:
+    enabled: false
+    status: disabled_by_owner
+    requires_explicit_owner_activation: true
+  opencode_cli:
+    enabled: false
+    status: disabled_by_owner
+    requires_explicit_owner_activation: true

@@ -1,0 +1,27 @@
+project_name: beta
+repo_path: /tmp/fixture-beta
+evidence_dir: /tmp/fixture-beta-evidence
+default_branch: master
+test_command: "make test"
+github_repo: WietRob/fixture-beta
+autopilot_enabled: true
+delivery_mode: full
+allowed_phases:
+  - DREAMER
+  - BUILDER
+profiles:
+  dreamer: dreamer
+  builder: builder
+execution:
+  builder_backend: native
+  reviewer_backend: native
+  builder_model: openai-codex/gpt-5.6-sol
+builder:
+  backend: native
+  model: openai-codex/gpt-5.6-sol
+reviewer:
+  backend: native
+merge:
+  backend: native
+review_convergence:
+  max_review_rounds: 3
