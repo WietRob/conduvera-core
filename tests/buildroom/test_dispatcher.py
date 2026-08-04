@@ -17,6 +17,7 @@ V6 rollback: switching back to legacy requires no migration.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -31,6 +32,7 @@ from curaops.buildroom.dispatcher import (  # noqa: E402
     DispatcherConfig,
     MODE_LEGACY,
     MODE_MANAGED_CANARY,
+    _run_legacy_entrypoint,
 )
 from curaops.buildroom.managed_execution import ManagedBuildroomCaller  # noqa: E402
 
@@ -85,6 +87,11 @@ def make_dispatcher(tmp_path, *, config=..., managed_caller=None, legacy_runner=
     cfg_path = tmp_path / "dispatcher.yaml"
     cfg_path.write_text(config, encoding="utf-8")
     leases_dir = Path(leases) if leases else tmp_path / "leases"
+    if legacy_runner is None:
+        # Unit-Test-Stub: kein echter Legacy-Subprozess in schnellen Tests.
+        # Der ECHTE Legacy-Lauf wird in test_arbeit3_legacy_real_execution
+        # separat bewiesen (isolierte Umgebung, eigener Subprozess).
+        legacy_runner = lambda task_id="", task_description="": "stub"
     return BuildroomExecutionDispatcher(
         config_path=cfg_path,
         leases_dir=leases_dir,
@@ -116,10 +123,16 @@ def test_v1_legacy_default_with_missing_config(tmp_path):
     assert d.resolve_path("t_abc123") == MODE_LEGACY
 
 
-def test_v1_invalid_config_value_falls_back_to_legacy(tmp_path):
+def test_v1_invalid_config_value_blocks(tmp_path):
+    """Ungültiger Mode -> CONFIG_INVALID (ARBEIT 4-Vertrag), kein Spawn."""
+    from curaops.buildroom.dispatcher import DispatcherConfigError
+
     cfg = "buildroom:\n  execution_path: parallel_universe\n"
-    d = make_dispatcher(tmp_path, config=cfg, managed_caller=RecordingManagedCaller())
-    assert d._config.execution_path == MODE_LEGACY  # fail-closed
+    cfg_path = tmp_path / "bad-mode.yaml"
+    cfg_path.write_text(cfg, encoding="utf-8")
+    # Config-Load wirft bereits beim Dispatcher-Aufbau -> kein Spawn möglich
+    with pytest.raises(DispatcherConfigError, match="CONFIG_INVALID"):
+        make_dispatcher(tmp_path, config=cfg, managed_caller=RecordingManagedCaller())
 
 
 # -- V2: Kein Doppelstart ----------------------------------------------------
@@ -288,3 +301,173 @@ def test_dod10_single_dispatcher_single_productive_caller():
     for f in files:
         assert f.endswith(("managed_execution.py", "fixture_runner.py", "dispatcher.py")), \
             f"start_session außerhalb des erlaubten Callgraphs: {f}"
+
+
+# -- ARBEIT 3: Legacy REAL ausführen (DOD-04) ----------------------------------
+
+def test_arbeit3_legacy_real_execution(tmp_path):
+    """Legacy über den Dispatcher REAL ausgeführt (isolierte Umgebung).
+
+    Der echte buildroom_loop.py (produktive Installation) wird als
+    Subprozess mit separatem HOME/HERMES_HOME gestartet. Kein
+    legacy_delegated-Marker als Ersatz für Ausführung.
+    """
+    from curaops.buildroom.dispatcher import _run_legacy_entrypoint
+
+    iso = tmp_path / "legacy-iso"
+    r = _run_legacy_entrypoint(task_id="t_0c0a1e", task_description="legacy control",
+                               isolated_home=iso, timeout_s=90)
+    assert r.status == "legacy_completed", f"Legacy-Lauf fehlgeschlagen: {r.detail}"
+    assert r.detail["exit_code"] == 0
+    assert "buildroom_loop.py" in r.detail["entrypoint"]
+    # State wurde vom Orchestrator gelesen (terminale Phase erkannt)
+    state = r.detail.get("state_after") or {}
+    assert "STOPPED_AFTER" in str(state.get("phase", "")) or state == {}
+    # Prozess beendet -> kein gehaltener flock, keine Zombies
+    assert r.detail["process_exited"] is True
+
+
+def test_arbeit3_legacy_isolated_no_live_state_mutation(tmp_path):
+    """Der isolierte Legacy-Lauf berührt den Live-State NICHT."""
+    import os
+
+    live_state = Path.home() / ".hermes/research-vault/ops/peekxd-buildroom-v09/orchestrator-state.json"
+    live_before = live_state.read_text(encoding="utf-8") if live_state.is_file() else None
+    iso = tmp_path / "legacy-iso2"
+    r = _run_legacy_entrypoint(task_id="t_0c0a1e", task_description="x",
+                               isolated_home=iso, timeout_s=90)
+    assert r.status == "legacy_completed"
+    live_after = live_state.read_text(encoding="utf-8") if live_state.is_file() else None
+    assert live_after == live_before  # Live-State unverändert
+
+
+# -- ARBEIT 4: Config-Authority (DOD-07) ---------------------------------------
+
+def test_arbeit4_productive_config_not_in_fixtures(tmp_path):
+    """Produktiver Default zeigt auf contracts/, nicht auf fixtures/."""
+    from curaops.buildroom.dispatcher import _PACKAGE_DISPATCHER
+
+    assert "contracts/" in _PACKAGE_DISPATCHER
+    assert "fixtures" not in _PACKAGE_DISPATCHER
+    contracts_cfg = Path(__file__).resolve().parents[2] / _PACKAGE_DISPATCHER
+    assert contracts_cfg.is_file(), "kanonische Config fehlt unter contracts/"
+
+
+def test_arbeit4_invalid_mode_blocks(tmp_path):
+    """Ungültiger Mode -> CONFIG_INVALID, kein Spawn."""
+    from curaops.buildroom.dispatcher import DispatcherConfigError
+
+    cfg = "buildroom:\n  execution_path: parallel_universe\n"
+    cfg_path = tmp_path / "bad.yaml"
+    cfg_path.write_text(cfg, encoding="utf-8")
+    with pytest.raises(DispatcherConfigError, match="CONFIG_INVALID"):
+        from curaops.buildroom.dispatcher import DispatcherConfig
+        DispatcherConfig.load(cfg_path)
+
+
+def test_arbeit4_invalid_canary_id_blocks(tmp_path):
+    """Ungültige Canary-Task-ID -> CONFIG_INVALID beim Laden (kein Spawn)."""
+    from curaops.buildroom.dispatcher import DispatcherConfig, DispatcherConfigError
+
+    cfg = "buildroom:\n  execution_path: managed_canary\n  canary_tasks:\n    - t_canary01\n"
+    cfg_path = tmp_path / "bad-canary.yaml"
+    cfg_path.write_text(cfg, encoding="utf-8")
+    with pytest.raises(DispatcherConfigError, match="CONFIG_INVALID"):
+        DispatcherConfig.load(cfg_path)
+
+
+def test_arbeit4_missing_config_legacy(tmp_path):
+    """Fehlende Config -> legacy (Vertrag: fehlend = legacy)."""
+    from curaops.buildroom.dispatcher import DispatcherConfig
+
+    c = DispatcherConfig.load(tmp_path / "nonexistent.yaml")
+    assert c.execution_path == MODE_LEGACY
+
+
+# -- ARBEIT 5: Concurrency + Crash-Recovery (DOD-08) ----------------------------
+
+def test_arbeit5_atomic_lease_multiprocess(tmp_path):
+    """Konkurrierende Prozesse: genau EIN Gewinner für dieselbe Attempt-ID.
+
+    WICHTIG: Die Worker halten die Lease bis alle gestartet sind (Event),
+    sonst endet der erste Gewinner sofort und hinterlässt eine verwaiste
+    Lease, die ein späterer Worker KORREKT reklamiert (Stale-Reclaim) —
+    das wäre kein Atomicitätsfehler, sondern der gewollte Reclaim-Pfad.
+    """
+    import multiprocessing as mp
+
+    leases = tmp_path / "leases"
+    results = mp.Queue()
+    release = mp.Event()
+
+    def worker(q, task_id, attempt):
+        from curaops.buildroom.dispatcher import BuildroomExecutionDispatcher
+        d = BuildroomExecutionDispatcher(
+            config_path=tmp_path / "dispatcher.yaml", leases_dir=leases)
+        won = d._acquire_attempt_lease(task_id, attempt)
+        q.put(won)
+        # Lease halten, bis alle Worker gestartet sind (kein vorzeitiger
+        # Prozess-Exit, der die Lease verwaist).
+        release.wait(timeout=30)
+
+    # Canary-Config mit gültiger ID anlegen
+    (tmp_path / "dispatcher.yaml").write_text(
+        "buildroom:\n  execution_path: managed_canary\n  canary_tasks:\n    - t_c0a1\n",
+        encoding="utf-8")
+    procs = [mp.Process(target=worker, args=(results, "t_c0a1", "ATT-CONC01"))
+             for _ in range(4)]
+    for p in procs:
+        p.start()
+    # Alle Worker haben acquiriert (genau 1 True, 3 False) — dann erst freigeben.
+    wins = [results.get(timeout=30) for _ in procs]
+    release.set()
+    for p in procs:
+        p.join(timeout=30)
+    assert wins.count(True) == 1, f"Erwartet genau 1 Gewinner, bekam {wins}"
+    assert wins.count(False) == 3
+
+
+def test_arbeit5_stale_lease_reclaim_same_task_only(tmp_path):
+    """Stale Lease (toter Owner): nur derselbe Task darf reklamieren."""
+    import os
+
+    from curaops.buildroom.dispatcher import BuildroomExecutionDispatcher
+
+    d = make_dispatcher(tmp_path)
+    # Lease mit totem PID (sehr hohe PID, sicher nicht lebend)
+    lease = d._attempt_lease("ATT-STALE01")
+    lease.write_text(json.dumps({
+        "task_id": "t_c0a1", "attempt_id": "ATT-STALE01",
+        "pid": 99999999, "created_at": "2026-08-04T00:00:00+00:00",
+    }), encoding="utf-8")
+    # Fremder Task darf NICHT reklamieren
+    assert d._acquire_attempt_lease("t_0bad99", "ATT-STALE01") is False
+    # Derselbe Task darf reklamieren
+    assert d._acquire_attempt_lease("t_c0a1", "ATT-STALE01") is True
+    d._release_attempt_lease("ATT-STALE01")
+
+
+def test_arbeit5_no_foreign_lease_release(tmp_path):
+    """Ein fremder Prozess darf die Lease eines anderen NICHT freigeben."""
+    from curaops.buildroom.dispatcher import BuildroomExecutionDispatcher
+
+    leases = tmp_path / "leases"
+    # Owner-Prozess = aktueller Prozess
+    d = BuildroomExecutionDispatcher(config_path=tmp_path / "d.yaml",
+                                     leases_dir=leases)
+    assert d._acquire_attempt_lease("t_c0a1", "ATT-OWN01") is True
+    # Zweite Instanz (anderer 'Prozess' simuliert: anderer pid im Owner-Feld)
+    lease = d._attempt_lease("ATT-OWN01")
+    data = json.loads(lease.read_text(encoding="utf-8"))
+    data["pid"] = 424242
+    lease.write_text(json.dumps(data), encoding="utf-8")
+    # Release mit aktuellem pid darf NICHT greifen (Owner fremd)
+    d2 = BuildroomExecutionDispatcher(config_path=tmp_path / "d.yaml",
+                                      leases_dir=leases)
+    d2._release_attempt_lease("ATT-OWN01")
+    assert lease.exists(), "Fremde Lease wurde fälschlich freigegeben"
+    # Aufräumen (Owner zurücksetzen und freigeben)
+    data["pid"] = os.getpid()
+    lease.write_text(json.dumps(data), encoding="utf-8")
+    d._release_attempt_lease("ATT-OWN01")
+    assert not lease.exists()

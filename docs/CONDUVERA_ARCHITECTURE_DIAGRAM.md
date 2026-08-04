@@ -23,8 +23,17 @@ flowchart TD
         B2["backend_policy (Execution-Backend-Entscheidung, LIVE_PROVEN)"]
         B3["BuildroomExecutionDispatcher (legacy | managed_canary)"]
         B4["ManagedBuildroomCaller (produktionsnaher Caller, LIVE_PROVEN)"]
+        B5["Operator Entry (buildroom_loop.py CLI)"]
+        B6["Legacy Orchestrator (peekxd v0.20, Default)"]
         C1 --- C2 --- C3 --- C4
         C4 --> B1
+        %% Echte Kanten (ARBEIT 6): Operator -> Dispatcher -> legacy | managed
+        B5 --> B3
+        B3 -->|legacy| B6
+        B3 -->|managed_canary| B4
+        B6 --> C4
+        B4 --> C4
+        B4 --> B2
     end
 
     subgraph HARNESS["Harness Plane (Adapter-gebunden)"]

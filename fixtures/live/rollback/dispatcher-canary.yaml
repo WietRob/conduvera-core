@@ -1,0 +1,4 @@
+buildroom:
+  execution_path: managed_canary
+  canary_tasks:
+    - t_c0a1

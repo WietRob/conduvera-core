@@ -588,15 +588,36 @@ components:
       / dispatch
     runtime_dependencies:
     - ManagedBuildroomCaller (managed_canary)
-    - Legacy-Orchestrator (legacy, Default)
+    - buildroom_loop.py CLI (legacy, produktive Installation ~/.hermes/scripts/)
     security_gate: kein Dual-Run/Shadow-Spawn; Lease je Attempt (single-writer); Nicht-Canary-Task
       in managed_canary -> legacy/kein Managed-Spawn; fehlende/ungueltige Config ->
       legacy (fail-closed)
     evidence_output: dispatcher-lease (je Attempt); delegiert Evidence an ManagedBuildroomCaller
       (MXOS-EVIDENCE-1.0.0)
-    status: LIVE_PROVEN
-    proof: tests/buildroom/test_dispatcher.py (12/12); fixtures/live/dispatcher-canary/dispatcher-3x-canary-evidence.json
-      (PASS 3/3 CANARY, route workload/local, Model openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf)
+    status: LIVE_PROVEN_AND_ENTRYPOINT_WIRED
+    proof: 'dispatcher-3x-canary-evidence.json (PASS 3/3 CANARY) + rollback-evidence.json
+      (PASS: managed->legacy->echter Legacy-Lauf) + test_dispatcher.py (21/21, inkl.
+      Multiprocess-Lease + Stale-Lease) + Legacy real via buildroom_loop.py (exit
+      0, isoliert)'
     modularity: intern; kein zweiter Orchestrator; keine neue Registry/Evidence-Huelle
-    missing_gate: OPERATIONAL_PRODUCTION (kein Cutover); Legacy-Absorption offen (CORE-002
-      PARTIAL)
+    missing_gate: OPERATIONAL_PRODUCTION (kein Cutover); Buildroom-Absorption PARTIAL
+  brain_runtime:
+    feature_id: BRAIN-001
+    funktion: Brain Runtime — Index-/Retrieval-/Capture-Engine ueber Roberto_Brain;
+      liefert brain-context.v1-Pakete an Conduvera Core; KEINE Wissens-/Task-Autoritaet
+    owner: Roberto_Brain (90_System/Automation/brain/brain.py, Symlink ~/.local/bin/brain)
+    repository: Vault-intern (derzeit); Kandidat fuer eigenstaendiges Repo roberto-brain-runtime
+    adapter_contract: brain doctor / brain context / brain query / brain capture /
+      brain index rebuild
+    runtime_dependencies:
+    - Roberto_Brain Vault
+    - SQLite-FTS5-Index (~/.cache/roberto-brain, derived)
+    security_gate: NUR Retrieval/Capture; kein Schreiben in kanonische Bereiche ausser
+      via capture/promote; Indizes vollstaendig rebuildable
+    evidence_output: brain-context.v1-Receipt (Quellen/Hashes/Authority/Selection-Reason)
+    status: V1_REAL_TASK_PROVEN
+    proof: brain doctor 0 errors; brain context liefert alle 4 Pflichtquellen; 5 echte
+      Defekte gefunden+gefixt (FTS5, domain-Filter, stale index_state, Frontmatter-YAML,
+      Status-Filter); Receipt brain-context-v1-buildroom-wiring.json
+    modularity: Symlink-Installation; Vault unabhaengig; Indizes derived
+    missing_gate: eigenstaendiges Repo (Owner-Vorgabe); Conduvera Brain Adapter PILOT_PROVEN

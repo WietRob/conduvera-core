@@ -89,3 +89,4 @@ fixtures/**/worktrees/
 .env
 .env.local
 *.bak
+fixtures/live/rollback/legacy-iso/

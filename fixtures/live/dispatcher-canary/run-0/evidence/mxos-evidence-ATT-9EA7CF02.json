@@ -1,0 +1,47 @@
+{
+  "schema": "MXOS-EVIDENCE-1.0.0",
+  "goal_id": "CONDUVERA-FIXTURE-001",
+  "task_id": "t_c0a1",
+  "attempt_id": "ATT-9EA7CF02",
+  "session_id": "mxfix_7e5ea2274d2f",
+  "harness": "hermes",
+  "producer": {
+    "name": "conduvera-core",
+    "version": "0.1.0"
+  },
+  "evidence": {
+    "session_id": "mxfix_7e5ea2274d2f",
+    "status": "completed",
+    "artifacts": [
+      {
+        "path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/dispatcher-canary/run-0/worktrees/SES-F5A0CBC7/mxfix_7e5ea2274d2f.response.txt",
+        "sha256": "sha256:c8a786cab2621aba8724e063b6f391edcbb431f43228959a03c507c3eae90a8b"
+      }
+    ],
+    "model_binding": {
+      "kind": "gateway_alias",
+      "selector": "workload/local",
+      "auth_domain": "litellm",
+      "backend_family": "openai",
+      "model": "fixture-model-local"
+    },
+    "handle": {
+      "session_id": "mxfix_7e5ea2274d2f",
+      "pid": 1630177,
+      "pgid": 1630177,
+      "create_time": "Di Aug  4 22:30:51 2026",
+      "hermes_home": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/dispatcher-canary/run-0/worktrees/SES-F5A0CBC7/hermes-home/profiles/fixture-live",
+      "status": "completed",
+      "exitcode": 0,
+      "started_at": "2026-08-04T20:30:52.036174+00:00",
+      "finished_at": "2026-08-04T20:30:57.467984+00:00",
+      "output_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/dispatcher-canary/run-0/worktrees/SES-F5A0CBC7/mxfix_7e5ea2274d2f.response.txt",
+      "route": "workload/local",
+      "model_identity": "",
+      "trace_id": "TRACE-86809C083C",
+      "execution_mode": "LIVE"
+    },
+    "ok": true
+  },
+  "generated_at": "2026-08-04T20:30:57.468985+00:00"
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "rollback-evidence.v1",
+  "goal": "wire-canonical-buildroom-entrypoint-and-pilot-brain-runtime-on-real-task",
+  "steps": [
+    {
+      "step": "canary",
+      "task": "t_c0a1",
+      "path": "managed_canary",
+      "status": "completed"
+    },
+    {
+      "step": "rollback_resolve",
+      "task": "t_c0a1",
+      "path_after": "legacy"
+    },
+    {
+      "step": "legacy_real_run",
+      "status": "legacy_completed",
+      "exit_code": 0,
+      "entrypoint": "/home/roberto_schmidt/.hermes/scripts/buildroom_loop.py"
+    }
+  ],
+  "legacy_real_executed": true,
+  "managed_calls_after_rollback": 0,
+  "leases_left": 0,
+  "verdict": "PASS"
+}

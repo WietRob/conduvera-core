@@ -1,0 +1,26 @@
+# Buildroom execution dispatcher configuration — CANONICAL RUNTIME AUTHORITY.
+# Schema: buildroom.dispatcher.v1
+#
+# This is the SINGLE source of truth for the execution-path selection in
+# production (Conduvera Core config layer). Fixture copies under
+# fixtures/buildroom/ are TEST DATA ONLY and never the productive default.
+#
+# Resolution priority (mirrors harness-registry resolve pattern):
+#   1. explicit path (caller-supplied)
+#   2. CONDUVERA_BUILDROOM_DISPATCHER env var
+#   3. this package resource (contracts/buildroom-execution-dispatcher.yaml)
+#   missing -> legacy (conservative default, backward compatible)
+#
+# Contract:
+#   - missing config:                    legacy
+#   - mode = legacy:                     legacy
+#   - mode = managed_canary + allowlisted: managed
+#   - mode = managed_canary + not allowlisted: legacy (deterministic
+#     strangler fallback — NOT 'fail-closed')
+#   - invalid YAML / invalid mode / invalid task id: CONFIG_INVALID, no spawn
+#
+# Canary task ids are validated against the TaskBinding schema (^t_[a-f0-9]+$)
+# at config load time.
+buildroom:
+  execution_path: legacy
+  canary_tasks: []

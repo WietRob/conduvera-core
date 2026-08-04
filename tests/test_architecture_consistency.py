@@ -74,7 +74,9 @@ def test_catalog_status_values_valid():
     valid = {"LIVE_PROVEN", "RELEASE_CANDIDATE", "SERVICE_HEALTHY_NOT_E2E",
              "DESIGNED_ONLY", "BLOCKED", "DEPRECATED",
              "NOT_PROVEN", "NOT_STARTED", "PARTIAL", "NOT_OPERATIONAL",
-             "PARITY_PROVEN_NOT_INTEGRATED", "INTEGRATED_AND_LIVE_PROVEN"}
+             "PARITY_PROVEN_NOT_INTEGRATED", "INTEGRATED_AND_LIVE_PROVEN",
+             "LIVE_PROVEN_AND_ENTRYPOINT_WIRED", "V1_REAL_TASK_PROVEN",
+             "PILOT_PROVEN"}
     for name, comp in data["components"].items():
         assert comp["status"] in valid, f"{comp['feature_id']}: ungültiger Status {comp['status']}"
 
@@ -206,3 +208,21 @@ def test_v3_no_current_not_proven_statement():
     data = yaml.safe_load(CATALOG.read_text(encoding="utf-8"))
     # Der kanonische Status ist LIVE_PROVEN (kein NOT_PROVEN für diesen Pfad)
     assert data["components"]["real_buildroom_execution_path"]["status"] == "LIVE_PROVEN"
+
+
+def test_dod12_diagram_shows_real_call_path_edges():
+    """DOD-12: Diagramm zeigt echte Kanten (Operator -> Dispatcher ->
+    legacy|managed -> Gateway -> Hermes -> LiteLLM -> ODS), nicht nur Knoten."""
+    md = DIAGRAM.read_text(encoding="utf-8")
+    mmd = MMD.read_text(encoding="utf-8")
+    required_edges = [
+        "B5 --> B3",              # Operator Entry -> Dispatcher
+        "B3 -->|legacy| B6",      # Dispatcher -> Legacy Orchestrator
+        "B3 -->|managed_canary| B4",  # Dispatcher -> Managed Caller
+        "B6 --> C4",              # Legacy -> Gateway
+        "B4 --> C4",              # Managed -> Gateway
+        "B4 --> B2",              # Managed -> backend_policy
+    ]
+    for edge in required_edges:
+        assert edge in mmd, f"architecture.mmd fehlt Kante: {edge}"
+        assert edge in md, f"Diagramm-MD fehlt Kante: {edge}"

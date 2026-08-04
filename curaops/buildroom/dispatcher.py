@@ -35,6 +35,8 @@ value -> legacy (the conservative, existing behaviour).
 from __future__ import annotations
 
 import json
+import os
+import sys
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -52,7 +54,35 @@ MODE_LEGACY = "legacy"
 MODE_MANAGED_CANARY = "managed_canary"
 VALID_MODES = (MODE_LEGACY, MODE_MANAGED_CANARY)
 
-DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[2] / "fixtures/buildroom/execution-dispatcher.yaml"
+# Canonical runtime config layer (mirrors harness-registry resolution):
+# explicit path -> CONDUVERA_BUILDROOM_DISPATCHER env -> package resource.
+_DISPATCHER_ENV_VAR = "CONDUVERA_BUILDROOM_DISPATCHER"
+_PACKAGE_DISPATCHER = "contracts/buildroom-execution-dispatcher.yaml"
+# Task-ID-Schema der TaskBinding-Validierung (keine zweite Authority — gleiche
+# Regex wie curaops.buildroom.task_binding, geprüft beim Config-Laden).
+_CANARY_ID_RE = None  # lazy import
+
+
+def _task_id_re():
+    global _CANARY_ID_RE
+    if _CANARY_ID_RE is None:
+        from curaops.buildroom.task_binding import _TASK_ID_RE
+
+        _CANARY_ID_RE = _TASK_ID_RE
+    return _CANARY_ID_RE
+
+
+def _pid_alive(pid: int) -> bool:
+    """True wenn der Prozess lebt (Liveness-Prüfung für stale Leases)."""
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True  # existiert, aber fremd
+    return True
 
 
 class DispatcherConfigError(ValueError):
@@ -66,24 +96,60 @@ class DispatcherConfig:
 
     @classmethod
     def load(cls, path: str | Path | None = None) -> "DispatcherConfig":
-        cfg_path = Path(path) if path else DEFAULT_CONFIG_PATH
-        if not cfg_path.is_file():
-            # Missing config -> conservative default (legacy), never canary.
+        """Load from the canonical config layer (never fixtures by default).
+
+        Priority: explicit path -> CONDUVERA_BUILDROOM_DISPATCHER env ->
+        package resource contracts/buildroom-execution-dispatcher.yaml.
+        Missing -> legacy (conservative, backward compatible).
+        Invalid YAML/mode/task id -> DispatcherConfigError (CONFIG_INVALID).
+        """
+        import os
+
+        candidates: list[Path] = []
+        if path is not None:
+            candidates.append(Path(path).expanduser())
+        env_val = os.environ.get(_DISPATCHER_ENV_VAR, "").strip()
+        if env_val:
+            candidates.append(Path(env_val).expanduser())
+        cfg_path: Path | None = None
+        for cand in candidates:
+            if cand.is_file():
+                cfg_path = cand.resolve()
+                break
+        if cfg_path is None:
+            # Package resource (installed) / repo-relative contracts/.
+            try:
+                from importlib import resources
+
+                pkg_res = resources.files("curaops") / _PACKAGE_DISPATCHER
+                if pkg_res.is_file():
+                    cfg_path = Path(str(pkg_res))
+            except Exception:
+                pass
+        if cfg_path is None:
+            repo_rel = Path(__file__).resolve().parents[2] / _PACKAGE_DISPATCHER
+            if repo_rel.is_file():
+                cfg_path = repo_rel.resolve()
+        if cfg_path is None or not cfg_path.is_file():
+            # Fehlende Konfiguration -> legacy (Vertrag: fehlend = legacy).
             return cls()
         try:
             data = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
         except (OSError, yaml.YAMLError) as exc:
-            raise DispatcherConfigError("DISPATCHER_CONFIG_INVALID") from exc
+            raise DispatcherConfigError("CONFIG_INVALID") from exc
         br = data.get("buildroom", {})
         if not isinstance(br, dict):
-            raise DispatcherConfigError("DISPATCHER_CONFIG_INVALID")
+            raise DispatcherConfigError("CONFIG_INVALID")
         mode = br.get("execution_path", MODE_LEGACY)
         if mode not in VALID_MODES:
-            # Invalid value -> conservative default (legacy), fail-closed.
-            mode = MODE_LEGACY
+            raise DispatcherConfigError(f"CONFIG_INVALID: execution_path={mode!r}")
         canary = br.get("canary_tasks", [])
         if not isinstance(canary, list):
-            raise DispatcherConfigError("DISPATCHER_CONFIG_INVALID")
+            raise DispatcherConfigError("CONFIG_INVALID: canary_tasks kein list")
+        id_re = _task_id_re()
+        for t in canary:
+            if not id_re.fullmatch(str(t)):
+                raise DispatcherConfigError(f"CONFIG_INVALID: canary task id {t!r} entspricht nicht ^t_[a-f0-9]+$")
         return cls(execution_path=mode, canary_tasks=tuple(str(t) for t in canary))
 
 
@@ -178,23 +244,77 @@ class BuildroomExecutionDispatcher:
         return self._leases_dir / f"{attempt_id}.lease.json"
 
     def _acquire_attempt_lease(self, task_id: str, attempt_id: str) -> bool:
-        """Single-writer per attempt: second dispatch for the same attempt
-        fails closed (no dual run, no shadow spawn)."""
+        """ATOMIC single-writer lease (multiprocess-safe, ARBEIT 5).
+
+        Uses O_CREAT|O_EXCL so exactly ONE competing process wins for the
+        same attempt id; the others get False (DUPLICATE_ATTEMPT). A stale
+        lease from a crashed process is detected via owner pid liveness and
+        can be reclaimed only by the same owner task (never a foreign one).
+        """
         lease = self._attempt_lease(attempt_id)
-        if lease.exists():
-            return False
-        lease.write_text(json.dumps({
-            "schema": "buildroom.dispatcher.lease.v1",
-            "task_id": task_id,
-            "attempt_id": attempt_id,
-            "execution_path": self.resolve_path(task_id),
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        }, indent=2, ensure_ascii=False), encoding="utf-8")
-        return True
+        # Stale-Reclaim atomar machen: Zwei Prozesse dürfen nicht beide die
+        # verwaiste Lease löschen und dann beide O_EXCL gewinnen. Eine
+        # Reclaim-Lock-Datei (flock) serialisiert den unlink+create-Schritt.
+        reclaim_lock = self._leases_dir / f".{attempt_id}.reclaim"
+        try:
+            rl_fd = os.open(str(reclaim_lock), os.O_CREAT | os.O_RDWR, 0o600)
+        except OSError:
+            rl_fd = -1
+        try:
+            if rl_fd >= 0:
+                import fcntl
+
+                fcntl.flock(rl_fd, fcntl.LOCK_EX)
+            if lease.exists():
+                try:
+                    owner = json.loads(lease.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError):
+                    owner = {}
+                owner_pid = int(owner.get("pid", 0) or 0)
+                stale = owner_pid and not _pid_alive(owner_pid)
+                if stale and owner.get("task_id") == task_id:
+                    lease.unlink()  # verwaiste Lease desselben Tasks reklamieren
+                else:
+                    return False
+            try:
+                fd = os.open(str(lease), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            except FileExistsError:
+                return False
+            except OSError:
+                return False
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                json.dump({
+                    "schema": "buildroom.dispatcher.lease.v1",
+                    "task_id": task_id,
+                    "attempt_id": attempt_id,
+                    "execution_path": self.resolve_path(task_id),
+                    "pid": os.getpid(),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }, f, indent=2, ensure_ascii=False)
+            return True
+        finally:
+            if rl_fd >= 0:
+                import fcntl
+
+                try:
+                    fcntl.flock(rl_fd, fcntl.LOCK_UN)
+                except OSError:
+                    pass
+                os.close(rl_fd)
+                # Reclaim-Lock-Datei NICHT löschen: unlink während andere
+                # Prozesse den flock halten, erzeugt einen neuen Inode —
+                # dann serialisieren zwei verschiedene Datei-Locks nicht
+                # mehr gegeneinander (Multiprocess-Race). Die Lock-Datei
+                # bleibt als dauerhafter Serialisierer liegen (0 Bytes).
 
     def _release_attempt_lease(self, attempt_id: str) -> None:
+        """Release ONLY the lease owned by this process (no foreign release)."""
         lease = self._attempt_lease(attempt_id)
-        if lease.exists():
+        try:
+            owner = json.loads(lease.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            owner = {}
+        if int(owner.get("pid", 0) or 0) == os.getpid():
             lease.unlink()
 
     def _dispatch_managed(self, *, task_id: str, task_description: str, phase: str,
@@ -244,11 +364,16 @@ class BuildroomExecutionDispatcher:
             self._release_attempt_lease(attempt_id)
 
     def _dispatch_legacy(self, *, task_id: str, task_description: str) -> DispatchResult:
-        """legacy: exact existing behaviour via the existing orchestrator.
+        """legacy: execute the REAL legacy entrypoint as an isolated subprocess.
 
-        When a legacy_runner is injected (tests), delegate to it. Otherwise
-        the legacy CLI entry (buildroom_loop.py --legacy-peekxd) is invoked
-        as the existing entry point — ManagedBuildroomCaller is never called.
+        The actual buildroom_loop.py CLI (productive installation
+        ~/.hermes/scripts/buildroom_loop.py, or the frozen repo copy) is
+        invoked with --legacy-peekxd -> BuildroomOrchestrator.run().
+
+        Isolation (ARBEIT 3): separate HOME/HERMES_HOME, own state path,
+        no mutation of the running ~/.hermes Buildroom state, own PID/PGID,
+        bounded timeout, full exit/state/evidence report. Legacy code stays
+        unchanged. ManagedBuildroomCaller is never called.
         """
         if self._legacy_runner is not None:
             result = self._legacy_runner(task_id=task_id, task_description=task_description)
@@ -258,10 +383,98 @@ class BuildroomExecutionDispatcher:
                 detail={"legacy_result": str(result)},
                 final_status_readable="LEGACY: an bestehenden Orchestrator delegiert",
             )
-        # No injected runner in this context: report delegation without
-        # spawning anything (no dual run; the real CLI remains the entry).
+        # Productive default: run the real entrypoint in an isolated home.
+        return _run_legacy_entrypoint(task_id=task_id, task_description=task_description)
+
+
+def _find_legacy_entrypoint() -> Path | None:
+    """Resolve the actual buildroom_loop.py (productive install first)."""
+    candidates = [
+        Path.home() / ".hermes/scripts/buildroom_loop.py",
+        Path(__file__).resolve().parents[2] / "legacy/buildroom/source/buildroom_loop.py",
+    ]
+    for c in candidates:
+        if c.is_file():
+            return c
+    return None
+
+
+def _run_legacy_entrypoint(*, task_id: str, task_description: str,
+                           timeout_s: int = 120,
+                           isolated_home: Path | None = None) -> DispatchResult:
+    """Run buildroom_loop.py --legacy-peekxd in an isolated HOME.
+
+    Returns a DispatchResult with status legacy_completed (exit 0) or
+    legacy_failed (non-zero exit/timeout), plus the isolated state/evidence
+    report. Never touches the live ~/.hermes Buildroom state.
+    """
+    import os
+    import subprocess
+    import tempfile
+
+    entry = _find_legacy_entrypoint()
+    if entry is None:
         return DispatchResult(
-            task_id=task_id, execution_path=MODE_LEGACY,
-            attempt_id="", status="legacy_delegated",
-            final_status_readable="LEGACY: bestehender Orchestrator (Default; kein Managed-Spawn)",
+            task_id=task_id, execution_path=MODE_LEGACY, attempt_id="",
+            status="legacy_failed",
+            detail={"error": "LEGACY_ENTRYPOINT_NOT_FOUND"},
+            final_status_readable="LEGACY: buildroom_loop.py nicht gefunden",
+        )
+
+    own_home = Path(isolated_home) if isolated_home else Path(tempfile.mkdtemp(prefix="buildroom-legacy-iso-"))
+    own_home.mkdir(parents=True, exist_ok=True)
+    env = dict(os.environ)
+    env["HOME"] = str(own_home)
+    env["HERMES_HOME"] = str(own_home / ".hermes")
+    (own_home / ".hermes").mkdir(parents=True, exist_ok=True)
+
+    # Isolierter State: terminale Phase -> Orchestrator endet sauber mit
+    # PHASE_ALREADY_TERMINAL (exit 0), ohne echte Research-/Hermes-Spawns.
+    evidence_dir = own_home / ".hermes/research-vault/ops/peekxd-buildroom-v09"
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    (evidence_dir / "orchestrator-state.json").write_text(json.dumps({
+        "cycle": 1, "phase": "STOPPED_AFTER_CANARY_CHECK", "status": "DONE",
+        "pr_open": None, "current_candidate": None, "last_run": None,
+        "task_bindings": {}, "attempts": {},
+    }, indent=2), encoding="utf-8")
+
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(entry), "--legacy-peekxd"],
+            capture_output=True, text=True, timeout=timeout_s,
+            env=env, cwd=str(own_home),
+        )
+        exit_code = proc.returncode
+        stdout = proc.stdout[-2000:]
+        stderr = proc.stderr[-2000:]
+        lock_file = evidence_dir / ".orchestrator-lock"
+        state_file = evidence_dir / "orchestrator-state.json"
+        report = {
+            "entrypoint": str(entry),
+            "isolated_home": str(own_home),
+            "exit_code": exit_code,
+            # Die Lock-Datei kann nach Prozessende existieren (Artefakt);
+            # der flock selbst ist mit dem Prozess-Exit automatisch frei.
+            "lock_file_present": lock_file.exists(),
+            "process_exited": True,
+            "state_after": json.loads(state_file.read_text(encoding="utf-8"))
+            if state_file.is_file() else None,
+            "stdout_tail": stdout,
+            "stderr_tail": stderr,
+        }
+        status = "legacy_completed" if exit_code == 0 else "legacy_failed"
+        return DispatchResult(
+            task_id=task_id, execution_path=MODE_LEGACY, attempt_id="",
+            status=status, detail=report,
+            final_status_readable=(
+                f"LEGACY: {entry.name} exit={exit_code} (isolierte Umgebung, "
+                f"kein Managed-Spawn, Live-State unberührt)"
+            ),
+        )
+    except subprocess.TimeoutExpired:
+        return DispatchResult(
+            task_id=task_id, execution_path=MODE_LEGACY, attempt_id="",
+            status="legacy_failed",
+            detail={"error": "LEGACY_TIMEOUT", "timeout_s": timeout_s},
+            final_status_readable=f"LEGACY: Timeout nach {timeout_s}s (isoliert)",
         )

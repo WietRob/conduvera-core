@@ -41,6 +41,9 @@ allowed_patterns:
   - "fixtures/live/dispatcher-canary/run-*/managed-state.json"
   - "fixtures/live/dispatcher-canary/run-*/state/call-trace.json"
   - "fixtures/live/dispatcher-canary/run-*/evidence/mxos-evidence-*.json"
+  # Rollback evidence (managed_canary -> legacy -> echter Legacy-Lauf)
+  - "fixtures/live/verify_rollback_evidence.py"
+  - "fixtures/live/rollback/rollback-evidence.json"
   # Dispatcher configuration (single config authority, static)
   - "fixtures/buildroom/execution-dispatcher.yaml"
   - "fixtures/buildroom/execution-dispatcher-canary.yaml"
