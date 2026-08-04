@@ -5,7 +5,7 @@
   "overall_status": "TEILBESTANDEN",
   "status_components": {
     "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "PENDING (vor Commit)",
+    "FINAL_REPO_HEAD": "934ae4396a76a75351982937106578d23b9bea8e",
     "SKILL_SELF_IMPROVEMENT": "ALLOWED",
     "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
     "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
@@ -16,7 +16,8 @@
     "OPERATIONAL_PRODUCTION": "NOT_YET",
     "REAL_BUILDROOM_EXECUTION_PATH": "LIVE_PROVEN",
     "FULL_SYSTEM": "TEILBESTANDEN",
-    "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN"
+    "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN",
+    "SYSTEM_BASELINE": "NOT_REQUESTED (Owner-Steuerung 2026-08-04)"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -181,7 +182,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T18:51:57.987897+00:00",
+  "generated_at": "2026-08-04T18:58:51.340426+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -924,8 +925,12 @@
       "evidence": "regression_full_status_truth.out (374 passed, 3 skipped); porcelain leer vor Commit"
     },
     "DOD-08": {
-      "result": "PENDING",
-      "check": "review_auf_exakt_korrekturcommit"
+      "result": "BESTANDEN",
+      "check": "review_auf_exakt_korrekturcommit",
+      "reviewer_session": "deleg_994cd0e1 (frische Session, kein Implementierungskontext)",
+      "commit_sha": "934ae4396a76a75351982937106578d23b9bea8e",
+      "verdict_file": "evidence/goals/CONDUVERA-FIXTURE-001/reviewer-verdict-status-truth.md",
+      "note": "BESTANDEN, 0 Findings. Statuskonsistenz (Repo+Brain+Katalog+Matrix) PASS; V2/V3 sauber (0 aktuelle PARITY/NOT_PROVEN); Caller-Authority PASS (ManagedBuildroomCaller einziger produktiver Caller, FixtureRunner test-only); keine Code-/Runtime-Aenderung (nur Katalog+Tests+Evidence); Konsistenztests 12/12 + Suite 374/3; kein Scope-Creep; Commit-Identitaet exakt."
     }
   },
   "status_truth_evidence_checks": [
