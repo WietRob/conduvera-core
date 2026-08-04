@@ -1,0 +1,16 @@
+{
+  "goal_id": "CONDUVERA-FIXTURE-001",
+  "trace_id": "TRACE-809BE70F55",
+  "task_id": "TASK-260E7464",
+  "attempt_id": "ATT-0FD7EFC3",
+  "session_id": "SES-6E260C93",
+  "adapter_id": "hermes",
+  "adapter_version": "hermes-adapter.v1",
+  "pid": 3688597,
+  "pgid": 3688597,
+  "create_time": "Di Aug  4 09:09:34 2026",
+  "route": "workload/local",
+  "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+  "execution_mode": "LIVE",
+  "evidence_event": "fixture.run.completed"
+}
