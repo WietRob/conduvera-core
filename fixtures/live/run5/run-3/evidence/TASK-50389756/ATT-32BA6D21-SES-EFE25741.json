@@ -1,14 +1,14 @@
 {
   "schema_version": "MXOS-EVIDENCE-1.0.0",
-  "task_id": "TASK-C73742DF",
-  "attempt_id": "ATT-04C41818",
-  "session_id": "SES-A8F1B8FB",
+  "task_id": "TASK-50389756",
+  "attempt_id": "ATT-32BA6D21",
+  "session_id": "SES-EFE25741",
   "evidence": {
-    "session_id": "mxfix_79b6058a0659",
+    "session_id": "mxfix_3de54777f0de",
     "status": "completed",
     "artifacts": [
       {
-        "path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/run5/run-2/worktrees/SES-A8F1B8FB/mxfix_79b6058a0659.response.txt",
+        "path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/run5/run-3/worktrees/SES-EFE25741/mxfix_3de54777f0de.response.txt",
         "sha256": "sha256:c8a786cab2621aba8724e063b6f391edcbb431f43228959a03c507c3eae90a8b"
       }
     ],
@@ -20,19 +20,19 @@
       "model": "fixture-model-local"
     },
     "handle": {
-      "session_id": "mxfix_79b6058a0659",
-      "pid": 3502589,
-      "pgid": 3502589,
-      "create_time": "Di Aug  4 07:11:12 2026",
-      "hermes_home": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/run5/run-2/worktrees/SES-A8F1B8FB/hermes-home/profiles/fixture-live",
+      "session_id": "mxfix_3de54777f0de",
+      "pid": 3688493,
+      "pgid": 3688493,
+      "create_time": "Di Aug  4 09:09:29 2026",
+      "hermes_home": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/run5/run-3/worktrees/SES-EFE25741/hermes-home/profiles/fixture-live",
       "status": "completed",
       "exitcode": 0,
-      "started_at": "2026-08-04T05:11:12.406528+00:00",
-      "finished_at": "2026-08-04T05:11:17.536574+00:00",
-      "output_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/run5/run-2/worktrees/SES-A8F1B8FB/mxfix_79b6058a0659.response.txt",
+      "started_at": "2026-08-04T07:09:29.510813+00:00",
+      "finished_at": "2026-08-04T07:09:34.642073+00:00",
+      "output_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/run5/run-3/worktrees/SES-EFE25741/mxfix_3de54777f0de.response.txt",
       "route": "workload/local",
       "model_identity": "",
-      "trace_id": "TRACE-75006DA5AF",
+      "trace_id": "TRACE-C9FDB97600",
       "execution_mode": "LIVE"
     },
     "ok": true
@@ -40,9 +40,9 @@
   "events": [
     {
       "schema_version": "MXOS-EVIDENCE-1.0.0",
-      "event_id": "mxev_a82029c9bbbc42b2a3cc068f94693f70",
+      "event_id": "mxev_157b9979b6aa4712b47768c1a6e2751c",
       "event_type": "fixture.attempt.bound",
-      "occurred_at": "2026-08-04T05:11:12Z",
+      "occurred_at": "2026-08-04T07:09:29Z",
       "producer": {
         "name": "conduvera-core",
         "version": "0.1.0"
@@ -54,10 +54,10 @@
       "severity": "info",
       "payload": {
         "goal_id": "CONDUVERA-FIXTURE-001",
-        "trace_id": "TRACE-75006DA5AF",
-        "task_id": "TASK-C73742DF",
-        "attempt_id": "ATT-04C41818",
-        "session_id": "SES-A8F1B8FB",
+        "trace_id": "TRACE-C9FDB97600",
+        "task_id": "TASK-50389756",
+        "attempt_id": "ATT-32BA6D21",
+        "session_id": "SES-EFE25741",
         "task": "5x live verification run"
       },
       "integrity": {
@@ -66,15 +66,15 @@
           "event_hash",
           "integrity.hash"
         ],
-        "hash": "sha256:a612816d49a5e1236acf609eda25064e460242429ce75cd3fd7b41099c5128c2"
+        "hash": "sha256:5f578fd2211663fe55421260f13dc1eca9c10dfcd2dd3048d75430f67fe08c10"
       },
-      "event_hash": "sha256:a612816d49a5e1236acf609eda25064e460242429ce75cd3fd7b41099c5128c2"
+      "event_hash": "sha256:5f578fd2211663fe55421260f13dc1eca9c10dfcd2dd3048d75430f67fe08c10"
     },
     {
       "schema_version": "MXOS-EVIDENCE-1.0.0",
-      "event_id": "mxev_c9bbb5e55c2a4c498a636ace7d0bc9d1",
+      "event_id": "mxev_12842c311873449394c2c9d019cc4b4a",
       "event_type": "fixture.run.started",
-      "occurred_at": "2026-08-04T05:11:12Z",
+      "occurred_at": "2026-08-04T07:09:29Z",
       "producer": {
         "name": "conduvera-core",
         "version": "0.1.0"
@@ -86,10 +86,10 @@
       "severity": "info",
       "payload": {
         "goal_id": "CONDUVERA-FIXTURE-001",
-        "trace_id": "TRACE-75006DA5AF",
-        "task_id": "TASK-C73742DF",
-        "attempt_id": "ATT-04C41818",
-        "session_id": "SES-A8F1B8FB",
+        "trace_id": "TRACE-C9FDB97600",
+        "task_id": "TASK-50389756",
+        "attempt_id": "ATT-32BA6D21",
+        "session_id": "SES-EFE25741",
         "harness": "hermes",
         "model_binding": {
           "kind": "gateway_alias",
@@ -106,9 +106,9 @@
           "event_hash",
           "integrity.hash"
         ],
-        "hash": "sha256:aeed3ab139a9ca252fe355efb217a8207c4cb47dce7cb2bf517ffe1ca82c0630"
+        "hash": "sha256:9054046c2c1213cde7883cccacb247859460cd5b3333b90247eb23729cd17d32"
       },
-      "event_hash": "sha256:aeed3ab139a9ca252fe355efb217a8207c4cb47dce7cb2bf517ffe1ca82c0630"
+      "event_hash": "sha256:9054046c2c1213cde7883cccacb247859460cd5b3333b90247eb23729cd17d32"
     }
   ]
 }

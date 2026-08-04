@@ -1,0 +1,392 @@
+# Conduvera System Capability Catalog (maschinenlesbar)
+# Schema: system-capabilities.v1 | Goal: establish-canonical-pre-buildroom-system-baseline
+# Status-Legende:
+#   LIVE_PROVEN                 - funktional bewiesen (Live-Lauf/Test mit Evidence)
+#   RELEASE_CANDIDATE           - live bewiesen + unabhängig reviewt (Release-Kandidat)
+#   SERVICE_HEALTHY_NOT_E2E     - Service läuft, aber kein End-to-End-Beweis
+#   DESIGNED_ONLY               - nur Design/Doku, keine Implementierung
+#   BLOCKED                     - blockiert (fehlendes Gate/Auth/Recovery)
+#   DEPRECATED                  - ersetzt/obsolet
+
+schema: system-capabilities.v1
+generated_at: 2026-08-04
+baseline_head: 5d2f0ba51ddd362296661914f87de96a4c7ba68a
+components:
+
+  conduvera_core:
+    feature_id: CORE-001
+    funktion: "Einzige Task-/Attempt-/Session-/Policy-/Evidence-Autorität; orchestriert Fixture-Läufe über das interne Buildroom-Modul"
+    owner: "Conduvera Core (internes Modul)"
+    repository: "internes Modul (matrix-os-wt-goal-contract curaops/)"
+    adapter_contract: "HarnessGatewayService (öffentlicher Lifecycle)"
+    runtime_dependencies: ["HarnessGatewayService", "LiteLLM :4000", "ODS text-Modus"]
+    security_gate: "ExecutionMode Pflichtfeld; kein stiller Default"
+    evidence_output: "call-trace.json, MXOS-EVIDENCE-1.0.0, goal-receipt.json"
+    status: LIVE_PROVEN
+    proof: "curaops/buildroom/fixture_runner.py; fixtures/live/core-run/core-run-evidence.json; Commit 5d2f0ba"
+    modularity: "herauslösbar (Adapter-grenzen, keine harten Imports)"
+    missing_gate: "OPERATIONAL_PRODUCTION (separate Proofs)"
+
+  buildroom_module:
+    feature_id: CORE-002
+    funktion: "Internes Execution-/Arbeitsmodus-Modul von Conduvera Core; verwaltet Fixture-Attempts"
+    owner: "Conduvera Core"
+    repository: "internes Modul (curaops/buildroom/)"
+    adapter_contract: "kein eigener; nutzt HarnessGatewayService"
+    runtime_dependencies: ["conduvera_core"]
+    security_gate: "Single-Writer; keine parallelen State-Writer"
+    evidence_output: "evidence/TASK-*/ATT-*.json, run-ledger (Test-Fixture)"
+    status: LIVE_PROVEN
+    proof: "tests/buildroom/test_core_internal_seam.py; Commit 5d2f0ba"
+    modularity: "intern; Legacy-Module (backend_policy/no_progress/task_binding) NOCH NICHT portiert"
+    missing_gate: "REAL_BUILDROOM_EXECUTION_PATH (NOT_PROVEN)"
+
+  harness_gateway_service:
+    feature_id: HARNESS-001
+    funktion: "EINZIGER öffentlicher Lifecycle-Einstieg: start_session, await_completion, status/cancel/timeout, collect_evidence; ExecutionMode-Pflicht"
+    owner: "Conduvera Core"
+    repository: "internes Modul (curaops/harness/gateway.py)"
+    adapter_contract: "HarnessGatewayService (öffentlich); _load_adapter privat"
+    runtime_dependencies: ["HarnessAdapterRegistry (intern)", "contracts/harness-registry.yaml"]
+    security_gate: "Concrete Adapter nie an Caller; Registry cwd-unabhängig (explizit→Env→Package)"
+    evidence_output: "AdapterResult mit strukturierten Codes (ADAPTER_PROTOCOL_ERROR, CAPABILITY_UNAVAILABLE, ...)"
+    status: RELEASE_CANDIDATE
+    proof: "reviewer-verdict-hardening.md (c6ffc48 APPROVE) + reviewer-verdict final-head (5d2f0ba APPROVE)"
+    modularity: "herauslösbar (einziger Einstieg, Test-Only-Gateway getrennt)"
+    missing_gate: "OPERATIONAL_PRODUCTION"
+
+  hermes_adapter:
+    feature_id: HARNESS-002
+    funktion: "Hermes starten/managen: isolierte HERMES_HOME, Env-Allowlist (keine Parent-Pointer), Fingerprint vor jedem Signal, TERM→Grace→KILL, Await-Completion"
+    owner: "Conduvera Core"
+    repository: "internes Modul (curaops/harness/hermes_adapter.py)"
+    adapter_contract: "HermesAdapter (hermes-adapter.v1), nur über Gateway geladen"
+    runtime_dependencies: ["Hermes CLI", "LiteLLM :4000", "ODS text-Modus", "LITELLM_API_KEY (bestehende Injection)"]
+    security_gate: "Env-Allowlist (PATH/HOME/HERMES_*/LITELLM_API_KEY/Locale); HERMES_PROFILE/CONFIG sessionlokal; Poison-getestet"
+    evidence_output: "SessionHandle (pid/pgid/create_time/execution_mode), response.txt-SHA, route-Snapshot"
+    status: LIVE_PROVEN
+    proof: "fixtures/live/run5/live-5x-evidence.json (PASS 5/5, 0 Zombie/Orphan); Poison-Live-Lauf; Commit 5d2f0ba"
+    modularity: "herauslösbar (Adapter, kein Core-Import des konkreten Adapters)"
+    missing_gate: "OPERATIONAL_PRODUCTION"
+
+  opencode_adapter:
+    feature_id: HARNESS-003
+    funktion: "OpenCode als Harness-Adapter (geplant)"
+    owner: "Conduvera Core"
+    repository: "intern (noch nicht implementiert)"
+    adapter_contract: "HarnessAdapterProtocol (geplant)"
+    runtime_dependencies: ["OpenCode (Host-Service)"]
+    security_gate: "n/a (nicht implementiert)"
+    evidence_output: "keine"
+    status: DESIGNED_ONLY
+    proof: "docs/CONDUVERA_ARCHITECTURE_DIAGRAM.md (H2/UI5)"
+    modularity: "herauslösbar geplant"
+    missing_gate: "Adapter-Implementierung + Live-Beweis"
+
+  codex_cli_adapter:
+    feature_id: HARNESS-004
+    funktion: "Codex CLI als Harness (geplant) — eigener Auth-Store (~/.codex), direkter Backend-Pfad, getrennt von Codex-OAuth"
+    owner: "Conduvera Core"
+    repository: "intern (noch nicht implementiert)"
+    adapter_contract: "HarnessAdapterProtocol (geplant)"
+    runtime_dependencies: ["Codex CLI", "~/.codex (eigener Auth-Store)"]
+    security_gate: "Codex CLI ≠ Codex OAuth (Terminologie-Gate)"
+    evidence_output: "keine"
+    status: DESIGNED_ONLY
+    proof: "docs/CONDUVERA_ARCHITECTURE_DIAGRAM.md (H3/C1-C3); Terminology_Codex_Harness_vs_OAuth.md"
+    modularity: "herauslösbar geplant"
+    missing_gate: "Adapter-Implementierung + Live-Beweis"
+
+  pi_adapter:
+    feature_id: HARNESS-005
+    funktion: "Pi als Harness (geplant)"
+    owner: "Conduvera Core"
+    repository: "intern (noch nicht implementiert)"
+    adapter_contract: "HarnessAdapterProtocol (geplant)"
+    runtime_dependencies: ["Pi"]
+    security_gate: "PI_START_BLOCKED (Safety-Gate fehlt)"
+    evidence_output: "keine"
+    status: BLOCKED
+    proof: "HCP-Notizen; PI_START_BLOCKED"
+    modularity: "herauslösbar geplant"
+    missing_gate: "Safety-Gate + Implementierung"
+
+  litellm_routing:
+    feature_id: MODEL-001
+    funktion: "Modell-Gateway; workload/local-Route für Text-Inferenz; KEINE Task-/Session-Autorität"
+    owner: "ODS / ai-stack (Runtime-Authority)"
+    repository: "externer Container (dream-litellm :4000)"
+    adapter_contract: "LiteLLM-API (OpenAI-kompatibel)"
+    runtime_dependencies: ["llama-server (text)", "LITELLM_API_KEY"]
+    security_gate: "nur Text-Modus für workload/local"
+    evidence_output: "Route-Snapshot (route-manifest.snapshot.yaml)"
+    status: LIVE_PROVEN
+    proof: "fixtures/live/core-run/route-snapshot/route-manifest.snapshot.yaml (active_mode: text, Qwen-Identität); live-5x-evidence"
+    modularity: "extern (Container), austauschbar"
+    missing_gate: "keiner (für diese Route)"
+
+  cliproxyapi_codex_oauth:
+    feature_id: MODEL-002
+    funktion: "OAuth-Broker für Codex-OAuth (geteilter Broker für Hermes/OpenCode-Routen)"
+    owner: "ODS / ai-stack"
+    repository: "externer Service"
+    adapter_contract: "OAuth-Broker"
+    runtime_dependencies: ["Codex-OAuth"]
+    security_gate: "CLIProxyAPI nur Broker, nie Task-Autorität"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "capability-matrix.yaml (cliproxyapi in CORE_SERVICES)"
+    modularity: "extern"
+    missing_gate: "E2E-Beweis"
+
+  ods_modes:
+    feature_id: ODS-001
+    funktion: "GPU-Modi text/vision/bootstrap/image; einzige Moduswechsel-Schnittstelle: 'ai-stack model use'"
+    owner: "ODS / ai-stack (Runtime-/GPU-Authority)"
+    repository: "extern (ai-stack CLI + systemd-Container)"
+    adapter_contract: "ai-stack CLI"
+    runtime_dependencies: ["GPU (TUXEDO Stellaris)", "systemd-Container"]
+    security_gate: "Buildroom/Conduvera wechseln NIE implizit Modi; nur ai-stack model use"
+    evidence_output: "capability-matrix.yaml (gpu_modes mit switch_verified)"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "~/.local/share/ai-stack/capability-matrix.yaml (text/vision switch_verified)"
+    modularity: "extern"
+    missing_gate: "E2E-Integration über Conduvera"
+
+  local_text_inference:
+    feature_id: ODS-002
+    funktion: "Lokale Text-Inferenz (Qwen3.6-35B) über llama-server :8080"
+    owner: "ODS / ai-stack"
+    repository: "extern (dream-llama-server)"
+    adapter_contract: "OpenAI-kompatibel"
+    runtime_dependencies: ["GPU", "text-Modus"]
+    security_gate: "nur text-Modus"
+    evidence_output: "Modellidentität im Route-Snapshot"
+    status: LIVE_PROVEN
+    proof: "core-run-evidence.json model_identity: openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf; Antwort CONDUVERA_FIXTURE_OK"
+    modularity: "extern"
+    missing_gate: "keiner (für Fixture-Pfad)"
+
+  local_vision_inference:
+    feature_id: ODS-003
+    funktion: "Lokale Vision-Inferenz (gemma-4-31B) im vision-Modus"
+    owner: "ODS / ai-stack"
+    repository: "extern"
+    adapter_contract: "OpenAI-kompatibel"
+    runtime_dependencies: ["GPU", "vision-Modus"]
+    security_gate: "Moduswechsel nur via ai-stack model use"
+    evidence_output: "capability-matrix.yaml"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "capability-matrix.yaml (vision switch_verified)"
+    modularity: "extern"
+    missing_gate: "E2E-Beweis"
+
+  comfyui:
+    feature_id: CAP-001
+    funktion: "Bildgenerierung als ODS-Capability"
+    owner: "ODS / ai-stack (IMAGE_SERVICES)"
+    repository: "extern"
+    adapter_contract: "Capability-Adapter (geplant)"
+    runtime_dependencies: ["GPU", "image-Modus"]
+    security_gate: "Capability, keine Control Plane"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "capability-matrix.yaml (IMAGE_SERVICES: [comfyui])"
+    modularity: "herauslösbar via Adapter"
+    missing_gate: "Capability-Adapter + E2E"
+
+  qdrant_embeddings_rag:
+    feature_id: CAP-002
+    funktion: "Qdrant + Embeddings + Perplexica (RAG)"
+    owner: "ODS / ai-stack (RAG_SERVICES)"
+    repository: "extern"
+    adapter_contract: "Capability-Adapter (geplant)"
+    runtime_dependencies: ["qdrant", "embeddings", "perplexica"]
+    security_gate: "Capability, keine Control Plane"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "capability-matrix.yaml (RAG_SERVICES)"
+    modularity: "herauslösbar via Adapter"
+    missing_gate: "Capability-Adapter + E2E"
+
+  whisper_kokoro_voice:
+    feature_id: CAP-003
+    funktion: "Whisper (STT) + Kokoro/TTS (Voice)"
+    owner: "ODS / ai-stack (VOICE_SERVICES)"
+    repository: "extern"
+    adapter_contract: "Capability-Adapter (geplant)"
+    runtime_dependencies: ["whisper", "tts"]
+    security_gate: "Capability, keine Control Plane"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "capability-matrix.yaml (VOICE_SERVICES)"
+    modularity: "herauslösbar via Adapter"
+    missing_gate: "Capability-Adapter + E2E"
+
+  n8n:
+    feature_id: CAP-004
+    funktion: "Workflow-Automatisierung (separates Login)"
+    owner: "ODS / ai-stack (WORKFLOW_SERVICES)"
+    repository: "extern"
+    adapter_contract: "Capability-Adapter (geplant)"
+    runtime_dependencies: ["n8n"]
+    security_gate: "Capability, keine Control Plane; separates Login"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "capability-matrix.yaml (WORKFLOW_SERVICES: [n8n]); UI_Consolidation (5678)"
+    modularity: "herauslösbar via Adapter"
+    missing_gate: "Capability-Adapter + E2E"
+
+  search:
+    feature_id: CAP-005
+    funktion: "SearXNG + Perplexica (Search)"
+    owner: "ODS / ai-stack (CORE_SERVICES: searxng; RAG: perplexica)"
+    repository: "extern"
+    adapter_contract: "Capability-Adapter (geplant)"
+    runtime_dependencies: ["searxng", "perplexica"]
+    security_gate: "Capability, keine Control Plane"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "capability-matrix.yaml"
+    modularity: "herauslösbar via Adapter"
+    missing_gate: "Capability-Adapter + E2E"
+
+  langfuse_telemetry:
+    feature_id: OBS-001
+    funktion: "Langfuse (LLM-Telemetry/Observability)"
+    owner: "ODS / ai-stack (OBSERVABILITY_SERVICES)"
+    repository: "extern"
+    adapter_contract: "Capability-Adapter (geplant)"
+    runtime_dependencies: ["langfuse + Worker/Postgres/ClickHouse/Redis/MinIO"]
+    security_gate: "Telemetrie, keine Control Plane"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "capability-matrix.yaml (OBSERVABILITY_SERVICES)"
+    modularity: "herauslösbar via Adapter"
+    missing_gate: "Capability-Adapter + E2E"
+
+  open_webui:
+    feature_id: UI-001
+    funktion: "Browser-UI (Open WebUI :3000) — aktuell BLOCKED_AUTH_RECOVERY"
+    owner: "ODS / ai-stack (CORE_SERVICES: open-webui)"
+    repository: "extern"
+    adapter_contract: "Browser-Ebene"
+    runtime_dependencies: ["open-webui"]
+    security_gate: "Auth-Wiederherstellung offen; KEIN Reset; kein produktiver Chat"
+    evidence_output: "keine"
+    status: BLOCKED
+    proof: "UI_Consolidation.md (BLOCKED_AUTH_RECOVERY); Current_State.md"
+    modularity: "extern"
+    missing_gate: "Auth-Recovery"
+
+  dashboard:
+    feature_id: UI-002
+    funktion: "Dashboard (:3001) — Systemübersicht; KEIN Modellwechsel"
+    owner: "ODS / ai-stack (CORE_SERVICES: dashboard, dashboard-api)"
+    repository: "extern"
+    adapter_contract: "Browser-Ebene"
+    runtime_dependencies: ["dashboard-api"]
+    security_gate: "Dashboard darf nie Modus wechseln (nur ai-stack model use)"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "capability-matrix.yaml; UI_Consolidation.md"
+    modularity: "extern"
+    missing_gate: "Browser-E2E"
+
+  ods_hermes:
+    feature_id: UI-003
+    funktion: "ODS-Hermes (:9120) — Appliance-Agent (Owner Card/dream-session)"
+    owner: "ODS / ai-stack (CORE_SERVICES: hermes, hermes-proxy)"
+    repository: "extern (ODS-Hermes Appliance)"
+    adapter_contract: "Hermes (via ODS)"
+    runtime_dependencies: ["hermes-proxy"]
+    security_gate: "healthy ≠ Browser-autorisiert (Owner Card nötig)"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "Current_State.md (9120, healthy ≠ Browser-Auth)"
+    modularity: "extern"
+    missing_gate: "Browser-Auth-E2E"
+
+  opencode_ui:
+    feature_id: UI-004
+    funktion: "OpenCode als Host-Service-UI (:3003)"
+    owner: "ODS / ai-stack"
+    repository: "extern"
+    adapter_contract: "Browser-Ebene"
+    runtime_dependencies: ["opencode"]
+    security_gate: "OpenCode ≠ Conduvera-Core-Autorität"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "UI_Consolidation.md (3003)"
+    modularity: "extern"
+    missing_gate: "Browser-E2E"
+
+  conduvera_operator:
+    feature_id: OPS-001
+    funktion: "Operator-Schnittstelle für Conduvera (geplant)"
+    owner: "Conduvera Core"
+    repository: "intern (Design)"
+    adapter_contract: "n/a"
+    runtime_dependencies: ["conduvera_core"]
+    security_gate: "n/a"
+    evidence_output: "keine"
+    status: DESIGNED_ONLY
+    proof: "HCP-Dokumente"
+    modularity: "intern"
+    missing_gate: "Implementierung"
+
+  conduvera_guard:
+    feature_id: OPS-002
+    funktion: "Guard/Policy-Schicht (geplant; Legacy: backend_policy/no_progress/task_binding)"
+    owner: "Conduvera Core"
+    repository: "intern (noch nicht portiert)"
+    adapter_contract: "n/a"
+    runtime_dependencies: ["conduvera_core"]
+    security_gate: "S2-Guards erst nach einzelnem Beweis portieren"
+    evidence_output: "keine"
+    status: DESIGNED_ONLY
+    proof: "legacy/buildroom/SOURCE_MANIFEST.json (65 entries); buildroom_backend_policy.py frozen"
+    modularity: "herauslösbar (pure Komponenten)"
+    missing_gate: "Port von backend_policy (nächstes Goal)"
+
+  conduvera_release:
+    feature_id: OPS-003
+    funktion: "Release-/Baseline-Management (dieses Goal: System-Baseline-Manifest)"
+    owner: "Conduvera Core"
+    repository: "intern (evidence/goals/ + Baseline-Manifest)"
+    adapter_contract: "n/a"
+    runtime_dependencies: ["git", "Roberto_Brain"]
+    security_gate: "Review außerhalb geprüfter Trees; kein Drift nach APPROVE"
+    evidence_output: "CONDUVERA-SYSTEM-BASELINE-v1.yaml"
+    status: LIVE_PROVEN
+    proof: "evidence/goals/CONDUVERA-FIXTURE-001/ (Receipt, Verdikte, Audits)"
+    modularity: "intern"
+    missing_gate: "OPERATIONAL_PRODUCTION"
+
+  bws:
+    feature_id: SEC-001
+    funktion: "BWS = alleinige Secrets-Authority"
+    owner: "BWS"
+    repository: "extern (Bitwarden)"
+    adapter_contract: "Secrets-Schnittstelle"
+    runtime_dependencies: ["Bitwarden"]
+    security_gate: "BWS einzige Secrets-Quelle; keine Secrets in Evidence/Logs"
+    evidence_output: "keine"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "Architekturdiagramm (E3); Secret-Policy"
+    modularity: "extern"
+    missing_gate: "E2E-Beweis"
+
+  backup_recovery:
+    feature_id: OPS-004
+    funktion: "Backup/Recovery (ai-stack backup; Brain-Vault git)"
+    owner: "ODS / ai-stack + Roberto_Brain"
+    repository: "extern + Brain-Vault"
+    adapter_contract: "n/a"
+    runtime_dependencies: ["ai-stack backup", "git"]
+    security_gate: "Backup ohne Secrets-Kopie (BWS bleibt Quelle)"
+    evidence_output: "capability-matrix.yaml (non-secret metadata)"
+    status: SERVICE_HEALTHY_NOT_E2E
+    proof: "Current_State.md (Backup-Status); capability-matrix.yaml"
+    modularity: "extern"
+    missing_gate: "Restore-E2E"
