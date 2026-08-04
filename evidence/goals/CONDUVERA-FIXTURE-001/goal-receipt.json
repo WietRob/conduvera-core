@@ -487,6 +487,7 @@
       "SYSTEM_BASELINE_REVIEW = NOT_REQUESTED (nur wenn Owner Repo+Skill gemeinsam prüft)",
       "Nächster Auftrag: buildroom_backend_policy-Slice (Legacy-vs.-Neu-Differentialtests)"
     ],
-    "note": "Skill-Änderungen werden separat ausgewiesen und nie als unveränderter Skill-State gemeldet."
+    "note": "Skill-Änderungen werden separat ausgewiesen und nie als unveränderter Skill-State gemeldet.",
+    "precision": "FINAL_REPO_HEAD_REVIEW=APPROVED bezieht sich auf den final-head-Review von 5d2f0ba51ddd362296661914f87de96a4c7ba68a (deleg_f89d4e3f, APPROVE) und die Folge-Commits bis 55fe7d5 — NICHT auf das Baseline-Tupel-Review (deleg_d658aade), das laut Owner-Steuerung NOT_REQUESTED war. Dessen REQUEST_FIX (F1: Skill-Tree-Hash-Methode) wurde im Manifest adressiert (7ba447d, dokumentierte Methode df24b0fc); F2/F3/F4/F5 dokumentiert. Kein Buildroom-Port in diesem Goal."
   }
 }
