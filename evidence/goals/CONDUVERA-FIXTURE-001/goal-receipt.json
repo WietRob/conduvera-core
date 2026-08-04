@@ -14,7 +14,7 @@
     "SYSTEM_FEATURE_DOCUMENTATION": "DONE",
     "RELEASE_CANDIDATE": "YES",
     "OPERATIONAL_PRODUCTION": "NOT_YET",
-    "REAL_BUILDROOM_EXECUTION_PATH": "NOT_PROVEN",
+    "REAL_BUILDROOM_EXECUTION_PATH": "NOT_PROVEN (backend_policy-Slice LIVE_PROVEN, no_progress/task_binding/Caller-Integration offen)",
     "FULL_SYSTEM": "TEILBESTANDEN",
     "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN"
   },
@@ -181,7 +181,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T07:20:04.471891+00:00",
+  "generated_at": "2026-08-04T08:52:40.847513+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -489,5 +489,80 @@
     ],
     "note": "Skill-Änderungen werden separat ausgewiesen und nie als unveränderter Skill-State gemeldet.",
     "precision": "FINAL_REPO_HEAD_REVIEW=APPROVED bezieht sich auf den final-head-Review von 5d2f0ba51ddd362296661914f87de96a4c7ba68a (deleg_f89d4e3f, APPROVE) und die Folge-Commits bis 55fe7d5 — NICHT auf das Baseline-Tupel-Review (deleg_d658aade), das laut Owner-Steuerung NOT_REQUESTED war. Dessen REQUEST_FIX (F1: Skill-Tree-Hash-Methode) wurde im Manifest adressiert (7ba447d, dokumentierte Methode df24b0fc); F2/F3/F4/F5 dokumentiert. Kein Buildroom-Port in diesem Goal."
-  }
+  },
+  "backend_policy_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "legacy_api_verhalten_inventarisiert",
+      "evidence": "backend-policy-behaviour-matrix.md (17 Verhaltensfälle, 2 Funktionen, Caller, Side Effects)"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "kleiner_oeffentlicher_vertrag",
+      "evidence": "curaops/buildroom/backend_policy.py (POLICY_PATH, KNOWN_BACKENDS, BackendPolicyError, load_backend_policy, require_backend_enabled)"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "differentialtests_vergleichen_legacy_neu",
+      "evidence": "tests/buildroom/test_backend_policy_differential.py (Rückgabewert, Exception-Typ, Fehlercode, Side Effects, deterministische Reihenfolge)"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "abdeckung_minimalfaelle",
+      "evidence": "17 Verhaltensfälle inkl. gültig/fehlend/unbekannt/deaktiviert/leer/falscher Typ/Default/fail-closed"
+    },
+    "DOD-05": {
+      "result": "PASS",
+      "check": "kein_produktionsimport_aus_legacy",
+      "evidence": "test_dod05_no_production_import_of_legacy (nur echte Import-Statements geprüft)"
+    },
+    "DOD-06": {
+      "result": "PASS",
+      "check": "keine_neue_registry_evidence_policy_authority",
+      "evidence": "backend_policy.py ist pure Policy-Prüfung; keine Registry, kein Evidence-Schema, keine zweite Autorität"
+    },
+    "DOD-07": {
+      "result": "PASS",
+      "check": "alle_tests_gruen",
+      "evidence": "evidence/checks/regression_full_backend_policy.out (301 passed, 2 skipped) + backend_policy_differential.out (21/21)"
+    },
+    "DOD-08": {
+      "result": "PASS",
+      "check": "negativtest_keine_fremd_autoritaet",
+      "evidence": "test_dod08_no_litellm_ods_gpu_secret_side_effects (statisch: keine litellm/ai-stack/bws/subprocess/env; dynamisch: env unverändert)"
+    },
+    "DOD-09": {
+      "result": "PASS",
+      "check": "katalog_architektur_minimal_aktualisiert",
+      "evidence": "system-capabilities.yaml (buildroom_backend_policy_slice LIVE_PROVEN, 3 Statuskorrekturen) + Diagramm B2-Node; Authority-Grenzen unverändert"
+    },
+    "DOD-10": {
+      "result": "PENDING",
+      "check": "unabhaengiges_semantisches_review"
+    },
+    "DOD-11": {
+      "result": "PENDING",
+      "check": "worktree_sauber_committet_kein_merge"
+    }
+  },
+  "backend_policy_evidence_checks": [
+    {
+      "check": "regression_full_backend_policy",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_backend_policy.out",
+      "output_sha256": "sha256:6e4060688eed99acee24fbb1e34755941e386e54bf8fdcca9f4e4b71e7005657"
+    },
+    {
+      "check": "backend_policy_differential",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/backend_policy_differential.out",
+      "output_sha256": "sha256:a43b1c44dd1e7077494364be64b82b24c56360825914f2412562a9c3c39cbf49"
+    },
+    {
+      "check": "architecture_consistency",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/architecture_consistency.out",
+      "output_sha256": "sha256:a3b87b3e70a646014ef7768df332ba733b54347b3aa1bbeb1ab1a7a6371463e4"
+    }
+  ]
 }

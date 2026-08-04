@@ -60,7 +60,8 @@ def test_catalog_fields_complete():
 def test_catalog_status_values_valid():
     data = yaml.safe_load(CATALOG.read_text(encoding="utf-8"))
     valid = {"LIVE_PROVEN", "RELEASE_CANDIDATE", "SERVICE_HEALTHY_NOT_E2E",
-             "DESIGNED_ONLY", "BLOCKED", "DEPRECATED"}
+             "DESIGNED_ONLY", "BLOCKED", "DEPRECATED",
+             "NOT_PROVEN", "NOT_STARTED", "PARTIAL", "NOT_OPERATIONAL"}
     for name, comp in data["components"].items():
         assert comp["status"] in valid, f"{comp['feature_id']}: ungültiger Status {comp['status']}"
 
