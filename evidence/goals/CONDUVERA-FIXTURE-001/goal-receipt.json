@@ -5,7 +5,7 @@
   "overall_status": "TEILBESTANDEN",
   "status_components": {
     "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "PENDING (vor Commit)",
+    "FINAL_REPO_HEAD": "b0efc78f2e0787a6bd4f95030b430d7a89f7644e",
     "SKILL_SELF_IMPROVEMENT": "ALLOWED",
     "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
     "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
@@ -182,7 +182,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T19:29:14.948365+00:00",
+  "generated_at": "2026-08-04T19:36:25.846596+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1009,8 +1009,12 @@
       "evidence": "regression_full_dispatcher.out (386 passed, 3 skipped); legacy_characterization_tests.out (30 passed — V1-Invarianz)"
     },
     "DOD-13": {
-      "result": "PENDING",
-      "check": "unabhaengiges_review"
+      "result": "BESTANDEN",
+      "check": "unabhaengiges_review",
+      "reviewer_session": "deleg_87e0d986 (frische Session, kein Implementierungskontext)",
+      "commit_sha": "b0efc78f2e0787a6bd4f95030b430d7a89f7644e",
+      "verdict_file": "evidence/goals/CONDUVERA-FIXTURE-001/reviewer-verdict-dispatcher.md",
+      "note": "BESTANDEN, 0 P1/P2; 2 P3-Advisories (Brain-Tabellen-Vollstaendigkeit CORE-002, fixture-model-local-Kosmetik). Kein zweiter Orchestrator PASS; kein Dual-Spawn PASS; kein doppelter State PASS; echter Entrypoint (3/3 Canary live) PASS; Rollback PASS; Caller-Authority AST PASS; Legacy-Invarianz 30/30 PASS; Suite 386/3 PASS; CORE-002 PARTIAL + CORE-002E LIVE_PROVEN konsistent; kein Scope-Creep."
     }
   },
   "dispatcher_evidence_checks": [
