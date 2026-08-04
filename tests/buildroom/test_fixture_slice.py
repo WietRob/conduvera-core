@@ -49,6 +49,7 @@ def runner(tmp_path, adapter) -> FixtureRunner:
         route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         adapter=adapter,
         producer={"name": "test-runner", "version": "0.0.0"},
+        execution_mode='SIMULATION',
     )
 
 
@@ -77,7 +78,7 @@ def test_e2e_managed_fixture_run(runner):
 
 def test_timeout_only_managed_session(adapter, tmp_path):
     adapter._require_enabled()
-    start = adapter.start_session("a", str(tmp_path / "wt"), "t", {"model_binding": {}})
+    start = adapter.start_session("a", str(tmp_path / "wt"), "t", {"model_binding": {}, "execution_mode": "SIMULATION"})
     assert start.success
     sid = start.detail["session_id"]
     adapter.timeout_session(sid)
@@ -86,7 +87,7 @@ def test_timeout_only_managed_session(adapter, tmp_path):
 
 
 def test_cancel_only_managed_session(adapter, tmp_path):
-    start = adapter.start_session("a", str(tmp_path / "wt"), "t", {"model_binding": {}})
+    start = adapter.start_session("a", str(tmp_path / "wt"), "t", {"model_binding": {}, "execution_mode": "SIMULATION"})
     sid = start.detail["session_id"]
     adapter.cancel_session(sid)
     st = adapter.status_session(sid)
@@ -106,7 +107,7 @@ def test_disabled_adapter_fail_closed(disabled_adapter, tmp_path):
     hc = disabled_adapter.health_check()
     assert hc.success is False
     assert hc.detail["code"] == "CAPABILITY_UNAVAILABLE"
-    start = disabled_adapter.start_session("a", str(tmp_path / "wt"), "t", {})
+    start = disabled_adapter.start_session("a", str(tmp_path / "wt"), "t", {"execution_mode": "SIMULATION"})
     assert start.success is False
     assert start.detail["code"] == "CAPABILITY_UNAVAILABLE"
 
@@ -119,6 +120,7 @@ def test_disabled_adapter_runner_ends_cleanly(disabled_adapter, tmp_path):
         route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         adapter=disabled_adapter,
         producer={"name": "t", "version": "1"},
+        execution_mode='SIMULATION',
     )
     result = runner.run("task")
     assert result.status == "cap_unavailable"
@@ -144,6 +146,7 @@ def test_feature_flag_disables_fixture(tmp_path, adapter):
         adapter=adapter,
         producer={"name": "t", "version": "1"},
         feature_flag=False,
+        execution_mode='SIMULATION',
     )
     result = runner.run("task")
     assert result.status == "disabled"

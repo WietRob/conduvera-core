@@ -132,6 +132,7 @@ def test_dod02_call_path_correlated(tmp_path):
         adapter=RecordingAdapter(),
         producer={"name": "t", "version": "1"},
         goal_id="CONDUVERA-FIXTURE-001",
+        execution_mode='SIMULATION',
     )
     result = runner.run("call path task")
     assert result.status == "completed"
@@ -218,6 +219,7 @@ def test_dod04_ledger_test_fixture_scope(tmp_path):
         route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         adapter=Shim(),
         producer={"name": "t", "version": "1"},
+        execution_mode='SIMULATION',
     )
     ledger = runner._load_ledger()
     assert ledger["ledger_scope"] == "test_fixture"

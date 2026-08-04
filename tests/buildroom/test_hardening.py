@@ -72,7 +72,7 @@ def test_dod02_gateway_await_completion_is_contract_method():
     proto = HarnessAdapterProtocol
     assert hasattr(proto, "await_completion")
     # The gateway service exposes it publicly.
-    gw = HarnessGatewayService()
+    gw = HarnessGatewayService(execution_mode=ExecutionMode.LIVE.value)
     assert hasattr(gw, "await_completion")
 
 
@@ -122,6 +122,37 @@ def test_dod03_runner_without_registry_fails_closed(tmp_path):
     assert result.error == "CAPABILITY_UNAVAILABLE"
 
 
+def test_dod03_no_direct_registry_usage_in_productive_callers():
+    """DOD-03: Core/Runner/CLI must never use HarnessAdapterRegistry or
+    HarnessGatewayRegistry.load_adapter() directly — only the public
+    HarnessGatewayService lifecycle is allowed. The gateway module itself
+    owns the loader internally (that is its job)."""
+    import curaops.buildroom.fixture_runner as fr_mod
+    import curaops.harness.gateway as gw_mod
+
+    # Runner/Core: no direct registry instantiation, no load_adapter calls.
+    fr_src = Path(fr_mod.__file__).read_text(encoding="utf-8") if fr_mod.__file__ else ""
+    assert "HarnessAdapterRegistry(" not in fr_src, "FixtureRunner instanziert HarnessAdapterRegistry direkt"
+    assert "load_adapter(" not in fr_src, "FixtureRunner ruft load_adapter direkt"
+    # The gateway service must NOT expose a public load_adapter (private only):
+    gw_src = Path(gw_mod.__file__).read_text(encoding="utf-8") if gw_mod.__file__ else ""
+    assert "def load_adapter" not in gw_src or "def _load_adapter" in gw_src
+
+
+def test_dod03_concrete_adapter_never_returned_to_caller(tmp_path):
+    """The gateway lifecycle returns AdapterResult/dicts — never the
+    concrete adapter object."""
+    gw = HarnessGatewayService(execution_mode=ExecutionMode.SIMULATION.value)
+    start = gw.start_session(
+        "hermes",
+        agent_id="a", worktree=str(tmp_path / "wt"),
+        task="t", config={},
+    )
+    # SIMULATION without registry: the adapter is not loadable -> structured
+    # fail-closed result, and definitely no adapter object.
+    assert isinstance(start, dict) or hasattr(start, "success")
+
+
 # -- DOD-04: ExecutionMode trennt Simulation/Live ---------------------------
 
 
@@ -136,21 +167,42 @@ def test_dod04_execution_mode_never_silent_default():
     assert ExecutionMode.require("live") is ExecutionMode.LIVE
 
 
-def test_dod04_simulation_never_live_gate(tmp_path):
-    # A SIMULATION runner must produce SIMULATION-mode events/trace.
-    runner = FixtureRunner(
-        fixture_dir=tmp_path / "f",
-        route_manifest=ROUTE_FIXTURE,
-        producer={"name": "t", "version": "1"},
-        execution_mode=ExecutionMode.SIMULATION.value,
+def test_dod04_gateway_requires_explicit_mode():
+    """DOD-04: HarnessGatewayService must NOT default the execution mode."""
+    with pytest.raises(ValueError, match="EXECUTION_MODE_REQUIRED"):
+        HarnessGatewayService()  # no execution_mode -> structured error
+
+
+def test_dod04_runner_requires_explicit_mode(tmp_path):
+    """DOD-04: FixtureRunner must NOT default the execution mode."""
+    with pytest.raises(ValueError, match="EXECUTION_MODE_REQUIRED"):
+        FixtureRunner(
+            fixture_dir=tmp_path / "f",
+            route_manifest=ROUTE_FIXTURE,
+            producer={"name": "t", "version": "1"},
+            # no execution_mode -> structured error
+        )
+
+
+def test_dod04_adapter_requires_explicit_mode(tmp_path):
+    """DOD-04: HermesAdapter must NOT assume SIMULATION when mode missing."""
+    from curaops.harness.hermes_adapter import HermesAdapter
+
+    adapter = HermesAdapter(
+        registry_path=FIXTURES / "harness-registry.yaml",
+        fixture_worktree=str(tmp_path / "wt"),
     )
-    # without registry -> cap_unavailable; the mode is still recorded.
-    assert runner._execution_mode is ExecutionMode.SIMULATION
+    result = adapter.start_session(
+        agent_id="a", worktree=str(tmp_path / "wt2"),
+        task="t", config={},  # no execution_mode
+    )
+    assert not result.success
+    assert result.detail.get("code") == "EXECUTION_MODE_REQUIRED"
 
 
-def test_dod04_gateway_default_mode_is_live_fail_closed():
-    gw = HarnessGatewayService()
-    assert gw.execution_mode == "LIVE"
+def test_dod04_unknown_mode_fails():
+    with pytest.raises(ValueError):
+        HarnessGatewayService(execution_mode="RANDOM")
 
 
 # -- DOD-05/06: Fingerprint vor jedem Signal --------------------------------
@@ -203,6 +255,29 @@ def test_dod08_env_allowlist_drops_foreign_secrets(tmp_path, monkeypatch):
     assert "GITHUB_TOKEN" not in env
     assert "SESSION_COOKIE" not in env
     assert "HERMES_HOME" in env
+
+
+def test_dod04_poison_env_never_leaks_parent_hermes_pointers(tmp_path, monkeypatch):
+    """Poison test (DOD-04): the parent deliberately carries WRONG
+    HERMES_PROFILE/HERMES_CONFIG/HERMES_ENV values. The child environment
+    must contain ONLY the session-local values — the parent's pointers must
+    never leak."""
+    hermes_home = tmp_path / "session-home"
+    hermes_home.mkdir(parents=True)
+    (hermes_home / "config.yaml").write_text("model: {}\n", encoding="utf-8")
+    monkeypatch.setenv("HERMES_PROFILE", "poisoned-profile")
+    monkeypatch.setenv("HERMES_CONFIG", "/tmp/poisoned-config.yaml")
+    monkeypatch.setenv("HERMES_ENV", "/tmp/poisoned.env")
+    env = _build_hermes_env(hermes_home)
+    # Session-local values are set:
+    assert env.get("HERMES_HOME") == str(hermes_home)
+    assert env.get("HERMES_PROFILE") == "fixture-live"
+    assert env.get("HERMES_CONFIG") == str(hermes_home / "config.yaml")
+    # Parent poison values never appear:
+    assert "poisoned-profile" not in env.values()
+    assert "poisoned-config" not in env.get("HERMES_CONFIG", "")
+    assert "poisoned.env" not in env.values()
+    assert "HERMES_ENV" not in env
 
 
 # -- DOD-10: Live- und Unit-Fixtures getrennt -------------------------------

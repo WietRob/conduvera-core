@@ -34,6 +34,7 @@ def _runner_with(tmp_path, registry_content: str) -> FixtureRunner:
         route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         adapter_registry=reg,
         producer={"name": "t", "version": "1"},
+        execution_mode='SIMULATION',
     )
 
 
@@ -99,6 +100,7 @@ def test_runner_without_registry_no_hidden_fallback(tmp_path):
         fixture_dir=fixture_dir,
         route_manifest=FIXTURES / "ods" / "route-manifest.fixture.yaml",
         producer={"name": "t", "version": "1"},
+        execution_mode='SIMULATION',
     )
     result = runner.run("task")
     assert result.status == "cap_unavailable"

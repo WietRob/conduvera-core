@@ -52,7 +52,7 @@ class FixtureRunResult:
     events: list[dict[str, Any]] = field(default_factory=list)
     error: str = ""
     final_status_readable: str = ""
-    execution_mode: str = ExecutionMode.SIMULATION.value
+    execution_mode: str = ""  # required — never defaulted
 
 
 class FixtureRunner:
@@ -77,13 +77,15 @@ class FixtureRunner:
         producer: dict[str, Any],
         feature_flag: bool = True,
         goal_id: str = "CONDUVERA-FIXTURE-001",
-        execution_mode: str = ExecutionMode.SIMULATION.value,
+        execution_mode: str | None = None,
     ):
         self.fixture_dir = Path(fixture_dir).expanduser().resolve()
         self.route_manifest = Path(route_manifest).expanduser().resolve()
         self.producer = producer
         self.feature_flag = feature_flag
         self.goal_id = goal_id
+        if execution_mode is None:
+            raise ValueError("EXECUTION_MODE_REQUIRED: FixtureRunner requires an explicit execution_mode (LIVE or SIMULATION)")
         self._execution_mode = ExecutionMode.require(execution_mode)
         self._ledger_path = self.fixture_dir / "state" / "run-ledger.json"
         self._events: list[EventEnvelope] = []

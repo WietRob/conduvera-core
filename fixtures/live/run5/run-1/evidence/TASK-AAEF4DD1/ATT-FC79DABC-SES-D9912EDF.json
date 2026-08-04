@@ -1,14 +1,14 @@
 {
   "schema_version": "MXOS-EVIDENCE-1.0.0",
-  "task_id": "TASK-D83DE84D",
-  "attempt_id": "ATT-86CA8923",
-  "session_id": "SES-101E8A39",
+  "task_id": "TASK-AAEF4DD1",
+  "attempt_id": "ATT-FC79DABC",
+  "session_id": "SES-D9912EDF",
   "evidence": {
-    "session_id": "mxfix_fa100cb612fb",
+    "session_id": "mxfix_4a883eff8f2c",
     "status": "completed",
     "artifacts": [
       {
-        "path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/core-run/worktrees/SES-101E8A39/mxfix_fa100cb612fb.response.txt",
+        "path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/run5/run-1/worktrees/SES-D9912EDF/mxfix_4a883eff8f2c.response.txt",
         "sha256": "sha256:c8a786cab2621aba8724e063b6f391edcbb431f43228959a03c507c3eae90a8b"
       }
     ],
@@ -20,19 +20,19 @@
       "model": "fixture-model-local"
     },
     "handle": {
-      "session_id": "mxfix_fa100cb612fb",
-      "pid": 1915237,
-      "pgid": 1915237,
-      "create_time": "Mo Aug  3 21:09:41 2026",
-      "hermes_home": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/core-run/worktrees/SES-101E8A39/hermes-home/profiles/fixture-live",
+      "session_id": "mxfix_4a883eff8f2c",
+      "pid": 3502485,
+      "pgid": 3502485,
+      "create_time": "Di Aug  4 07:11:07 2026",
+      "hermes_home": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/run5/run-1/worktrees/SES-D9912EDF/hermes-home/profiles/fixture-live",
       "status": "completed",
       "exitcode": 0,
-      "started_at": "2026-08-03T19:09:41.521914+00:00",
-      "finished_at": "2026-08-03T19:09:46.655025+00:00",
-      "output_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/core-run/worktrees/SES-101E8A39/mxfix_fa100cb612fb.response.txt",
+      "started_at": "2026-08-04T05:11:07.255725+00:00",
+      "finished_at": "2026-08-04T05:11:12.387350+00:00",
+      "output_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/run5/run-1/worktrees/SES-D9912EDF/mxfix_4a883eff8f2c.response.txt",
       "route": "workload/local",
       "model_identity": "",
-      "trace_id": "TRACE-E435628DBE",
+      "trace_id": "TRACE-711C6C780A",
       "execution_mode": "LIVE"
     },
     "ok": true
@@ -40,9 +40,9 @@
   "events": [
     {
       "schema_version": "MXOS-EVIDENCE-1.0.0",
-      "event_id": "mxev_734c6b42c28d4f8ebbf07a202b664788",
+      "event_id": "mxev_7e45f769aa154a0abff91f2924e7eb86",
       "event_type": "fixture.attempt.bound",
-      "occurred_at": "2026-08-03T19:09:41Z",
+      "occurred_at": "2026-08-04T05:11:07Z",
       "producer": {
         "name": "conduvera-core",
         "version": "0.1.0"
@@ -54,11 +54,11 @@
       "severity": "info",
       "payload": {
         "goal_id": "CONDUVERA-FIXTURE-001",
-        "trace_id": "TRACE-E435628DBE",
-        "task_id": "TASK-D83DE84D",
-        "attempt_id": "ATT-86CA8923",
-        "session_id": "SES-101E8A39",
-        "task": "Managed fixture: Core→Buildroom→Gateway→Adapter→Hermes→LiteLLM→workload/local"
+        "trace_id": "TRACE-711C6C780A",
+        "task_id": "TASK-AAEF4DD1",
+        "attempt_id": "ATT-FC79DABC",
+        "session_id": "SES-D9912EDF",
+        "task": "5x live verification run"
       },
       "integrity": {
         "algorithm": "sha256",
@@ -66,15 +66,15 @@
           "event_hash",
           "integrity.hash"
         ],
-        "hash": "sha256:9b4f4521176899eef0ebe07f427072b5657cc4729592463bfeb1ecdb6cc19571"
+        "hash": "sha256:afad3f87a55010569fd5e5c380dba67af47cd76d668e441b3eb8c279b87af94a"
       },
-      "event_hash": "sha256:9b4f4521176899eef0ebe07f427072b5657cc4729592463bfeb1ecdb6cc19571"
+      "event_hash": "sha256:afad3f87a55010569fd5e5c380dba67af47cd76d668e441b3eb8c279b87af94a"
     },
     {
       "schema_version": "MXOS-EVIDENCE-1.0.0",
-      "event_id": "mxev_3e2390bc201d48bd8f94ce7c24805c12",
+      "event_id": "mxev_7d1e54c87bc64699af4858bcb8fc456b",
       "event_type": "fixture.run.started",
-      "occurred_at": "2026-08-03T19:09:41Z",
+      "occurred_at": "2026-08-04T05:11:07Z",
       "producer": {
         "name": "conduvera-core",
         "version": "0.1.0"
@@ -86,10 +86,10 @@
       "severity": "info",
       "payload": {
         "goal_id": "CONDUVERA-FIXTURE-001",
-        "trace_id": "TRACE-E435628DBE",
-        "task_id": "TASK-D83DE84D",
-        "attempt_id": "ATT-86CA8923",
-        "session_id": "SES-101E8A39",
+        "trace_id": "TRACE-711C6C780A",
+        "task_id": "TASK-AAEF4DD1",
+        "attempt_id": "ATT-FC79DABC",
+        "session_id": "SES-D9912EDF",
         "harness": "hermes",
         "model_binding": {
           "kind": "gateway_alias",
@@ -106,9 +106,9 @@
           "event_hash",
           "integrity.hash"
         ],
-        "hash": "sha256:c3b274070c3dd348c4bdead35b8dc82f484d7f78c77652b57429a2909b0774f1"
+        "hash": "sha256:8154264adb6f3332ea0e417d6729680d26fb677c22b2bac300d42e9c531bf2ee"
       },
-      "event_hash": "sha256:c3b274070c3dd348c4bdead35b8dc82f484d7f78c77652b57429a2909b0774f1"
+      "event_hash": "sha256:8154264adb6f3332ea0e417d6729680d26fb677c22b2bac300d42e9c531bf2ee"
     }
   ]
 }

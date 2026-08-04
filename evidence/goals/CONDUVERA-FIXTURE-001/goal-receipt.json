@@ -4,15 +4,19 @@
   "goal_id": "CONDUVERA-FIXTURE-001",
   "overall_status": "TEILBESTANDEN",
   "status_components": {
+    "FINAL_HEAD_SEMANTIC_REVIEW": "NOT_PROVEN",
+    "DOD_H14": "FAIL",
+    "DOD_H15": "FAIL",
+    "DOD_H04": "PASS",
+    "NO_SKILL_MUTATION_GATE": "PASS",
+    "CORE_ADAPTER_SEAM": "HARDENED_LIVE_PROVEN_CANDIDATE",
+    "RELEASE_CANDIDATE": "NOT_YET",
+    "OPERATIONAL_PRODUCTION": "NOT_YET",
+    "FULL_SYSTEM": "TEILBESTANDEN",
     "CORE_INTERNAL_MANAGED_HERMES_SLICE": "LIVE_PROVEN_CANDIDATE",
-    "CORE_INTERNAL_MANAGED_HERMES_SLICE_OPERATIONAL": "NOT_YET",
-    "FINAL_COMMIT_SEMANTIC_REVIEW": "APPROVED",
     "REAL_BUILDROOM_EXECUTION_PATH": "NOT_PROVEN",
     "BUILDROOM_ABSORPTION": "NOT_STARTED",
-    "LIVE_RUNTIME_CUTOVER": "NOT_STARTED",
-    "FULL_SYSTEM": "TEILBESTANDEN",
-    "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN",
-    "OPERATIONAL_PRODUCTION": "NOT_YET"
+    "LIVE_RUNTIME_CUTOVER": "NOT_STARTED"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -177,7 +181,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-03T19:18:15.097526+00:00",
+  "generated_at": "2026-08-04T05:12:06.772782+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -287,6 +291,103 @@
       "exitcode": 0,
       "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/core_internal_seam_tests.out",
       "output_sha256": "sha256:1698cf53738fece3fc128f68a2005bf90098cb09ffc528d80a18fe683159d622"
+    }
+  ],
+  "correction_note_final_head": "Korrektur 2026-08-03 (Goal close-the-actual-final-head-gate): Der Commit 1c3aaa0 modifizierte den von c6ffc48 geprüften Tree (Hygiene-Nachzug) NACH dem APPROVE von deleg_7ab4de75. Das ist ein Review-Drift: Das APPROVE galt für c6ffc48, der finale HEAD ist aber 1c3aaa0. Daher sind DOD-H14 (Review auf exakt finalem HEAD) und DOD-H15 (worktree clean) FAIL, DOD-H04 (ExecutionMode ohne Default) FAIL wegen stiller SIMULATION-Defaults in Gateway/Runner/Adapter, NO_SKILL_MUTATION_GATE FAIL bis das Skill-Inventar vor/nach bewiesen ist. Es muss genau EIN finaler, sauberer HEAD existieren, dessen kompletter Tree unabhängig semantisch geprüft wurde; nach APPROVE keine Dateiänderung mehr. Kein Buildroom-Port in diesem Goal.",
+  "final_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "execution_mode_pflicht_ueberall",
+      "evidence": "gateway.py/runner.py: ValueError EXECUTION_MODE_REQUIRED; hermes_adapter.py: AdapterResult EXECUTION_MODE_REQUIRED; keine stillen Defaults (grep-Beweis)"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "fehlender_mode_failt_strukturiert",
+      "evidence": "tests/buildroom/test_hardening.py::test_dod04_gateway_requires_explicit_mode, test_dod04_runner_requires_explicit_mode, test_dod04_adapter_requires_explicit_mode, test_dod04_unknown_mode_fails"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "nur_gateway_oeffentlicher_lifecycle_einstieg",
+      "evidence": "gateway.py: _load_adapter privat; test_hardening.py::test_dod03_no_direct_registry_usage_in_productive_callers, test_dod03_concrete_adapter_never_returned_to_caller"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "keine_parent_hermes_config_zeiger",
+      "evidence": "hermes_adapter.py _build_hermes_env: HERMES_PROFILE=fixture-live, HERMES_CONFIG=<session>/config.yaml sessionlokal; Pointer-Pop vor Setzen"
+    },
+    "DOD-05": {
+      "result": "PASS",
+      "check": "poison_env_test_grün",
+      "evidence": "test_hardening.py::test_dod04_poison_env_never_leaks_parent_hermes_pointers + Live-Poison-Lauf (Env HERMES_CONFIG/PROFILE vergiftet, Antwort exakt CONDUVERA_FIXTURE_OK, kein Poison im Evidence)"
+    },
+    "DOD-06": {
+      "result": "PASS",
+      "check": "uv_lock_policy_konform",
+      "evidence": ".gitignore: uv.lock ignoriert (Policy: Lockfiles nicht committen, pyproject.toml ist Manifest)"
+    },
+    "DOD-07": {
+      "result": "PASS",
+      "check": "git_status_porcelain_exakt_leer",
+      "evidence": "git status --porcelain == leer (nach finalem Commit)"
+    },
+    "DOD-08": {
+      "result": "PASS",
+      "check": "skill_inventar_vor_nach_identisch",
+      "evidence": "/tmp/skill-inventory-pre.txt vs post; skill-mutation-audit.md (21:23 externe Referenz, war schon in Baseline)"
+    },
+    "DOD-09": {
+      "result": "PASS",
+      "check": "portable_regression_vollstaendig",
+      "evidence": "evidence/checks/regression_full_finalhead.out (271 passed, 1 skipped)"
+    },
+    "DOD-10": {
+      "result": "PASS",
+      "check": "5x_live_erneut",
+      "evidence": "fixtures/live/run5/live-5x-evidence.json (PASS 5/5, 0 Zombie, 0 Orphan, 0 PGID-Rest, 0 Foreign)"
+    },
+    "DOD-11": {
+      "result": "PASS",
+      "check": "evidence_allowlist",
+      "evidence": ".gitignore (hermes-home/state.db/cache/response/stderr ignoriert); keine Runtime-Artefakte ausserhalb Allowlist in git status"
+    },
+    "DOD-12": {
+      "result": "PENDING",
+      "check": "unabhaengiges_review_auf_exakt_finalem_head"
+    },
+    "DOD-13": {
+      "result": "PENDING",
+      "check": "nach_approve_keine_aenderung"
+    },
+    "DOD-14": {
+      "result": "PASS",
+      "check": "kein_buildroom_port_kein_merge_kein_cutover",
+      "evidence": "kein run_buildroom_fixture.py; Branch task/goal-contract-fixture; kein Cutover"
+    }
+  },
+  "final_evidence_checks": [
+    {
+      "check": "regression_full_finalhead",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_finalhead.out",
+      "output_sha256": "sha256:68b7ba1b7dd19e0351e5258de96acc71b8646b252b800b3406d4c921814dd537"
+    },
+    {
+      "check": "hardening_tests_finalhead",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/hardening_tests_finalhead.out",
+      "output_sha256": "sha256:2b147b57fc934f6eb2d26838c619470a18fafc9561e08f69a4eacfe079575e08"
+    },
+    {
+      "check": "core_internal_seam_finalhead",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/core_internal_seam_finalhead.out",
+      "output_sha256": "sha256:1698cf53738fece3fc128f68a2005bf90098cb09ffc528d80a18fe683159d622"
+    },
+    {
+      "check": "ui_access_plane_finalhead",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/ui_access_plane_finalhead.out",
+      "output_sha256": "sha256:d54fb569ef2ac2f23e46c0f40eebb6e63039964defa6e401136a70aea2e7a1ed"
     }
   ]
 }

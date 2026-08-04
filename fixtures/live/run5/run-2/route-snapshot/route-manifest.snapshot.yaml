@@ -1,6 +1,6 @@
 {
   "schema": "route-manifest.snapshot.v1",
-  "generated_at": "2026-08-04T05:11:44.945688+00:00",
+  "generated_at": "2026-08-04T05:11:17.538907+00:00",
   "source": "live ai-stack local-mode.yaml (read-only)",
   "live_manifest_sha256": "sha256:4e11969eea21d03ebe1787e2bdd58897ed62d198f18601e54bdad41356c2f300",
   "active_mode": "text",

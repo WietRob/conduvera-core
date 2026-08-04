@@ -60,7 +60,7 @@ class SessionHandle:
     route: str = "workload/local"
     model_identity: str = ""
     trace_id: str = ""
-    execution_mode: str = "SIMULATION"
+    execution_mode: str = ""  # required — never defaulted
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -81,17 +81,16 @@ class SessionHandle:
         }
 
 
-# -- Environment allowlist (DOD-08): the Hermes child must NOT inherit the
-#    full parent environment. Only explicitly allowlisted variables pass;
-#    no other tokens/keys/cookies are forwarded. LITELLM_API_KEY is only
-#    forwarded as a reference to the existing injection when already present.
+# -- Environment allowlist (DOD-08/04): the Hermes child must NOT inherit the
+#    full parent environment — and specifically NOT the parent's HERMES_*
+#    config pointers. Only explicitly allowlisted variables pass; no other
+#    tokens/keys/cookies are forwarded. LITELLM_API_KEY is only forwarded as
+#    a reference to the existing injection when already present.
+#    HERMES_PROFILE / HERMES_CONFIG / HERMES_ENV are NEVER inherited from
+#    the parent; the adapter sets them session-locally (DOD-04).
 _ENV_ALLOWLIST = {
     "PATH",
     "HOME",
-    "HERMES_HOME",
-    "HERMES_PROFILE",
-    "HERMES_CONFIG",
-    "HERMES_ENV",
     "LITELLM_API_KEY",
     "LANG",
     "LC_ALL",
@@ -103,21 +102,34 @@ _ENV_ALLOWLIST = {
     "TERM",
 }
 
+# Parent pointers that must NEVER leak into the child (session-local only).
+_PARENT_HERMES_POINTERS = ("HERMES_PROFILE", "HERMES_CONFIG", "HERMES_ENV")
+
 
 def _build_hermes_env(hermes_home: Path) -> dict[str, str]:
     """Build the child environment from the allowlist only (no secrets leak).
 
-    The Hermes child sees PATH, HOME, HERMES_* config pointers, locale/
+    The Hermes child sees PATH, HOME, HERMES_HOME (session-local),
+    HERMES_PROFILE=fixture-live and HERMES_CONFIG=<session>/config.yaml
+    (session-local, set here — never inherited from the parent), locale/
     runtime fields, and LITELLM_API_KEY (existing injection, referenced not
-    printed). Every other parent variable — including any other secret
-    tokens/cookies — is dropped.
+    printed). Every other parent variable — including HERMES_PROFILE/
+    HERMES_CONFIG/HERMES_ENV and any other secret tokens/cookies — is
+    dropped.
     """
     env: dict[str, str] = {}
     for key in _ENV_ALLOWLIST:
         val = os.environ.get(key)
         if val is not None:
             env[key] = val
+    # Session-local Hermes configuration (DOD-04): the parent's pointers are
+    # deliberately NOT consulted — remove any inherited pointer first, then
+    # set the session-local values (never leak parent values).
+    for pointer in _PARENT_HERMES_POINTERS:
+        env.pop(pointer, None)  # ensure never leaked (defensive)
     env["HERMES_HOME"] = str(hermes_home)
+    env["HERMES_PROFILE"] = "fixture-live"
+    env["HERMES_CONFIG"] = str(hermes_home / "config.yaml")
     if "PATH" not in env:
         env["PATH"] = "/usr/local/bin:/usr/bin:/bin"
     if "HOME" not in env:
@@ -234,10 +246,17 @@ class HermesAdapter(BaseAdapter):
         wt.mkdir(parents=True, exist_ok=True)
         started_at = datetime.now(timezone.utc).isoformat()
 
-        # Execution mode: SIMULATION vs LIVE — never a silent default.
+        # Execution mode: required — never a silent default.
         from curaops.harness.registry import ExecutionMode
 
-        mode = ExecutionMode.require(config.get("execution_mode", ExecutionMode.SIMULATION))
+        mode_raw = config.get("execution_mode")
+        if mode_raw is None:
+            return AdapterResult(
+                success=False,
+                message="EXECUTION_MODE_REQUIRED: HermesAdapter.start_session requires config['execution_mode']",
+                detail={"code": "EXECUTION_MODE_REQUIRED"},
+            )
+        mode = ExecutionMode.require(mode_raw)
         route = str(config.get("route", self._route))
 
         if mode is not ExecutionMode.LIVE:

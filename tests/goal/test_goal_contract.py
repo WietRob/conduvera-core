@@ -102,6 +102,7 @@ def test_dod05_e2e_and_dod06_timeout_cancel(tmp_path):
         route_manifest=ROOT / "fixtures/ods/route-manifest.fixture.yaml",
         adapter=adapter,
         producer={"name": "t", "version": "1"},
+        execution_mode='SIMULATION',
     )
     result = runner.run("e2e")
     assert result.status == "completed"
@@ -127,6 +128,7 @@ def test_dod08_disabled_adapter_clean(tmp_path):
         route_manifest=ROOT / "fixtures/ods/route-manifest.fixture.yaml",
         adapter=adapter,
         producer={"name": "t", "version": "1"},
+        execution_mode='SIMULATION',
     )
     result = runner.run("task")
     assert result.status == "cap_unavailable"
@@ -173,6 +175,7 @@ def test_dod11_receipt_contains_dod_matrix(tmp_path):
         route_manifest=ROOT / "fixtures/ods/route-manifest.fixture.yaml",
         adapter=adapter,
         producer={"name": "t", "version": "1"},
+        execution_mode='SIMULATION',
     )
     result = runner.run("receipt task")
     receipt_path = runner.emit_receipt(result, goal_id="CONDUVERA-FIXTURE-001")

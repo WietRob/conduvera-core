@@ -1,0 +1,114 @@
+{
+  "schema_version": "MXOS-EVIDENCE-1.0.0",
+  "task_id": "TASK-3787045F",
+  "attempt_id": "ATT-A4E84BD8",
+  "session_id": "SES-F501B173",
+  "evidence": {
+    "session_id": "mxfix_11824df7d968",
+    "status": "completed",
+    "artifacts": [
+      {
+        "path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/core-run/worktrees/SES-F501B173/mxfix_11824df7d968.response.txt",
+        "sha256": "sha256:c8a786cab2621aba8724e063b6f391edcbb431f43228959a03c507c3eae90a8b"
+      }
+    ],
+    "model_binding": {
+      "kind": "gateway_alias",
+      "selector": "workload/local",
+      "auth_domain": "litellm",
+      "backend_family": "openai",
+      "model": "fixture-model-local"
+    },
+    "handle": {
+      "session_id": "mxfix_11824df7d968",
+      "pid": 3503396,
+      "pgid": 3503396,
+      "create_time": "Di Aug  4 07:11:39 2026",
+      "hermes_home": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/core-run/worktrees/SES-F501B173/hermes-home/profiles/fixture-live",
+      "status": "completed",
+      "exitcode": 0,
+      "started_at": "2026-08-04T05:11:39.813737+00:00",
+      "finished_at": "2026-08-04T05:11:44.943472+00:00",
+      "output_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/live/core-run/worktrees/SES-F501B173/mxfix_11824df7d968.response.txt",
+      "route": "workload/local",
+      "model_identity": "",
+      "trace_id": "TRACE-D3A29025E4",
+      "execution_mode": "LIVE"
+    },
+    "ok": true
+  },
+  "events": [
+    {
+      "schema_version": "MXOS-EVIDENCE-1.0.0",
+      "event_id": "mxev_63437ae563274c91bedd02f7be2fcd68",
+      "event_type": "fixture.attempt.bound",
+      "occurred_at": "2026-08-04T05:11:39Z",
+      "producer": {
+        "name": "conduvera-core",
+        "version": "0.1.0"
+      },
+      "subject": {
+        "kind": "fixture.run",
+        "component": "buildroom.internal"
+      },
+      "severity": "info",
+      "payload": {
+        "goal_id": "CONDUVERA-FIXTURE-001",
+        "trace_id": "TRACE-D3A29025E4",
+        "task_id": "TASK-3787045F",
+        "attempt_id": "ATT-A4E84BD8",
+        "session_id": "SES-F501B173",
+        "task": "Managed fixture: Core→Buildroom→Gateway→Adapter→Hermes→LiteLLM→workload/local"
+      },
+      "integrity": {
+        "algorithm": "sha256",
+        "hash_excludes": [
+          "event_hash",
+          "integrity.hash"
+        ],
+        "hash": "sha256:5a198146602d6affd9373a6d9d5f016721f5a4fd75d8250458ee4251ae9ac75b"
+      },
+      "event_hash": "sha256:5a198146602d6affd9373a6d9d5f016721f5a4fd75d8250458ee4251ae9ac75b"
+    },
+    {
+      "schema_version": "MXOS-EVIDENCE-1.0.0",
+      "event_id": "mxev_693f00ea7133440f948f8d42321e6388",
+      "event_type": "fixture.run.started",
+      "occurred_at": "2026-08-04T05:11:39Z",
+      "producer": {
+        "name": "conduvera-core",
+        "version": "0.1.0"
+      },
+      "subject": {
+        "kind": "fixture.run",
+        "component": "buildroom.internal"
+      },
+      "severity": "info",
+      "payload": {
+        "goal_id": "CONDUVERA-FIXTURE-001",
+        "trace_id": "TRACE-D3A29025E4",
+        "task_id": "TASK-3787045F",
+        "attempt_id": "ATT-A4E84BD8",
+        "session_id": "SES-F501B173",
+        "harness": "hermes",
+        "model_binding": {
+          "kind": "gateway_alias",
+          "selector": "workload/local",
+          "auth_domain": "litellm",
+          "backend_family": "openai",
+          "model": "fixture-model-local"
+        },
+        "execution_mode": "LIVE"
+      },
+      "integrity": {
+        "algorithm": "sha256",
+        "hash_excludes": [
+          "event_hash",
+          "integrity.hash"
+        ],
+        "hash": "sha256:b99274ee2e70a4eb94ad32515b2d9820a7250f40aa90008f0266e7dd66d20b6a"
+      },
+      "event_hash": "sha256:b99274ee2e70a4eb94ad32515b2d9820a7250f40aa90008f0266e7dd66d20b6a"
+    }
+  ]
+}

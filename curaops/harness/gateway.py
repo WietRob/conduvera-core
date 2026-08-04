@@ -346,12 +346,14 @@ class HarnessGatewayService:
         self,
         *,
         registry_path: str | Path | None = None,
-        execution_mode: str | ExecutionMode = ExecutionMode.LIVE,
+        execution_mode: str | ExecutionMode | None = None,
     ):
         from curaops.harness.registry import (
             ExecutionMode as _EM,
         )
 
+        if execution_mode is None:
+            raise ValueError("EXECUTION_MODE_REQUIRED: HarnessGatewayService requires an explicit execution_mode (LIVE or SIMULATION)")
         self._registry_path = registry_path
         self._execution_mode = _EM.require(execution_mode)
         self._adapter_cache: dict[str, Any] = {}
@@ -372,8 +374,13 @@ class HarnessGatewayService:
             self._loader = HarnessAdapterRegistry(self._registry_path)
         return self._loader
 
-    def load_adapter(self, adapter_id: str) -> Any:
-        """Load an adapter (fail-closed via internal loader)."""
+    def _load_adapter(self, adapter_id: str) -> Any:
+        """INTERNAL adapter loading (fail-closed via internal loader).
+
+        Private on purpose (DOD-03): concrete adapters are never returned
+        to callers. The only public surface is the lifecycle methods
+        (start_session/status/cancel/timeout/await_completion/collect_evidence).
+        """
         if adapter_id not in self._adapter_cache:
             try:
                 self._adapter_cache[adapter_id] = self._get_loader().load_adapter(adapter_id)
@@ -395,7 +402,7 @@ class HarnessGatewayService:
         config = dict(kwargs.pop("config", {}))
         config["execution_mode"] = self._execution_mode.value
         try:
-            adapter = self.load_adapter(adapter_id)
+            adapter = self._load_adapter(adapter_id)
             return adapter.start_session(config=config, **kwargs)
         except Exception as exc:  # structured, never silent
             from curaops.harness.registry import HarnessCapabilityUnavailableError
@@ -414,7 +421,7 @@ class HarnessGatewayService:
 
     def status_session(self, adapter_id: str, session_id: str) -> AdapterResult:
         try:
-            return self.load_adapter(adapter_id).status_session(session_id)
+            return self._load_adapter(adapter_id).status_session(session_id)
         except Exception as exc:
             return AdapterResult(
                 success=False,
@@ -424,7 +431,7 @@ class HarnessGatewayService:
 
     def cancel_session(self, adapter_id: str, session_id: str) -> AdapterResult:
         try:
-            return self.load_adapter(adapter_id).cancel_session(session_id)
+            return self._load_adapter(adapter_id).cancel_session(session_id)
         except Exception as exc:
             return AdapterResult(
                 success=False,
@@ -434,7 +441,7 @@ class HarnessGatewayService:
 
     def timeout_session(self, adapter_id: str, session_id: str) -> AdapterResult:
         try:
-            return self.load_adapter(adapter_id).timeout_session(session_id)
+            return self._load_adapter(adapter_id).timeout_session(session_id)
         except Exception as exc:
             return AdapterResult(
                 success=False,
@@ -450,7 +457,7 @@ class HarnessGatewayService:
     ) -> AdapterResult:
         """Block until the managed session completes (contract method)."""
         try:
-            return self.load_adapter(adapter_id).await_completion(
+            return self._load_adapter(adapter_id).await_completion(
                 session_id, timeout_policy=timeout_policy
             )
         except Exception as exc:
@@ -462,7 +469,7 @@ class HarnessGatewayService:
 
     def collect_evidence(self, adapter_id: str, session_id: str) -> dict[str, Any]:
         try:
-            return self.load_adapter(adapter_id).collect_evidence(session_id)
+            return self._load_adapter(adapter_id).collect_evidence(session_id)
         except Exception as exc:
             return {
                 "session_id": session_id,
