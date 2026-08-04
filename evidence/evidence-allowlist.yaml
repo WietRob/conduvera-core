@@ -29,6 +29,12 @@ allowed_patterns:
   # Fixture scripts (source, not generated)
   - "fixtures/live/run_core_fixture.py"
   - "fixtures/live/verify_5x_live.py"
+  # Managed Buildroom execution caller (guard integration, LIVE proof)
+  - "fixtures/live/verify_managed_live.py"
+  - "fixtures/live/managed/managed-3x-live-evidence.json"
+  - "fixtures/live/managed/run-*/managed-state.json"
+  - "fixtures/live/managed/run-*/state/call-trace.json"
+  - "fixtures/live/managed/run-*/evidence/mxos-evidence-*.json"
   # Goal evidence + checks outputs
   - "evidence/goals/**"
   - "evidence/checks/*.out"

@@ -46,7 +46,6 @@ import yaml
 
 from curaops.buildroom.backend_policy import (
     BackendPolicyError,
-    load_backend_policy,
     require_backend_enabled,
 )
 from curaops.buildroom.no_progress import NoProgressResult, observe_reconciliation

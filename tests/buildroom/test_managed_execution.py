@@ -250,14 +250,18 @@ def test_dod13_no_spawn_after_terminal_hold(tmp_path):
 
 
 def test_dod13_no_foreign_process_changed(tmp_path):
-    before = subprocess.run(["ps", "-eo", "pid,lstart,comm", "--sort=pid"],
-                            capture_output=True, text=True).stdout
+    """Kein fremder codex/opencode-Prozess wird verändert (wie verify_5x)."""
+    def foreign():
+        r = subprocess.run(["ps", "-eo", "pid,lstart,comm", "--sort=pid"],
+                           capture_output=True, text=True)
+        return [l for l in r.stdout.splitlines() if any(k in l for k in ("codex", "opencode"))]
+
+    before = foreign()
     caller = make_caller(tmp_path)
     caller.execute(task_description="foreign check")
-    after = subprocess.run(["ps", "-eo", "pid,lstart,comm", "--sort=pid"],
-                           capture_output=True, text=True).stdout
+    after = foreign()
     # SIMULATION startet keine Prozesse: keine codex/opencode-Veränderung
-    assert len(before.splitlines()) == len(after.splitlines())
+    assert after == before
 
 
 def test_dod13_no_implicit_ai_stack_model_use(tmp_path):
