@@ -1,0 +1,20 @@
+[
+  {
+    "check": "regression_full_wired_final",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_wired_final.out",
+    "output_sha256": "sha256:bba7605f7f2ef1f9362f6c535327c46d546e69c5a93b3fbb67ddc08f5461c9ba"
+  },
+  {
+    "check": "dispatcher_tests_wired_final",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/dispatcher_tests_wired_final.out",
+    "output_sha256": "sha256:1ff397652ae6ff0d1f12de08e00e10edcf9547f09628b694b6ccf6deaf8fce23"
+  },
+  {
+    "check": "architecture_consistency_wired_final",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/architecture_consistency_wired_final.out",
+    "output_sha256": "sha256:8c12836c6b318891ee679126094dd1eeac5dd90cd0672445010f59f187a7d53a"
+  }
+]

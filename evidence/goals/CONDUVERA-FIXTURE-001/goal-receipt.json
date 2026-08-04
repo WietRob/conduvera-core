@@ -5,7 +5,7 @@
   "overall_status": "TEILBESTANDEN",
   "status_components": {
     "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "PENDING (vor Commit)",
+    "FINAL_REPO_HEAD": "6d477ed35a70f0fc1825e1487118070698912b8b",
     "SKILL_SELF_IMPROVEMENT": "ALLOWED",
     "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
     "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
@@ -182,7 +182,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T20:37:14.473025+00:00",
+  "generated_at": "2026-08-04T20:59:22.068386+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1105,33 +1105,28 @@
       "evidence": "test_dod12_diagram_shows_real_call_path_edges (6 Kanten: B5->B3, B3->|legacy|B6, B3->|managed_canary|B4, B6->C4, B4->C4, B4->B2); Katalog CORE-002E LIVE_PROVEN_AND_ENTRYPOINT_WIRED + BRAIN-001; Brain-Matrix aktualisiert"
     },
     "DOD-13": {
-      "result": "PENDING",
-      "check": "volle_suite_review"
+      "result": "PASS",
+      "check": "review_teilbestanden_dann_fix",
+      "evidence": "Reviewer (deleg_c71330d2) TEILBESTANDEN auf d336ee9: P1 Allowlist-Luecke (4 Rollback-canary-Dateien) + P3 Docstring. Fix 6d477ed: Allowlist erweitert + Docstring korrigiert. Suite nach Fix: 399 passed, 0 failed, 0 skipped (frisch verifiziert). Verdikt: evidence/goals/CONDUVERA-FIXTURE-001/reviewer-verdict-wired-entrypoint.md"
     }
   },
   "wired_evidence_checks": [
     {
-      "check": "regression_full_wired",
+      "check": "regression_full_wired_final",
       "exitcode": 0,
-      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_wired.out",
-      "output_sha256": "sha256:29ce5c56cf61e21b2e4c6b127e9ddc5edd1d7da7349f20632f189a1b6c4556fb"
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_wired_final.out",
+      "output_sha256": "sha256:bba7605f7f2ef1f9362f6c535327c46d546e69c5a93b3fbb67ddc08f5461c9ba"
     },
     {
-      "check": "dispatcher_tests_wired",
+      "check": "dispatcher_tests_wired_final",
       "exitcode": 0,
-      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/dispatcher_tests_wired.out",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/dispatcher_tests_wired_final.out",
       "output_sha256": "sha256:1ff397652ae6ff0d1f12de08e00e10edcf9547f09628b694b6ccf6deaf8fce23"
     },
     {
-      "check": "legacy_characterization_tests",
+      "check": "architecture_consistency_wired_final",
       "exitcode": 0,
-      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_characterization_tests.out",
-      "output_sha256": "sha256:670684a4067054d1ddfc1161677f7b3a23c1db1608a14aa5c8c24f0f82a43e89"
-    },
-    {
-      "check": "architecture_consistency_wired",
-      "exitcode": 0,
-      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/architecture_consistency_wired.out",
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/architecture_consistency_wired_final.out",
       "output_sha256": "sha256:8c12836c6b318891ee679126094dd1eeac5dd90cd0672445010f59f187a7d53a"
     }
   ]
