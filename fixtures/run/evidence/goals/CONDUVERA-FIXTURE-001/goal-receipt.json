@@ -1,0 +1,132 @@
+{
+  "goal_contract": "CONDUVERA-GOAL-1.0",
+  "goal_id": "CONDUVERA-FIXTURE-001",
+  "task_id": "TASK-FF765089",
+  "attempt_id": "ATT-CAEC199D",
+  "session_id": "SES-2AE5BF81",
+  "status": "completed",
+  "model_binding": {
+    "kind": "gateway_alias",
+    "selector": "workload/fixture",
+    "auth_domain": "litellm",
+    "backend_family": "openai",
+    "model": "fixture-model-1"
+  },
+  "evidence_paths": [
+    "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/run/evidence/TASK-FF765089/ATT-CAEC199D-SES-2AE5BF81.json"
+  ],
+  "events": [
+    {
+      "schema_version": "MXOS-EVIDENCE-1.0.0",
+      "event_id": "mxev_b54da1e2ced44d9ab54ee8f9e468c080",
+      "event_type": "fixture.attempt.bound",
+      "occurred_at": "2026-08-03T10:38:04Z",
+      "producer": {
+        "name": "conduvera-core",
+        "version": "0.1.0"
+      },
+      "subject": {
+        "kind": "fixture.run",
+        "component": "buildroom.internal"
+      },
+      "severity": "info",
+      "payload": {
+        "task_id": "TASK-FF765089",
+        "attempt_id": "ATT-CAEC199D",
+        "session_id": "SES-2AE5BF81",
+        "task": "Managed fixture: prove Core→Buildroom→Hermes→ODS/LiteLLM→Evidence→status"
+      },
+      "integrity": {
+        "algorithm": "sha256",
+        "hash_excludes": [
+          "event_hash",
+          "integrity.hash"
+        ],
+        "hash": "sha256:3e11cefe77d8b47d0aa8f3065a53f5e594a0af1e17969ec874ca702af17cec66"
+      },
+      "event_hash": "sha256:3e11cefe77d8b47d0aa8f3065a53f5e594a0af1e17969ec874ca702af17cec66"
+    },
+    {
+      "schema_version": "MXOS-EVIDENCE-1.0.0",
+      "event_id": "mxev_4bd7498682684c6583abcf6efdb82901",
+      "event_type": "fixture.run.started",
+      "occurred_at": "2026-08-03T10:38:04Z",
+      "producer": {
+        "name": "conduvera-core",
+        "version": "0.1.0"
+      },
+      "subject": {
+        "kind": "fixture.run",
+        "component": "buildroom.internal"
+      },
+      "severity": "info",
+      "payload": {
+        "task_id": "TASK-FF765089",
+        "attempt_id": "ATT-CAEC199D",
+        "session_id": "SES-2AE5BF81",
+        "harness": "hermes",
+        "model_binding": {
+          "kind": "gateway_alias",
+          "selector": "workload/fixture",
+          "auth_domain": "litellm",
+          "backend_family": "openai",
+          "model": "fixture-model-1"
+        }
+      },
+      "integrity": {
+        "algorithm": "sha256",
+        "hash_excludes": [
+          "event_hash",
+          "integrity.hash"
+        ],
+        "hash": "sha256:68bda82bd049295b3e6131e2da8427a4213524db171f2f4b7ae9599d34c471ca"
+      },
+      "event_hash": "sha256:68bda82bd049295b3e6131e2da8427a4213524db171f2f4b7ae9599d34c471ca"
+    },
+    {
+      "schema_version": "MXOS-EVIDENCE-1.0.0",
+      "event_id": "mxev_417cfb817d09477b88f114c31bff2204",
+      "event_type": "fixture.run.completed",
+      "occurred_at": "2026-08-03T10:38:04Z",
+      "producer": {
+        "name": "conduvera-core",
+        "version": "0.1.0"
+      },
+      "subject": {
+        "kind": "fixture.run",
+        "component": "buildroom.internal"
+      },
+      "severity": "info",
+      "payload": {
+        "task_id": "TASK-FF765089",
+        "attempt_id": "ATT-CAEC199D",
+        "session_id": "SES-2AE5BF81",
+        "status": "completed",
+        "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/fixtures/run/evidence/TASK-FF765089/ATT-CAEC199D-SES-2AE5BF81.json"
+      },
+      "integrity": {
+        "algorithm": "sha256",
+        "hash_excludes": [
+          "event_hash",
+          "integrity.hash"
+        ],
+        "hash": "sha256:1633cea116844a8cc739064df14a6f6cea4fb162293531eea2996b6310fedd1f"
+      },
+      "event_hash": "sha256:1633cea116844a8cc739064df14a6f6cea4fb162293531eea2996b6310fedd1f"
+    }
+  ],
+  "invariants": {
+    "exactly_one_control_plane": "PASS",
+    "buildroom_is_internal_module": "PASS",
+    "ods_is_runtime_authority": "PASS",
+    "bws_is_secrets_authority": "PASS",
+    "harnesses_are_replaceable": "PASS",
+    "capabilities_are_adapter_bound": "PASS",
+    "no_private_cross_repo_imports": "PASS",
+    "no_second_evidence_schema": "PASS",
+    "no_parallel_state_writer": "PASS",
+    "adapters_are_removable": "PASS",
+    "products_remain_standalone": "PASS"
+  },
+  "generated_at": "2026-08-03T10:38:04.861807+00:00"
+}
