@@ -27,9 +27,11 @@ MODES:
   ManagedBuildroomCaller; anything else fails closed. No dual-run, no
   shadow spawn with duplicated side effects.
 
-CONFIG: single authority — fixtures/buildroom/execution-dispatcher.yaml
-(`buildroom.execution_path` + `buildroom.canary_tasks`). Missing or invalid
-value -> legacy (the conservative, existing behaviour).
+CONFIG: single authority — contracts/buildroom-execution-dispatcher.yaml
+(`buildroom.execution_path` + `buildroom.canary_tasks`), aufgelöst über
+expliziter Pfad -> CONDUVERA_BUILDROOM_DISPATCHER -> Paketressource.
+Fixtures unter fixtures/buildroom/ sind ausschliesslich Testdaten.
+Missing -> legacy (konservativ). Invalid mode/task id -> CONFIG_INVALID.
 """
 
 from __future__ import annotations
