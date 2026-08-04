@@ -46,6 +46,14 @@ ADAPTER_EVENT_TYPES = {
     "fixture.run.reconciled",
     "fixture.attempt.bound",
     "fixture.attempt.restarted",
+    # Managed Buildroom execution (guard-integration caller, same envelope):
+    # task/binding/policy/session lifecycle events for the internal Buildroom
+    # managed-execution module. Same schema, same envelope — no new schema.
+    "buildroom.attempt.bound",
+    "buildroom.attempt.started",
+    "buildroom.attempt.failed",
+    "buildroom.attempt.policy_blocked",
+    "buildroom.run.completed",
 }
 EVENT_TYPES = CORE_EVENT_TYPES | ADAPTER_EVENT_TYPES
 SEVERITIES = {"debug", "info", "warning", "error", "critical"}

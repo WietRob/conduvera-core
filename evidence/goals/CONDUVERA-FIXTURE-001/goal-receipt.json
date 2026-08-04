@@ -5,7 +5,7 @@
   "overall_status": "TEILBESTANDEN",
   "status_components": {
     "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "6e0cdac1be9f2929eee51bcf037f0997eea7a486",
+    "FINAL_REPO_HEAD": "PENDING (vor Commit)",
     "SKILL_SELF_IMPROVEMENT": "ALLOWED",
     "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
     "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
@@ -14,7 +14,7 @@
     "SYSTEM_FEATURE_DOCUMENTATION": "DONE",
     "RELEASE_CANDIDATE": "YES",
     "OPERATIONAL_PRODUCTION": "NOT_YET",
-    "REAL_BUILDROOM_EXECUTION_PATH": "NOT_PROVEN (backend_policy-Slice LIVE_PROVEN, no_progress/task_binding/Caller-Integration offen)",
+    "REAL_BUILDROOM_EXECUTION_PATH": "LIVE_PROVEN",
     "FULL_SYSTEM": "TEILBESTANDEN",
     "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN"
   },
@@ -181,7 +181,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T11:10:17.911982+00:00",
+  "generated_at": "2026-08-04T12:02:38.611400+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -749,6 +749,134 @@
       "exitcode": 0,
       "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_task_binding_tests.out",
       "output_sha256": "sha256:c3788640522b7a73a8a63ce1a35822e59814788116a50e7dc72a1c192363d3f2"
+    },
+    {
+      "check": "architecture_consistency",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/architecture_consistency.out",
+      "output_sha256": "sha256:a3b87b3e70a646014ef7768df332ba733b54347b3aa1bbeb1ab1a7a6371463e4"
+    }
+  ],
+  "managed_integration_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "realer_produktionscaller",
+      "evidence": "curaops/buildroom/managed_execution.py (ManagedBuildroomCaller); Kein Testskript = Businesslogik; verify_managed_live.py ruft nur auf"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "helper_ueber_oeffentliche_vertraege",
+      "evidence": "imports aus task_binding/backend_policy/no_progress; keine kopierte Semantik"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "taskbinding_vor_harness",
+      "evidence": "store_task_binding -> binding_for_phase -> Identitätsprüfung VOR start_session (execute-Reihenfolge 1-3)"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "policy_vor_jedem_spawn",
+      "evidence": "require_backend_enabled VOR start_session; Reihenfolge 4 vor 6"
+    },
+    "DOD-05": {
+      "result": "PASS",
+      "check": "disabled_unknown_blockieren_ohne_prozess",
+      "evidence": "test_b_disabled_backend_no_spawn (adapter.calls==[]), test_c_unknown_backend_no_spawn"
+    },
+    "DOD-06": {
+      "result": "PASS",
+      "check": "erlaubter_pfad_laeuft_real",
+      "evidence": "fixtures/live/managed/managed-3x-live-evidence.json (PASS 3/3 LIVE)"
+    },
+    "DOD-07": {
+      "result": "PASS",
+      "check": "route_modellidentitaet_aus_realer_evidence",
+      "evidence": "call-trace.json: route=workload/local, model_identity=openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf (live aus ai-stack local-mode.yaml)"
+    },
+    "DOD-08": {
+      "result": "PASS",
+      "check": "no_progress_im_realen_reconciliation_pfad",
+      "evidence": "observe_reconciliation im execute() nach collect_evidence; fingerprint in Live-Evidence"
+    },
+    "DOD-09": {
+      "result": "PASS",
+      "check": "schwellen_hold_reset_semantik",
+      "evidence": "test_d_no_progress_threshold_sequence (1→2→3, HOLD_FOR_BOSS), test_e_progress_reset (NEW_EVIDENCE)"
+    },
+    "DOD-10": {
+      "result": "PASS",
+      "check": "state_vor_nach_je_schritt",
+      "evidence": "test_dod10_state_snapshot_before_after (deepcopy vor/nach; Disk==Memory)"
+    },
+    "DOD-11": {
+      "result": "PASS",
+      "check": "mxos_evidence_pflichtfelder",
+      "evidence": "test_dod11_mxos_evidence_fields; mxos-evidence-*.json (schema, goal_id, task_id, attempt_id, session_id, harness, producer, evidence, generated_at) + call_trace (route, model_identity, pid, pgid)"
+    },
+    "DOD-12": {
+      "result": "PASS",
+      "check": "keine_neue_authority_registry",
+      "evidence": "kein zweiter State-Store/Registry/Evidence-Schema (EventEnvelope.create, bestehende EVENT_TYPES erweitert um buildroom.* — gleiche MXOS-Hülle); keine GPU-/Modell-/Secret-Zuständigkeit"
+    },
+    "DOD-13": {
+      "result": "PASS",
+      "check": "negativtests",
+      "evidence": "kein Spawn nach Deny/Hold; kein fremder Prozess (ps-Vergleich); kein 'ai-stack model use'; keine Secrets in Evidence"
+    },
+    "DOD-14": {
+      "result": "PASS",
+      "check": "differentialtests_gruen",
+      "evidence": "backend_policy 21/21 + no_progress 18/18 + task_binding 37/37 (evidence/checks/*.out)"
+    },
+    "DOD-15": {
+      "result": "PASS",
+      "check": "volle_suite_gruen",
+      "evidence": "regression_full_managed.out (370 passed, 2 skipped)"
+    },
+    "DOD-16": {
+      "result": "PASS",
+      "check": "3x_live_gleicher_endzustand",
+      "evidence": "fixtures/live/managed/managed-3x-live-evidence.json: PASS 3/3, 0 Zombie/Orphan/PGID-Rest/Foreign, SameSemanticState=True"
+    },
+    "DOD-17": {
+      "result": "PENDING",
+      "check": "unabhaengiges_review_auf_exakt_commit"
+    },
+    "DOD-18": {
+      "result": "PENDING",
+      "check": "nur_verdict_receipt_nach_review"
+    }
+  },
+  "managed_integration_evidence_checks": [
+    {
+      "check": "regression_full_managed",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_managed.out",
+      "output_sha256": "sha256:4d880e20438223cfb69ede6b5c1d89c42aa72d4d6b11930165603046e349044f"
+    },
+    {
+      "check": "managed_execution_tests",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/managed_execution_tests.out",
+      "output_sha256": "sha256:a3a035c0a1954d50955063c38f419bc95528dad397e611a442da2a0ee0beafea"
+    },
+    {
+      "check": "backend_policy_differential",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/backend_policy_differential.out",
+      "output_sha256": "sha256:a43b1c44dd1e7077494364be64b82b24c56360825914f2412562a9c3c39cbf49"
+    },
+    {
+      "check": "no_progress_differential",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/no_progress_differential.out",
+      "output_sha256": "sha256:6a1d2ec8a317d166439f512895139f460d3bad29c632a23cee143093a1a75009"
+    },
+    {
+      "check": "task_binding_differential",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/task_binding_differential.out",
+      "output_sha256": "sha256:8ac7ab9b9c337752c370dad85eb7e9567ce6364c83202bd355389116c758ea3d"
     },
     {
       "check": "architecture_consistency",

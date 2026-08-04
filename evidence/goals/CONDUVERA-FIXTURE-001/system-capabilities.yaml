@@ -443,12 +443,14 @@ components:
     - conduvera_core
     security_gate: S2-Guards erst nach einzelnem Port-Beweis
     evidence_output: keine
-    status: NOT_PROVEN
-    proof: legacy/buildroom/SOURCE_MANIFEST.json (65 entries, frozen)
+    status: LIVE_PROVEN
+    proof: 'fixtures/live/managed/managed-3x-live-evidence.json (PASS 3/3 LIVE: completed,
+      CONDUVERA_FIXTURE_OK, route workload/local, model openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf,
+      0 Zombie/Orphan/Foreign, gleicher semantischer Endzustand); tests/buildroom/test_managed_execution.py
+      (14/14)'
     modularity: intern
-    missing_gate: Port von backend_policy (DONE, LIVE_PROVEN), no_progress (offen),
-      task_binding (offen), plus reale Caller-Integration (buildroom_core/buildroom_execution
-      bleiben Legacy — Integration explizit deferred, nicht simuliert)
+    missing_gate: OPERATIONAL_PRODUCTION (kein Cutover); BUILDROOM_ABSORPTION separat
+      zu bewerten
   buildroom_absorption:
     feature_id: CORE-002C
     funktion: 'Buildroom-Absorption: Legacy-Buildroom vollständig in Conduvera-Core
@@ -510,13 +512,12 @@ components:
     security_gate: 'fail-closed: deaktiviertes/unbekanntes Backend wirft IMMER; KEINE
       andere Autorität (kein Modell-/Provider-/GPU-/Secret-Zugriff)'
     evidence_output: keine (pure Policy-Prüfung)
-    status: PARITY_PROVEN_NOT_INTEGRATED
+    status: INTEGRATED_AND_LIVE_PROVEN
     proof: tests/buildroom/test_backend_policy_differential.py (21/21, Legacy vs Neu
       identisch); Behaviour-Matrix backend-policy-behaviour-matrix.md
     modularity: intern; Legacy bleibt frozen (legacy/buildroom/source, nur Differentialtests
       laden es)
-    missing_gate: reale Caller-Integration (buildroom_core/buildroom_execution bleiben
-      Legacy) — Port-Parität bewiesen, Integration deferred
+    missing_gate: — (im realen Caller managed_execution.py integriert, LIVE bewiesen)
   buildroom_no_progress_slice:
     feature_id: CORE-002B2
     funktion: No-Progress-Reconciliation-Guard (count identischer Beobachtungen, HOLD_FOR_BOSS
@@ -529,13 +530,12 @@ components:
     security_gate: 'fail-closed: Schwelle erreicht -> HOLD_FOR_BOSS + REPEATED_NO_PROGRESS;
       KEINE Task-/Session-/Harness-/Modell-/Runtime-/Secret-Autorität'
     evidence_output: keine (State-Mutation am übergebenen dict)
-    status: PARITY_PROVEN_NOT_INTEGRATED
+    status: INTEGRATED_AND_LIVE_PROVEN
     proof: tests/buildroom/test_no_progress_differential.py (18/18, Legacy vs Neu
       identisch incl. State vor/nach jedem Schritt); 8/9 Legacy-Tests grün isoliert
       (1 Mismatch = frozen-Layout .sh, audit-Datei)
     modularity: intern; Legacy bleibt frozen; nur Differentialtests laden es
-    missing_gate: reale Caller-Integration (peekxd_buildroom_loop_v20/cycle49_preflight
-      bleiben Legacy) — deferred, nicht simuliert
+    missing_gate: — (im realen Caller managed_execution.py integriert, LIVE bewiesen)
   buildroom_task_binding_slice:
     feature_id: CORE-002B3
     funktion: Task-zu-Kanban-Board-Bindings (TaskBinding, store/binding_for_phase/clear/kanban_argv)
@@ -549,9 +549,30 @@ components:
     security_gate: Validierung (KANBAN_TASK_ID_INVALID/KANBAN_BOARD_INVALID/BUILDROOM_PHASE_INVALID/BUILDROOM_CYCLE_INVALID/TASK_BINDING_CREATED_AT_REQUIRED);
       KEINE Task-/Session-/Harness-/Modell-/Runtime-/Secret-Autorität
     evidence_output: keine (State-dict-Mutation + argv)
-    status: PARITY_PROVEN_NOT_INTEGRATED
+    status: INTEGRATED_AND_LIVE_PROVEN
     proof: tests/buildroom/test_task_binding_differential.py (37/37); modulspezifische
       Legacy-Tests 17/17 isoliert grün
     modularity: intern; Legacy bleibt frozen; nur Differentialtests laden es
-    missing_gate: reale Caller-Integration (peekxd_buildroom_loop_v20/cycle49_preflight
-      bleiben Legacy) — deferred, nicht simuliert
+    missing_gate: — (im realen Caller managed_execution.py integriert, LIVE bewiesen)
+  managed_execution_caller:
+    feature_id: CORE-002D
+    funktion: 'Produktionsnaher Buildroom-Caller (managed_execution.py): Task → Binding
+      → Policy → HarnessGateway → Hermes → LiteLLM → Evidence → Reconciliation → No-Progress'
+    owner: Conduvera Core
+    repository: internes Modul (curaops/buildroom/managed_execution.py)
+    adapter_contract: HarnessGatewayService (public lifecycle)
+    runtime_dependencies:
+    - HarnessGatewayService
+    - Hermes
+    - LiteLLM :4000
+    - ODS text-Modus
+    - ai-stack local-mode.yaml (read-only)
+    security_gate: Backend-Policy VOR jedem Spawn (fail-closed); kein Prozessstart
+      nach Deny/Hold; kein impliziter GPU-Moduswechsel
+    evidence_output: MXOS-EVIDENCE-1.0.0 (mxos-evidence-<attempt>.json) + call-trace.json
+      + managed-state.json
+    status: LIVE_PROVEN
+    proof: fixtures/live/managed/managed-3x-live-evidence.json (PASS 3/3 LIVE); tests/buildroom/test_managed_execution.py
+      (14/14, Szenarien A-F + DOD-13-Negativtests)
+    modularity: intern; FixtureRunner bleibt separater Fixture-Seam
+    missing_gate: OPERATIONAL_PRODUCTION (kein Cutover)

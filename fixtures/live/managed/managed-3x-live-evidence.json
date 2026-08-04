@@ -1,0 +1,84 @@
+{
+  "runs": [
+    {
+      "run": 0,
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 329991,
+      "pgid": 329991,
+      "pgid_remaining": 0,
+      "clean": true,
+      "route": "workload/local",
+      "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+      "reconciliation": {
+        "count": 1,
+        "terminal_hold": false,
+        "fingerprint": [
+          "BUILDER",
+          "WAITING",
+          "TASK_DONE_BUT_NO_EVIDENCE",
+          "t_0a0b0c0d00",
+          "",
+          ""
+        ]
+      }
+    },
+    {
+      "run": 1,
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 330184,
+      "pgid": 330184,
+      "pgid_remaining": 0,
+      "clean": true,
+      "route": "workload/local",
+      "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+      "reconciliation": {
+        "count": 1,
+        "terminal_hold": false,
+        "fingerprint": [
+          "BUILDER",
+          "WAITING",
+          "TASK_DONE_BUT_NO_EVIDENCE",
+          "t_0a0b0c0d01",
+          "",
+          ""
+        ]
+      }
+    },
+    {
+      "run": 2,
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 330413,
+      "pgid": 330413,
+      "pgid_remaining": 0,
+      "clean": true,
+      "route": "workload/local",
+      "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+      "reconciliation": {
+        "count": 1,
+        "terminal_hold": false,
+        "fingerprint": [
+          "BUILDER",
+          "WAITING",
+          "TASK_DONE_BUT_NO_EVIDENCE",
+          "t_0a0b0c0d02",
+          "",
+          ""
+        ]
+      }
+    }
+  ],
+  "all_exact": true,
+  "all_completed": true,
+  "zombies": [],
+  "orphans": [],
+  "pgid_all_empty": true,
+  "foreign_process_changed": false,
+  "same_semantic_state": true,
+  "verdict": "PASS 3/3 LIVE"
+}

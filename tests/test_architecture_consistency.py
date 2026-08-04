@@ -62,7 +62,7 @@ def test_catalog_status_values_valid():
     valid = {"LIVE_PROVEN", "RELEASE_CANDIDATE", "SERVICE_HEALTHY_NOT_E2E",
              "DESIGNED_ONLY", "BLOCKED", "DEPRECATED",
              "NOT_PROVEN", "NOT_STARTED", "PARTIAL", "NOT_OPERATIONAL",
-             "PARITY_PROVEN_NOT_INTEGRATED"}
+             "PARITY_PROVEN_NOT_INTEGRATED", "INTEGRATED_AND_LIVE_PROVEN"}
     for name, comp in data["components"].items():
         assert comp["status"] in valid, f"{comp['feature_id']}: ungültiger Status {comp['status']}"
 

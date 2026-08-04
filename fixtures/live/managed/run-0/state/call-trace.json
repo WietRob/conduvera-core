@@ -1,0 +1,15 @@
+{
+  "goal_id": "CONDUVERA-FIXTURE-001",
+  "trace_id": "TRACE-B3FD371287",
+  "task_id": "t_0a0b0c0d00",
+  "attempt_id": "ATT-D301BA87",
+  "session_id": "mxfix_1e6f08f006db",
+  "adapter_id": "hermes",
+  "pid": 329991,
+  "pgid": 329991,
+  "create_time": "Di Aug  4 14:00:11 2026",
+  "route": "workload/local",
+  "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+  "execution_mode": "LIVE",
+  "evidence_event": "buildroom.run.completed"
+}
