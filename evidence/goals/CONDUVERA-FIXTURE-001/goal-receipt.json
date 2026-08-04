@@ -5,7 +5,7 @@
   "overall_status": "TEILBESTANDEN",
   "status_components": {
     "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "PENDING (nach Fix-Commit)",
+    "FINAL_REPO_HEAD": "a34f92e8c484d26b2e198d417e15a38891718d05",
     "SKILL_SELF_IMPROVEMENT": "ALLOWED",
     "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
     "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
@@ -181,7 +181,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T12:10:22.845643+00:00",
+  "generated_at": "2026-08-04T12:21:47.836792+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -839,12 +839,32 @@
       "evidence": "fixtures/live/managed/managed-3x-live-evidence.json: PASS 3/3, 0 Zombie/Orphan/PGID-Rest/Foreign, SameSemanticState=True"
     },
     "DOD-17": {
-      "result": "PENDING",
-      "check": "unabhaengiges_review_auf_exakt_commit"
+      "result": "BESTANDEN",
+      "check": "unabhaengiges_review_auf_exakt_commit",
+      "reviewer_rounds": [
+        {
+          "round": 1,
+          "session": "deleg_8a12f401",
+          "verdict": "NICHT BESTANDEN",
+          "finding": "P1: Evidence-Allowlist-Verstoß (8 managed-Artefakte), Suite rot, stale Evidence",
+          "commit": "e0e71ab"
+        },
+        {
+          "round": 2,
+          "session": "deleg_a1d22c8e",
+          "verdict": "BESTANDEN",
+          "finding": "0 Findings",
+          "commit": "a34f92e"
+        }
+      ],
+      "commit_sha": "a34f92e8c484d26b2e198d417e15a38891718d05",
+      "verdict_file": "evidence/goals/CONDUVERA-FIXTURE-001/reviewer-verdict-managed-integration-r2.md",
+      "note": "R1: P1 Allowlist (Fix in a34f92e: 5 Muster + flaky-Testfix + unused import). R2: Allowlist vollständig, Suite reproduzierbar 370/2 (sha256 exakt), semantischer Kern intakt (Policy-before-spawn, no_progress im Caller), LIVE-Beweis echt (openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf aus Live-Manifest), kein Scope-Creep, 0 Findings."
     },
     "DOD-18": {
-      "result": "PENDING",
-      "check": "nur_verdict_receipt_nach_review"
+      "result": "PASS",
+      "check": "nur_verdict_receipt_nach_review",
+      "note": "Nach R2-APPROVE: nur dieses Receipt-Update + R2-Verdikt committet; Worktree danach sauber; kein Merge/Cutover"
     }
   },
   "managed_integration_evidence_checks": [
