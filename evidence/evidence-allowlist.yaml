@@ -19,6 +19,7 @@ allowed_patterns:
   - "fixtures/live/run5/run-*/route-snapshot/route-manifest.snapshot.yaml"
   # Historical live-run evidence (documented runs, receipts verified)
   - "fixtures/live/live-run-*/process-evidence.json"
+  - "fixtures/live/run*/process-evidence.json"
   - "fixtures/live/live-run-*/mxos-evidence-*.json"
   - "fixtures/live/live-run-*/reconcile-evidence.json"
   - "fixtures/live/live-run-*/bootstrap-output.txt"
