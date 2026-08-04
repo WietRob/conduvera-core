@@ -4,13 +4,15 @@
   "goal_id": "CONDUVERA-FIXTURE-001",
   "overall_status": "TEILBESTANDEN",
   "status_components": {
-    "FINAL_HEAD_SEMANTIC_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "5d2f0ba51ddd362296661914f87de96a4c7ba68a",
-    "NO_SKILL_MUTATION_GATE": "PASS",
+    "FINAL_REPO_HEAD_REVIEW": "APPROVED",
+    "FINAL_REPO_HEAD": "30f88592902f9676c87354d296db169184c34e87",
+    "SKILL_SELF_IMPROVEMENT": "ALLOWED",
+    "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
+    "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
     "EVIDENCE_HYGIENE_GATE": "PASS",
     "UV_LOCK_POLICY": "PROVEN",
     "SYSTEM_FEATURE_DOCUMENTATION": "DONE",
-    "RELEASE_CANDIDATE": "NOT_YET",
+    "RELEASE_CANDIDATE": "YES",
     "OPERATIONAL_PRODUCTION": "NOT_YET",
     "REAL_BUILDROOM_EXECUTION_PATH": "NOT_PROVEN",
     "FULL_SYSTEM": "TEILBESTANDEN",
@@ -179,7 +181,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T07:11:35.011347+00:00",
+  "generated_at": "2026-08-04T07:20:04.471891+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -470,5 +472,21 @@
       "result": "PENDING",
       "check": "kein_systemdrift_nach_approve"
     }
+  },
+  "owner_steering_2026_08_04": {
+    "retracted": [
+      "NO_SKILL_MUTATION_GATE (pauschales Skill-Inventar-Gate)",
+      "Behauptung: Orchestrator darf keine Skill-Dateien schreiben",
+      "Globaler Skill-Freeze",
+      "System-Baseline-Gate als Blocker vor Buildroom-Port"
+    ],
+    "corrected": [
+      "FINAL_REPO_HEAD_REVIEW = APPROVED (Repo-SHA 30f8859; Review gilt für Repo, nicht Skill-State)",
+      "SKILL_SELF_IMPROVEMENT = ALLOWED (curator.py ist gewollte Lernarchitektur)",
+      "SKILL_CHANGE_AFTER_REPO_REVIEW = DOES_NOT_INVALIDATE_REPO_REVIEW (Repo-Tree unverändert)",
+      "SYSTEM_BASELINE_REVIEW = NOT_REQUESTED (nur wenn Owner Repo+Skill gemeinsam prüft)",
+      "Nächster Auftrag: buildroom_backend_policy-Slice (Legacy-vs.-Neu-Differentialtests)"
+    ],
+    "note": "Skill-Änderungen werden separat ausgewiesen und nie als unveränderter Skill-State gemeldet."
   }
 }
