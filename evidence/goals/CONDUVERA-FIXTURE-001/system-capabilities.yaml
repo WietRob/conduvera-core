@@ -31,11 +31,11 @@ components:
     - conduvera_core
     security_gate: Single-Writer; keine parallelen State-Writer
     evidence_output: evidence/TASK-*/ATT-*.json, run-ledger (Test-Fixture)
-    status: NOT_PROVEN
-    proof: tests/buildroom/test_core_internal_seam.py; Commit 5d2f0ba
-    modularity: intern; Legacy-Module (backend_policy/no_progress/task_binding) NOCH
-      NICHT portiert
-    missing_gate: REAL_BUILDROOM_EXECUTION_PATH (NOT_PROVEN)
+    status: LIVE_PROVEN
+    proof: managed_execution.py Caller + 3/3 Live (managed-3x-live-evidence.json);
+      fixture_runner.py Fixture-Seam; CORE-002B1/B2/B3 je INTEGRATED_AND_LIVE_PROVEN
+    modularity: intern; drei Helper portiert und integriert; Legacy frozen als Provenance
+    missing_gate: BUILDROOM_ABSORPTION (separat); OPERATIONAL_PRODUCTION (kein Cutover)
   harness_gateway_service:
     feature_id: HARNESS-001
     funktion: 'EINZIGER öffentlicher Lifecycle-Einstieg: start_session, await_completion,
@@ -496,7 +496,8 @@ components:
     security_gate: Guard-Ports einzeln bewiesen
     evidence_output: keine (produktiv)
     status: PARTIAL
-    proof: nur Adapter-Seam + Fixture-Seam bewiesen; Guards/Policy offen
+    proof: Managed Guard Path live (backend_policy+no_progress+task_binding integriert,
+      3/3 Live); Absorption/Cutover und übrige Control-Plane-Funktionen offen
     modularity: intern
     missing_gate: backend_policy + no_progress + task_binding + produktive Integration
   buildroom_backend_policy_slice:

@@ -5,7 +5,7 @@
   "overall_status": "TEILBESTANDEN",
   "status_components": {
     "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "a34f92e8c484d26b2e198d417e15a38891718d05",
+    "FINAL_REPO_HEAD": "PENDING (vor Commit)",
     "SKILL_SELF_IMPROVEMENT": "ALLOWED",
     "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
     "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
@@ -181,7 +181,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T12:21:47.836792+00:00",
+  "generated_at": "2026-08-04T18:51:57.987897+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -885,6 +885,61 @@
       "exitcode": 0,
       "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/evidence_allowlist.out",
       "output_sha256": "sha256:c2cba0e5b1275bde99432021fd22a26635493fa35d0886fcd5cd38708b0f7cca"
+    }
+  ],
+  "status_truth_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "core002b_live_proven_alle_ssots",
+      "evidence": "Repo system-capabilities.yaml (real_buildroom_execution_path LIVE_PROVEN) + Brain Conduvera_System_Feature_Catalog.md (CORE-002B LIVE_PROVEN); test_v1_core002b_status_identical_in_repo_and_brain"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "b1_b2_b3_integrated_ueberall",
+      "evidence": "Repo (3 Slices INTEGRATED_AND_LIVE_PROVEN) + Brain-Katalog + Brain-Matrix (Einzelstatuszeilen); Paritätswerte 21/21/18/18/37/37 als Provenance"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "keine_stale_integration_deferred",
+      "evidence": "Brain-Katalog Z.85 'Offen' korrigiert; Brain-Matrix deferred-Zeilen ersetzt; Grep: 0 aktuelle deferred-Aussagen"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "core001b_praezise",
+      "evidence": "CORE-001B: 'Managed Guard Path live; Absorption/Cutover und übrige Control-Plane-Funktionen offen' (Repo + Brain)"
+    },
+    "DOD-05": {
+      "result": "PASS",
+      "check": "caller_authority_verankert",
+      "evidence": "ManagedBuildroomCaller = einziger produktionsnaher Caller; FixtureRunner = Fixture-/Test-Seam; test_v5_single_productive_execution_caller"
+    },
+    "DOD-06": {
+      "result": "PASS",
+      "check": "automatischer_konsistenztest",
+      "evidence": "tests/test_architecture_consistency.py: +test_v1 (Repo+Brain CORE-002B), +test_v2 (kein Konflikt-Status), +test_v3 (kein NOT_PROVEN), +test_v4 (Implikationslogik), +test_v5 (Single-Caller)"
+    },
+    "DOD-07": {
+      "result": "PASS",
+      "check": "volle_suite_gruen_worktree_sauber",
+      "evidence": "regression_full_status_truth.out (374 passed, 3 skipped); porcelain leer vor Commit"
+    },
+    "DOD-08": {
+      "result": "PENDING",
+      "check": "review_auf_exakt_korrekturcommit"
+    }
+  },
+  "status_truth_evidence_checks": [
+    {
+      "check": "regression_full_status_truth",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_status_truth.out",
+      "output_sha256": "sha256:ead485b8d23210f5730e40003c44f575d32984575c6d74bb4e3e22f9e6e6a638"
+    },
+    {
+      "check": "architecture_consistency_status_truth",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/architecture_consistency_status_truth.out",
+      "output_sha256": "sha256:cbee9c0722fd6a09c9cc31d458a52e1ef59156c120e1c47c8ca9ed985131253a"
     }
   ]
 }
