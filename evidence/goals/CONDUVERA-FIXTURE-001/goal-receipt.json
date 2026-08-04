@@ -179,7 +179,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T07:09:28.598609+00:00",
+  "generated_at": "2026-08-04T07:11:35.011347+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -395,5 +395,80 @@
     "skill_writer_audit": "evidence/goals/CONDUVERA-FIXTURE-001/skill-writer-audit.md",
     "uvlock_policy": "evidence/goals/CONDUVERA-FIXTURE-001/uvlock-policy-decision.md",
     "allowlist": "evidence/evidence-allowlist.yaml"
+  },
+  "baseline_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "statuswahrheit_korrigiert",
+      "evidence": "goal-receipt.json status_components (FINAL_HEAD_SEMANTIC_REVIEW=APPROVED, NO_SKILL_MUTATION_GATE FAIL→PASS, EVIDENCE_HYGIENE FAIL→PASS, UV_LOCK NOT_SUFFICIENTLY_PROVEN→PROVEN, SYSTEM_FEATURE_DOCUMENTATION INCOMPLETE→DONE, RELEASE_CANDIDATE NOT_YET)"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "skill_writer_identifiziert_und_kontrolliert",
+      "evidence": "evidence/goals/CONDUVERA-FIXTURE-001/skill-writer-audit.md (curator.py, inactivity-triggered, 7-Tage-Interval, paused-Flag als Freeze, letzter Lauf 02.08 → nächster ~09.08 außerhalb Zeitfenster)"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "skill_inventar_pre_post_identisch",
+      "evidence": "/tmp/skill-tree-pre.txt (1048 Dateien) vs post — identisch"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "evidence_allowlist_tree_weit",
+      "evidence": "evidence/evidence-allowlist.yaml + tests/test_evidence_allowlist.py (3/3 grün)"
+    },
+    "DOD-05": {
+      "result": "PASS",
+      "check": "fixtures_run_worktrees_gap_geschlossen",
+      "evidence": ".gitignore fixtures/run/worktrees/ + fixtures/**/worktrees/; 13 Artefakte entfernt (5 response.txt + 2 worktree-Sims + 8 Rohartefakte)"
+    },
+    "DOD-06": {
+      "result": "PASS",
+      "check": "uv_lock_entscheidung_belegt",
+      "evidence": "evidence/goals/CONDUVERA-FIXTURE-001/uvlock-policy-decision.md (0 historische Vorkommen, pyproject.toml = Manifest, bewusst ausgeschlossen, reproduzierbarer Test)"
+    },
+    "DOD-07": {
+      "result": "PASS",
+      "check": "feature_katalog_vollstaendig_maschinenlesbar",
+      "evidence": "evidence/goals/CONDUVERA-FIXTURE-001/system-capabilities.yaml (26 Features, 12 Pflichtfelder je Eintrag) + Brain Conduvera_System_Feature_Catalog.md"
+    },
+    "DOD-08": {
+      "result": "PASS",
+      "check": "produkte_herausloesbar_repo_eigenstaendig",
+      "evidence": "Katalog modularity-Feld je Feature (Adapter-Grenzen, keine harten Imports); Produkte extern (ODS/LiteLLM/BWS/Capabilities)"
+    },
+    "DOD-09": {
+      "result": "PASS",
+      "check": "katalog_authority_diagramm_konsistent",
+      "evidence": "tests/test_architecture_consistency.py (7/7 grün, 1 skip): Katalog↔Diagramm↔.mmd↔Brain-Katalog"
+    },
+    "DOD-10": {
+      "result": "PASS",
+      "check": "ai_stack_einbezogen_nicht_mutiert",
+      "evidence": "AI-Stack nur read-only gehasht (ai-stack CLI 6c3f9aca, workloads e82c22b7, local-mode 4e11969e, capability-matrix 02e33267); keine ODS-/LiteLLM-/Auth-Mutation"
+    },
+    "DOD-11": {
+      "result": "PASS",
+      "check": "regression_und_5x_live",
+      "evidence": "280 passed + 2 skipped; fixtures/live/run5/live-5x-evidence.json PASS 5/5 (PIDs 3688121-3688597), 0 Zombie/Orphan/PGID-Rest/Foreign"
+    },
+    "DOD-12": {
+      "result": "PASS",
+      "check": "repo_brain_clean",
+      "evidence": "Repo porcelain leer (HEAD 9494c2a); Brain: eigene Arbeit committet (23beeba/17332f3), 10 vorbestehende Hermes_Buildroom-Änderungen dokumentiert (fremde Arbeit, nicht angefasst)"
+    },
+    "DOD-13": {
+      "result": "PASS",
+      "check": "baseline_manifest_vollstaendig",
+      "evidence": "Roberto_Brain/70_Evidence/CONDUVERA-SYSTEM-BASELINE-v1.yaml (Core-SHA, Brain-SHA, Skill-Tree-Hash 1048, AI-Stack-Hashes, Legacy-Inventar, Feature-Katalog-Hash, generated_at, verification_results)"
+    },
+    "DOD-14": {
+      "result": "PENDING",
+      "check": "unabhaengiges_approve_auf_baseline_tupel"
+    },
+    "DOD-15": {
+      "result": "PENDING",
+      "check": "kein_systemdrift_nach_approve"
+    }
   }
 }
