@@ -35,6 +35,15 @@ allowed_patterns:
   - "fixtures/live/managed/run-*/managed-state.json"
   - "fixtures/live/managed/run-*/state/call-trace.json"
   - "fixtures/live/managed/run-*/evidence/mxos-evidence-*.json"
+  # Dispatcher strangler (canary, LIVE proof)
+  - "fixtures/live/verify_dispatcher_live.py"
+  - "fixtures/live/dispatcher-canary/dispatcher-3x-canary-evidence.json"
+  - "fixtures/live/dispatcher-canary/run-*/managed-state.json"
+  - "fixtures/live/dispatcher-canary/run-*/state/call-trace.json"
+  - "fixtures/live/dispatcher-canary/run-*/evidence/mxos-evidence-*.json"
+  # Dispatcher configuration (single config authority, static)
+  - "fixtures/buildroom/execution-dispatcher.yaml"
+  - "fixtures/buildroom/execution-dispatcher-canary.yaml"
   # Goal evidence + checks outputs
   - "evidence/goals/**"
   - "evidence/checks/*.out"

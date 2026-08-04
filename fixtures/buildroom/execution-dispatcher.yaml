@@ -1,0 +1,19 @@
+# Buildroom execution dispatcher configuration (SINGLE config authority).
+# Schema: buildroom.dispatcher.v1 | Goal: introduce-buildroom-strangler-entrypoint-with-managed-canary
+#
+# This is the ONLY source of truth for the execution-path selection.
+# No distributed env defaults, no second config file.
+#
+# buildroom.execution_path:
+#   legacy         (DEFAULT) — exactly the existing Buildroom orchestrator
+#                              path; ManagedBuildroomCaller is never called.
+#   managed_canary — only explicitly approved canary task IDs may run via
+#                    ManagedBuildroomCaller; anything else fails closed.
+#
+# buildroom.canary_tasks:
+#   Explicit allowlist of task IDs that may run on the managed path when
+#   execution_path=managed_canary. Empty by default (canary is opt-in and
+#   cannot be activated globally by accident).
+buildroom:
+  execution_path: legacy
+  canary_tasks: []

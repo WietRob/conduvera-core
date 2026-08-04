@@ -11,6 +11,8 @@ flowchart TD
         C4["Harness Gateway (eine Registry-Authority)"]
         B1["internes Buildroom-Modul"]
         B2["backend_policy (Execution-Backend-Entscheidung, LIVE_PROVEN)"]
+        B3["BuildroomExecutionDispatcher (legacy | managed_canary)"]
+        B4["ManagedBuildroomCaller (produktionsnaher Caller, LIVE_PROVEN)"]
         C1 --- C2 --- C3 --- C4
         C4 --> B1
     end

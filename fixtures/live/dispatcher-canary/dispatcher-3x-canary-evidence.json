@@ -1,0 +1,55 @@
+{
+  "runs": [
+    {
+      "run": 0,
+      "task_id": "t_c0a1",
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 1478960,
+      "pgid": 1478960,
+      "pgid_remaining": 0,
+      "clean": true,
+      "route": "workload/local",
+      "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+      "leases_left": 0
+    },
+    {
+      "run": 1,
+      "task_id": "t_0c0a1e",
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 1479112,
+      "pgid": 1479112,
+      "pgid_remaining": 0,
+      "clean": true,
+      "route": "workload/local",
+      "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+      "leases_left": 0
+    },
+    {
+      "run": 2,
+      "task_id": "t_0c0a1f",
+      "status": "completed",
+      "response": "CONDUVERA_FIXTURE_OK",
+      "response_exact": true,
+      "pid": 1479229,
+      "pgid": 1479229,
+      "pgid_remaining": 0,
+      "clean": true,
+      "route": "workload/local",
+      "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+      "leases_left": 0
+    }
+  ],
+  "all_exact": true,
+  "all_completed": true,
+  "zombies": [],
+  "orphans": [],
+  "pgid_all_empty": true,
+  "foreign_process_changed": false,
+  "all_leases_released": true,
+  "ai_stack_model_use": false,
+  "verdict": "PASS 3/3 CANARY"
+}

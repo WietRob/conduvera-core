@@ -5,7 +5,7 @@
   "overall_status": "TEILBESTANDEN",
   "status_components": {
     "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "934ae4396a76a75351982937106578d23b9bea8e",
+    "FINAL_REPO_HEAD": "PENDING (vor Commit)",
     "SKILL_SELF_IMPROVEMENT": "ALLOWED",
     "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
     "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
@@ -182,7 +182,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T18:58:51.340426+00:00",
+  "generated_at": "2026-08-04T19:29:14.948365+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -944,6 +944,98 @@
       "check": "architecture_consistency_status_truth",
       "exitcode": 0,
       "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/architecture_consistency_status_truth.out",
+      "output_sha256": "sha256:cbee9c0722fd6a09c9cc31d458a52e1ef59156c120e1c47c8ca9ed985131253a"
+    }
+  ],
+  "dispatcher_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "core002_partial_002b_live",
+      "evidence": "system-capabilities.yaml: buildroom_module=CORE-002 PARTIAL (Managed live; Absorption/Cutover offen); real_buildroom_execution_path=CORE-002B LIVE_PROVEN"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "genau_ein_dispatcher",
+      "evidence": "curaops/buildroom/dispatcher.py BuildroomExecutionDispatcher; test_dod10_single_dispatcher_single_productive_caller (AST)"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "legacy_default",
+      "evidence": "execution-dispatcher.yaml execution_path: legacy; test_v1_legacy_mode_never_calls_managed; test_v1_legacy_default_with_missing_config"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "canary_taskgebunden",
+      "evidence": "canary_tasks-Allowlist; test_v4_non_canary_task_in_managed_mode_no_managed_spawn; keine globale Aktivierung möglich (leere Default-Allowlist)"
+    },
+    "DOD-05": {
+      "result": "PASS",
+      "check": "kein_task_beide_pfade",
+      "evidence": "resolve_path: managed_canary ODER legacy, nie beide; Lease-Guard je Attempt (test_v2_lease_guard_blocks_same_attempt)"
+    },
+    "DOD-06": {
+      "result": "PASS",
+      "check": "3_3_canary_ueber_entrypoint",
+      "evidence": "fixtures/live/dispatcher-canary/dispatcher-3x-canary-evidence.json: PASS 3/3 CANARY (t_c0a1/t_0c0a1e/t_0c0a1f, completed, CONDUVERA_FIXTURE_OK, route workload/local, Model openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf, 0 Zombie/Orphan/Foreign, Leases freigegeben)"
+    },
+    "DOD-07": {
+      "result": "PASS",
+      "check": "policy_hold_nichtcanary_negativ",
+      "evidence": "test_v4_disabled_backend_no_managed_spawn, test_v4_non_canary_no_managed_spawn, test_v4_no_progress_hold_no_further_spawn"
+    },
+    "DOD-08": {
+      "result": "PASS",
+      "check": "state_evidence_ein_writer",
+      "evidence": "Lease je Attempt (single-writer); test_v5_single_attempt_single_lease; ManagedBuildroomCaller schreibt state+evidence je Attempt (kein paralleles Legacy-Artefakt)"
+    },
+    "DOD-09": {
+      "result": "PASS",
+      "check": "rollback_praktisch",
+      "evidence": "Default-Config nach 3 Canary-Läufen: resolve=legacy, 0 Managed-Aufrufe, keine Leases, keine Migration (verifiziert + test_v6_rollback_to_legacy_no_migration)"
+    },
+    "DOD-10": {
+      "result": "PASS",
+      "check": "caller_authority_ast",
+      "evidence": "test_dod10_single_dispatcher_single_productive_caller (AST-Klassenanalyse + start_session-Callgraph-Grep)"
+    },
+    "DOD-11": {
+      "result": "PASS",
+      "check": "ai_stack_unveraendert",
+      "evidence": "GPU-Modus=text, LiteLLM :4000 läuft (PID 3568), Route-Hashes 4e11969e/e82c22b7 == Baseline (keine Änderung); kein ai-stack model use (V7)"
+    },
+    "DOD-12": {
+      "result": "PASS",
+      "check": "volle_suite_gruen",
+      "evidence": "regression_full_dispatcher.out (386 passed, 3 skipped); legacy_characterization_tests.out (30 passed — V1-Invarianz)"
+    },
+    "DOD-13": {
+      "result": "PENDING",
+      "check": "unabhaengiges_review"
+    }
+  },
+  "dispatcher_evidence_checks": [
+    {
+      "check": "regression_full_dispatcher",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_dispatcher.out",
+      "output_sha256": "sha256:9efb2cd0d56a0046117305c3108503b4ffc66b5e6f01e0dbe3a82b3160d79fbc"
+    },
+    {
+      "check": "dispatcher_tests",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/dispatcher_tests.out",
+      "output_sha256": "sha256:b33632f1430ce0b5613db6927aa9428be40f9ba4c14734049ef9438acb7ebe3a"
+    },
+    {
+      "check": "legacy_characterization_tests",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_characterization_tests.out",
+      "output_sha256": "sha256:670684a4067054d1ddfc1161677f7b3a23c1db1608a14aa5c8c24f0f82a43e89"
+    },
+    {
+      "check": "architecture_consistency_dispatcher",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/architecture_consistency_dispatcher.out",
       "output_sha256": "sha256:cbee9c0722fd6a09c9cc31d458a52e1ef59156c120e1c47c8ca9ed985131253a"
     }
   ]

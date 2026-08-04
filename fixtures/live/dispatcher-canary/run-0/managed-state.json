@@ -1,0 +1,48 @@
+{
+  "task_bindings": {
+    "BUILDER": {
+      "task_id": "t_c0a1",
+      "board": "conduvera",
+      "phase": "BUILDER",
+      "cycle": 1,
+      "created_at": "2026-08-04T19:25:06.728985+00:00"
+    }
+  },
+  "call_trace": {
+    "goal_id": "CONDUVERA-FIXTURE-001",
+    "trace_id": "TRACE-ACB7CF2D0C",
+    "task_id": "t_c0a1",
+    "attempt_id": "ATT-0466E6B0",
+    "session_id": "mxfix_be38ce52e03a",
+    "adapter_id": "hermes",
+    "pid": 1478960,
+    "pgid": 1478960,
+    "create_time": "Di Aug  4 21:25:06 2026",
+    "route": "workload/local",
+    "model_identity": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+    "execution_mode": "LIVE",
+    "evidence_event": "buildroom.run.completed"
+  },
+  "no_progress": {
+    "count": 1,
+    "fingerprint": [
+      "BUILDER",
+      "WAITING",
+      "TASK_DONE_BUT_NO_EVIDENCE",
+      "t_c0a1",
+      "",
+      ""
+    ],
+    "terminal_hold": false,
+    "threshold": 3,
+    "first_observed_at": "2026-08-04T19:25:12.165623+00:00",
+    "last_observed_at": "2026-08-04T19:25:12.165623+00:00",
+    "root_blocker": "TASK_DONE_BUT_NO_EVIDENCE",
+    "task_binding": {
+      "task_id": "t_c0a1",
+      "board": "conduvera"
+    },
+    "evidence_fingerprint": "",
+    "log_fingerprint": ""
+  }
+}

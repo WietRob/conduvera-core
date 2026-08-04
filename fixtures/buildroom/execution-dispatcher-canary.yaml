@@ -1,0 +1,9 @@
+# Dispatcher canary config — LIVE verification (Goal: strangler entrypoint).
+# Explicit allowlist: only these task IDs may run on the managed path.
+# Task IDs must satisfy the TaskBinding regex ^t_[a-f0-9]+$ (hex only).
+buildroom:
+  execution_path: managed_canary
+  canary_tasks:
+    - t_c0a1
+    - t_0c0a1e
+    - t_0c0a1f

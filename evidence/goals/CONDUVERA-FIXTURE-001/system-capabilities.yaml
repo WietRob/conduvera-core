@@ -31,11 +31,11 @@ components:
     - conduvera_core
     security_gate: Single-Writer; keine parallelen State-Writer
     evidence_output: evidence/TASK-*/ATT-*.json, run-ledger (Test-Fixture)
-    status: LIVE_PROVEN
-    proof: managed_execution.py Caller + 3/3 Live (managed-3x-live-evidence.json);
-      fixture_runner.py Fixture-Seam; CORE-002B1/B2/B3 je INTEGRATED_AND_LIVE_PROVEN
+    status: PARTIAL
+    proof: Managed-Execution-Pfad live (CORE-002B/002D); Legacy-Orchestrator-Absorption,
+      State-Migration und Cutover offen
     modularity: intern; drei Helper portiert und integriert; Legacy frozen als Provenance
-    missing_gate: BUILDROOM_ABSORPTION (separat); OPERATIONAL_PRODUCTION (kein Cutover)
+    missing_gate: Legacy-Orchestrator-Absorption, State-Migration, Cutover
   harness_gateway_service:
     feature_id: HARNESS-001
     funktion: 'EINZIGER öffentlicher Lifecycle-Einstieg: start_session, await_completion,
@@ -577,3 +577,26 @@ components:
       (14/14, Szenarien A-F + DOD-13-Negativtests)
     modularity: intern; FixtureRunner bleibt separater Fixture-Seam
     missing_gate: OPERATIONAL_PRODUCTION (kein Cutover)
+  buildroom_execution_dispatcher:
+    feature_id: CORE-002E
+    funktion: 'BuildroomExecutionDispatcher — Strangler-Dispatcher: waehlt legacy
+      (Default) ODER managed_canary (nur freigegebene Task-IDs); EINZIGE Pfad-Auswahl-Autoritaet,
+      keine zweite Task-/Policy-/State-/Evidence-Autoritaet'
+    owner: Conduvera Core
+    repository: internes Modul (curaops/buildroom/dispatcher.py)
+    adapter_contract: DispatcherConfig / BuildroomExecutionDispatcher.resolve_path
+      / dispatch
+    runtime_dependencies:
+    - ManagedBuildroomCaller (managed_canary)
+    - Legacy-Orchestrator (legacy, Default)
+    security_gate: kein Dual-Run/Shadow-Spawn; Lease je Attempt (single-writer); Nicht-Canary-Task
+      in managed_canary -> legacy/kein Managed-Spawn; fehlende/ungueltige Config ->
+      legacy (fail-closed)
+    evidence_output: dispatcher-lease (je Attempt); delegiert Evidence an ManagedBuildroomCaller
+      (MXOS-EVIDENCE-1.0.0)
+    status: LIVE_PROVEN
+    proof: tests/buildroom/test_dispatcher.py (12/12); fixtures/live/dispatcher-canary/dispatcher-3x-canary-evidence.json
+      (PASS 3/3 CANARY, route workload/local, Model openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf)
+    modularity: intern; kein zweiter Orchestrator; keine neue Registry/Evidence-Huelle
+    missing_gate: OPERATIONAL_PRODUCTION (kein Cutover); Legacy-Absorption offen (CORE-002
+      PARTIAL)
