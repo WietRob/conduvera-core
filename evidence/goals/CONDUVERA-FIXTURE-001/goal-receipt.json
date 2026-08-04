@@ -5,7 +5,7 @@
   "overall_status": "TEILBESTANDEN",
   "status_components": {
     "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "dedd56d5ee53062177e7811781c25021fedc48d6",
+    "FINAL_REPO_HEAD": "6e0cdac1be9f2929eee51bcf037f0997eea7a486",
     "SKILL_SELF_IMPROVEMENT": "ALLOWED",
     "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
     "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
@@ -181,7 +181,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T11:03:56.068733+00:00",
+  "generated_at": "2026-08-04T11:10:17.911982+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -718,12 +718,17 @@
       "evidence": "task_binding.py pure State+argv; keine litellm/ai_stack/bws/subprocess/sqlite/pathlib; keine Registry/Evidence-Schema"
     },
     "DOD-12": {
-      "result": "PENDING",
-      "check": "unabhaengiges_review_auf_exakt_commit"
+      "result": "BESTANDEN",
+      "check": "unabhaengiges_review_auf_exakt_commit",
+      "reviewer_session": "deleg_987ef1a5 (frische Session, kein Implementierungskontext)",
+      "commit_sha": "6e0cdac1be9f2929eee51bcf037f0997eea7a486",
+      "verdict_file": "evidence/goals/CONDUVERA-FIXTURE-001/reviewer-verdict-task-binding.md",
+      "note": "133 Code-Zeilen byte-identisch (Tail-Identitaet); State-Paritaet vollstaendig; Side-Effect-Paritaet (Orchestrator deferred); Grenzen sauber; Tests frisch 37/37 + 17/17 Legacy + 356 Regression; Anti-Tamper 4/4; 0 Findings. BESTANDEN nur fuer den task_binding-Slice (PARITY_PROVEN_NOT_INTEGRATED)."
     },
     "DOD-13": {
-      "result": "PENDING",
-      "check": "worktree_sauber_committet_kein_merge"
+      "result": "PASS",
+      "check": "worktree_sauber_committet_kein_merge",
+      "note": "Commit 6e0cdac; kein Merge/Force-Push/Cutover; porcelain leer (nur dieses Receipt-Update + Verdikt folgen)"
     }
   },
   "task_binding_evidence_checks": [
