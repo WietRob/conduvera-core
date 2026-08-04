@@ -536,3 +536,22 @@ components:
     modularity: intern; Legacy bleibt frozen; nur Differentialtests laden es
     missing_gate: reale Caller-Integration (peekxd_buildroom_loop_v20/cycle49_preflight
       bleiben Legacy) — deferred, nicht simuliert
+  buildroom_task_binding_slice:
+    feature_id: CORE-002B3
+    funktion: Task-zu-Kanban-Board-Bindings (TaskBinding, store/binding_for_phase/clear/kanban_argv)
+      — portiert mit Differentialparität
+    owner: Conduvera Core
+    repository: internes Modul (curaops/buildroom/task_binding.py)
+    adapter_contract: TaskBinding / store_task_binding / binding_for_phase / clear_task_binding
+      / kanban_argv
+    runtime_dependencies:
+    - keine (pure State-Transformation + argv-Bau)
+    security_gate: Validierung (KANBAN_TASK_ID_INVALID/KANBAN_BOARD_INVALID/BUILDROOM_PHASE_INVALID/BUILDROOM_CYCLE_INVALID/TASK_BINDING_CREATED_AT_REQUIRED);
+      KEINE Task-/Session-/Harness-/Modell-/Runtime-/Secret-Autorität
+    evidence_output: keine (State-dict-Mutation + argv)
+    status: PARITY_PROVEN_NOT_INTEGRATED
+    proof: tests/buildroom/test_task_binding_differential.py (37/37); modulspezifische
+      Legacy-Tests 17/17 isoliert grün
+    modularity: intern; Legacy bleibt frozen; nur Differentialtests laden es
+    missing_gate: reale Caller-Integration (peekxd_buildroom_loop_v20/cycle49_preflight
+      bleiben Legacy) — deferred, nicht simuliert
