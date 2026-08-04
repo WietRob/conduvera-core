@@ -1,0 +1,34 @@
+........F                                                                [100%]
+=================================== FAILURES ===================================
+___________ test_autopilot_runner_stops_immediately_on_terminal_hold ___________
+
+    def test_autopilot_runner_stops_immediately_on_terminal_hold():
+>       runner = (Path(__file__).parents[1] / "buildroom_autopilot_runner.sh").read_text()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+legacy/buildroom/tests/test_buildroom_no_progress.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/legacy/buildroom/buildroom_autopilot_runner.sh')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/legacy/buildroom/buildroom_autopilot_runner.sh'
+
+../../.local/share/uv/python/cpython-3.11.14-linux-x86_64-gnu/lib/python3.11/pathlib.py:1044: FileNotFoundError
+=========================== short test summary info ============================
+FAILED legacy/buildroom/tests/test_buildroom_no_progress.py::test_autopilot_runner_stops_immediately_on_terminal_hold
+1 failed, 8 passed in 0.04s

@@ -510,10 +510,29 @@ components:
     security_gate: 'fail-closed: deaktiviertes/unbekanntes Backend wirft IMMER; KEINE
       andere Autorität (kein Modell-/Provider-/GPU-/Secret-Zugriff)'
     evidence_output: keine (pure Policy-Prüfung)
-    status: LIVE_PROVEN
+    status: PARITY_PROVEN_NOT_INTEGRATED
     proof: tests/buildroom/test_backend_policy_differential.py (21/21, Legacy vs Neu
       identisch); Behaviour-Matrix backend-policy-behaviour-matrix.md
     modularity: intern; Legacy bleibt frozen (legacy/buildroom/source, nur Differentialtests
       laden es)
-    missing_gate: Integration in realen Caller (buildroom_core/buildroom_execution
-      sind Legacy — Port deferred, kein zweiter Modulport in diesem Goal)
+    missing_gate: reale Caller-Integration (buildroom_core/buildroom_execution bleiben
+      Legacy) — Port-Parität bewiesen, Integration deferred
+  buildroom_no_progress_slice:
+    feature_id: CORE-002B2
+    funktion: No-Progress-Reconciliation-Guard (count identischer Beobachtungen, HOLD_FOR_BOSS
+      ab Schwelle) — portiert mit Differentialparität
+    owner: Conduvera Core
+    repository: internes Modul (curaops/buildroom/no_progress.py)
+    adapter_contract: NoProgressResult / observe_reconciliation
+    runtime_dependencies:
+    - keine (pure State-Transformation)
+    security_gate: 'fail-closed: Schwelle erreicht -> HOLD_FOR_BOSS + REPEATED_NO_PROGRESS;
+      KEINE Task-/Session-/Harness-/Modell-/Runtime-/Secret-Autorität'
+    evidence_output: keine (State-Mutation am übergebenen dict)
+    status: PARITY_PROVEN_NOT_INTEGRATED
+    proof: tests/buildroom/test_no_progress_differential.py (18/18, Legacy vs Neu
+      identisch incl. State vor/nach jedem Schritt); 8/9 Legacy-Tests grün isoliert
+      (1 Mismatch = frozen-Layout .sh, audit-Datei)
+    modularity: intern; Legacy bleibt frozen; nur Differentialtests laden es
+    missing_gate: reale Caller-Integration (peekxd_buildroom_loop_v20/cycle49_preflight
+      bleiben Legacy) — deferred, nicht simuliert
