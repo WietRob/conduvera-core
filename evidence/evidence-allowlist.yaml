@@ -1,0 +1,64 @@
+# Machine-readable evidence allowlist (CONDUVERA-GOAL-1.0, baseline)
+# Only these artifacts may be committed as generated evidence. Everything
+# else under fixtures/live, fixtures/run, evidence/checks or runtime dirs
+# is non-committable (state, caches, HERMES_HOME, logs, dumps, stderr).
+
+schema: evidence-allowlist.v1
+generated_at: 2026-08-04
+allowed_patterns:
+  # Trace + core run evidence
+  - "fixtures/live/**/state/call-trace.json"
+  - "fixtures/live/**/core-run-evidence.json"
+  - "fixtures/live/**/evidence/**/*.json"
+  # Route snapshot (live, sanitized)
+  - "fixtures/live/**/route-snapshot/route-manifest.snapshot.yaml"
+  # 5x live verification
+  - "fixtures/live/run5/live-5x-evidence.json"
+  - "fixtures/live/run5/run-*/state/call-trace.json"
+  - "fixtures/live/run5/run-*/evidence/**/*.json"
+  - "fixtures/live/run5/run-*/route-snapshot/route-manifest.snapshot.yaml"
+  # Historical live-run evidence (documented runs, receipts verified)
+  - "fixtures/live/live-run-*/process-evidence.json"
+  - "fixtures/live/live-run-*/mxos-evidence-*.json"
+  - "fixtures/live/live-run-*/reconcile-evidence.json"
+  - "fixtures/live/live-run-*/bootstrap-output.txt"
+  - "fixtures/live/pgid-repro/repro.json"
+  - "fixtures/live/reconcile-ledger.json"
+  - "fixtures/run/evidence/**"
+  # Fixture scripts (source, not generated)
+  - "fixtures/live/run_core_fixture.py"
+  - "fixtures/live/verify_5x_live.py"
+  # Goal evidence + checks outputs
+  - "evidence/goals/**"
+  - "evidence/checks/*.out"
+  - "evidence/checks/_*.json"
+  - "evidence/evidence-allowlist.yaml"
+  # Static fixtures (deterministic, not runtime)
+  - "fixtures/ods/**"
+  - "fixtures/harness-registry.yaml"
+forbidden_patterns:
+  # Runtime state — never committable
+  - "**/state.db"
+  - "**/state.db-wal"
+  - "**/state.db-shm"
+  - "**/hermes-home/**"
+  - "**/auth.lock"
+  - "**/cache/**"
+  - "**/sessions/**"
+  - "**/request_dump*"
+  - "**/SOUL.md"
+  - "**/MEMORY.md"
+  - "**/USER.md"
+  - "**/*.stderr.txt"
+  - "**/stderr.txt"
+  - "**/agent.log"
+  - "**/errors.log"
+  - "**/*.response.txt"     # bare response artifacts — never committed
+  - "**/response.txt"
+  - "fixtures/**/worktrees/**"   # runtime worktree artifacts (never .ai/worktrees)
+  - "fixtures/**/*.err"          # raw stderr-captures
+  - "fixtures/**/run*.err"
+  - "fixtures/**/resp*.txt"
+  - "fixtures/**/err*.txt"
+  - "fixtures/live/live-run-*/response.txt"
+  - "fixtures/live/run*/response.txt"

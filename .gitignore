@@ -79,6 +79,8 @@ fixtures/live/**/errors.log
 fixtures/live/**/*.response.txt
 fixtures/live/**/response.txt
 fixtures/live/**/worktrees/
+fixtures/run/worktrees/
+fixtures/**/worktrees/
 *.db
 *.db-wal
 *.db-shm

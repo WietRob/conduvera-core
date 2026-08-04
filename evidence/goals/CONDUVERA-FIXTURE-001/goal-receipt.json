@@ -4,19 +4,17 @@
   "goal_id": "CONDUVERA-FIXTURE-001",
   "overall_status": "TEILBESTANDEN",
   "status_components": {
-    "FINAL_HEAD_SEMANTIC_REVIEW": "NOT_PROVEN",
-    "DOD_H14": "FAIL",
-    "DOD_H15": "FAIL",
-    "DOD_H04": "PASS",
-    "NO_SKILL_MUTATION_GATE": "PASS",
-    "CORE_ADAPTER_SEAM": "HARDENED_LIVE_PROVEN_CANDIDATE",
+    "FINAL_HEAD_SEMANTIC_REVIEW": "APPROVED",
+    "FINAL_REPO_HEAD": "5d2f0ba51ddd362296661914f87de96a4c7ba68a",
+    "NO_SKILL_MUTATION_GATE": "FAIL",
+    "EVIDENCE_HYGIENE_GATE": "FAIL",
+    "UV_LOCK_POLICY": "NOT_SUFFICIENTLY_PROVEN",
+    "SYSTEM_FEATURE_DOCUMENTATION": "INCOMPLETE",
     "RELEASE_CANDIDATE": "NOT_YET",
     "OPERATIONAL_PRODUCTION": "NOT_YET",
-    "FULL_SYSTEM": "TEILBESTANDEN",
-    "CORE_INTERNAL_MANAGED_HERMES_SLICE": "LIVE_PROVEN_CANDIDATE",
     "REAL_BUILDROOM_EXECUTION_PATH": "NOT_PROVEN",
-    "BUILDROOM_ABSORPTION": "NOT_STARTED",
-    "LIVE_RUNTIME_CUTOVER": "NOT_STARTED"
+    "FULL_SYSTEM": "TEILBESTANDEN",
+    "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -181,7 +179,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-04T05:12:06.772782+00:00",
+  "generated_at": "2026-08-04T06:59:13.041878+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -389,5 +387,6 @@
       "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/ui_access_plane_finalhead.out",
       "output_sha256": "sha256:d54fb569ef2ac2f23e46c0f40eebb6e63039964defa6e401136a70aea2e7a1ed"
     }
-  ]
+  ],
+  "baseline_note": "Goal establish-canonical-pre-buildroom-system-baseline (2026-08-04): Der exakte Repo-Review (5d2f0ba, deleg_f89d4e3f APPROVE) wird NICHT zurückgenommen. Zurückgenommen wird nur die daraus ueberdehnte Gesamtfreigabe: RELEASE_CANDIDATE zurueck auf NOT_YET, bis (a) der automatische Skill-Writer identifiziert und kontrolliert ist, (b) die Evidence-Hygiene tree-weit geschlossen ist, (c) die uv.lock-Policy durch Repository-Evidence belegt ist, (d) der kanonische Funktionskatalog existiert und konsistent ist, (e) das System-Baseline-Manifest unabhaengig reviewt wurde. Brain-Porcelain: 10 vorbestehende Hermes_Buildroom-Aenderungen (mtime 2026-07-27/08-01, vor diesem Goal) — fremde uncommittete Arbeit, nicht angefasst, im Baseline-Manifest als Brain-Porcelain dokumentiert."
 }

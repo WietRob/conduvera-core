@@ -1,5 +1,0 @@
-fixture task: Managed fixture: prove Core→Buildroom→Hermes→ODS/LiteLLM→Evidence→status
-agent: fixture-agent
-session: mxfix_9ab38e91b619
-model_binding: {'kind': 'gateway_alias', 'selector': 'workload/fixture', 'auth_domain': 'litellm', 'backend_family': 'openai', 'model': 'fixture-model-1'}
-status: ok
