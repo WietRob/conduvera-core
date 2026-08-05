@@ -18,12 +18,14 @@
     "FULL_SYSTEM": "TEILBESTANDEN",
     "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN",
     "SYSTEM_BASELINE": "NOT_REQUESTED (Owner-Steuerung 2026-08-04)",
-    "LLM_ROUTING_INCIDENT": "RESOLVED (extern bewiesen)",
+    "LLM_ROUTING_INCIDENT": "RESOLVED (externer Cooldown + Config-Drift behoben)",
     "OPERATOR_ENTRYPOINT_CUTOVER": "COMPLETED_AND_ROLLBACK_PROVEN",
     "DURABLE_INSTALLATION": "LIVE_PROVEN",
     "BUILDROOM_ROUTE_CONTRACT": "workload/local",
     "LEGACY_FALLBACK_INDEPENDENCE": "LIVE_PROVEN",
-    "GENERAL_MANAGED_EXECUTION_CUTOVER": "NOT_STARTED"
+    "GENERAL_MANAGED_EXECUTION_CUTOVER": "NOT_STARTED",
+    "CONFIG_DRIFT_FIX": "orchestrator: oauth/codex-luna -> oauth/codex (Owner-Freigabe, Backup, Retest 200)",
+    "LITELLM_CLEANUP": "DRAFT erstellt (26/20), NICHT aktiviert — wartet auf Owner + Container-Restart"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -188,7 +190,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T07:35:08.631680+00:00",
+  "generated_at": "2026-08-05T07:43:51.285252+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1238,8 +1240,8 @@
     },
     "DOD-03": {
       "result": "PASS",
-      "check": "client_wieder_gruen_oder_extern_bewiesen",
-      "evidence": "Externe Stoerung eindeutig bewiesen; ALLE lokalen Pfade gruen (LiteLLM 4000, llama-server 11434, kimi 200, codex 200, workload/local 200); betroffene Modelle sind externe Kontingente"
+      "check": "client_wieder_gruen",
+      "evidence": "Orchestrator-Profil zeigte auf oauth/codex-luna (experimenteller Config-Eintrag, OpenAI-Cooldown 68h). Owner-freigegebene Umstellung auf oauth/codex (Backup .bak-20260805-luna-fix, exakt 1 Zeile, diff belegt). Retest: oauth/codex -> gpt-5.6-sol -> 'pong' 200 OK. Legitime Pfade alle gruen: oauth/codex 200, deepseek-v4-flash 200, kimi-k3 200, workload/local 200. glm-* bis 17:37 extern limitiert."
     },
     "DOD-04": {
       "result": "PASS",

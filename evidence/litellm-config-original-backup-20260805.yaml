@@ -1,0 +1,332 @@
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+litellm_settings:
+  drop_params: true
+  request_timeout: 120
+  set_verbose: false
+  stream_timeout: 60
+  success_callback:
+  - langfuse
+model_list:
+- litellm_params:
+    api_base: https://api.deepseek.com/v1
+    api_key: os.environ/DEEPSEEK_API_KEY
+    model: openai/deepseek-v4-pro
+  model_info:
+    max_input_tokens: 1000000
+  model_name: cloud/deepseek
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-4.5
+  model_info:
+    max_input_tokens: 128000
+  model_name: cloud/glm-4.5
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-4.6
+  model_info:
+    max_input_tokens: 200000
+  model_name: cloud/glm-4.6
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-4.7
+  model_info:
+    max_input_tokens: 200000
+  model_name: cloud/glm-4.7
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-5-turbo
+  model_info:
+    max_input_tokens: 200000
+  model_name: cloud/glm-5-turbo
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-5.2
+  model_info:
+    max_input_tokens: 1000000
+  model_name: cloud/glm-5.2
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-4.7
+  model_info:
+    max_input_tokens: 200000
+  model_name: cloud/glm-standard
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-5.2
+  model_info:
+    max_input_tokens: 1000000
+  model_name: cloud/glm-strong
+- litellm_params:
+    api_base: https://api.kimi.com/coding/v1
+    api_key: os.environ/KIMI_API_KEY
+    model: openai/kimi-for-coding
+  model_info:
+    max_input_tokens: 262144
+  model_name: cloud/kimi
+- litellm_params:
+    api_base: https://api.kimi.com/coding/v1
+    api_key: os.environ/KIMI_API_KEY
+    model: openai/kimi-for-coding-highspeed
+  model_info:
+    max_input_tokens: 262144
+  model_name: cloud/kimi-coding-fast
+- litellm_params:
+    api_base: https://api.kimi.com/coding/v1
+    api_key: os.environ/KIMI_API_KEY
+    model: openai/k3
+  model_info:
+    max_input_tokens: 262144
+  model_name: cloud/kimi-k3
+- litellm_params:
+    api_base: https://api.kimi.com/coding/v1
+    api_key: os.environ/KIMI_API_KEY
+    model: openai/k3-256k
+  model_info:
+    max_input_tokens: 262144
+  model_name: cloud/kimi-k3-256k
+- litellm_params:
+    api_base: http://llama-server:8080/v1
+    api_key: not-needed
+    model: openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
+  model_info:
+    max_input_tokens: 32768
+  model_name: local/default
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.6-sol
+  model_info:
+    max_input_tokens: 1050000
+  model_name: oauth/codex
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.6-luna
+  model_info:
+    max_input_tokens: 1050000
+  model_name: oauth/codex-luna
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.6-sol
+  model_info:
+    max_input_tokens: 1050000
+  model_name: oauth/codex-sol
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.3-codex-spark
+  model_info:
+    max_input_tokens: 128000
+  model_name: oauth/codex-spark
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.6-terra
+  model_info:
+    max_input_tokens: 1050000
+  model_name: oauth/codex-terra
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.4
+  model_info:
+    max_input_tokens: 128000
+  model_name: oauth/gpt-5.4
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.4-mini
+  model_info:
+    max_input_tokens: 128000
+  model_name: oauth/gpt-5.4-mini
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.5
+  model_info:
+    max_input_tokens: 1050000
+  model_name: oauth/gpt-5.5
+- litellm_params:
+    api_base: https://api.deepseek.com/v1
+    api_key: os.environ/DEEPSEEK_API_KEY
+    model: openai/deepseek-v4-flash
+  model_info:
+    max_input_tokens: 1000000
+  model_name: provider/deepseek/v4-flash
+- litellm_params:
+    api_base: https://api.deepseek.com/v1
+    api_key: os.environ/DEEPSEEK_API_KEY
+    model: openai/deepseek-v4-pro
+  model_info:
+    max_input_tokens: 1000000
+  model_name: provider/deepseek/v4-pro
+- litellm_params:
+    api_base: https://api.kimi.com/coding/v1
+    api_key: os.environ/KIMI_API_KEY
+    model: openai/kimi-for-coding
+  model_info:
+    max_input_tokens: 262144
+  model_name: provider/kimi/coding
+- litellm_params:
+    api_base: https://api.kimi.com/coding/v1
+    api_key: os.environ/KIMI_API_KEY
+    model: openai/k3
+  model_info:
+    max_input_tokens: 262144
+  model_name: provider/kimi/k3
+- litellm_params:
+    api_base: https://api.kimi.com/coding/v1
+    api_key: os.environ/KIMI_API_KEY
+    model: openai/k3-256k
+  model_info:
+    max_input_tokens: 262144
+  model_name: provider/kimi/k3-256k
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.5
+  model_info:
+    max_input_tokens: 1050000
+  model_name: provider/openai/gpt-5.5
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.6-luna
+  model_info:
+    max_input_tokens: 1050000
+  model_name: provider/openai/luna
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.6-sol
+  model_info:
+    max_input_tokens: 1050000
+  model_name: provider/openai/sol
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.3-codex-spark
+  model_info:
+    max_input_tokens: 128000
+  model_name: provider/openai/spark
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.6-terra
+  model_info:
+    max_input_tokens: 1050000
+  model_name: provider/openai/terra
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-4.5
+  model_info:
+    max_input_tokens: 128000
+  model_name: provider/zai/glm-4.5
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-4.5-air
+  model_info:
+    max_input_tokens: 128000
+  model_name: provider/zai/glm-4.5-air
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-4.6
+  model_info:
+    max_input_tokens: 200000
+  model_name: provider/zai/glm-4.6
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-4.7
+  model_info:
+    max_input_tokens: 200000
+  model_name: provider/zai/glm-4.7
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-5
+  model_info:
+    max_input_tokens: 200000
+  model_name: provider/zai/glm-5
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-5-turbo
+  model_info:
+    max_input_tokens: 200000
+  model_name: provider/zai/glm-5-turbo
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-5.1
+  model_info:
+    max_input_tokens: 200000
+  model_name: provider/zai/glm-5.1
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-5.2
+  model_info:
+    max_input_tokens: 1000000
+  model_name: provider/zai/glm-5.2
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-5.2
+  model_info:
+    max_input_tokens: 1000000
+  model_name: workload/architect
+- litellm_params:
+    api_base: http://cliproxyapi:8317/v1
+    api_key: os.environ/CLIPROXYAPI_API_KEY
+    model: openai/gpt-5.6-sol
+  model_info:
+    max_input_tokens: 1050000
+  model_name: workload/builder
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-5-turbo
+  model_info:
+    max_input_tokens: 200000
+  model_name: workload/fast
+- litellm_params:
+    api_base: http://llama-server:8080/v1
+    api_key: not-needed
+    model: openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
+  model_info:
+    max_input_tokens: 32768
+  model_name: workload/local
+- litellm_params:
+    api_base: https://api.z.ai/api/coding/paas/v4
+    api_key: os.environ/ZAI_API_KEY
+    model: openai/glm-5.2
+  model_info:
+    max_input_tokens: 1000000
+  model_name: workload/long-context
+- litellm_params:
+    api_base: https://api.kimi.com/coding/v1
+    api_key: os.environ/KIMI_API_KEY
+    model: openai/kimi-for-coding
+  model_info:
+    max_input_tokens: 262144
+  model_name: workload/research
+- litellm_params:
+    api_base: https://api.kimi.com/coding/v1
+    api_key: os.environ/KIMI_API_KEY
+    model: openai/k3
+  model_info:
+    max_input_tokens: 262144
+  model_name: workload/reviewer

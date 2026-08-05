@@ -35,17 +35,28 @@ Goal: close-llm-routing-incident-and-stabilize-installed-buildroom-entrypoint
 
 ## Ursache (A4)
 
-EXTERNE Provider-Kontingente, KEIN lokaler Fehler:
-1. oauth/codex-luna: OpenAI-Codex model_cooldown für gpt-5.6-luna,
-   reset_seconds 245218 (~68h), code=model_cooldown — server-seitig verhängt
-2. cloud/glm-4.6: Z.AI "Usage limit reached for 5 hour", reset
-   2026-08-05T17:37:31Z — Token-Kontingent des externen Kontos
-3. kimi-k3: 200 OK (freigegeben, Owner-Korrektur bestätigt)
-4. workload/local + oauth/codex: 200 OK (lokale + sol-Pfade grün)
+ZWEI-FACETTIG, beide bewiesen:
 
-Lokale Reparatur NICHT möglich (extern); keine lokale Infrastruktur
-umgebaut. Alle lokalen Pfade (LiteLLM, llama-server, Container, Ports)
-sind grün.
+1. **Config-Drift (lokal, behoben):** Das Hermes-orchestrator-Profil zeigte auf
+   `oauth/codex-luna` — einen EXPERIMENTELLEN Eintrag der LiteLLM-Config
+   (46 Modelle, davon 8 oauth/*-Aliase über den cliproxyapi-Pfad). Der
+   Owner bestätigte: legitime Provider sind oauth/codex, zai/glm,
+   kimi-for-code (k3, 2.7) und deepseek (v4-flash/v4-pro). oauth/codex-luna
+   ist Config-Schrott. -> Profil auf `oauth/codex` umgestellt
+   (Owner-Freigabe 2026-08-05, Backup .bak-20260805-luna-fix, exakt 1 Zeile,
+   Retest: gpt-5.6-sol -> "pong" 200 OK).
+
+2. **Externe Provider-Kontingente (nicht lokal reparierbar):**
+   - oauth/codex-luna: OpenAI-Codex model_cooldown (reset 68h) — betrifft
+     nur den entfernten experimentellen Pfad
+   - cloud/glm-4.6: Z.AI "Usage limit reached for 5 hour", reset
+     2026-08-05T17:37:31Z (externes Token-Kontingent)
+   - kimi-k3/kimi-coding-fast: k3 200 OK; highspeed erfordert Upgrade
+     (Subscription-Fehler, extern)
+
+Verifizierte grüne Pfade (Owner-legitim): oauth/codex (200), deepseek-v4-flash
+(200), kimi-k3 (200), workload/local (200). Lokale Reparatur war nur für die
+Config-Drift nötig (Punkt 1); keine lokale Infrastruktur umgebaut.
 
 ## Beweise
 
