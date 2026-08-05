@@ -21,6 +21,7 @@
       "provider/zai/glm-5",
       "provider/deepseek/v4-pro",
       "provider/deepseek/v4-flash",
+      "provider/deepseek/v4-flash-0731",
       "provider/kimi/k3",
       "provider/kimi/k2.7-code",
       "provider/kimi/k2.7-code-hs",
@@ -31,7 +32,7 @@
   },
   "verified": {
     "litellm_models": 54,
-    "new_routes_active": "17/17",
+    "new_routes_active": "18/18",
     "alias_compat": true,
     "hermes_default": "provider/openai/gpt-5.6-sol -> PONG (Session 20260805_132431_7d2e9f)",
     "glm_5_2": "OK",
@@ -40,7 +41,8 @@
     "local_qwen": "OK",
     "gpt_5_6_luna": "HTTP 429 (externer OpenAI-Cooldown, nicht die Route)",
     "opencode_migrated": "litellm/provider/openai/gpt-5.6-sol + small_model litellm/provider/zai/glm-5.2",
-    "picker": "17 einheitliche Namen, keine cloud/oauth-Mischung"
+    "picker": "17 einheitliche Namen, keine cloud/oauth-Mischung",
+    "deepseek_v4_flash_0731": "OK (Upstream=aktualisiertes deepseek-v4-flash 2026-07-31; API akzeptiert nur v4-flash als Namen)"
   },
   "backups": {
     "litellm_host_mount": "~/dream-server/config/litellm/local.yaml.bak-20260805-nomenklatur (c65cd000)",
