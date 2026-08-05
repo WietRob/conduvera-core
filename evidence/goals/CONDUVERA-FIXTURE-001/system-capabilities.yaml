@@ -595,12 +595,21 @@ components:
     evidence_output: dispatcher-lease (je Attempt); delegiert Evidence an ManagedBuildroomCaller
       (MXOS-EVIDENCE-1.0.0)
     status: LIVE_PROVEN_AND_INSTALLED_ENTRYPOINT_WIRED
-    proof: installed-entry/evidence/mxos-evidence-*.json (3/3 Canary via ~/.local/bin/buildroom-operator)
+    proof: 'installed-entry/evidence/mxos-evidence-*.json (3/3 Canary via ~/.local/bin/buildroom-operator)
       + buildroom-callgraph-v1.json (8 Caller, 1 aktiver Operator-Einstieg) + installierter
       Wrapper buildroom_autopilot_runner.sh ruft buildroom-operator (legacy-Tick exit
-      0) + Rollback byte-identisch (ec8db221) + Package-Nachweis (Wheel enthält Config)
+      0) + Rollback byte-identisch (ec8db221) + Package-Nachweis (Wheel enthält Config);
+      worktree-unavailable: legacy exit 0 + 3/3 Canary route=workload/local ohne Source-Worktree;
+      LLM-Incident: externe Provider-Cooldowns (luna 68h, glm bis 17:37), lokale Pfade
+      gruen'
     modularity: intern; kein zweiter Orchestrator; keine neue Registry/Evidence-Huelle
     missing_gate: OPERATIONAL_PRODUCTION (kein Cutover); Buildroom-Absorption PARTIAL
+    route_contract: 'workload/local (B1: local/default fuer Buildroom unzulaessig;
+      fail-closed wenn workload/local fehlt)'
+    legacy_independence: 'B2: legacy laeuft ohne Route-Manifest/Registry/Managed-Caller
+      (exit 0 bewiesen)'
+    durable_installation: 'B3: immutable Release ~/.local/share/conduvera/releases/buildroom-operator/8094134a/
+      (Wheel de54726f, Git 8094134a); current-Symlink atomar; KEIN Worktree-Pfad'
   brain_runtime:
     feature_id: BRAIN-001
     funktion: Brain Runtime — Index-/Retrieval-/Capture-Engine ueber Roberto_Brain;
@@ -641,6 +650,7 @@ components:
     evidence_output: installed-entry/mxos-evidence-*.json (MXOS-EVIDENCE-1.0.0)
     status: LIVE_PROVEN
     proof: 3/3 Canary via installiertem Einstieg (completed, Qwen live); legacy-Tick
-      exit 0; Wrapper-End-to-End getestet
+      exit 0; Wrapper-End-to-End getestet; durable installation immutable release
+      dir (B3)
     modularity: console-script im Wheel; package-data Config
     missing_gate: General Managed Cutover NOT_STARTED

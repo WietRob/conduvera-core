@@ -17,7 +17,13 @@
     "REAL_BUILDROOM_EXECUTION_PATH": "LIVE_PROVEN",
     "FULL_SYSTEM": "TEILBESTANDEN",
     "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN",
-    "SYSTEM_BASELINE": "NOT_REQUESTED (Owner-Steuerung 2026-08-04)"
+    "SYSTEM_BASELINE": "NOT_REQUESTED (Owner-Steuerung 2026-08-04)",
+    "LLM_ROUTING_INCIDENT": "RESOLVED (extern bewiesen)",
+    "OPERATOR_ENTRYPOINT_CUTOVER": "COMPLETED_AND_ROLLBACK_PROVEN",
+    "DURABLE_INSTALLATION": "LIVE_PROVEN",
+    "BUILDROOM_ROUTE_CONTRACT": "workload/local",
+    "LEGACY_FALLBACK_INDEPENDENCE": "LIVE_PROVEN",
+    "GENERAL_MANAGED_EXECUTION_CUTOVER": "NOT_STARTED"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -182,7 +188,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T06:14:04.582572+00:00",
+  "generated_at": "2026-08-05T07:35:08.631680+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1216,6 +1222,88 @@
       "check": "allowlist_installed",
       "exitcode": 0,
       "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/allowlist_installed.out",
+      "output_sha256": "sha256:c2cba0e5b1275bde99432021fd22a26635493fa35d0886fcd5cd38708b0f7cca"
+    }
+  ],
+  "incident_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "fehler_reproduziert",
+      "evidence": "oauth/codex-luna -> HTTP 429 model_cooldown gpt-5.6-luna (reset 68h); cloud/glm-4.6 -> 429 Usage limit bis 17:37; kimi-k3 -> 200; oauth/codex -> 200; workload/local -> 200 (Live-Calls mit Client-Key)"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "ursache_lokalisiert",
+      "evidence": "Container-Log dream-litellm (--timestamps): erste luna-429 2026-07-30T12:00:51Z; code=model_cooldown; provider=codex; reset_seconds 245218. EXTERN (OpenAI-Codex + Z.AI-Kontingent), kein lokaler Fehler"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "client_wieder_gruen_oder_extern_bewiesen",
+      "evidence": "Externe Stoerung eindeutig bewiesen; ALLE lokalen Pfade gruen (LiteLLM 4000, llama-server 11434, kimi 200, codex 200, workload/local 200); betroffene Modelle sind externe Kontingente"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "port_4000_authority",
+      "evidence": "127.0.0.1:4000 = Container dream-litellm (cgroup docker-09f9d267, PID 3568, Start Jul 31, Port-Mapping 4000->4000, Config /tmp/config.yaml IM Container sha c6e1fdfd); KEIN paralleler Host-Proxy (frueherer 'fehlend'-Befund = Namespace-Artefakt)"
+    },
+    "DOD-05": {
+      "result": "PASS",
+      "check": "workload_local_vertrag",
+      "evidence": "BUILDROOM_ROUTE=workload/local; test_b1_workload_local_required (local/default zuerst -> workload/local gewaehlt); test_b1_workload_local_missing_fails_closed; Live-Canary route=workload/local (vorher local/default)"
+    },
+    "DOD-06": {
+      "result": "PASS",
+      "check": "legacy_independent",
+      "evidence": "test_b2_legacy_independent_of_ai_stack (ohne Route-Manifest/Registry/Caller, legacy exit 0); test_b2_canary_requires_route_manifest (canary ohne Manifest -> CONFIG_INVALID); _build_dispatcher(canary=False) ohne managed_caller"
+    },
+    "DOD-07": {
+      "result": "PASS",
+      "check": "immutable_release",
+      "evidence": "~/.local/share/conduvera/releases/buildroom-operator/8094134abf6e/ (Wheel de54726f, Git 8094134a, venv); current-Symlink atomar; ~/.local/bin/buildroom-operator -> current; KEIN matrix-os-wt-*-Pfad; release-manifest.json"
+    },
+    "DOD-08": {
+      "result": "PASS",
+      "check": "worktree_unavailable",
+      "evidence": "Worktree zu -HIDDEN umbenannt: legacy exit 0 + 3/3 Canary completed route=workload/local (ATT-0064E5FF/D4E25FC7/22617D47); 0 Prozesse/Leases; Worktree restored; buildroom-operator laeuft aus Release weiter"
+    },
+    "DOD-09": {
+      "result": "PASS",
+      "check": "rollback_byte_identisch",
+      "evidence": "Wrapper: 16364b20 -> Rollback via .bak-20260804-wired -> ec8db221 (sha256 -c OK); danach Re-Wiring; Release: current/previous-Symlink-Mechanik atomar"
+    },
+    "DOD-10": {
+      "result": "PASS",
+      "check": "ai_stack_unveraendert",
+      "evidence": "GPU text, LiteLLM Container seit Jul 31 unveraendert (Config sha c6e1fdfd), llama-server healthy 0 Restarts, keine Secret-/Route-Änderung; nur neue Buildroom-Code-Ebene (Repo)"
+    },
+    "DOD-11": {
+      "result": "PENDING",
+      "check": "review_final"
+    }
+  },
+  "incident_evidence_checks": [
+    {
+      "check": "regression_full_hardened",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_hardened.out",
+      "output_sha256": "sha256:3d987b25ee51956cf690fa0783ef5e13a305b213e3bbed9ad26411499a6a2e35"
+    },
+    {
+      "check": "dispatcher_tests_hardened",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/dispatcher_tests_hardened.out",
+      "output_sha256": "sha256:efd94f23eff0355e7c955f83f29b831e302896c460bab7efad320685112b1626"
+    },
+    {
+      "check": "legacy_characterization_hardened",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_characterization_hardened.out",
+      "output_sha256": "sha256:670684a4067054d1ddfc1161677f7b3a23c1db1608a14aa5c8c24f0f82a43e89"
+    },
+    {
+      "check": "allowlist_hardened",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/allowlist_hardened.out",
       "output_sha256": "sha256:c2cba0e5b1275bde99432021fd22a26635493fa35d0886fcd5cd38708b0f7cca"
     }
   ]

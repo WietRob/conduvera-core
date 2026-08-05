@@ -1,0 +1,48 @@
+{
+  "schema": "MXOS-EVIDENCE-1.0.0",
+  "goal_id": "CONDUVERA-FIXTURE-001",
+  "task_id": "t_0c0a1e",
+  "attempt_id": "ATT-D4E25FC7",
+  "session_id": "mxfix_315640ecf891",
+  "harness": "hermes",
+  "producer": {
+    "name": "conduvera-core",
+    "version": "0.1.0"
+  },
+  "evidence": {
+    "session_id": "mxfix_315640ecf891",
+    "status": "completed",
+    "artifacts": [
+      {
+        "path": "/home/roberto_schmidt/.hermes/buildroom/dispatcher/worktrees/SES-43437263/mxfix_315640ecf891.response.txt",
+        "sha256": "sha256:c8a786cab2621aba8724e063b6f391edcbb431f43228959a03c507c3eae90a8b"
+      }
+    ],
+    "model_binding": {
+      "kind": "gateway_alias",
+      "selector": "workload/local",
+      "auth_domain": "litellm",
+      "backend_family": "openai",
+      "model": "openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+      "api_base": "http://llama-server:8080/v1"
+    },
+    "handle": {
+      "session_id": "mxfix_315640ecf891",
+      "pid": 3070938,
+      "pgid": 3070938,
+      "create_time": "Mi Aug  5 09:29:13 2026",
+      "hermes_home": "/home/roberto_schmidt/.hermes/buildroom/dispatcher/worktrees/SES-43437263/hermes-home/profiles/fixture-live",
+      "status": "completed",
+      "exitcode": 0,
+      "started_at": "2026-08-05T07:29:13.647661+00:00",
+      "finished_at": "2026-08-05T07:29:19.980854+00:00",
+      "output_path": "/home/roberto_schmidt/.hermes/buildroom/dispatcher/worktrees/SES-43437263/mxfix_315640ecf891.response.txt",
+      "route": "workload/local",
+      "model_identity": "",
+      "trace_id": "TRACE-11CEC19A95",
+      "execution_mode": "LIVE"
+    },
+    "ok": true
+  },
+  "generated_at": "2026-08-05T07:29:19.981560+00:00"
+}

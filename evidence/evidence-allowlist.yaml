@@ -49,6 +49,8 @@ allowed_patterns:
   - "fixtures/live/rollback/canary-run/managed-state.json"
   - "fixtures/live/rollback/canary-run/state/call-trace.json"
   - "fixtures/live/rollback/canary-run/evidence/mxos-evidence-*.json"
+  # LLM-Routing-Incident evidence
+  - "evidence/llm-routing-incident-evidence.md"
   # Installed operator entry proof (3/3 Canary via ~/.local/bin/buildroom-operator)
   - "fixtures/live/installed-entry/evidence/mxos-evidence-*.json"
   - "fixtures/live/installed-entry/state/call-trace.json"
@@ -89,3 +91,5 @@ forbidden_patterns:
   - "fixtures/**/err*.txt"
   - "fixtures/live/live-run-*/response.txt"
   - "fixtures/live/run*/response.txt"
+  # Worktree-unavailable proof (DOD-08: installierter Operator ohne Source-Worktree)
+  - "fixtures/live/worktree-unavailable/evidence/mxos-evidence-*.json"
