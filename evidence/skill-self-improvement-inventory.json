@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-08-05T19:32:41.363171+00:00",
+  "schema": "skill-self-improvement-inventory.v1",
+  "scope": "Hermes-Profil orchestorator skills/ — Änderungen seit 2026-08-05 12:00",
+  "origin": "Parallele Sessions/Agenten (keine Skill-Edits durch die Orchestrator-Goal-Session selbst)",
+  "note": "Separater Skill-Review erforderlich; keine stillen Skill-Diffs im Goalabschluss.",
+  "skills": [
+    {
+      "skill": "autonomous-ai-agents/hermes-maintenance",
+      "modified": "2026-08-05 12:33"
+    },
+    {
+      "skill": "governance/exact-head-final-review",
+      "modified": "2026-08-05 12:11"
+    },
+    {
+      "skill": "governance/control-plane-throughput-governance",
+      "modified": "2026-08-05 12:34"
+    },
+    {
+      "skill": "devops/ai-stack-routing-gpu-governance",
+      "modified": "2026-08-05 13:43"
+    },
+    {
+      "skill": "software-development/curaops-codebase-architecture-map",
+      "modified": "2026-08-05 13:20"
+    },
+    {
+      "skill": "software-development/hermes-multi-agent-setup",
+      "modified": "2026-08-05 13:44"
+    },
+    {
+      "skill": "hermes/hermes-provider-management",
+      "modified": "2026-08-05 14:07"
+    },
+    {
+      "skill": "hermes/hermes-model-picker-cache-governance",
+      "modified": "2026-08-05 14:24"
+    },
+    {
+      "skill": "devops/litellm-gateway-operations",
+      "modified": "2026-08-05 20:58"
+    }
+  ],
+  "total": 9
+}

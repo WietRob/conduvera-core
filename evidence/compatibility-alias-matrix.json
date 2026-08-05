@@ -1,0 +1,203 @@
+{
+  "generated_at": "2026-08-05T12:31:20.596001+00:00",
+  "schema": "compatibility-alias-matrix.v1",
+  "aliases": [
+    {
+      "alias": "cloud/deepseek",
+      "replacement": "openai/deepseek-v4-pro",
+      "consumers": [
+        ".hermes/profiles/litellm-local/config.yaml",
+        ".hermes/profiles/ops/config.yaml"
+      ],
+      "consumer_count": 2,
+      "last_seen": "2026-08-05",
+      "remove_after": "Nach Clientmigration",
+      "status": "KEEP"
+    },
+    {
+      "alias": "cloud/glm-4.5",
+      "replacement": "openai/glm-4.5",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "cloud/glm-4.6",
+      "replacement": "openai/glm-4.6",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "cloud/glm-4.7",
+      "replacement": "openai/glm-4.7",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "cloud/glm-5-turbo",
+      "replacement": "openai/glm-5-turbo",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "cloud/glm-5.2",
+      "replacement": "openai/glm-5.2",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "cloud/glm-standard",
+      "replacement": "openai/glm-4.7",
+      "consumers": [
+        ".hermes/profiles/analyst/config.yaml",
+        ".hermes/profiles/dreamer/config.yaml",
+        ".hermes/profiles/litellm-local/config.yaml",
+        ".hermes/profiles/pm/config.yaml",
+        ".hermes/profiles/researcher/config.yaml",
+        ".hermes/profiles/writer/config.yaml"
+      ],
+      "consumer_count": 6,
+      "last_seen": "2026-08-05",
+      "remove_after": "Nach Clientmigration",
+      "status": "KEEP"
+    },
+    {
+      "alias": "cloud/glm-strong",
+      "replacement": "openai/glm-5.2",
+      "consumers": [
+        ".hermes/profiles/designer/config.yaml"
+      ],
+      "consumer_count": 1,
+      "last_seen": "2026-08-05",
+      "remove_after": "Nach Clientmigration",
+      "status": "KEEP"
+    },
+    {
+      "alias": "cloud/kimi",
+      "replacement": "openai/kimi-for-coding",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "cloud/kimi-coding-fast",
+      "replacement": "openai/kimi-for-coding-highspeed",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "cloud/kimi-k3",
+      "replacement": "openai/k3",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "cloud/kimi-k3-256k",
+      "replacement": "openai/k3-256k",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "oauth/codex",
+      "replacement": "openai/gpt-5.6-sol",
+      "consumers": [
+        ".hermes/profiles/backend/config.yaml",
+        ".hermes/profiles/builder/config.yaml",
+        ".hermes/profiles/programmer/config.yaml",
+        ".hermes/profiles/reviewer/config.yaml"
+      ],
+      "consumer_count": 4,
+      "last_seen": "2026-08-05",
+      "remove_after": "Nach Clientmigration",
+      "status": "KEEP"
+    },
+    {
+      "alias": "oauth/codex-luna",
+      "replacement": "openai/gpt-5.6-luna",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "oauth/codex-sol",
+      "replacement": "openai/gpt-5.6-sol",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "oauth/codex-spark",
+      "replacement": "openai/gpt-5.3-codex-spark",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "oauth/codex-terra",
+      "replacement": "openai/gpt-5.6-terra",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "oauth/gpt-5.4",
+      "replacement": "openai/gpt-5.4",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "oauth/gpt-5.4-mini",
+      "replacement": "openai/gpt-5.4-mini",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    },
+    {
+      "alias": "oauth/gpt-5.5",
+      "replacement": "openai/gpt-5.5",
+      "consumers": [],
+      "consumer_count": 0,
+      "last_seen": "UNBEKANNT/kein Nachweis",
+      "remove_after": "SOFORT (0 Consumers)",
+      "status": "REMOVE"
+    }
+  ]
+}
