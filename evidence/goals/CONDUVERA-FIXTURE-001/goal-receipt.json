@@ -12,7 +12,7 @@
     "DURABLE_MANAGED_CANARY_INSTALLATION": "LIVE_PROVEN",
     "SOURCE_WORKTREE_INDEPENDENCE": "LIVE_PROVEN",
     "FINAL_RELEASE_C_ROLLBACK": "LIVE_PROVEN",
-    "INDEPENDENT_REVIEW_ON_FINAL_HEAD": "NOT_PROVEN",
+    "INDEPENDENT_REVIEW_ON_FINAL_HEAD": "PENDING_REVIEW_B",
     "LITELLM_CLEANUP_DRAFT": "NOT_APPROVED",
     "MODEL_PICKER_UX": "NOT_FIXED",
     "GENERAL_MANAGED_CUTOVER": "NOT_STARTED",
@@ -182,7 +182,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T09:58:36.697128+00:00",
+  "generated_at": "2026-08-05T10:05:22.801882+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1394,7 +1394,7 @@
     "DOD-02": {
       "result": "PASS",
       "check": "c_b_c_rollback",
-      "evidence": "C geprueft (Legacy exit 0, Canary t_c0a1 ATT-B6679A55 workload/local, 0 Leases) -> atomar C->B (B geprueft: Legacy, Canary t_0c0a1e ATT-F55311E5, 0 Leases) -> atomar B->C (C erneut: Legacy, Canary t_0c0a1f ATT-706CA56F, 0 Leases)"
+      "evidence": "C geprueft (Legacy exit 0, Canary completed workload/local, 0 Leases) -> atomar C->B (B geprueft: Legacy exit 0, Canary completed workload/local, 0 Leases) -> atomar B->C (C erneut: Legacy exit 0, Canary completed workload/local, 0 Leases). Symlink-Zustand physisch verifiziert: current->C (87e1296), previous->B (990b19a). Committete Worktree-Proof-Evidence: ATT-83DC75FB (t_c0a1), ATT-0C6B28B8 (t_0c0a1e), ATT-9F1C588F (t_0c0a1f) - alle completed, route=workload/local, exit 0. (P3-Fix 2026-08-05: Attempt-ID-Angabe praezisiert.)"
     },
     "DOD-03": {
       "result": "PASS",
@@ -1422,8 +1422,9 @@
       "evidence": "412 passed + 30/30 Legacy (frisch)"
     },
     "DOD-08": {
-      "result": "PENDING",
-      "check": "review_a"
+      "result": "PASS",
+      "check": "review_a",
+      "evidence": "Reviewer (deleg_bd53d21f, frische Session) BESTANDEN auf f698d95: 0 P1/P2, 1 P3 (Attempt-ID-Drift, behoben). Verdikt: reviewer-verdict-exacthead-A.md"
     },
     "DOD-09": {
       "result": "PENDING",
