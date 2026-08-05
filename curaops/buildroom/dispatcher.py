@@ -87,6 +87,33 @@ def _pid_alive(pid: int) -> bool:
     return True
 
 
+def _process_fingerprint() -> dict:
+    """Fingerprint des aktuellen Prozesses: PID + Create-Time + Boot-ID.
+
+    PID allein ist gegen PID-Reuse nicht abgesichert (ein neuer Prozess
+    kann dieselbe PID erben). Boot-ID identifiziert den System-Boot
+    eindeutig; die Prozess-Create-Time stammt aus /proc/<pid>/stat
+    (field 22, Startzeit in Clockticks seit Boot).
+    """
+    pid = os.getpid()
+    boot_id = ""
+    try:
+        boot_id = Path("/proc/sys/kernel/random/boot_id").read_text(
+            encoding="utf-8").strip()
+    except OSError:
+        pass
+    create_time_ticks = ""
+    try:
+        stat = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
+        # Feld 22 (Startzeit) nach der schließenden Klammer des comm-Feldes.
+        after = stat.rsplit(")", 1)[1].split()
+        if len(after) >= 20:
+            create_time_ticks = after[19]
+    except (OSError, IndexError, ValueError):
+        pass
+    return {"pid": pid, "boot_id": boot_id, "create_time_ticks": create_time_ticks}
+
+
 class DispatcherConfigError(ValueError):
     """Raised when the dispatcher config is structurally invalid."""
 
@@ -224,6 +251,7 @@ class BuildroomExecutionDispatcher:
         log_fingerprint: str = "",
         worktree_root: str | Path | None = None,
         caller_args: dict[str, Any] | None = None,
+        live: bool = False,
     ) -> DispatchResult:
         """Run one task through the selected path (single-writer per attempt)."""
         path = self.resolve_path(task_id)
@@ -238,7 +266,8 @@ class BuildroomExecutionDispatcher:
             )
 
         # legacy: exact existing behaviour; never touches ManagedBuildroomCaller.
-        return self._dispatch_legacy(task_id=task_id, task_description=task_description)
+        return self._dispatch_legacy(task_id=task_id, task_description=task_description,
+                                     live=live)
 
     # -- internals ---------------------------------------------------------
 
@@ -273,7 +302,40 @@ class BuildroomExecutionDispatcher:
                 except (OSError, json.JSONDecodeError):
                     owner = {}
                 owner_pid = int(owner.get("pid", 0) or 0)
-                stale = owner_pid and not _pid_alive(owner_pid)
+                # PID-Reuse-Schutz: gleiche PID allein reicht nicht. Die
+                # Lease gilt nur als live, wenn Boot-ID UND Create-Time
+                # (falls in der Lease vorhanden) mit dem aktuellen
+                # Fingerprint dieses PIDs übereinstimmen. Weicht die
+                # Create-Time ab, ist die PID einem neuen Prozess
+                # zugefallen -> Lease ist stale.
+                stale = False
+                if not owner_pid:
+                    stale = True
+                elif not _pid_alive(owner_pid):
+                    stale = True
+                else:
+                    boot_id = owner.get("boot_id", "") or ""
+                    ctime = owner.get("create_time_ticks", "") or ""
+                    if boot_id:
+                        cur_boot = ""
+                        try:
+                            cur_boot = Path("/proc/sys/kernel/random/boot_id").read_text(
+                                encoding="utf-8").strip()
+                        except OSError:
+                            pass
+                        if cur_boot and boot_id != cur_boot:
+                            stale = True  # System neu gebootet
+                    if ctime and not stale:
+                        try:
+                            cur_ctime = ""
+                            stat = Path(f"/proc/{owner_pid}/stat").read_text(encoding="utf-8")
+                            after = stat.rsplit(")", 1)[1].split()
+                            if len(after) >= 20:
+                                cur_ctime = after[19]
+                            if cur_ctime and cur_ctime != ctime:
+                                stale = True  # PID-Reuse: andere Create-Time
+                        except OSError:
+                            stale = True
                 if stale and owner.get("task_id") == task_id:
                     lease.unlink()  # verwaiste Lease desselben Tasks reklamieren
                 else:
@@ -285,12 +347,15 @@ class BuildroomExecutionDispatcher:
             except OSError:
                 return False
             with os.fdopen(fd, "w", encoding="utf-8") as f:
+                fp = _process_fingerprint()
                 json.dump({
                     "schema": "buildroom.dispatcher.lease.v1",
                     "task_id": task_id,
                     "attempt_id": attempt_id,
                     "execution_path": self.resolve_path(task_id),
                     "pid": os.getpid(),
+                    "boot_id": fp["boot_id"],
+                    "create_time_ticks": fp["create_time_ticks"],
                     "created_at": datetime.now(timezone.utc).isoformat(),
                 }, f, indent=2, ensure_ascii=False)
             return True
@@ -365,17 +430,19 @@ class BuildroomExecutionDispatcher:
         finally:
             self._release_attempt_lease(attempt_id)
 
-    def _dispatch_legacy(self, *, task_id: str, task_description: str) -> DispatchResult:
+    def _dispatch_legacy(self, *, task_id: str, task_description: str,
+                         live: bool = False) -> DispatchResult:
         """legacy: execute the REAL legacy entrypoint as an isolated subprocess.
 
         The actual buildroom_loop.py CLI (productive installation
         ~/.hermes/scripts/buildroom_loop.py, or the frozen repo copy) is
-        invoked with --legacy-peekxd -> BuildroomOrchestrator.run().
+        invoked as the existing entry point — ManagedBuildroomCaller is
+        never called.
 
-        Isolation (ARBEIT 3): separate HOME/HERMES_HOME, own state path,
-        no mutation of the running ~/.hermes Buildroom state, own PID/PGID,
-        bounded timeout, full exit/state/evidence report. Legacy code stays
-        unchanged. ManagedBuildroomCaller is never called.
+        live=False (Default): isolated proof run (separate HOME/HERMES_HOME,
+        own state path, no live-state drift, bounded timeout).
+        live=True: productive tick against the real ~/.hermes state (used
+        by the installed autopilot wrapper).
         """
         if self._legacy_runner is not None:
             result = self._legacy_runner(task_id=task_id, task_description=task_description)
@@ -385,8 +452,9 @@ class BuildroomExecutionDispatcher:
                 detail={"legacy_result": str(result)},
                 final_status_readable="LEGACY: an bestehenden Orchestrator delegiert",
             )
-        # Productive default: run the real entrypoint in an isolated home.
-        return _run_legacy_entrypoint(task_id=task_id, task_description=task_description)
+        # Productive default: run the real entrypoint (isolated or live).
+        return _run_legacy_entrypoint(task_id=task_id, task_description=task_description,
+                                      live=live)
 
 
 def _find_legacy_entrypoint() -> Path | None:
@@ -403,12 +471,22 @@ def _find_legacy_entrypoint() -> Path | None:
 
 def _run_legacy_entrypoint(*, task_id: str, task_description: str,
                            timeout_s: int = 120,
-                           isolated_home: Path | None = None) -> DispatchResult:
-    """Run buildroom_loop.py --legacy-peekxd in an isolated HOME.
+                           isolated_home: Path | None = None,
+                           live: bool = False) -> DispatchResult:
+    """Run buildroom_loop.py --legacy-peekxd (or generic --project) as a
+    subprocess.
+
+    isolate=True (Default): separates HOME/HERMES_HOME, own state path —
+    the PROOF mode (EVIDENZ C: no live-state drift). The caller may prep a
+    terminal phase in the isolated state so the orchestrator ends cleanly.
+
+    isolate=False (live=True): the PRODUCTIVE tick mode used by the
+    installed autopilot wrapper — buildroom_loop.py runs against the real
+    ~/.hermes state exactly like today, so the orchestrator actually
+    advances the live state. ManagedBuildroomCaller is never called.
 
     Returns a DispatchResult with status legacy_completed (exit 0) or
-    legacy_failed (non-zero exit/timeout), plus the isolated state/evidence
-    report. Never touches the live ~/.hermes Buildroom state.
+    legacy_failed (non-zero exit/timeout), plus the state/evidence report.
     """
     import os
     import subprocess
@@ -422,6 +500,39 @@ def _run_legacy_entrypoint(*, task_id: str, task_description: str,
             detail={"error": "LEGACY_ENTRYPOINT_NOT_FOUND"},
             final_status_readable="LEGACY: buildroom_loop.py nicht gefunden",
         )
+
+    if live:
+        # Produktiver Tick: echte Umgebung, echter State (kein isoliertes
+        # HOME) — der Autopilot liest danach den LIVE-State.
+        try:
+            proc = subprocess.run(
+                [sys.executable, str(entry), "--project", "peekxd"],
+                capture_output=True, text=True, timeout=timeout_s,
+            )
+            report = {
+                "entrypoint": str(entry),
+                "live": True,
+                "exit_code": proc.returncode,
+                "process_exited": True,
+                "stdout_tail": proc.stdout[-2000:],
+                "stderr_tail": proc.stderr[-2000:],
+            }
+            status = "legacy_completed" if proc.returncode == 0 else "legacy_failed"
+            return DispatchResult(
+                task_id=task_id, execution_path=MODE_LEGACY, attempt_id="",
+                status=status, detail=report,
+                final_status_readable=(
+                    f"LEGACY: {entry.name} exit={proc.returncode} "
+                    f"(produktiver Tick, echter State)"
+                ),
+            )
+        except subprocess.TimeoutExpired:
+            return DispatchResult(
+                task_id=task_id, execution_path=MODE_LEGACY, attempt_id="",
+                status="legacy_failed",
+                detail={"error": "LEGACY_TIMEOUT", "timeout_s": timeout_s},
+                final_status_readable=f"LEGACY: Timeout nach {timeout_s}s (live)",
+            )
 
     own_home = Path(isolated_home) if isolated_home else Path(tempfile.mkdtemp(prefix="buildroom-legacy-iso-"))
     own_home.mkdir(parents=True, exist_ok=True)

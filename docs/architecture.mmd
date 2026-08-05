@@ -13,7 +13,7 @@ flowchart TD
         B2["backend_policy (Execution-Backend-Entscheidung, LIVE_PROVEN)"]
         B3["BuildroomExecutionDispatcher (legacy | managed_canary)"]
         B4["ManagedBuildroomCaller (produktionsnaher Caller, LIVE_PROVEN)"]
-        B5["Operator Entry (buildroom_loop.py CLI)"]
+        B5["Operator Entry (buildroom-operator, installiert)"]
         B6["Legacy Orchestrator (peekxd v0.20, Default)"]
         C1 --- C2 --- C3 --- C4
         C4 --> B1

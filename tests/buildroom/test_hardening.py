@@ -101,22 +101,44 @@ def test_dod03_registry_env_var_resolution(tmp_path, monkeypatch):
 
 
 def test_dod03_no_cwd_fallback_when_nothing_configured(tmp_path, monkeypatch):
+    """Registry-Auflösung ist deterministisch: nie cwd-abhängig.
+
+    Ohne expliziten Pfad und ohne Env wird die package resource
+    (curaops/harness/contracts/harness-registry.yaml — DOD-07: Config im
+    gebauten Artefakt) gefunden, auch aus fremdem cwd. Nur wenn weder
+    explizit, Env, package resource noch checkout existieren, fail-closed.
+    """
     import curaops.harness.registry as reg_mod
 
     monkeypatch.delenv("CONDUVERA_HARNESS_REGISTRY", raising=False)
-    # chdir to a directory with no registry
-    monkeypatch.chdir(tmp_path)
-    with pytest.raises(FileNotFoundError):
-        reg_mod.resolve_registry_path(explicit=None)
+    monkeypatch.chdir(tmp_path)  # fremdes cwd ohne Registry
+    resolved = reg_mod.resolve_registry_path(explicit=None)
+    # Package resource oder checkout-Fallback — aber NIE cwd-abhängig
+    assert resolved.is_file()
+    assert tmp_path not in resolved.parents
 
 
-def test_dod03_runner_without_registry_fails_closed(tmp_path):
+def test_dod03_runner_without_registry_fails_closed(tmp_path, monkeypatch):
+    """Ohne auflösbare Registry -> CAPABILITY_UNAVAILABLE (fail-closed)."""
+    from curaops.harness import registry as reg_mod
+
     runner = FixtureRunner(
         fixture_dir=tmp_path / "f",
         route_manifest=ROUTE_FIXTURE,
         producer={"name": "t", "version": "1"},
         execution_mode=ExecutionMode.SIMULATION.value,
     )
+    # Registry-Optionen komplett ausblenden: explizit weg, Env weg,
+    # package resource + checkout-Fallback weg (resolve gibt nichts her).
+    monkeypatch.setattr(reg_mod, "_REGISTRY_ENV_VAR", "CONDUVERA_NONEXISTENT_ENV")
+    monkeypatch.setattr(
+        reg_mod, "resources", None, raising=False,
+    )
+    # Checkout- und Package-Pfade unkenntlich machen: resolve greift auf
+    # _PACKAGE_REGISTRY relativ zum Modul — wir simulieren fehlende Quelle
+    # über einen nicht existierenden Package-Pfad.
+    monkeypatch.setattr(reg_mod, "_PACKAGE_REGISTRY", "contracts/does-not-exist.yaml")
+    monkeypatch.setattr(reg_mod, "_REGISTRY_ENV_VAR", "CONDUVERA_HARNESS_REGISTRY_NONE")
     result = runner.run("task")
     assert result.status == "cap_unavailable"
     assert result.error == "CAPABILITY_UNAVAILABLE"

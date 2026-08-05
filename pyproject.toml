@@ -47,6 +47,7 @@ matrix-os = "src.core.app:main"
 mxos = "src.core.app:main"
 matrix-cli = "curaops.cli.main:main"
 conduvera = "curaops.cli.main:main"
+buildroom-operator = "curaops.buildroom.operator_entry:main"
 
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
@@ -55,6 +56,9 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["src*", "curaops*"]
 exclude = ["curaops.tests*"]
+
+[tool.setuptools.package-data]
+curaops = ["contracts/*.yaml", "contracts/*.json", "harness/contracts/*.yaml"]
 
 [tool.black]
 line-length = 100

@@ -594,11 +594,11 @@ components:
       legacy (fail-closed)
     evidence_output: dispatcher-lease (je Attempt); delegiert Evidence an ManagedBuildroomCaller
       (MXOS-EVIDENCE-1.0.0)
-    status: LIVE_PROVEN_AND_ENTRYPOINT_WIRED
-    proof: 'dispatcher-3x-canary-evidence.json (PASS 3/3 CANARY) + rollback-evidence.json
-      (PASS: managed->legacy->echter Legacy-Lauf) + test_dispatcher.py (21/21, inkl.
-      Multiprocess-Lease + Stale-Lease) + Legacy real via buildroom_loop.py (exit
-      0, isoliert)'
+    status: LIVE_PROVEN_AND_INSTALLED_ENTRYPOINT_WIRED
+    proof: installed-entry/evidence/mxos-evidence-*.json (3/3 Canary via ~/.local/bin/buildroom-operator)
+      + buildroom-callgraph-v1.json (8 Caller, 1 aktiver Operator-Einstieg) + installierter
+      Wrapper buildroom_autopilot_runner.sh ruft buildroom-operator (legacy-Tick exit
+      0) + Rollback byte-identisch (ec8db221) + Package-Nachweis (Wheel enthält Config)
     modularity: intern; kein zweiter Orchestrator; keine neue Registry/Evidence-Huelle
     missing_gate: OPERATIONAL_PRODUCTION (kein Cutover); Buildroom-Absorption PARTIAL
   brain_runtime:
@@ -621,3 +621,26 @@ components:
       Status-Filter); Receipt brain-context-v1-buildroom-wiring.json
     modularity: Symlink-Installation; Vault unabhaengig; Indizes derived
     missing_gate: eigenstaendiges Repo (Owner-Vorgabe); Conduvera Brain Adapter PILOT_PROVEN
+  installed_operator_entrypoint:
+    feature_id: INSTALLED-001
+    funktion: Installierter Operator-Einstieg (~/.local/bin/buildroom-operator via
+      curaops.buildroom.operator_entry) — ruft BuildroomExecutionDispatcher genau
+      einmal; legacy Default
+    owner: Conduvera Core (operator_entry.py)
+    repository: matrix-os-wt-goal-contract (curaops/buildroom/operator_entry.py)
+    adapter_contract: buildroom-operator --project <pack> [--live] | --canary <task-id>
+    runtime_dependencies:
+    - BuildroomExecutionDispatcher
+    - buildroom_loop.py CLI (Legacy)
+    - ManagedBuildroomCaller (Canary)
+    - HarnessGatewayService
+    - LiteLLM
+    - ODS/ai-stack text
+    security_gate: legacy Default; managed_canary nur allowlistete Task-IDs; atomare
+      Lease (PID+CreateTime+BootID); Rollback-Pfad .bak-20260804-wired
+    evidence_output: installed-entry/mxos-evidence-*.json (MXOS-EVIDENCE-1.0.0)
+    status: LIVE_PROVEN
+    proof: 3/3 Canary via installiertem Einstieg (completed, Qwen live); legacy-Tick
+      exit 0; Wrapper-End-to-End getestet
+    modularity: console-script im Wheel; package-data Config
+    missing_gate: General Managed Cutover NOT_STARTED

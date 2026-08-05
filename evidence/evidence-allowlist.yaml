@@ -49,6 +49,9 @@ allowed_patterns:
   - "fixtures/live/rollback/canary-run/managed-state.json"
   - "fixtures/live/rollback/canary-run/state/call-trace.json"
   - "fixtures/live/rollback/canary-run/evidence/mxos-evidence-*.json"
+  # Installed operator entry proof (3/3 Canary via ~/.local/bin/buildroom-operator)
+  - "fixtures/live/installed-entry/evidence/mxos-evidence-*.json"
+  - "fixtures/live/installed-entry/state/call-trace.json"
   # Dispatcher configuration (single config authority, static)
   - "fixtures/buildroom/execution-dispatcher.yaml"
   - "fixtures/buildroom/execution-dispatcher-canary.yaml"

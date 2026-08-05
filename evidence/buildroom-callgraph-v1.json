@@ -1,0 +1,90 @@
+{
+  "schema": "buildroom-callgraph.v1",
+  "goal": "prove-and-wire-the-installed-buildroom-operator-entrypoint",
+  "generated_at": "2026-08-05T05:48:28.606637+00:00",
+  "callers": [
+    {
+      "caller": "Operator (manuell)",
+      "executable": "/home/roberto_schmidt/.hermes/scripts/buildroom_loop.py",
+      "dispatcher": "no",
+      "legacy_direct_bypass": "yes",
+      "runtime_path": "buildroom_loop.py --project <pack> | --legacy-peekxd -> BuildroomOrchestrator.run()",
+      "file_hash": "sha256:3bc2ff6b07d3f44da7112e1ed09b13825a1bc53e7cc7a13596205f6144947e63",
+      "notes": "Direkter Legacy-Aufruf; ruft peekxd_buildroom_loop_v20.BuildroomOrchestrator.run()"
+    },
+    {
+      "caller": "Autopilot (buildroom_autopilot_runner.sh, installiert, hash-identisch zum Repo-Wrapper)",
+      "executable": "/home/roberto_schmidt/.hermes/scripts/buildroom_autopilot_runner.sh",
+      "dispatcher": "no",
+      "legacy_direct_bypass": "yes",
+      "runtime_path": "python3 $LOOP --project peekxd (buildroom_loop.py generic mode)",
+      "file_hash": "sha256:ec8db221d04a603e530a24b55225d08dbaf203c58173f02c8a588376f634c9ee",
+      "notes": "Ticker bis WAITING/BLOCKED/PROOF_COMPLETE; flock-Lock ~/.hermes/run/buildroom-autopilot.lock; letzte aktive Laeufe in ~/.hermes/logs/buildroom-autopilot/cron.log (zuletzt Jul 16, derzeit kein laufender Prozess)"
+    },
+    {
+      "caller": "OS-Crontab (freeze-watchdog.sh, */2)",
+      "executable": "/home/roberto_schmidt/freeze-watchdog.sh",
+      "dispatcher": "no",
+      "legacy_direct_bypass": "no",
+      "runtime_path": "I/O-Pressure-Watchdog (KEIN Buildroom-Aufruf; historischer Kommentar 'Autopilot every 15 min' referenziert den nicht mehr aktiven buildroom-auto-build Cron)",
+      "file_hash": "sha256:7f2a763bc55c9088ef204c5ddf4f33092b3753556d89f5b6be7562adb9edefe4",
+      "notes": "Kein Buildroom-Pfad; dokumentiert als Nicht-Aufrufer"
+    },
+    {
+      "caller": "Hermes-Cron buildroom-qa-verify (enabled)",
+      "executable": "/home/roberto_schmidt/hermes-buildroom/scripts/delegate_qa.py",
+      "dispatcher": "no",
+      "legacy_direct_bypass": "no",
+      "runtime_path": "hermes-buildroom Reporting-Skript (KEIN buildroom_loop-Aufruf)",
+      "file_hash": "sha256:daa8215e4bab8aaae83d7dcc7d29dfd426d7fdf5d914d0dee2b80f068ccb33d2",
+      "notes": "Separates Repo; Reporting/QA; ruft buildroom_loop NICHT auf"
+    },
+    {
+      "caller": "Hermes-Cron buildroom-daily-research (enabled)",
+      "executable": "/home/roberto_schmidt/hermes-buildroom/scripts/cron/daily_research_summary.py",
+      "dispatcher": "no",
+      "legacy_direct_bypass": "no",
+      "runtime_path": "hermes-buildroom Reporting-Skript (KEIN buildroom_loop-Aufruf)",
+      "file_hash": "sha256:3a9bb0266c9ad0f0541da72f12706594489e3584c956cf69908383bdd0a5dca1",
+      "notes": "Separates Repo; Reporting; kein buildroom_loop-Aufruf"
+    },
+    {
+      "caller": "Hermes-Cron buildroom-weekly-dreamer (enabled)",
+      "executable": "/home/roberto_schmidt/hermes-buildroom/scripts/cron/weekly_dreamer_scan.py",
+      "dispatcher": "no",
+      "legacy_direct_bypass": "no",
+      "runtime_path": "hermes-buildroom Reporting-Skript (KEIN buildroom_loop-Aufruf)",
+      "file_hash": "sha256:b7ce2ee174a62614486ac8cc0f18c483f180cb39a001da1d8ac684d2fe425272",
+      "notes": "Separates Repo; Reporting; kein buildroom_loop-Aufruf"
+    },
+    {
+      "caller": "Hermes-Cron buildroom-daily-summary (enabled)",
+      "executable": "/home/roberto_schmidt/hermes-buildroom/scripts/cron/daily_operator_summary.py",
+      "dispatcher": "no",
+      "legacy_direct_bypass": "no",
+      "runtime_path": "hermes-buildroom Reporting-Skript (KEIN buildroom_loop-Aufruf)",
+      "file_hash": "sha256:2b01f16de9637066a614a0e713d7670cb9e73f1b14dcd97bdbbd84c0ac8c219e",
+      "notes": "Separates Repo; Reporting; kein buildroom_loop-Aufruf"
+    },
+    {
+      "caller": "Hermes-Cron buildroom-auto-build (DISABLED)",
+      "executable": "-",
+      "dispatcher": "no",
+      "legacy_direct_bypass": "no",
+      "runtime_path": "DISABLED — ersetzt durch OS-Crontab Autopilot",
+      "file_hash": "-",
+      "notes": "Deaktiviert; kein aktiver Pfad"
+    }
+  ],
+  "active_operator_entries": [
+    {
+      "path": "/home/roberto_schmidt/.hermes/scripts/buildroom_loop.py",
+      "role": "KANONISCHER OPERATOR-EINSTIEG (manuell + via Autopilot)",
+      "hash": "sha256:3bc2ff6b07d3f44da7112e1ed09b13825a1bc53e7cc7a13596205f6144947e63",
+      "dispatcher_called": false,
+      "action": "MUSS Dispatcher aufrufen (DOD-02)"
+    }
+  ],
+  "running_buildroom_processes": [],
+  "conclusion": "EIN aktiver Operator-Einstieg (buildroom_loop.py). Kein STOP-Grund: keine laufenden fremden Prozesse; Legacy-Code intern bleibt unveraendert; kein Secret-/Route-/GPU-Eingriff; installierte Wrapper hash-identisch zum Repo -> reversibel sicherbar."
+}

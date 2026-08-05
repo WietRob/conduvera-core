@@ -413,15 +413,27 @@ class ManagedBuildroomCaller:
         except Exception:
             return None
         routes = data.get("routes", data)
-        if not isinstance(routes, dict):
-            return None
-        for alias, cfg in routes.items():
-            if isinstance(cfg, dict) and cfg.get("model"):
-                return {
-                    "kind": "gateway_alias", "selector": alias,
-                    "auth_domain": "litellm", "backend_family": str(cfg.get("backend", "openai")),
-                    "model": cfg.get("model"),
-                }
+        # Format 1: dict (Fixture: routes -> {alias: {model, backend}})
+        if isinstance(routes, dict):
+            for alias, cfg in routes.items():
+                if isinstance(cfg, dict) and cfg.get("model"):
+                    return {
+                        "kind": "gateway_alias", "selector": alias,
+                        "auth_domain": "litellm", "backend_family": str(cfg.get("backend", "openai")),
+                        "model": cfg.get("model"),
+                    }
+        # Format 2: Liste (installierter ai-stack local-mode.yaml:
+        # routes -> [{model_name, upstream_model, api_base, ...}])
+        if isinstance(routes, list):
+            for r in routes:
+                if isinstance(r, dict) and r.get("upstream_model") and r.get("model_name"):
+                    return {
+                        "kind": "gateway_alias", "selector": str(r["model_name"]),
+                        "auth_domain": "litellm",
+                        "backend_family": "openai",
+                        "model": str(r["upstream_model"]),
+                        "api_base": str(r.get("api_base", "")),
+                    }
         return None
 
     def _model_identity_from_manifest(self, selector: str) -> str:

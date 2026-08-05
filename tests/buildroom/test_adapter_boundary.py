@@ -92,8 +92,15 @@ def test_adapter_module_physically_absent_core_starts(tmp_path):
     assert "CAPABILITY_UNAVAILABLE" in result.final_status_readable
 
 
-def test_runner_without_registry_no_hidden_fallback(tmp_path):
-    """No registry provided -> structured error, never a hidden fallback."""
+def test_runner_without_registry_no_hidden_fallback(tmp_path, monkeypatch):
+    """No registry resolvable -> structured error, never a hidden fallback.
+
+    Die package resource (DOD-07) ist die deterministische Quelle; der
+    Test blendet alle Registry-Optionen aus, um die fail-closed-Semantik
+    (CAPABILITY_UNAVAILABLE) zu prüfen.
+    """
+    from curaops.harness import registry as reg_mod
+
     fixture_dir = tmp_path / "fixture"
     fixture_dir.mkdir(parents=True, exist_ok=True)
     runner = FixtureRunner(
@@ -102,6 +109,8 @@ def test_runner_without_registry_no_hidden_fallback(tmp_path):
         producer={"name": "t", "version": "1"},
         execution_mode='SIMULATION',
     )
+    monkeypatch.setattr(reg_mod, "_REGISTRY_ENV_VAR", "CONDUVERA_HARNESS_REGISTRY_NONE")
+    monkeypatch.setattr(reg_mod, "_PACKAGE_REGISTRY", "contracts/does-not-exist.yaml")
     result = runner.run("task")
     assert result.status == "cap_unavailable"
     assert result.error == "CAPABILITY_UNAVAILABLE"

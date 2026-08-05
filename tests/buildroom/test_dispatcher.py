@@ -471,3 +471,152 @@ def test_arbeit5_no_foreign_lease_release(tmp_path):
     lease.write_text(json.dumps(data), encoding="utf-8")
     d._release_attempt_lease("ATT-OWN01")
     assert not lease.exists()
+
+
+# -- EVIDENZ F: Lease-Fingerprint (PID-Reuse-Schutz, DOD-06) -------------------
+
+def test_evidenz_f_lease_contains_fingerprint(tmp_path):
+    """Lease-Owner enthält PID + Create-Time + Boot-ID."""
+    import os
+
+    from curaops.buildroom.dispatcher import BuildroomExecutionDispatcher, _process_fingerprint
+
+    d = BuildroomExecutionDispatcher(config_path=tmp_path / "d.yaml",
+                                     leases_dir=tmp_path / "leases")
+    assert d._acquire_attempt_lease("t_c0a1", "ATT-FP01") is True
+    lease = d._attempt_lease("ATT-FP01")
+    data = json.loads(lease.read_text(encoding="utf-8"))
+    fp = _process_fingerprint()
+    assert data["pid"] == os.getpid()
+    assert data["boot_id"] == fp["boot_id"], "Boot-ID fehlt in Lease"
+    assert data["create_time_ticks"] == fp["create_time_ticks"], "Create-Time fehlt in Lease"
+    assert data["create_time_ticks"], "Create-Time darf nicht leer sein"
+    d._release_attempt_lease("ATT-FP01")
+
+
+def test_evidenz_f_pid_reuse_same_pid_other_createtime(tmp_path):
+    """Gleiche PID, andere Create-Time -> Lease gilt NICHT als aktueller
+    Owner (PID-Reuse), darf also NICHT gehalten werden (fremd)."""
+    from curaops.buildroom.dispatcher import BuildroomExecutionDispatcher
+
+    d = make_dispatcher(tmp_path)
+    # Lease mit LEBENDER PID (PID 1 = init, lebt immer), aber falscher
+    # Create-Time -> PID-Reuse-Szenario
+    lease = d._attempt_lease("ATT-REUSE01")
+    lease.write_text(json.dumps({
+        "task_id": "t_c0a1", "attempt_id": "ATT-REUSE01",
+        "pid": 1, "boot_id": "00000000-0000-0000-0000-000000000000",
+        "create_time_ticks": "1",  # init hat sicher NICHT Startzeit 1
+        "created_at": "2026-08-04T00:00:00+00:00",
+    }), encoding="utf-8")
+    # init (pid 1) lebt, aber andere Create-Time -> stale, NICHT haltbar:
+    # derselbe Task darf reklamieren (Owner ist tot/reused)
+    assert d._acquire_attempt_lease("t_c0a1", "ATT-REUSE01") is True
+    d._release_attempt_lease("ATT-REUSE01")
+
+
+def test_evidenz_f_foreign_process_not_affected(tmp_path):
+    """Fremde Lease (anderer Task) wird weder beendet noch freigegeben."""
+    from curaops.buildroom.dispatcher import BuildroomExecutionDispatcher
+
+    d = make_dispatcher(tmp_path)
+    assert d._acquire_attempt_lease("t_c0a1", "ATT-FOREIGN01") is True
+    # Fremde Instanz (anderer Task) versucht Reclaim -> False
+    assert d._acquire_attempt_lease("t_0bad99", "ATT-FOREIGN01") is False
+    # Fremdheit simulieren: Lease gehört einem ANDEREN Prozess (fremde PID,
+    # die lebt aber nicht uns gehört — z.B. PID 1 = init)
+    lease = d._attempt_lease("ATT-FOREIGN01")
+    data = json.loads(lease.read_text(encoding="utf-8"))
+    data["pid"] = 1  # init: lebt, aber fremd
+    data["boot_id"] = "00000000-0000-0000-0000-000000000000"
+    data["create_time_ticks"] = "1"  # andere Create-Time -> für unseren pid
+    lease.write_text(json.dumps(data), encoding="utf-8")
+    # Release mit aktuellem pid darf NICHT greifen (Owner ist fremd)
+    d._release_attempt_lease("ATT-FOREIGN01")
+    assert d._attempt_lease("ATT-FOREIGN01").exists(), \
+        "Fremde Instanz hat die Lease fälschlich freigegeben"
+    # Fremde Instanz darf auch NICHT reklamieren (fremder Task)
+    assert d._acquire_attempt_lease("t_0bad99", "ATT-FOREIGN01") is False
+    # Aufräumen: Owner-Beschreibung zurücksetzen und als Owner freigeben
+    data["pid"] = os.getpid()
+    data["boot_id"] = ""
+    data["create_time_ticks"] = ""
+    lease.write_text(json.dumps(data), encoding="utf-8")
+    d._release_attempt_lease("ATT-FOREIGN01")
+    assert not d._attempt_lease("ATT-FOREIGN01").exists()
+
+
+# -- EVIDENZ B/C/D: Operator-Entry (DOD-02/03/04) ------------------------------
+
+def test_evidenz_b_operator_entry_legacy_real(tmp_path):
+    """Operator-Entry: legacy -> realer buildroom_loop.py-Subprozess
+    (isolierte Umgebung), kein Managed-Aufruf, exit 0."""
+    import subprocess
+
+    from curaops.buildroom.operator_entry import main
+
+    rc = main(["--project", "peekxd"])
+    assert rc == 0, f"Operator-Entry legacy schlug fehl: rc={rc}"
+
+
+def test_evidenz_c_operator_entry_default_config_legacy(tmp_path):
+    """Kanonische Config (contracts/) => Default legacy."""
+    from curaops.buildroom.dispatcher import DispatcherConfig
+
+    c = DispatcherConfig.load()  # ohne expliziten Pfad = kanonische Config
+    assert c.execution_path == MODE_LEGACY
+
+
+# -- EVIDENZ E: Package-Nachweis (DOD-07) --------------------------------------
+
+def test_evidenz_e_config_in_wheel(tmp_path):
+    """Die Dispatcher-Config ist Bestandteil des gebauten Artefakts."""
+    import glob
+    import zipfile
+
+    dist = ROOT / "dist"
+    wheels = sorted(glob.glob(str(dist / "*.whl")))
+    if not wheels:
+        import pytest
+        pytest.skip("kein Wheel gebaut (uv build erforderlich)")
+    z = zipfile.ZipFile(wheels[-1])
+    cfg_in_wheel = [n for n in z.namelist() if "execution-dispatcher" in n]
+    assert cfg_in_wheel, "Config fehlt im Wheel (DOD-07 verletzt)"
+    assert any(n.endswith("buildroom-execution-dispatcher.yaml") for n in cfg_in_wheel)
+
+
+def test_evidenz_e_package_data_mirrors_canonical(tmp_path):
+    """curaops/contracts-Kopie ist byte-identisch zur kanonischen SSoT."""
+    canonical = ROOT / "contracts" / "buildroom-execution-dispatcher.yaml"
+    packaged = ROOT / "curaops" / "contracts" / "buildroom-execution-dispatcher.yaml"
+    assert canonical.is_file() and packaged.is_file()
+    assert canonical.read_bytes() == packaged.read_bytes(), \
+        "Package-Config weicht von der kanonischen Config ab"
+
+
+# -- EVIDENZ B/D: Installed Operator Entry (DOD-02/03/04) ----------------------
+
+def test_evidenz_b_operator_entry_binary_exists():
+    """Installierter Operator-Einstieg existiert (~/.local/bin/buildroom-operator)."""
+    import shutil
+
+    binary = shutil.which("buildroom-operator")
+    assert binary, "buildroom-operator nicht im PATH (Installation fehlt)"
+    assert Path(binary).is_file()
+
+
+def test_evidenz_d_canary_same_attempt_no_parallel(tmp_path):
+    """DOD-05: Dieselbe Attempt-ID kann über den Operator-Entry nicht
+    parallel gestartet werden (atomare Lease)."""
+    from curaops.buildroom.dispatcher import BuildroomExecutionDispatcher
+
+    d = BuildroomExecutionDispatcher(
+        config_path=ROOT / "fixtures/buildroom/execution-dispatcher-canary.yaml",
+        leases_dir=tmp_path / "leases")
+    # Erster Start: Lease wird gehalten (simuliert laufenden Attempt)
+    assert d._acquire_attempt_lease("t_c0a1", "ATT-PAR01") is True
+    # Zweiter Start derselben Attempt-ID (gleicher Prozess = gleicher
+    # Fingerprint) -> muss blocken
+    assert d._acquire_attempt_lease("t_c0a1", "ATT-PAR01") is False
+    d._release_attempt_lease("ATT-PAR01")
+    assert not d._attempt_lease("ATT-PAR01").exists()
