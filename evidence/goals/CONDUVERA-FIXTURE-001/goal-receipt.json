@@ -4,7 +4,7 @@
   "goal_id": "CONDUVERA-FIXTURE-001",
   "overall_status": "TEILBESTANDEN",
   "status_components": {
-    "GOAL_STATUS": "COMPLETED_CORE (DOD-13 Review ausstehend)",
+    "GOAL_STATUS": "COMPLETED (DOD-01..14, Review BESTANDEN)",
     "HERMES_ORCHESTRATOR_INCIDENT": "RESOLVED",
     "BUILDROOM_ROUTE_CONTRACT": "PASS",
     "LEGACY_FALLBACK_INDEPENDENCE": "LIVE_PROVEN",
@@ -193,7 +193,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T22:05:32.406758+00:00",
+  "generated_at": "2026-08-05T22:09:48.287975+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1626,7 +1626,14 @@
     "FULL_GPU_MODE_MATRIX": "NOT_PROVEN",
     "DESIRED_STATE_REPRODUCIBILITY": "LIVE_PROVEN",
     "FULL_COLD_START": "NOT_PROVEN",
-    "FINAL_HEAD_REVIEW": "NOT_PROVEN",
+    "FINAL_HEAD_REVIEW": "PASS (deleg_05c7e21d, 7/7, 0 P1/P2)",
     "SKILL_REVIEW": "PENDING"
+  },
+  "dod13_review": {
+    "reviewer": "deleg_05c7e21d",
+    "verdict": "BESTANDEN (7/7 PASS, 0 P1, 0 P2)",
+    "hermes_head": "0fee78cba5495fbe2070464b3f6fd46e06d330d6",
+    "goal_head": "d617f3e4697444deea9e3d5753898b905fa91c6b",
+    "verdict_file": "evidence/goals/CONDUVERA-FIXTURE-001/reviewer-verdict-capability-routing.md"
   }
 }
