@@ -24,7 +24,8 @@
     "MODEL_ROUTE_NOMENKLATUR": "CONSOLIDATED (provider/<familie>/<modell>)",
     "KANBAN_ORCHESTRATOR": "REGISTERED (orchestrator, assignee=frontend)",
     "FRONTEND_PROFILE": "CURRENT (provider/zai/glm-5.2, 18 Modelle)",
-    "DEEPSEEK_0731": "ADDED (provider/deepseek/v4-flash-0731, Upstream=aktualisiertes v4-flash)"
+    "DEEPSEEK_0731": "ADDED (provider/deepseek/v4-flash-0731, Upstream=aktualisiertes v4-flash)",
+    "MODEL_CONTEXT_WINDOWS": "CORRECTED_FROM_SOURCES (18 Modelle belegt)"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -189,7 +190,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T11:41:51.223171+00:00",
+  "generated_at": "2026-08-05T11:52:03.241773+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1585,6 +1586,28 @@
       "result": "PASS",
       "check": "backups",
       "evidence": "config.yaml.bak-20260805-kanban + frontend config.yaml.bak-20260805-nomenklatur"
+    }
+  },
+  "context_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "werte_recherchiert",
+      "evidence": "evidence/model-context-matrix.json: 18 Modelle, alle Fenster aus Quellen belegt (OpenAI 1M, Z.AI 400K/204.8K, DeepSeek 1M, Kimi 1M/256K, llama-server 32K)"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "litellm_korrigiert",
+      "evidence": "6 Routen korrigiert: glm-5.2 1M->400K, glm-5.1/5-turbo/4.7/5 200K->204.8K, kimi-k3 256K->1M; Restart + Verifikation (400000/1048576/32768/1050000 live)"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "profile_korrigiert",
+      "evidence": "default+orchestrator context_length 128000/1050000 -> 1050000 (gpt-5.6-sol); frontend 128000 -> 400000 (glm-5.2)"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "keine_geratenen_werte",
+      "evidence": "Qwen-Fenster aus Container-Parameter (--ctx-size 32768), nicht angenommen"
     }
   }
 }

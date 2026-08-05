@@ -1,0 +1,120 @@
+{
+  "schema": "model-context-matrix.v1",
+  "date": "2026-08-05",
+  "owner_complaint": "Kontextfenster waren geraten (128000 etc.)",
+  "sources": {
+    "openai_gpt56": "simonwillison.net/2026/Jul/9/gpt-5-6: 'million token context window, 128,000 max output'; coursiv: Terra 1.05M",
+    "zai_glm52": "z.ai/blog/glm-5.2: 'a 400K context window'",
+    "zai_glm51": "NVIDIA-Forum-Spec: GLM-5.1 204,800 token",
+    "deepseek_v4": "deepseek-ai/DeepSeek-V4 (HF): 'context length of one million tokens'",
+    "kimi_k3": "platform.kimi.ai/docs/models: kimi-k3 '1M-token context window'",
+    "kimi_k27": "platform.kimi.ai: K2.7 Code 256k; unsloth: up to 262,144",
+    "local_qwen": "docker inspect dream-llama-server: --ctx-size 32768 (Server-Wahrheit)"
+  },
+  "models": [
+    {
+      "route": "provider/openai/gpt-5.6-sol",
+      "context": 1050000,
+      "source": "OpenAI 1M-1.05M"
+    },
+    {
+      "route": "provider/openai/gpt-5.6-terra",
+      "context": 1050000,
+      "source": "OpenAI 1M-1.05M"
+    },
+    {
+      "route": "provider/openai/gpt-5.6-luna",
+      "context": 1050000,
+      "source": "OpenAI 1M-1.05M"
+    },
+    {
+      "route": "provider/openai/gpt-5.6-spark",
+      "context": 128000,
+      "source": "LiteLLM model_info (Spark-Spezial)"
+    },
+    {
+      "route": "provider/openai/gpt-5.4-mini",
+      "context": 128000,
+      "source": "LiteLLM model_info"
+    },
+    {
+      "route": "provider/zai/glm-5.2",
+      "context": 400000,
+      "source": "Z.AI-Blog '400K'"
+    },
+    {
+      "route": "provider/zai/glm-5.1",
+      "context": 204800,
+      "source": "NVIDIA-Spec 204,800"
+    },
+    {
+      "route": "provider/zai/glm-5-turbo",
+      "context": 204800,
+      "source": "Z.AI 200K-Serie"
+    },
+    {
+      "route": "provider/zai/glm-4.7",
+      "context": 204800,
+      "source": "Z.AI 200K-Serie"
+    },
+    {
+      "route": "provider/zai/glm-5",
+      "context": 204800,
+      "source": "Z.AI 200K-Serie"
+    },
+    {
+      "route": "provider/deepseek/v4-pro",
+      "context": 1000000,
+      "source": "DeepSeek 1M"
+    },
+    {
+      "route": "provider/deepseek/v4-flash",
+      "context": 1000000,
+      "source": "DeepSeek 1M"
+    },
+    {
+      "route": "provider/deepseek/v4-flash-0731",
+      "context": 1000000,
+      "source": "DeepSeek 1M (Update)"
+    },
+    {
+      "route": "provider/kimi/k3",
+      "context": 1048576,
+      "source": "Kimi-Doku 1M"
+    },
+    {
+      "route": "provider/kimi/k2.7-code",
+      "context": 262144,
+      "source": "Kimi-Doku 256k"
+    },
+    {
+      "route": "provider/kimi/k2.7-code-hs",
+      "context": 262144,
+      "source": "Kimi-Doku 256k"
+    },
+    {
+      "route": "provider/kimi/k3-256k",
+      "context": 262144,
+      "source": "Kimi-Doku 256k (Variante)"
+    },
+    {
+      "route": "local/qwen-3.6-35b",
+      "context": 32768,
+      "source": "llama-server --ctx-size 32768"
+    }
+  ],
+  "profile_defaults": {
+    "default": {
+      "default_model": "provider/openai/gpt-5.6-sol",
+      "context_length": 1050000
+    },
+    "orchestrator": {
+      "default_model": "provider/openai/gpt-5.6-sol",
+      "context_length": 1050000
+    },
+    "frontend": {
+      "default_model": "provider/zai/glm-5.2",
+      "context_length": 400000
+    }
+  }
+}
