@@ -6,11 +6,11 @@
     "litellm_routes": 46
   },
   "after": {
-    "picker_models": 13,
+    "picker_models": 17,
     "litellm_routes": 46
   },
   "orchestrator_profile": {
-    "total": 13,
+    "total": 17,
     "models": [
       "oauth/codex",
       "oauth/codex-terra",
@@ -18,17 +18,21 @@
       "oauth/codex-spark",
       "oauth/gpt-5.4-mini",
       "cloud/glm-5.2",
+      "provider/zai/glm-5.1",
       "cloud/glm-5-turbo",
-      "cloud/glm-4.6",
+      "cloud/glm-4.7",
+      "provider/zai/glm-5",
       "provider/deepseek/v4-pro",
       "provider/deepseek/v4-flash",
       "cloud/kimi-k3",
+      "provider/kimi/coding",
+      "cloud/kimi-coding-fast",
       "cloud/kimi-k3-256k",
       "local/default"
     ]
   },
   "default_profile": {
-    "total": 13,
+    "total": 17,
     "same_list": true
   },
   "backend_preserved": {
@@ -42,5 +46,12 @@
     "~/.hermes/profiles/orchestrator/config.yaml.bak-20260805-picker-curated"
   ],
   "mechanism": "providers.litellm.discover_models=false + models=[13 kuratierte] -> list_authenticated_providers() zeigt kuratierte Liste statt Live-/v1/models-Fallback (46)",
-  "advanced_still_available": "Enter custom model name / alle 46 LiteLLM-Routen erreichbar (Backend unverändert)"
+  "advanced_still_available": "Enter custom model name / alle 46 LiteLLM-Routen erreichbar (Backend unverändert)",
+  "research_basis": {
+    "codex": "OpenAI GPT-5.6 Familie: Sol (Flagship) / Terra (balanced) / Luna (fast+cheap), Spark, 5.4-mini (openai.com/index/gpt-5-6, 2026-07)",
+    "glm": "Z.AI Lineup Aug 2026: GLM-5.2 (Flagship), GLM-5.1 (8h autonomy), GLM-5-Turbo (fast), GLM-4.7 (coding flagship), GLM-5 (docs.z.ai/release-notes)",
+    "deepseek": "DeepSeek V4 offiziell: v4-pro (1.6T/49B) + v4-flash (284B/13B), je 1M context (api-docs.deepseek.com)",
+    "kimi": "Moonshot Aug 2026: kimi-k3 (flagship 2.8T/1M), kimi-k2.7-code, kimi-k2.7-code-highspeed (260 tok/s), moonshot-v1 retired Aug 31 (platform.kimi.ai)",
+    "note": "Erste Auswahl (13) war teils geraten (GLM 4.6 statt 5.1/4.7; Kimi ohne coding/coding-fast). Korrigiert auf 17 nach Recherche. Owner: 'wenn du raten musst, recherchier'."
+  }
 }

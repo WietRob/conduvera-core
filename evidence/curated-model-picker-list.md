@@ -1,4 +1,4 @@
-# Kuratierte Picker-Standardansicht für litellm (2026-08-05)
+# Kuratierte Picker-Standardansicht für litellm (2026-08-05, korrigiert nach Recherche)
 
 Schema: curated-model-picker-list.v1
 Zweck: MODEL_PICKER_UX — Standardansicht des Model Pickers für den litellm-
@@ -45,7 +45,15 @@ Kimi:
 Lokal:
   local/default               (Lokal — Qwen 3.6 35B)
 
-= 13 Modelle in der Standardansicht (statt 46)
+= 17 Modelle in der Standardansicht (statt 46)
+
+## Recherche-Korrektur (2026-08-05, Owner: 'wenn du raten musst, recherchier')
+
+Erste Auswahl (13) korrigiert: GLM 4.6 raus, stattdessen glm-5.1 (8h-Autonomie),
+glm-4.7 (Coding-Flagship), glm-5 (Z.AI-Lineup); Kimi um provider/kimi/coding
+(K2.7 Code) + cloud/kimi-coding-fast (K2.7 HS) ergänzt (Moonshot-Lineup).
+Alle 17 Routen existieren in der LiteLLM-Config (verifiziert) und sind funktional
+(glm-4.7 -> Pong, kimi-coding -> kimi-for-coding, glm-5.1/5 -> glm-5.2-Upstream).
 
 ## Bewusst NICHT in der Standardansicht
 

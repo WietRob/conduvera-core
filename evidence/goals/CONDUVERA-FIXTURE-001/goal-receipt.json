@@ -19,7 +19,7 @@
     "BUILDROOM_ABSORPTION": "PARTIAL",
     "OPERATIONAL_PRODUCTION": "NOT_YET",
     "MODEL_ROUTE_CATALOG": "UNCHANGED_46",
-    "PICKER_STANDARDANSICHT": "13_CURATED",
+    "PICKER_STANDARDANSICHT": "17_CURATED_RESEARCHED",
     "OPENCODE_COMPAT": "PRESERVED (cloud/glm-standard bleibt)"
   },
   "live_run": {
@@ -185,7 +185,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T10:30:28.625284+00:00",
+  "generated_at": "2026-08-05T10:44:04.107650+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1473,17 +1473,17 @@
     "DOD-02": {
       "result": "PASS",
       "check": "kuratierte_liste",
-      "evidence": "evidence/curated-model-picker-list.md: 13 Modelle (Codex 5, GLM 3, DeepSeek 2, Kimi 2, Lokal 1); workload/* + Alias-Dubletten ausgeblendet"
+      "evidence": "evidence/curated-model-picker-list.md: 17 Modelle (Codex 5, GLM 5, DeepSeek 2, Kimi 4, Lokal 1) nach Recherche (OpenAI/Z.AI/DeepSeek/Moonshot-Lineups Aug 2026); workload/* + Alias-Dubletten ausgeblendet"
     },
     "DOD-03": {
       "result": "PASS",
       "check": "picker_zeige_kuratiert",
-      "evidence": "list_authenticated_providers() mit echten Profilen: orchestrator total 13, default total 13 (statt 46); Mechanismus discover_models=false + models-Liste (model_switch.py Zeile 2662-2709)"
+      "evidence": "list_authenticated_providers() mit echten Profilen: orchestrator total 17, default total 17 (statt 46); Mechanismus discover_models=false + models-Liste"
     },
     "DOD-04": {
       "result": "PASS",
       "check": "backend_erhalten",
-      "evidence": "LiteLLM 46 Routen unveraendert; workload/local -> Qwen Pong!; cloud/glm-5.2 -> glm-5.2 OK; kein Container-Restart; Advanced/Enter-custom erreicht alle 46"
+      "evidence": "LiteLLM 46 Routen unveraendert; neue Routen funktional: glm-4.7 Pong, kimi-coding kimi-for-coding, glm-5.1/5 -> glm-5.2-Upstream; kein Container-Restart"
     },
     "DOD-05": {
       "result": "PASS",
