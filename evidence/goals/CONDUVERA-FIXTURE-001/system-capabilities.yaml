@@ -655,18 +655,20 @@ components:
     modularity: console-script im Wheel; package-data Config
     missing_gate: General Managed Cutover NOT_STARTED
 overall_status:
-  OVERALL_GOAL: TEILBESTANDEN
-  INDEPENDENT_SEMANTIC_REVIEW: NOT_PROVEN
+  GOAL_STATUS: PENDING_FINAL_REVIEW
+  HERMES_ORCHESTRATOR_INCIDENT: RESOLVED
+  BUILDROOM_ROUTE_CONTRACT: PASS
+  LEGACY_FALLBACK_INDEPENDENCE: LIVE_PROVEN
   DURABLE_LEGACY_INSTALLATION: LIVE_PROVEN
-  DURABLE_MANAGED_CANARY_INSTALLATION: NOT_PROVEN
-  WRAPPER_ROLLBACK: LIVE_PROVEN
-  RELEASE_ROLLBACK: NOT_PROVEN
-  HERMES_CONFIG_FILE: FIXED
-  ACTIVE_HERMES_CLIENT_RELOAD: NOT_PROVEN
+  DURABLE_MANAGED_CANARY_INSTALLATION: LIVE_PROVEN
+  SOURCE_WORKTREE_INDEPENDENCE: LIVE_PROVEN
+  FINAL_RELEASE_C_ROLLBACK: LIVE_PROVEN
+  INDEPENDENT_REVIEW_ON_FINAL_HEAD: NOT_PROVEN
   LITELLM_CLEANUP_DRAFT: NOT_APPROVED
+  MODEL_PICKER_UX: NOT_FIXED
   GENERAL_MANAGED_CUTOVER: NOT_STARTED
+  BUILDROOM_ABSORPTION: PARTIAL
   OPERATIONAL_PRODUCTION: NOT_YET
-  correction_note: 'Owner-Korrektur 2026-08-05: Das vorherige ''BESTANDEN''-Verdikt
-    (Orchestrator-Rerun nach 3 Delegations-Infrastrukturfehlern) ist kein unabhaengiges
-    Review. Ein gescheitertes Delegationsreview darf nicht durch ein ''unabhaengiges
-    Orchestrator-Review'' ersetzt werden. DOD-12 wird neu bewertet.'
+  correction_note: 'EINE Statuswahrheit (ARBEIT 4): identische Werte in Repo, Receipt,
+    Brain, Katalog. Finaler Release-Rollback C->B->C bewiesen; vollstaendige Worktree-Unabhaengigkeit
+    (cwd/cmdline/fds/maps/sys.path) bewiesen.'

@@ -4,40 +4,20 @@
   "goal_id": "CONDUVERA-FIXTURE-001",
   "overall_status": "TEILBESTANDEN",
   "status_components": {
-    "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "87e1296ca161b49f083fd707933be547c452b481",
-    "SKILL_SELF_IMPROVEMENT": "ALLOWED",
-    "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
-    "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
-    "EVIDENCE_HYGIENE_GATE": "PASS",
-    "UV_LOCK_POLICY": "PROVEN",
-    "SYSTEM_FEATURE_DOCUMENTATION": "DONE",
-    "RELEASE_CANDIDATE": "YES",
-    "OPERATIONAL_PRODUCTION": "NOT_YET",
-    "REAL_BUILDROOM_EXECUTION_PATH": "LIVE_PROVEN",
-    "FULL_SYSTEM": "TEILBESTANDEN",
-    "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN",
-    "SYSTEM_BASELINE": "NOT_REQUESTED (Owner-Steuerung 2026-08-04)",
-    "LLM_ROUTING_INCIDENT": "RESOLVED (Config-Drift behoben + externe Kontingente belegt)",
-    "OPERATOR_ENTRYPOINT_CUTOVER": "COMPLETED_AND_ROLLBACK_PROVEN",
-    "DURABLE_INSTALLATION": "LIVE_PROVEN",
+    "GOAL_STATUS": "PENDING_FINAL_REVIEW",
+    "HERMES_ORCHESTRATOR_INCIDENT": "RESOLVED",
     "BUILDROOM_ROUTE_CONTRACT": "PASS",
     "LEGACY_FALLBACK_INDEPENDENCE": "LIVE_PROVEN",
-    "GENERAL_MANAGED_EXECUTION_CUTOVER": "NOT_STARTED",
-    "CONFIG_DRIFT_FIX": "orchestrator: oauth/codex-luna -> oauth/codex (Owner-Freigabe, Backup, Retest 200)",
-    "LITELLM_CLEANUP": "DRAFT erstellt (26/20), NICHT aktiviert — wartet auf Owner + Container-Restart",
-    "OVERALL_GOAL": "TEILBESTANDEN",
-    "INDEPENDENT_SEMANTIC_REVIEW": "BESTANDEN",
     "DURABLE_LEGACY_INSTALLATION": "LIVE_PROVEN",
     "DURABLE_MANAGED_CANARY_INSTALLATION": "LIVE_PROVEN",
-    "WRAPPER_ROLLBACK": "LIVE_PROVEN",
-    "RELEASE_ROLLBACK": "LIVE_PROVEN",
-    "HERMES_CONFIG_FILE": "FIXED",
-    "ACTIVE_HERMES_CLIENT_RELOAD": "LIVE_PROVEN",
+    "SOURCE_WORKTREE_INDEPENDENCE": "LIVE_PROVEN",
+    "FINAL_RELEASE_C_ROLLBACK": "LIVE_PROVEN",
+    "INDEPENDENT_REVIEW_ON_FINAL_HEAD": "NOT_PROVEN",
     "LITELLM_CLEANUP_DRAFT": "NOT_APPROVED",
+    "MODEL_PICKER_UX": "NOT_FIXED",
     "GENERAL_MANAGED_CUTOVER": "NOT_STARTED",
-    "HERMES_ORCHESTRATOR_INCIDENT": "RESOLVED",
-    "BUILDROOM_ABSORPTION": "PARTIAL"
+    "BUILDROOM_ABSORPTION": "PARTIAL",
+    "OPERATIONAL_PRODUCTION": "NOT_YET"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -202,7 +182,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T08:54:55.587311+00:00",
+  "generated_at": "2026-08-05T09:58:36.697128+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1402,6 +1382,81 @@
       "check": "allowlist_releaseproof",
       "exitcode": 0,
       "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/allowlist_releaseproof.out",
+      "output_sha256": "sha256:c2cba0e5b1275bde99432021fd22a26635493fa35d0886fcd5cd38708b0f7cca"
+    }
+  ],
+  "exacthead_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "releases_b_c_manifeste",
+      "evidence": "B (990b19a): Manifest 1cb23433, Wheel 88d9290a==Disk, Git 990b19a; C (87e1296): Manifest 72b0ed33, Wheel f26383a8==Disk, Git 87e1296"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "c_b_c_rollback",
+      "evidence": "C geprueft (Legacy exit 0, Canary t_c0a1 ATT-B6679A55 workload/local, 0 Leases) -> atomar C->B (B geprueft: Legacy, Canary t_0c0a1e ATT-F55311E5, 0 Leases) -> atomar B->C (C erneut: Legacy, Canary t_0c0a1f ATT-706CA56F, 0 Leases)"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "hashes_identisch",
+      "evidence": "Vorher/Nachher identisch: B Manifest 1cb23433 + Wheel 88d9290a; C Manifest 72b0ed33 + Wheel f26383a8; keine neuen Dateien (3243/3243)"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "worktree_unavailable_prozess",
+      "evidence": "Worktree -FINAL-PROOF; /proc/cwd=~/projects, cmdline=Release-C-Binary, 0 Treffer in cwd/cmdline/fds/maps; sys.path: dispatcher.py+managed_execution.py aus site-packages, Worktree:False; 3/3 Canary completed (ATT-83DC75FB/0C6B28B8/9F1C588F) route=workload/local; 0 Zombies/Orphans/Leases"
+    },
+    "DOD-05": {
+      "result": "PASS",
+      "check": "statuswahrheit",
+      "evidence": "Repo overall_status == Receipt status_components (gleiche 14 Werte); Brain folgt"
+    },
+    "DOD-06": {
+      "result": "PASS",
+      "check": "cleanup_draft",
+      "evidence": "litellm-config-cleaned-draft QUARANTINED, nicht aktiviert, kein Container-Restart"
+    },
+    "DOD-07": {
+      "result": "PASS",
+      "check": "suite",
+      "evidence": "412 passed + 30/30 Legacy (frisch)"
+    },
+    "DOD-08": {
+      "result": "PENDING",
+      "check": "review_a"
+    },
+    "DOD-09": {
+      "result": "PENDING",
+      "check": "review_b"
+    },
+    "DOD-10": {
+      "result": "PENDING",
+      "check": "keine_mutation_nach_review_b"
+    }
+  },
+  "exacthead_evidence_checks": [
+    {
+      "check": "regression_full_exacthead",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_exacthead.out",
+      "output_sha256": "sha256:98915b6ac96153f526cd77adc566e61c216fd427bc197057b628ad06654fa3cf"
+    },
+    {
+      "check": "dispatcher_tests_exacthead",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/dispatcher_tests_exacthead.out",
+      "output_sha256": "sha256:0acf2c70be5a3b4b1d5c4d5252018b6444c3b093480c58ed4c0a68bdffb0e618"
+    },
+    {
+      "check": "legacy_characterization_exacthead",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_characterization_exacthead.out",
+      "output_sha256": "sha256:4f79869c1c7028401eef5a164820e039f618954c55095e3cc0cdeeee1188faf3"
+    },
+    {
+      "check": "allowlist_exacthead",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/allowlist_exacthead.out",
       "output_sha256": "sha256:c2cba0e5b1275bde99432021fd22a26635493fa35d0886fcd5cd38708b0f7cca"
     }
   ]
