@@ -128,6 +128,8 @@ class DispatcherConfig:
         """Load from the canonical config layer (never fixtures by default).
 
         Priority: explicit path -> CONDUVERA_BUILDROOM_DISPATCHER env ->
+        productive local override (~/.config/conduvera/buildroom-operator/
+        dispatcher.yaml, worktree-unabhaengige Runtime-Authority) ->
         package resource contracts/buildroom-execution-dispatcher.yaml.
         Missing -> legacy (conservative, backward compatible).
         Invalid YAML/mode/task id -> DispatcherConfigError (CONFIG_INVALID).
@@ -140,6 +142,10 @@ class DispatcherConfig:
         env_val = os.environ.get(_DISPATCHER_ENV_VAR, "").strip()
         if env_val:
             candidates.append(Path(env_val).expanduser())
+        # Produktiver lokaler Override (ARBEIT 2): worktree-unabhaengig,
+        # versioniert unter ~/.config/conduvera.
+        local_override = Path.home() / ".config/conduvera/buildroom-operator/dispatcher.yaml"
+        candidates.append(local_override)
         cfg_path: Path | None = None
         for cand in candidates:
             if cand.is_file():

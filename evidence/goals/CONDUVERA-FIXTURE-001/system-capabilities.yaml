@@ -654,3 +654,19 @@ components:
       dir (B3)
     modularity: console-script im Wheel; package-data Config
     missing_gate: General Managed Cutover NOT_STARTED
+overall_status:
+  OVERALL_GOAL: TEILBESTANDEN
+  INDEPENDENT_SEMANTIC_REVIEW: NOT_PROVEN
+  DURABLE_LEGACY_INSTALLATION: LIVE_PROVEN
+  DURABLE_MANAGED_CANARY_INSTALLATION: NOT_PROVEN
+  WRAPPER_ROLLBACK: LIVE_PROVEN
+  RELEASE_ROLLBACK: NOT_PROVEN
+  HERMES_CONFIG_FILE: FIXED
+  ACTIVE_HERMES_CLIENT_RELOAD: NOT_PROVEN
+  LITELLM_CLEANUP_DRAFT: NOT_APPROVED
+  GENERAL_MANAGED_CUTOVER: NOT_STARTED
+  OPERATIONAL_PRODUCTION: NOT_YET
+  correction_note: 'Owner-Korrektur 2026-08-05: Das vorherige ''BESTANDEN''-Verdikt
+    (Orchestrator-Rerun nach 3 Delegations-Infrastrukturfehlern) ist kein unabhaengiges
+    Review. Ein gescheitertes Delegationsreview darf nicht durch ein ''unabhaengiges
+    Orchestrator-Review'' ersetzt werden. DOD-12 wird neu bewertet.'

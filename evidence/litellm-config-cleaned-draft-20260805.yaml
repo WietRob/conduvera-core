@@ -1,3 +1,6 @@
+# STATUS: NOT_APPROVED / QUARANTINED (Owner 2026-08-05) — NICHT aktivieren, NICHT anwenden.
+# Grund: Varianten (sol/terra/luna/spark/5.4-mini, zai/deepseek/kimi) sind Owner-Eigentum,
+# duerfen NICHT pauschal als Duplikate entfernt werden. Goal: close-buildroom-release-proof-gaps.
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
 litellm_settings:

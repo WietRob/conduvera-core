@@ -25,7 +25,17 @@
     "LEGACY_FALLBACK_INDEPENDENCE": "LIVE_PROVEN",
     "GENERAL_MANAGED_EXECUTION_CUTOVER": "NOT_STARTED",
     "CONFIG_DRIFT_FIX": "orchestrator: oauth/codex-luna -> oauth/codex (Owner-Freigabe, Backup, Retest 200)",
-    "LITELLM_CLEANUP": "DRAFT erstellt (26/20), NICHT aktiviert — wartet auf Owner + Container-Restart"
+    "LITELLM_CLEANUP": "DRAFT erstellt (26/20), NICHT aktiviert — wartet auf Owner + Container-Restart",
+    "OVERALL_GOAL": "TEILBESTANDEN",
+    "INDEPENDENT_SEMANTIC_REVIEW": "NOT_PROVEN",
+    "DURABLE_LEGACY_INSTALLATION": "LIVE_PROVEN",
+    "DURABLE_MANAGED_CANARY_INSTALLATION": "NOT_PROVEN",
+    "WRAPPER_ROLLBACK": "LIVE_PROVEN",
+    "RELEASE_ROLLBACK": "NOT_PROVEN",
+    "HERMES_CONFIG_FILE": "FIXED",
+    "ACTIVE_HERMES_CLIENT_RELOAD": "NOT_PROVEN",
+    "LITELLM_CLEANUP_DRAFT": "NOT_APPROVED",
+    "GENERAL_MANAGED_CUTOVER": "NOT_STARTED"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -190,7 +200,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T07:58:00.097640+00:00",
+  "generated_at": "2026-08-05T08:35:15.721223+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1279,14 +1289,14 @@
       "evidence": "GPU text, LiteLLM Container seit Jul 31 unveraendert (Config sha c6e1fdfd), llama-server healthy 0 Restarts, keine Secret-/Route-Änderung; nur neue Buildroom-Code-Ebene (Repo)"
     },
     "DOD-11": {
-      "result": "PASS",
-      "check": "review_final",
-      "evidence": "Reviewer-Verdikt reviewer-verdict-incident-hardening.md: BESTANDEN (Orchestrator-Rerun nach 3 Delegations-Infrastrukturfehlern 503/404; read-only, 12/12 PASS, 0 P1/P2, 3 P3 dokumentiert)"
+      "result": "NOT_PROVEN",
+      "check": "review_ungueltig",
+      "evidence": "Owner-Korrektur 2026-08-05: vorheriges BESTANDEN war Orchestrator-Rerun, kein unabhaengiges Review. INDEPENDENT_SEMANTIC_REVIEW = NOT_PROVEN bis ein echter unabhaengiger Reviewer bestanden hat."
     },
     "DOD-12": {
-      "result": "PASS",
-      "check": "volle_suite_review",
-      "evidence": "Suite 412/0 + Legacy 30/0; Verdikt BESTANDEN auf bb74eb2"
+      "result": "NOT_PROVEN",
+      "check": "review_neu",
+      "evidence": "Neu zu bewerten im Goal close-buildroom-release-proof-gaps (ARBEIT 6)."
     }
   },
   "incident_evidence_checks": [
