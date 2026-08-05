@@ -34,8 +34,8 @@
     },
     {
       "route": "provider/openai/gpt-5.4-mini",
-      "context": 128000,
-      "source": "LiteLLM model_info"
+      "context": 400000,
+      "source": "Hermes model_metadata (models.dev): gpt-5.4-mini = 400k (not 1.05M)"
     },
     {
       "route": "provider/zai/glm-5.2",
@@ -133,5 +133,23 @@
       "orchestrator",
       "frontend"
     ]
-  }
+  },
+  "nie_wieder_absicherung": {
+    "problem": "Drei Config-Ebenen (ai-stack Quellen, local.yaml, Hermes-Profile) waren auseinandergelaufen; ein 'ai-stack routes build' haette die korrigierten Kontextfenster ueberschrieben (Quellen hatten alte Nomenklatur + falsche Werte)",
+    "loesung": "Kanonische Quellen aus der korrigierten local.yaml abgeleitet: providers.yaml 26 Routen, workloads.yaml 6, compatibility.yaml 20, local-mode.yaml 3 (local/qwen-3.6-35b ergaenzt)",
+    "verifikation": "ai-stack routes build --dry-run --diff: 55 Routen, 'No changes from live config' — Kandidat == Produktion",
+    "zusaetzlich_korrigiert": [
+      "provider/openai/gpt-5.4-mini: 128000 -> 400000 (Hermes models.dev-Tabelle)",
+      "oauth/gpt-5.4: 128000 -> 1050000 (GPT-5.4 = 1.05M)",
+      "workload/reviewer: 262144 -> 1048576 (upstream k3 = 1M laut Kimi-Doku)"
+    ],
+    "hermes_profile": "per-Modell-Overrides (DICT-Format) in allen 3 Profilen — Konsistenz-Check: ALLE OK",
+    "quellen_backups": [
+      "local.yaml.bak-20260805-context-windows",
+      "providers.yaml.bak-20260805",
+      "workloads.yaml.bak-20260805",
+      "compatibility.yaml.bak-20260805"
+    ]
+  },
+  "updated_at": "2026-08-05T12:21:43.971823+00:00"
 }
