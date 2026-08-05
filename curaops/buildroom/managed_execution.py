@@ -407,34 +407,51 @@ class ManagedBuildroomCaller:
             execution_mode=self._execution_mode.value,
         )
 
+    # Buildroom-Route-Vertrag (B1): Managed Buildroom verlangt AUSSCHLIESSLICH
+    # workload/local. local/default ist für Buildroom unzulässig (es ist die
+    # generische UI-Abstraktion). Fehlt workload/local -> fail closed, kein
+    # stiller Fallback auf local/default.
+    BUILDROOM_ROUTE = "workload/local"
+
     def _resolve_model_binding(self) -> dict[str, Any] | None:
         try:
             data = yaml.safe_load(self.route_manifest.read_text(encoding="utf-8")) or {}
         except Exception:
             return None
         routes = data.get("routes", data)
+        found: dict[str, Any] | None = None
         # Format 1: dict (Fixture: routes -> {alias: {model, backend}})
         if isinstance(routes, dict):
             for alias, cfg in routes.items():
                 if isinstance(cfg, dict) and cfg.get("model"):
-                    return {
+                    entry = {
                         "kind": "gateway_alias", "selector": alias,
                         "auth_domain": "litellm", "backend_family": str(cfg.get("backend", "openai")),
                         "model": cfg.get("model"),
                     }
+                    if alias == self.BUILDROOM_ROUTE:
+                        return entry  # workload/local hat Vorrang
+                    if found is None:
+                        found = entry
         # Format 2: Liste (installierter ai-stack local-mode.yaml:
         # routes -> [{model_name, upstream_model, api_base, ...}])
         if isinstance(routes, list):
             for r in routes:
                 if isinstance(r, dict) and r.get("upstream_model") and r.get("model_name"):
-                    return {
+                    entry = {
                         "kind": "gateway_alias", "selector": str(r["model_name"]),
                         "auth_domain": "litellm",
                         "backend_family": "openai",
                         "model": str(r["upstream_model"]),
                         "api_base": str(r.get("api_base", "")),
                     }
-        return None
+                    if str(r["model_name"]) == self.BUILDROOM_ROUTE:
+                        return entry  # workload/local hat Vorrang
+                    if found is None:
+                        found = entry
+        # Fail-closed: ohne workload/local gibt es KEINE Buildroom-Route.
+        # local/default (oder irgendeine andere) ist KEIN Fallback.
+        return found if found and found["selector"] == self.BUILDROOM_ROUTE else None
 
     def _model_identity_from_manifest(self, selector: str) -> str:
         try:

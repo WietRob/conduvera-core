@@ -35,6 +35,8 @@ from curaops.buildroom.dispatcher import (  # noqa: E402
     _run_legacy_entrypoint,
 )
 from curaops.buildroom.managed_execution import ManagedBuildroomCaller  # noqa: E402
+from curaops.harness.gateway import HarnessGatewayService  # noqa: E402
+from curaops.harness.registry import ExecutionMode  # noqa: E402
 
 FIXTURES = ROOT / "fixtures"
 ROUTE_MANIFEST = FIXTURES / "ods/route-manifest.fixture.yaml"
@@ -620,3 +622,91 @@ def test_evidenz_d_canary_same_attempt_no_parallel(tmp_path):
     assert d._acquire_attempt_lease("t_c0a1", "ATT-PAR01") is False
     d._release_attempt_lease("ATT-PAR01")
     assert not d._attempt_lease("ATT-PAR01").exists()
+
+
+# -- TEIL B: Workload-Vertrag + Legacy-Independence (B1/B2) --------------------
+
+def test_b1_workload_local_required(tmp_path):
+    """B1: local/default ZUERST im Manifest, workload/local vorhanden ->
+    ManagedBuildroomCaller MUSS workload/local wählen (nie local/default)."""
+    from curaops.buildroom.managed_execution import ManagedBuildroomCaller
+
+    manifest = tmp_path / "routes.yaml"
+    manifest.write_text("""routes:
+  local/default:
+    model: local-default-model
+    backend: openai
+  workload/local:
+    model: workload-local-model
+    backend: openai
+""", encoding="utf-8")
+    caller = ManagedBuildroomCaller(
+        state_path=tmp_path / "state.json",
+        route_manifest=manifest,
+        gateway=HarnessGatewayService(registry_path=ROOT / "fixtures/harness-registry.yaml",
+                                      execution_mode=ExecutionMode.LIVE.value),
+        producer={"name": "t", "version": "1"},
+        execution_mode=ExecutionMode.LIVE.value,
+    )
+    binding = caller._resolve_model_binding()
+    assert binding is not None
+    assert binding["selector"] == "workload/local", \
+        f"Buildroom muss workload/local wählen, bekam {binding['selector']}"
+    assert binding["model"] == "workload-local-model"
+
+
+def test_b1_workload_local_missing_fails_closed(tmp_path):
+    """B1: Fehlt workload/local -> fail closed, KEIN stiller Fallback auf
+    local/default."""
+    from curaops.buildroom.managed_execution import ManagedBuildroomCaller
+
+    manifest = tmp_path / "routes.yaml"
+    manifest.write_text("""routes:
+  local/default:
+    model: local-default-model
+    backend: openai
+""", encoding="utf-8")
+    caller = ManagedBuildroomCaller(
+        state_path=tmp_path / "state.json",
+        route_manifest=manifest,
+        gateway=HarnessGatewayService(registry_path=ROOT / "fixtures/harness-registry.yaml",
+                                      execution_mode=ExecutionMode.LIVE.value),
+        producer={"name": "t", "version": "1"},
+        execution_mode=ExecutionMode.LIVE.value,
+    )
+    assert caller._resolve_model_binding() is None, \
+        "Ohne workload/local muss Buildroom fail-closed sein (kein local/default-Fallback)"
+
+
+def test_b2_legacy_independent_of_ai_stack(tmp_path, monkeypatch):
+    """B2: legacy läuft ohne Route-Manifest + Harness-Registry + Managed-Caller.
+
+    Negativtest: AI-Stack route manifest NICHT verfügbar, Registry nicht
+    verfügbar, execution_path=legacy -> echter Legacy-Entrypoint exit 0.
+    """
+    from curaops.buildroom.operator_entry import _build_dispatcher
+
+    # Route-Manifest + Registry unkenntlich machen
+    monkeypatch.setattr("curaops.buildroom.operator_entry.Path.home",
+                        lambda: tmp_path / "fake-home")
+    # legacy braucht KEINE Route/Registry — Dispatcher ohne managed_caller
+    d = _build_dispatcher(canary=False)
+    assert d._managed_caller is None, \
+        "legacy darf keinen ManagedBuildroomCaller konstruieren"
+    # Der echte Legacy-Entrypoint (isolierte Umgebung) läuft exit 0
+    from curaops.buildroom.dispatcher import _run_legacy_entrypoint
+    r = _run_legacy_entrypoint(task_id="t_0c0a1e", task_description="b2 test",
+                               isolated_home=tmp_path / "iso", timeout_s=90)
+    assert r.status == "legacy_completed", f"Legacy braucht AI-Stack? {r.detail}"
+    assert r.detail["exit_code"] == 0
+
+
+def test_b2_canary_requires_route_manifest(tmp_path, monkeypatch):
+    """B2: managed_canary braucht das Route-Manifest — fehlt es, CONFIG_INVALID."""
+    from curaops.buildroom.operator_entry import _build_dispatcher
+    from curaops.buildroom.dispatcher import DispatcherConfigError
+
+    monkeypatch.setattr("curaops.buildroom.operator_entry.Path.home",
+                        lambda: tmp_path / "fake-home-no-manifest")
+    with pytest.raises(DispatcherConfigError, match="CONFIG_INVALID"):
+        _build_dispatcher(canary=True)

@@ -56,38 +56,46 @@ def _resolve_harness_registry() -> Path:
         "und checkout fehlen)")
 
 
-def _build_dispatcher() -> BuildroomExecutionDispatcher:
+def _build_dispatcher(canary: bool = False) -> BuildroomExecutionDispatcher:
     """Construct the dispatcher from the canonical config layer.
 
-    Explicit CONDUVERA_BUILDROOM_DISPATCHER env is honoured by
-    DispatcherConfig.load(); otherwise the package resource
-    contracts/buildroom-execution-dispatcher.yaml is used. Invalid config
-    raises DispatcherConfigError -> operator entry exits CONFIG_INVALID
-    before any spawn.
+    B2 (Legacy lazy): managed_canary-Komponenten (Route-Manifest, Registry,
+    ManagedBuildroomCaller) werden NUR konstruiert, wenn der managed_canary-
+    Zweig tatsächlich gewählt wird. Für legacy wird der Dispatcher ohne
+    managed_caller gebaut — legacy braucht weder local-mode.yaml, noch
+    Harness-Registry, noch LiteLLM, noch ODS.
     """
-    # Construct the real production caller graph. The productive route
-    # manifest is the installed ODS ai-stack local-mode (same resolution
-    # as managed_execution.py's live fallback) — never a fixture.
-    live_manifest = Path.home() / ".local/share/ai-stack/routes/local-mode.yaml"
-    if not live_manifest.is_file():
-        raise DispatcherConfigError(
-            "CONFIG_INVALID: route manifest fehlt "
-            f"({live_manifest}) — ai-stack local-mode nicht installiert")
+    if canary:
+        # Nur der managed-Zweig braucht die produktive Route (workload/local)
+        # und die Registry — B1/B2-Vertrag.
+        live_manifest = Path.home() / ".local/share/ai-stack/routes/local-mode.yaml"
+        if not live_manifest.is_file():
+            raise DispatcherConfigError(
+                "CONFIG_INVALID: route manifest fehlt "
+                f"({live_manifest}) — ai-stack local-mode nicht installiert")
 
-    caller = ManagedBuildroomCaller(
-        state_path=Path.home() / ".hermes/buildroom/dispatcher/managed-state.json",
-        route_manifest=live_manifest,
-        gateway=HarnessGatewayService(
-            registry_path=_resolve_harness_registry(),
+        caller = ManagedBuildroomCaller(
+            state_path=Path.home() / ".hermes/buildroom/dispatcher/managed-state.json",
+            route_manifest=live_manifest,
+            gateway=HarnessGatewayService(
+                registry_path=_resolve_harness_registry(),
+                execution_mode=ExecutionMode.LIVE.value,
+            ),
+            producer={"name": "conduvera-core", "version": "0.1.0"},
             execution_mode=ExecutionMode.LIVE.value,
-        ),
-        producer={"name": "conduvera-core", "version": "0.1.0"},
-        execution_mode=ExecutionMode.LIVE.value,
-    )
+        )
+        return BuildroomExecutionDispatcher(
+            config_path=None,  # canonical resolution
+            leases_dir=Path.home() / ".hermes/buildroom/dispatcher/leases",
+            managed_caller=caller,
+        )
+    # legacy: KEINE AI-Stack-/Registry-/Caller-Abhängigkeit. Der Dispatcher
+    # läuft ohne managed_caller; der legacy-Zweig ruft buildroom_loop.py als
+    # Subprozess (B2-Negativtest: exit 0 ohne Route-Manifest/Registry).
     return BuildroomExecutionDispatcher(
         config_path=None,  # canonical resolution
         leases_dir=Path.home() / ".hermes/buildroom/dispatcher/leases",
-        managed_caller=caller,
+        managed_caller=None,
     )
 
 
@@ -97,8 +105,9 @@ def _run_legacy_operator(*, project: str | None, legacy_peekxd: bool, live: bool
     The legacy branch executes the actual buildroom_loop.py as a subprocess.
     --live: productive tick against the real ~/.hermes state (installed
     autopilot behaviour). Default: isolated proof run (separate HOME).
+    B2: legacy konstruiert KEINE managed/AI-Stack-Komponenten.
     """
-    dispatcher = _build_dispatcher()
+    dispatcher = _build_dispatcher(canary=False)
     task_id = "legacy-operator-tick"
     result = dispatcher.dispatch(
         task_id=task_id,
@@ -121,7 +130,7 @@ def _run_legacy_operator(*, project: str | None, legacy_peekxd: bool, live: bool
 
 def _run_canary(*, task_id: str, description: str) -> int:
     """Run one allowlisted canary task via the dispatcher (managed branch)."""
-    dispatcher = _build_dispatcher()
+    dispatcher = _build_dispatcher(canary=True)
     result = dispatcher.dispatch(task_id=task_id, task_description=description)
     print(json.dumps({
         "task_id": task_id,
