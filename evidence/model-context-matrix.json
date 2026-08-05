@@ -122,5 +122,16 @@
     "konflikt_geloest": "glm-5.2: Z.AI-Blog '400K' war Fehlinterpretation — OpenRouter/Z.AI-Tweet/ZenMux bestätigen 1M; Hermes-Tabelle (1048576) war korrekt. kimi-k3: 1M bestätigt (Kimi-Doku + endpoint-scoped Override Zeile 767-778)",
     "wirksam_ab": "Alle NEUEN Prozesse nutzen die neuen Werte (verifiziert via get_model_context_length: default/orchestrator 1050000, frontend 1048576). Laufender Gateway 300958 (seit Aug 4) hält alte Config im Speicher — aktualisiert beim Neustart",
     "cache": "context_length_cache.yaml wird bei neuen Probes überschrieben (Stufe 1)"
+  },
+  "wirksame_mechanik": {
+    "problem": "config.model.context_length ist EIN globaler Wert, der beim Modellwechsel via should_clear_context_pin VERWORFEN wird (config_context_length=None). Intern matcht die hardcodierte Tabelle unsere provider/-Namen nicht (Fallback 128K).",
+    "loesung": "Per-Modell-Overrides in providers.litellm.models bzw. custom_providers[0].models als DICT {name: {context_length: N}} — gelesen via get_custom_provider_context_length (Stufe 0b), zieht beim Modellwechsel mit.",
+    "beweis": "resolve_display_context_length für Modellwechsel gpt-5.6-sol -> provider/deepseek/v4-flash-0731: VORHER 128000, NACHHER 1000000. Alle 18 Modelle korrekt: deepseek 1M, gpt-5.6 1.05M, glm-5.2 1M, kimi-k3 1M, qwen 32K.",
+    "format_hinweis": "models muss DICT sein ({name: {context_length: N}}), NICHT Liste von Dicts — get_custom_provider_context_length Zeile 1765-1767 verlangt isinstance(models, dict).",
+    "profile": [
+      "default",
+      "orchestrator",
+      "frontend"
+    ]
   }
 }
