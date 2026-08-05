@@ -19,8 +19,9 @@
     "BUILDROOM_ABSORPTION": "PARTIAL",
     "OPERATIONAL_PRODUCTION": "NOT_YET",
     "MODEL_ROUTE_CATALOG": "UNCHANGED_46",
-    "PICKER_STANDARDANSICHT": "17_CURATED_RESEARCHED",
-    "OPENCODE_COMPAT": "PRESERVED (cloud/glm-standard bleibt)"
+    "PICKER_STANDARDANSICHT": "17_UNIFORM_NAMES",
+    "OPENCODE_COMPAT": "MIGRATED (provider/openai/gpt-5.6-sol + provider/zai/glm-5.2)",
+    "MODEL_ROUTE_NOMENKLATUR": "CONSOLIDATED (provider/<familie>/<modell>)"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -185,7 +186,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T10:44:04.107650+00:00",
+  "generated_at": "2026-08-05T11:25:11.279977+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1508,6 +1509,52 @@
       "exitcode": 0,
       "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_characterization_pickercuration.out",
       "output_sha256": "sha256:f38d7cc8808936083068919e16367270336befe78504d20d7a29053a3639b3a2"
+    }
+  ],
+  "nomenclature_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "einheitliche_nomenklatur",
+      "evidence": "17 kanonische Routen provider/<familie>/<modell> + local/qwen-3.6-35b; 37 Kompatibilitäts-Aliasse behalten; 54 gesamt, alle unique"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "backend_funktional",
+      "evidence": "glm-5.2 OK, deepseek-v4-flash OK, kimi-k3 OK, local/qwen OK, gpt-5.6-sol PONG; luna 429 (externer Cooldown)"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "clients_migriert",
+      "evidence": "Hermes default+orchestrator: default=provider/openai/gpt-5.6-sol, PONG (Session 20260805_132431); OpenCode: model+small_model migriert"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "picker_sauber",
+      "evidence": "Picker zeigt 17 einheitliche Namen, keine oauth/cloud/provider-Mischung (list_authenticated_providers: total 17)"
+    },
+    "DOD-05": {
+      "result": "PASS",
+      "check": "backups_rollback",
+      "evidence": "Host-Mount c65cd000, Container c6e1fdfd, Hermes-Profile, OpenCode — alle Backups vorhanden; Rollback getestet (Original lief wieder)"
+    },
+    "DOD-06": {
+      "result": "PASS",
+      "check": "tests",
+      "evidence": "412 passed + 30/30 Legacy (frisch)"
+    }
+  },
+  "nomenclature_evidence_checks": [
+    {
+      "check": "regression_full_nomenklatur",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_nomenklatur.out",
+      "output_sha256": "sha256:59276f3a1554cebad610ae3dcee459a27308a65c03f5914669618e0d73c3d6e2"
+    },
+    {
+      "check": "legacy_characterization_nomenklatur",
+      "exitcode": 0,
+      "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_characterization_nomenklatur.out",
+      "output_sha256": "sha256:670684a4067054d1ddfc1161677f7b3a23c1db1608a14aa5c8c24f0f82a43e89"
     }
   ]
 }

@@ -1,0 +1,14 @@
+[
+  {
+    "check": "regression_full_nomenklatur",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_nomenklatur.out",
+    "output_sha256": "sha256:59276f3a1554cebad610ae3dcee459a27308a65c03f5914669618e0d73c3d6e2"
+  },
+  {
+    "check": "legacy_characterization_nomenklatur",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_characterization_nomenklatur.out",
+    "output_sha256": "sha256:670684a4067054d1ddfc1161677f7b3a23c1db1608a14aa5c8c24f0f82a43e89"
+  }
+]
