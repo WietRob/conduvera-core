@@ -39,8 +39,8 @@
     },
     {
       "route": "provider/zai/glm-5.2",
-      "context": 400000,
-      "source": "Z.AI-Blog '400K'"
+      "context": 1048576,
+      "source": "OpenRouter/Z.AI-Tweet/ZenMux: 1M (Blog-'400K' war Fehlinterpretation)"
     },
     {
       "route": "provider/zai/glm-5.1",
@@ -116,5 +116,11 @@
       "default_model": "provider/zai/glm-5.2",
       "context_length": 400000
     }
+  },
+  "wirksamkeit_analyse": {
+    "mechanismus": "get_model_context_length() in agent/model_metadata.py: Stufe 0 = config.context_length (höchste Priorität), Stufe 1 = persistenter Cache, Stufe 8 = eingebaute Tabelle",
+    "konflikt_geloest": "glm-5.2: Z.AI-Blog '400K' war Fehlinterpretation — OpenRouter/Z.AI-Tweet/ZenMux bestätigen 1M; Hermes-Tabelle (1048576) war korrekt. kimi-k3: 1M bestätigt (Kimi-Doku + endpoint-scoped Override Zeile 767-778)",
+    "wirksam_ab": "Alle NEUEN Prozesse nutzen die neuen Werte (verifiziert via get_model_context_length: default/orchestrator 1050000, frontend 1048576). Laufender Gateway 300958 (seit Aug 4) hält alte Config im Speicher — aktualisiert beim Neustart",
+    "cache": "context_length_cache.yaml wird bei neuen Probes überschrieben (Stufe 1)"
   }
 }
