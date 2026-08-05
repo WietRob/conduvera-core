@@ -21,7 +21,10 @@
     "MODEL_ROUTE_CATALOG": "UNCHANGED_46",
     "PICKER_STANDARDANSICHT": "17_UNIFORM_NAMES",
     "OPENCODE_COMPAT": "MIGRATED (provider/openai/gpt-5.6-sol + provider/zai/glm-5.2)",
-    "MODEL_ROUTE_NOMENKLATUR": "CONSOLIDATED (provider/<familie>/<modell>)"
+    "MODEL_ROUTE_NOMENKLATUR": "CONSOLIDATED (provider/<familie>/<modell>)",
+    "KANBAN_ORCHESTRATOR": "REGISTERED (orchestrator, assignee=frontend)",
+    "FRONTEND_PROFILE": "CURRENT (provider/zai/glm-5.2, 18 Modelle)",
+    "DEEPSEEK_0731": "ADDED (provider/deepseek/v4-flash-0731, Upstream=aktualisiertes v4-flash)"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -186,7 +189,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T11:25:11.279977+00:00",
+  "generated_at": "2026-08-05T11:41:51.223171+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1556,5 +1559,32 @@
       "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_characterization_nomenklatur.out",
       "output_sha256": "sha256:670684a4067054d1ddfc1161677f7b3a23c1db1608a14aa5c8c24f0f82a43e89"
     }
-  ]
+  ],
+  "kanban_dod_matrix": {
+    "DOD-01": {
+      "result": "PASS",
+      "check": "profile_inventar",
+      "evidence": "17 Profile inventarisiert; frontend-Profil existierte bereits vollwertig"
+    },
+    "DOD-02": {
+      "result": "PASS",
+      "check": "frontend_profil_aktuell",
+      "evidence": "default auf provider/zai/glm-5.2, 18 kuratierte Modelle, PONG (Session 20260805_134128)"
+    },
+    "DOD-03": {
+      "result": "PASS",
+      "check": "kanban_registriert",
+      "evidence": "orchestrator_profile=orchestrator, default_assignee=frontend, max_in_progress=2"
+    },
+    "DOD-04": {
+      "result": "PASS",
+      "check": "keine_erfundenen_keys",
+      "evidence": "Vorgeschlagene Keys (auto_kanban_threshold/auto_route/routing.yaml) als nicht-existierend verifiziert; nur reale Keys gesetzt"
+    },
+    "DOD-05": {
+      "result": "PASS",
+      "check": "backups",
+      "evidence": "config.yaml.bak-20260805-kanban + frontend config.yaml.bak-20260805-nomenklatur"
+    }
+  }
 }

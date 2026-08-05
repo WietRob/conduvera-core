@@ -1,0 +1,48 @@
+{
+  "schema": "kanban-frontend-worker-config.v1",
+  "date": "2026-08-05",
+  "owner_question": "Warum kam ich nicht auf die Idee, via Kanban einen Frontend-Worker zu nutzen? Was muss in der Hermes-Config besser werden?",
+  "facts_found": {
+    "frontend_profile_exists": true,
+    "frontend_profile_path": "~/.hermes/profiles/frontend/ (vollwertig: Config, Sessions, Skills, Memory)",
+    "profiles_inventory": [
+      "analyst",
+      "backend",
+      "builder",
+      "default",
+      "designer",
+      "dreamer",
+      "frontend",
+      "litellm-local",
+      "local-offline",
+      "local-vision",
+      "ops",
+      "orchestrator",
+      "pm",
+      "programmer",
+      "researcher",
+      "reviewer",
+      "writer"
+    ],
+    "kanban_was_configured": "auto_decompose=True, auto_decompose_per_tick=3, dispatch_in_gateway=True, max_concurrent_children=3",
+    "kanban_missing": "orchestrator_profile war LEER, default_assignee war LEER, max_in_progress_per_profile=None",
+    "gezeigte_antwort_fehler": "Andere Session schlug delegation.auto_kanban_threshold + kanban.auto_route + routing.yaml vor — diese Keys EXISTIEREN NICHT (Raten statt Prüfen)"
+  },
+  "changes_applied": {
+    "frontend_profile_default": "cloud/glm-standard -> provider/zai/glm-5.2 (neues Namensschema)",
+    "frontend_profile_models": "18 kuratierte Modelle (discover_models=false)",
+    "kanban_orchestrator_profile": "orchestrator",
+    "kanban_default_assignee": "frontend",
+    "kanban_max_in_progress_per_profile": 2
+  },
+  "verified": {
+    "frontend_profile_prompt": "PONG (Session 20260805_134128_d13296, provider/zai/glm-5.2)",
+    "orchestrator_profile": "provider/openai/gpt-5.6-sol (running)",
+    "hermes_config_check": "keine Fehler (nur Env-Hinweise)"
+  },
+  "backups": [
+    "~/.hermes/config.yaml.bak-20260805-kanban",
+    "~/.hermes/profiles/frontend/config.yaml.bak-20260805-nomenklatur"
+  ],
+  "lesson": "VOR dem Anlegen eines Profils erst die existierenden Profile inventarisieren (frontend existierte bereits). Vorschläge aus anderen Sessions auf reale Config-Keys prüfen, nicht übernehmen."
+}
