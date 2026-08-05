@@ -62,6 +62,9 @@ allowed_patterns:
   - "evidence/checks/*.out"
   - "evidence/checks/_*.json"
   - "evidence/evidence-allowlist.yaml"
+  # Worktree-unavailable proof (DOD-08/ARBEIT 3: installierter Operator ohne Source-Worktree)
+  - "fixtures/live/worktree-unavailable/evidence/mxos-evidence-*.json"
+  - "fixtures/live/worktree-unavailable-v2/evidence/mxos-evidence-*.json"
   # Static fixtures (deterministic, not runtime)
   - "fixtures/ods/**"
   - "fixtures/harness-registry.yaml"
@@ -92,4 +95,4 @@ forbidden_patterns:
   - "fixtures/live/live-run-*/response.txt"
   - "fixtures/live/run*/response.txt"
   # Worktree-unavailable proof (DOD-08: installierter Operator ohne Source-Worktree)
-  - "fixtures/live/worktree-unavailable/evidence/mxos-evidence-*.json"
+  # Worktree-unavailable v2 (ARBEIT 3: produktive Config, kein Worktree-Pfad)

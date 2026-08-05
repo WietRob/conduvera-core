@@ -1,0 +1,26 @@
+[
+  {
+    "check": "regression_full_releaseproof",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_releaseproof.out",
+    "output_sha256": "sha256:fc2daf99e2cc08e6b1bc5fc2fc5d4827a9636a364d235db981937dbb43f0628e"
+  },
+  {
+    "check": "dispatcher_tests_releaseproof",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/dispatcher_tests_releaseproof.out",
+    "output_sha256": "sha256:0acf2c70be5a3b4b1d5c4d5252018b6444c3b093480c58ed4c0a68bdffb0e618"
+  },
+  {
+    "check": "legacy_characterization_releaseproof",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_characterization_releaseproof.out",
+    "output_sha256": "sha256:670684a4067054d1ddfc1161677f7b3a23c1db1608a14aa5c8c24f0f82a43e89"
+  },
+  {
+    "check": "allowlist_releaseproof",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/allowlist_releaseproof.out",
+    "output_sha256": "sha256:c2cba0e5b1275bde99432021fd22a26635493fa35d0886fcd5cd38708b0f7cca"
+  }
+]
