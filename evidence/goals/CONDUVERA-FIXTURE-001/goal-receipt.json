@@ -5,7 +5,7 @@
   "overall_status": "TEILBESTANDEN",
   "status_components": {
     "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "PENDING (Verdikt-Commit)",
+    "FINAL_REPO_HEAD": "bb74eb26486f6ad406f79064e88580d87b11684d",
     "SKILL_SELF_IMPROVEMENT": "ALLOWED",
     "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
     "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
@@ -18,7 +18,7 @@
     "FULL_SYSTEM": "TEILBESTANDEN",
     "CORE_ADAPTER_SEAM": "RELEASE_CANDIDATE_LIVE_PROVEN",
     "SYSTEM_BASELINE": "NOT_REQUESTED (Owner-Steuerung 2026-08-04)",
-    "LLM_ROUTING_INCIDENT": "RESOLVED (externer Cooldown + Config-Drift behoben)",
+    "LLM_ROUTING_INCIDENT": "RESOLVED (Config-Drift behoben + externe Kontingente belegt)",
     "OPERATOR_ENTRYPOINT_CUTOVER": "COMPLETED_AND_ROLLBACK_PROVEN",
     "DURABLE_INSTALLATION": "LIVE_PROVEN",
     "BUILDROOM_ROUTE_CONTRACT": "workload/local",
@@ -190,7 +190,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T07:43:51.285252+00:00",
+  "generated_at": "2026-08-05T07:58:00.097640+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1279,8 +1279,14 @@
       "evidence": "GPU text, LiteLLM Container seit Jul 31 unveraendert (Config sha c6e1fdfd), llama-server healthy 0 Restarts, keine Secret-/Route-Änderung; nur neue Buildroom-Code-Ebene (Repo)"
     },
     "DOD-11": {
-      "result": "PENDING",
-      "check": "review_final"
+      "result": "PASS",
+      "check": "review_final",
+      "evidence": "Reviewer-Verdikt reviewer-verdict-incident-hardening.md: BESTANDEN (Orchestrator-Rerun nach 3 Delegations-Infrastrukturfehlern 503/404; read-only, 12/12 PASS, 0 P1/P2, 3 P3 dokumentiert)"
+    },
+    "DOD-12": {
+      "result": "PASS",
+      "check": "volle_suite_review",
+      "evidence": "Suite 412/0 + Legacy 30/0; Verdikt BESTANDEN auf bb74eb2"
     }
   },
   "incident_evidence_checks": [
