@@ -5,7 +5,7 @@
   "overall_status": "TEILBESTANDEN",
   "status_components": {
     "FINAL_REPO_HEAD_REVIEW": "APPROVED",
-    "FINAL_REPO_HEAD": "PENDING (vor Commit)",
+    "FINAL_REPO_HEAD": "PENDING (Verdikt-Commit)",
     "SKILL_SELF_IMPROVEMENT": "ALLOWED",
     "SKILL_CHANGE_AFTER_REPO_REVIEW": "DOES_NOT_INVALIDATE_REPO_REVIEW",
     "SYSTEM_BASELINE_REVIEW": "NOT_REQUESTED",
@@ -182,7 +182,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T06:04:19.820684+00:00",
+  "generated_at": "2026-08-05T06:14:04.582572+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1182,8 +1182,9 @@
       "evidence": "Katalog CORE-002E LIVE_PROVEN_AND_INSTALLED_ENTRYPOINT_WIRED + INSTALLED-001 LIVE_PROVEN; Diagramm B5=buildroom-operator; Brain-Matrix aktualisiert; Callgraph v1 zeigt denselben Pfad (B5->B3->legacy|managed); keine Zielarchitektur als Runtime-Wahrheit"
     },
     "DOD-11": {
-      "result": "PENDING",
-      "check": "volle_suite_review"
+      "result": "PASS",
+      "check": "review_bestanden_installed_runtime_trace",
+      "evidence": "Reviewer (deleg_55fe2517) BESTANDEN auf 899dc88: 14/14 Pruefpunkte PASS (Callgraph 8 Caller, installierter Einstieg, legacy real, Canary 3/3 via installiertem Einstieg, kein Parallel-Start, Lease-Fingerprint, Package-Wheel, Rollback byte-identisch, AI-Stack invariant, Konsistenz, Tests 408/0 + Legacy 30/0, installierter Runtime-Trace frisch ausgefuehrt, kein Scope-Creep, Commit-Identitaet); 0 P1/P2, 4 P3 dokumentiert; Callgraph post_wiring_state ergaenzt (16364b20). Verdikt: evidence/goals/CONDUVERA-FIXTURE-001/reviewer-verdict-installed-entrypoint.md"
     }
   },
   "installed_evidence_checks": [

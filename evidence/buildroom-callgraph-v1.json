@@ -86,5 +86,17 @@
     }
   ],
   "running_buildroom_processes": [],
-  "conclusion": "EIN aktiver Operator-Einstieg (buildroom_loop.py). Kein STOP-Grund: keine laufenden fremden Prozesse; Legacy-Code intern bleibt unveraendert; kein Secret-/Route-/GPU-Eingriff; installierte Wrapper hash-identisch zum Repo -> reversibel sicherbar."
+  "conclusion": "EIN aktiver Operator-Einstieg (buildroom_loop.py). Kein STOP-Grund: keine laufenden fremden Prozesse; Legacy-Code intern bleibt unveraendert; kein Secret-/Route-/GPU-Eingriff; installierte Wrapper hash-identisch zum Repo -> reversibel sicherbar.",
+  "post_wiring_state": {
+    "snapshot_at": "2026-08-05T06:13:56.203394+00:00",
+    "installed_wrapper": "/home/roberto_schmidt/.hermes/scripts/buildroom_autopilot_runner.sh",
+    "installed_wrapper_hash": "sha256:16364b20cedd6426891d5c80876e2a7cf571020931f04718a0d00cd266c8ea36",
+    "wrapper_calls": "$OPERATOR_ENTRY --project peekxd --live (Dispatcher via buildroom-operator)",
+    "operator_entry_binary": "/home/roberto_schmidt/.local/bin/buildroom-operator",
+    "operator_entry_binary_is_symlink": true,
+    "rollback_backup": "/home/roberto_schmidt/.hermes/scripts/buildroom_autopilot_runner.sh.bak-20260804-wired",
+    "rollback_backup_hash": "sha256:ec8db221d04a603e530a24b55225d08dbaf203c58173f02c8a588376f634c9ee",
+    "rollback_backup_matches_repo_original": true,
+    "note": "Ergaenzung nach DOD-11-Review (P3-Hinweis 1): Ist-Callgraph bleibt als Pre-Wiring-Snapshot datiert; dieser Block dokumentiert den Post-Wiring-Zustand."
+  }
 }
