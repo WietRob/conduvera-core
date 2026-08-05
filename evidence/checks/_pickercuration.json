@@ -1,0 +1,14 @@
+[
+  {
+    "check": "regression_full_pickercuration",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/regression_full_pickercuration.out",
+    "output_sha256": "sha256:6e1756bd5b8975d4d484c1c19b4fce918febaa5e534c18a1466d4be2f4c4b1a2"
+  },
+  {
+    "check": "legacy_characterization_pickercuration",
+    "exitcode": 0,
+    "evidence_path": "/home/roberto_schmidt/projects/matrix-os-wt-goal-contract/evidence/checks/legacy_characterization_pickercuration.out",
+    "output_sha256": "sha256:f38d7cc8808936083068919e16367270336befe78504d20d7a29053a3639b3a2"
+  }
+]

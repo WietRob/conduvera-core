@@ -1,0 +1,46 @@
+{
+  "schema": "model-picker-curation-evidence.v1",
+  "date": "2026-08-05",
+  "before": {
+    "picker_models": 46,
+    "litellm_routes": 46
+  },
+  "after": {
+    "picker_models": 13,
+    "litellm_routes": 46
+  },
+  "orchestrator_profile": {
+    "total": 13,
+    "models": [
+      "oauth/codex",
+      "oauth/codex-terra",
+      "oauth/codex-luna",
+      "oauth/codex-spark",
+      "oauth/gpt-5.4-mini",
+      "cloud/glm-5.2",
+      "cloud/glm-5-turbo",
+      "cloud/glm-4.6",
+      "provider/deepseek/v4-pro",
+      "provider/deepseek/v4-flash",
+      "cloud/kimi-k3",
+      "cloud/kimi-k3-256k",
+      "local/default"
+    ]
+  },
+  "default_profile": {
+    "total": 13,
+    "same_list": true
+  },
+  "backend_preserved": {
+    "litellm_routes": 46,
+    "workload_local_ok": "Qwen Pong!",
+    "glm_5_2_ok": "glm-5.2",
+    "no_container_restart": true
+  },
+  "config_backups": [
+    "~/.hermes/profiles/default/config.yaml.bak-20260805-picker-curated",
+    "~/.hermes/profiles/orchestrator/config.yaml.bak-20260805-picker-curated"
+  ],
+  "mechanism": "providers.litellm.discover_models=false + models=[13 kuratierte] -> list_authenticated_providers() zeigt kuratierte Liste statt Live-/v1/models-Fallback (46)",
+  "advanced_still_available": "Enter custom model name / alle 46 LiteLLM-Routen erreichbar (Backend unverändert)"
+}
