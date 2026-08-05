@@ -114,7 +114,8 @@
     },
     "frontend": {
       "default_model": "provider/zai/glm-5.2",
-      "context_length": 400000
+      "context_length": 1048576,
+      "context_length_source": "glm-5.2 = 1.048.576 (OpenRouter/Z.AI; 400K war widerlegte Blog-Fehlinterpretation)"
     }
   },
   "wirksamkeit_analyse": {
