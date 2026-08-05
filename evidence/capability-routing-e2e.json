@@ -1,0 +1,58 @@
+{
+  "generated_at": "2026-08-05T22:05:06.328597+00:00",
+  "schema": "capability-routing-e2e.v1",
+  "board": "cap-e2e",
+  "resolver": "hermes_cli/capability_resolver.py (deterministisch, regelbasiert, kein LLM)",
+  "policy_version": "capability-routing-v1",
+  "dry_run_matches_real_run": true,
+  "assignments": [
+    {
+      "task_id": "t_1df40bd8",
+      "title": "Frontend: React-Button-Komponente bauen",
+      "capability": "frontend",
+      "profile": "frontend",
+      "rule_id": "rule-frontend"
+    },
+    {
+      "task_id": "t_0b955e20",
+      "title": "Backend: SQL-Migration fuer Users-Tabelle",
+      "capability": "backend",
+      "profile": "backend",
+      "rule_id": "rule-backend"
+    },
+    {
+      "task_id": "t_87f300e2",
+      "title": "Research: DeepSeek v4-flash Kontextfenster belegen",
+      "capability": "research",
+      "profile": "researcher",
+      "rule_id": "rule-research"
+    },
+    {
+      "task_id": "t_3bed23a7",
+      "title": "Ops: Docker-Container-Status von dream-litellm pruefen",
+      "capability": "ops",
+      "profile": "ops",
+      "rule_id": "rule-ops"
+    }
+  ],
+  "blocked": {
+    "task_id": "t_102821d3",
+    "title": "Allgemeine Notiz ohne klare Aufgabe",
+    "reason": "BLOCKED_CAPABILITY_UNRESOLVED",
+    "source": "capability-resolver",
+    "event": "blocked {'reason': 'BLOCKED_CAPABILITY_UNRESOLVED', 'source': 'capability-resolver'}"
+  },
+  "worker_outcomes": {
+    "t_3bed23a7_ops": "done (Docker-Status geprueft, keine Mutationen)",
+    "t_0b955e20_backend": "done nach praezisierter Spezifikation (SQL geliefert)",
+    "t_1df40bd8_frontend": "crashed durch vorbestehendes Gateway-300958-Protocol-Problem (claimer 300958, alter Code)",
+    "t_87f300e2_researcher": "crashed durch vorbestehendes Gateway-300958-Protocol-Problem (claimer 300958, alter Code)"
+  },
+  "rest_processes": 0,
+  "open_claims": 0,
+  "dod_notes": {
+    "DOD-04": "PASS — 4 unassigned Tasks automatisch korrekt zugeordnet",
+    "DOD-05": "PASS — unklarer Task fail-closed blockiert (BLOCKED_CAPABILITY_UNRESOLVED)",
+    "DOD-06": "PASS (Routing-Ebene) — 0 Restprozesse, kein manueller kill; Worker-Protocol-Crashes sind vorbestehender Gateway-Altcode (claimer tuxedoschmidt:300958, Start Aug 4), NICHT durch den Resolver eingefuehrt"
+  }
+}

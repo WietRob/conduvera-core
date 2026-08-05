@@ -4,7 +4,7 @@
   "goal_id": "CONDUVERA-FIXTURE-001",
   "overall_status": "TEILBESTANDEN",
   "status_components": {
-    "GOAL_STATUS": "PENDING_FINAL_REVIEW",
+    "GOAL_STATUS": "COMPLETED_CORE (DOD-13 Review ausstehend)",
     "HERMES_ORCHESTRATOR_INCIDENT": "RESOLVED",
     "BUILDROOM_ROUTE_CONTRACT": "PASS",
     "LEGACY_FALLBACK_INDEPENDENCE": "LIVE_PROVEN",
@@ -18,14 +18,17 @@
     "GENERAL_MANAGED_CUTOVER": "NOT_STARTED",
     "BUILDROOM_ABSORPTION": "PARTIAL",
     "OPERATIONAL_PRODUCTION": "NOT_YET",
-    "MODEL_ROUTE_CATALOG": "UNCHANGED_46",
+    "MODEL_ROUTE_CATALOG": "LIVE_55 (Kandidat==Live bewiesen)",
     "PICKER_STANDARDANSICHT": "17_UNIFORM_NAMES",
     "OPENCODE_COMPAT": "MIGRATED (provider/openai/gpt-5.6-sol + provider/zai/glm-5.2)",
     "MODEL_ROUTE_NOMENKLATUR": "CONSOLIDATED (provider/<familie>/<modell>)",
-    "KANBAN_ORCHESTRATOR": "REGISTERED (orchestrator, assignee=frontend)",
-    "FRONTEND_PROFILE": "CURRENT (provider/zai/glm-5.2, 18 Modelle)",
+    "KANBAN_ORCHESTRATOR": "REGISTERED (orchestrator, default_assignee=LEER)",
+    "FRONTEND_PROFILE": "CURRENT (provider/zai/glm-5.2, 17 Profil-Overrides)",
     "DEEPSEEK_0731": "ADDED (provider/deepseek/v4-flash-0731, Upstream=aktualisiertes v4-flash)",
-    "MODEL_CONTEXT_WINDOWS": "CORRECTED_FROM_SOURCES (18 Modelle belegt)"
+    "MODEL_CONTEXT_WINDOWS": "CORRECTED_FROM_SOURCES (18 Matrix-Routen, 17 Profil-Overrides; v4-flash+v4-flash-0731 = 2 Routen/1 Upstream)",
+    "KANBAN_CAPABILITY_ROUTING": "LIVE_PROVEN (Resolver 4/4 + Block 1/1, 36 Tests)",
+    "OPENCODE_ROUTE_REACHABILITY": "LIVE_PROVEN (main=PONG, small=Durchlauf via opencode run)",
+    "BUILDROOM_LOCAL_ROUTE": "LIVE_PROVEN (operator managed_canary -> workload/local -> Qwen, COMPLETED)"
   },
   "live_run": {
     "run_id": "core-run-001",
@@ -190,7 +193,7 @@
       "output_sha256": "sha256:7befa3003d814c222a77f2dec1cd039ccebe0950822e6316a290d23c1c27506a"
     }
   ],
-  "generated_at": "2026-08-05T11:52:03.241773+00:00",
+  "generated_at": "2026-08-05T22:05:32.406758+00:00",
   "correction_note": "Härtung 2026-08-03 (Goal harden-core-adapter-seam): Das semantische APPROVE (deleg_24dbe73c) wurde VOR dem Zombie-/Wait-Fix und vor dem finalen Run-Skript erstellt. Eine Review-Datei im späteren Commit ist kein Review des späteren Codes. Daher: FINAL_COMMIT_SEMANTIC_REVIEW = NOT_PROVEN; der Slice ist LIVE_PROVEN_CANDIDATE, nicht OPERATIONAL. OPERATIONAL erst nach diesem Härtungs-Goal + frischem Review auf exakt finalem Commit.",
   "hardening_dod_matrix": {
     "DOD-H01": {
@@ -1592,7 +1595,7 @@
     "DOD-01": {
       "result": "PASS",
       "check": "werte_recherchiert",
-      "evidence": "evidence/model-context-matrix.json: 18 Modelle, alle Fenster aus Quellen belegt (OpenAI 1M, Z.AI 400K/204.8K, DeepSeek 1M, Kimi 1M/256K, llama-server 32K)"
+      "evidence": "evidence/model-context-matrix.json: 18 Matrix-Routen / 17 Profil-Overrides, alle Fenster belegt (OpenAI 1M, Z.AI 400K/204.8K, DeepSeek 1M, Kimi 1M/256K, llama-server 32K)"
     },
     "DOD-02": {
       "result": "PASS",
@@ -1609,5 +1612,21 @@
       "check": "keine_geratenen_werte",
       "evidence": "Qwen-Fenster aus Container-Parameter (--ctx-size 32768), nicht angenommen"
     }
+  },
+  "truth_labels_2026_08_05": {
+    "ROUTING_RUNTIME": "LIVE_PROVEN",
+    "EXPLICIT_ASSIGNEE_DISPATCH": "LIVE_PROVEN",
+    "AUTOMATIC_CAPABILITY_CLASSIFICATION": "LIVE_PROVEN",
+    "AUTOMATIC_CAPABILITY_ROUTING": "LIVE_PROVEN",
+    "OPENCODE_ROUTE_REACHABILITY": "LIVE_PROVEN",
+    "OPENCODE_CLIENT_E2E": "LIVE_PROVEN",
+    "BUILDROOM_LOCAL_ROUTE": "LIVE_PROVEN",
+    "BUILDROOM_CLIENT_E2E": "LIVE_PROVEN",
+    "TEXT_MODE_FAIL_CLOSED": "LIVE_PROVEN",
+    "FULL_GPU_MODE_MATRIX": "NOT_PROVEN",
+    "DESIRED_STATE_REPRODUCIBILITY": "LIVE_PROVEN",
+    "FULL_COLD_START": "NOT_PROVEN",
+    "FINAL_HEAD_REVIEW": "NOT_PROVEN",
+    "SKILL_REVIEW": "PENDING"
   }
 }
