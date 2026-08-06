@@ -109,5 +109,17 @@
     "tests": [
       "test_opencode_result.py (8)"
     ]
+  },
+  "honest_status": {
+    "CAPABILITY_ASSIGNMENT": "LIVE_PROVEN",
+    "REGISTRY_FAIL_CLOSED": "TEST_PROVEN",
+    "BLOCK_SEMANTICS": "LIVE_PROVEN",
+    "PROVIDER_FAILURE_CLASSIFICATION": "NORMALIZED (DEFECTIVE war der Altzustand; cli.py Sentinel-Exit 75 fuer 5 Failure-Reasons + kanban_db rate_limited -> BLOCKED_EXTERNAL_PROVIDER, 17 Tests)",
+    "WORKER_COMPLETION": "LIVE_PROVEN (4/4 done via kanban_complete am 2026-08-06, Provider 200 nach Cooldown)",
+    "OPENCODE_ORIGINAL_SMALL_MODEL": "LIVE_PROVEN (PONG, nicht-leer — Provider 200; vorher BLOCKED_EXTERNAL_PROVIDER)",
+    "BUILDROOM_REGRESSION": "FUNCTIONALLY_PROVEN (EXIT_CODE=0 im Log-Artefakt buildroom-regression-normalize-goal.log; vorher EVIDENCE_INCOMPLETE)",
+    "ACTUAL_FINAL_STATE_REVIEW": "NOT_PROVEN",
+    "OPERATIONAL_PRODUCTION": "NOT_YET",
+    "OVERALL_GOAL": "TEILBESTANDEN (bis finales Exact-Head-Review)"
   }
 }
