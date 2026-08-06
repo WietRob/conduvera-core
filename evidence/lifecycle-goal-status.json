@@ -14,7 +14,7 @@
     "eb0d1639_7977c77": "BESTANDEN (deleg_8d6454e7, Vor-Goal-Review) — bleibt als Review DIESER Heads erhalten",
     "note": "Wird NICHT als Review von 3ae14cf4/9d55d2e ausgegeben"
   },
-  "status_matrix_applies_to": "HEAD 97d8dae/c5ddfcb (finale Heads nach P2-A/P2-B-Fix aus finalem Review)",
+  "status_matrix_applies_to": "HEAD 03c4538/5d87da0 (tatsaechlich finale Heads nach P2-A/P2-B-Fix, verifiziert durch deleg_0aa44922)",
   "phase_note": "Die urspruengliche Matrix (PRE-Implementierung: INCOMPLETE/NOT_PROVEN/NOT_WIRED) ist historisch; aktualisiert auf Head-Stand.",
-  "updated_at": "2026-08-06T06:31:24.709646+00:00"
+  "updated_at": "2026-08-06T06:39:03.343477+00:00"
 }
