@@ -1,0 +1,101 @@
+{
+  "generated_at": "2026-08-06T00:11:16.658961+00:00",
+  "schema": "worker-terminal-diagnosis.v1",
+  "goal": "close-worker-terminal-protocol-and-review-the-actual-final-state",
+  "board": "terminal-e2e",
+  "discriminator": "EXTERNAL_PROVIDER_LIMIT",
+  "discriminator_rationale": "backend/ops (DeepSeek) erreichen done via kanban_complete — das Worker-Terminalprotokoll funktioniert. frontend/researcher (Z.AI glm-5.2/glm-standard) erhalten HTTP 429 (Usage limit, reset 2026-08-06 08:23) und koennen keine Antwort mit Tool-Call produzieren. Kein Code-/Protokoll-Defekt.",
+  "workers": [
+    {
+      "task_id": "t_661604cd",
+      "profile": "frontend",
+      "model": "provider/zai/glm-5.2",
+      "provider_http": "429 (Z.AI usage limit, reset 08:23)",
+      "session": "im Worker-Log belegt (RateLimitError HTTP 429, attempt 1/3)",
+      "tool_calls": 0,
+      "kanban_attach": false,
+      "kanban_complete": false,
+      "kanban_block": false,
+      "exitcode": 0,
+      "final_status": "blocked",
+      "artifact": null,
+      "classification": "EXTERNAL_PROVIDER_LIMIT"
+    },
+    {
+      "task_id": "t_278421e3",
+      "profile": "backend",
+      "model": "oauth/codex (gpt-5.6-sol)",
+      "provider_http": "200",
+      "session": "kanban_complete aufgerufen",
+      "tool_calls": 13,
+      "kanban_attach": false,
+      "kanban_complete": true,
+      "kanban_block": false,
+      "exitcode": 0,
+      "final_status": "done",
+      "artifact": "SQL-Migration als Ergebnis",
+      "classification": "OK"
+    },
+    {
+      "task_id": "t_d93d741d",
+      "profile": "researcher",
+      "model": "cloud/glm-standard",
+      "provider_http": "429 (Z.AI usage limit, reset 08:23)",
+      "session": "im Worker-Log belegt (RateLimitError HTTP 429, attempt 1/3)",
+      "tool_calls": 0,
+      "kanban_attach": false,
+      "kanban_complete": false,
+      "kanban_block": false,
+      "exitcode": 0,
+      "final_status": "blocked",
+      "artifact": null,
+      "classification": "EXTERNAL_PROVIDER_LIMIT"
+    },
+    {
+      "task_id": "t_8c9404bf",
+      "profile": "ops",
+      "model": "cloud/deepseek",
+      "provider_http": "200",
+      "session": "kanban_complete aufgerufen",
+      "tool_calls": 13,
+      "kanban_attach": false,
+      "kanban_complete": true,
+      "kanban_block": false,
+      "exitcode": 0,
+      "final_status": "done",
+      "artifact": "Docker-Status (dream-litellm healthy)",
+      "classification": "OK"
+    }
+  ],
+  "resolver_blocks": [
+    {
+      "task_id": "t_eab7b1af",
+      "reason": "BLOCKED_CAPABILITY_UNRESOLVED",
+      "assignee": null,
+      "status": "blocked"
+    },
+    {
+      "task_id": "t_441fcc3a",
+      "reason": "BLOCKED_CAPABILITY_AMBIGUOUS",
+      "assignee": null,
+      "status": "blocked"
+    }
+  ],
+  "rest_processes": 0,
+  "manual_kills": 0,
+  "open_claims": 0,
+  "arbeits_4_evaluation": {
+    "finalization_turn_needed": false,
+    "reason": "Der einzige belegte Defekt ist EXTERNAL_PROVIDER_LIMIT (Z.AI-429 bis 08:23). Die frontend/researcher-Worker haben KEINE Arbeit geleistet (0 Tool-Calls, 0 Artifacts) — ein Finalization-Turn wuerde nichts abschliessen, da das Modell nicht antwortet. Kein Modellwechsel erlaubt (Goal-Grenze). backend/ops beweisen, dass das Terminalprotokoll ohne Defekt funktioniert.",
+    "conclusion": "Kein Code-Fix noetig — der Defekt ist ein externer Provider-Cooldown. Nach 08:23 sind frontend/researcher mit Originalmodellen erneut pruefbar (BLOCKED_EXTERNAL_PROVIDER)."
+  },
+  "honest_status": {
+    "CAPABILITY_ASSIGNMENT": "LIVE_PROVEN",
+    "BLOCK_SEMANTICS": "LIVE_PROVEN",
+    "WORKER_COMPLETION": "PARTIAL (2/4 done; frontend/researcher durch externes Z.AI-429 bis 08:23 blockiert)",
+    "OPENCODE_ORIGINAL_SMALL_MODEL": "NOT_PROVEN (glm-5.2 429 bis 08:23)",
+    "FINAL_STATE_REVIEW": "NOT_PROVEN",
+    "OPERATIONAL_PRODUCTION": "NOT_YET",
+    "OVERALL_GOAL": "TEILBESTANDEN"
+  }
+}

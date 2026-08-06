@@ -1,0 +1,6 @@
+{
+  "task_id": "t_c0a1",
+  "execution_path": "managed_canary",
+  "status": "completed",
+  "final_status": "COMPLETED: task=t_c0a1 attempt=ATT-CA91A5A3 session=mxfix_2b7302250063 pid=3283271 route=workload/local model=openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf no_progress=1/3"
+}
