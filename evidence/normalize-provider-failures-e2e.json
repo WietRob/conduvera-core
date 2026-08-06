@@ -120,6 +120,14 @@
     "BUILDROOM_REGRESSION": "FUNCTIONALLY_PROVEN (EXIT_CODE=0 im Log-Artefakt buildroom-regression-normalize-goal.log; vorher EVIDENCE_INCOMPLETE)",
     "ACTUAL_FINAL_STATE_REVIEW": "NOT_PROVEN",
     "OPERATIONAL_PRODUCTION": "NOT_YET",
-    "OVERALL_GOAL": "TEILBESTANDEN (bis finales Exact-Head-Review)"
+    "OVERALL_GOAL": "BESTANDEN (finales Exact-Head-Review deleg_8d6454e7, 0 P1/P2, 2 P3)"
+  },
+  "final_review": {
+    "reviewer": "deleg_8d6454e7",
+    "verdict": "BESTANDEN (Gesamt-PASS)",
+    "hermes_head_reviewed": "eb0d1639899086bbabcaa28705416165719a2ad2",
+    "goal_head_reviewed": "7977c774314442dff251cb5abc3fe72aa74a6395",
+    "findings": "0 P1, 0 P2, 2 P3 (Doku-Drift kanban_db Docstring — gefixt in 3ae14cf4; 2 post-evidence Skill-Drifts extern)",
+    "note": "P3-1 (Docstring) nach Review korrigiert — rein dokumentarisch, vom Reviewer als nicht blockierend eingestuft; Code war korrekt attestiert."
   }
 }
