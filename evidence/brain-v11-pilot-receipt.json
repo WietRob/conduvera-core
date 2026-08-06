@@ -1,0 +1,20 @@
+{
+  "goal": "make-the-opencode-canary-durable-and-close-the-brain-v1-1-source-contract",
+  "captured_at": "2026-08-06T18:59:14.225561+00:00",
+  "work": "Arbeit 4 — Brain V1.1 wiederholter Pilot",
+  "brain_pilot_receipt": {
+    "context_precision": "19/19 ausgewaehlte Quellen relevant (alle tragen zum Canary-Topic bei)",
+    "missed_source_count": 0,
+    "missed_note": "Vor-Goal-Befund (kanonische Registry nicht im Brain-Index) ist geschlossen: registry.py + harness-registry.yaml sind jetzt REPO_TRUTH-Quellen via 99_Sources_READONLY-Symlink, im Kontext mit --include-sources geliefert.",
+    "stale_source_count": 0,
+    "context_tokens": 7229,
+    "correction_count": 0
+  },
+  "brain_changes": [
+    "99_Sources_READONLY/conduvera-harness -> Symlink auf curaops/harness (keine Vault-Kopie)",
+    "brain.py: source-Docs mit repo_name=conduvera-harness erhalten authority=REPO_TRUTH",
+    "brain.py: context() hat jetzt --include-sources (real implementiert, Filter (d.repo='' OR d.source_kind!='repository'))",
+    "brain.py: conduvera-harness registry.py + harness-registry.yaml als Pflichtquellen bei --include-sources"
+  ],
+  "cli_documentation_contract": "brain context --include-sources ist real implementiert (vorher dokumentiert-aber-nicht-existent -> DOD-10 geschlossen)"
+}

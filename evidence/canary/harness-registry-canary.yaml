@@ -22,7 +22,7 @@ adapters:
   opencode_cli:
     enabled: true
     status: enabled_canary
-    module: hermes_cli.opencode_gateway_adapter
+    module: opencode_harness_adapter.opencode_gateway_adapter
     entry_point: entry_point
     version: opencode-adapter.v1
     contract: CONDUVERA-GOAL-1.0

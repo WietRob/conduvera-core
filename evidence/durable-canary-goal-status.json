@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-08-06T18:40:44.517163+00:00",
+  "goal": "make-the-opencode-canary-durable-and-close-the-brain-v1-1-source-contract",
+  "status_matrix": {
+    "OPENCODE_ADAPTER_CONTRACT": "IMPLEMENTED_AND_TEST_PROVEN",
+    "OPENCODE_CANARY_SOURCE_COUPLED_PATH": "PROVEN",
+    "OPENCODE_DURABLE_CANARY_INTEGRATION": "NOT_PROVEN",
+    "FINAL_HEAD_REVIEW": "INVALIDATED_BY_POST_REVIEW_COMMIT",
+    "BRAIN_EXTERNAL_REPO_TRUTH_COVERAGE": "PARTIAL",
+    "OVERALL_GOAL": "TEILBESTANDEN"
+  },
+  "note": "Der Canary des Vor-Goals lief ueber sys.path-Insertion auf den Hermes-Source-Checkout (source-coupled) — das ist der Defekt. Der Post-Review-Commit 72ea06e (OVERALL_GOAL=BESTANDEN) invalidiert den FINAL_HEAD_REVIEW des Vor-Goals als Review des finalen Heads. Fruehere Evidence bleibt erhalten."
+}

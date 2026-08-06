@@ -1,0 +1,16 @@
+{
+  "component": "opencode-harness-adapter",
+  "git_sha": "6a5e51db8e7669456891399fe84b3e19a2373075",
+  "wheel_sha256": "42dd2fb0edfc3a781f173e5079a8f2aea8f45bc68ce6dd43716737af860cf504",
+  "adapter_version": "opencode-adapter.v1",
+  "contract_version": "CONDUVERA-GOAL-1.0",
+  "installed_at": "2026-08-06T18:41:51.658206+00:00",
+  "install_target": "/tmp/canary-venv",
+  "entry_point": "opencode_harness_adapter.opencode_gateway_adapter:entry_point",
+  "modules": [
+    "opencode_harness",
+    "opencode_result",
+    "opencode_gateway_adapter",
+    "provider_failure_receipt"
+  ]
+}
