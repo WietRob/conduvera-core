@@ -1,0 +1,113 @@
+{
+  "generated_at": "2026-08-06T01:39:10.111865+00:00",
+  "schema": "normalize-provider-failures-e2e.v1",
+  "goal": "normalize-provider-failures-and-close-the-real-terminal-proof",
+  "board": "terminal-e2e",
+  "provider_health": {
+    "glm-5.2": "200 OK",
+    "cloud/glm-standard": "200 OK",
+    "check_time": "2026-08-06T03:30+02:00"
+  },
+  "workers": [
+    {
+      "task_id": "t_661604cd",
+      "profile": "frontend",
+      "final_status": "done",
+      "kanban_complete": true,
+      "artifacts": [
+        "Button.jsx",
+        "Button.test.jsx"
+      ],
+      "exit": "self (nach ~8min Shutdown-Hänger, kein Kill)"
+    },
+    {
+      "task_id": "t_278421e3",
+      "profile": "backend",
+      "final_status": "done",
+      "kanban_complete": true,
+      "artifacts": [
+        "SQL-Migration"
+      ],
+      "exit": "self"
+    },
+    {
+      "task_id": "t_d93d741d",
+      "profile": "researcher",
+      "final_status": "done",
+      "kanban_complete": true,
+      "artifacts": [
+        "DeepSeek-Kontextfenster"
+      ],
+      "exit": "self"
+    },
+    {
+      "task_id": "t_8c9404bf",
+      "profile": "ops",
+      "final_status": "done",
+      "kanban_complete": true,
+      "artifacts": [
+        "Docker-Status"
+      ],
+      "exit": "self"
+    }
+  ],
+  "resolver_blocks": [
+    {
+      "task_id": "t_eab7b1af",
+      "reason": "BLOCKED_CAPABILITY_UNRESOLVED",
+      "status": "blocked",
+      "assignee": null
+    },
+    {
+      "task_id": "t_441fcc3a",
+      "reason": "BLOCKED_CAPABILITY_AMBIGUOUS",
+      "status": "blocked",
+      "assignee": null
+    }
+  ],
+  "counts": {
+    "done": 4,
+    "resolver_blocked": 2,
+    "protocol_violations": 0,
+    "manual_kills": 0,
+    "rest_processes": 0,
+    "open_claims": 0
+  },
+  "opencode": {
+    "main": {
+      "model": "gpt-5.6-sol",
+      "output": "PONG",
+      "exit": 0,
+      "classification": "SUCCESS"
+    },
+    "small_model": {
+      "model": "glm-5.2",
+      "output": "PONG",
+      "exit": 0,
+      "classification": "SUCCESS"
+    },
+    "note": "Original opencode.json unveraendert (main=gpt-5.6-sol, small_model=glm-5.2). Provider 200 seit Cooldown-Ende."
+  },
+  "buildroom": {
+    "log_artifact": "evidence/artifacts/buildroom-regression-normalize-goal.log",
+    "execution_path": "managed_canary",
+    "route": "workload/local",
+    "model": "Qwen3.6-35B-A3B-UD-Q4_K_M.gguf",
+    "status": "COMPLETED",
+    "attempt": "ATT-0708431D",
+    "exit_code": 0
+  },
+  "provider_failure_normalization": {
+    "code": "cli.py Exit-Code-Erweiterung (5 Failure-Reasons -> 75) + kanban_db rate_limited -> BLOCKED_EXTERNAL_PROVIDER",
+    "tests": [
+      "test_kanban_provider_failure_exit.py (9)",
+      "test_kanban_db.py rate_limit-block (angepasst)"
+    ]
+  },
+  "opencode_transparency": {
+    "code": "hermes_cli/opencode_result.py (leere Ausgabe + Exit 0 != SUCCESS)",
+    "tests": [
+      "test_opencode_result.py (8)"
+    ]
+  }
+}

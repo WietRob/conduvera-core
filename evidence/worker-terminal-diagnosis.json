@@ -92,10 +92,12 @@
   "honest_status": {
     "CAPABILITY_ASSIGNMENT": "LIVE_PROVEN",
     "BLOCK_SEMANTICS": "LIVE_PROVEN",
-    "WORKER_COMPLETION": "PARTIAL (2/4 done; frontend/researcher durch externes Z.AI-429 bis 08:23 blockiert)",
+    "WORKER_COMPLETION": "PARTIAL (2/4 done; 2/4 BLOCKED_EXTERNAL_PROVIDER — NICHT '4/4 durch Z.AI blockiert')",
     "OPENCODE_ORIGINAL_SMALL_MODEL": "NOT_PROVEN (glm-5.2 429 bis 08:23)",
     "FINAL_STATE_REVIEW": "NOT_PROVEN",
     "OPERATIONAL_PRODUCTION": "NOT_YET",
-    "OVERALL_GOAL": "TEILBESTANDEN"
-  }
+    "OVERALL_GOAL": "TEILBESTANDEN (Korrektur dokumentiert; Normalisierung im normalize-goal)",
+    "PROVIDER_FAILURE_CLASSIFICATION": "DEFECTIVE (Providerfehler wurden fälschlich ueber protocol_violation -> gave_up verarbeitet)"
+  },
+  "provider_failure_misclassification": "DEFECT: Die 2 Providerfehler (Z.AI-429) wurden vom Dispatcher als 'protocol violation' verbucht (worker rc=0 ohne kanban_complete), weil die Crash-Erkennung keinen Providerfehler-Zustand kannte. Tatsaechlich: Providerantwort war NIE erfolgreich — das ist BLOCKED_EXTERNAL_PROVIDER, keine Protokollverletzung. Wird im normalize-provider-failures-Goal gefixt."
 }

@@ -1,0 +1,9 @@
+{
+  "task_id": "t_c0a1",
+  "execution_path": "managed_canary",
+  "status": "completed",
+  "final_status": "COMPLETED: task=t_c0a1 attempt=ATT-0708431D session=mxfix_32d1fca5dcef pid=3619125 route=workload/local model=openai/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf no_progress=1/3"
+}
+EXIT_CODE=0
+Befehl: buildroom-operator --canary t_c0a1 --description 'Normalize-Goal: Buildroom-Regression'
+Timestamp: 2026-08-06T03:29:24+02:00

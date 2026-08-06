@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-08-06T01:29:46.380010+00:00",
+  "goal": "normalize-provider-failures",
+  "core_goal_diff": {
+    "count": 0,
+    "files": []
+  },
+  "self_improvement_diff": {
+    "count": 0,
+    "changed": {},
+    "added": [],
+    "removed": []
+  },
+  "note": "Lernänderungen sind getrennte Transaktion mit eigenem Receipt — verdecken/blockieren den Core-Fix nicht."
+}

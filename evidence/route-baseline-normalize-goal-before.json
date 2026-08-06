@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-08-06T01:17:05.748392+00:00",
+  "~/dream-server/config/litellm/local.yaml": "1c3d2b96825559fa",
+  "~/.config/ai-stack/routes/providers.yaml": "0cb08ff7cdb4578a",
+  "~/.config/ai-stack/routes/workloads.yaml": "9a649e04768335bd",
+  "~/.config/ai-stack/routes/compatibility.yaml": "6ca92fb9c44f77a8",
+  "~/.local/share/ai-stack/routes/local-mode.yaml": "efadb752eb99d496",
+  "live_route_count": 55,
+  "live_route_hash": "cd61881dd605665d"
+}
