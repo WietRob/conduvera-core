@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-08-06T14:56:49.171566+00:00",
+  "goal": "correct-status-truth-and-run-the-first-brain-backed-harness-canary",
+  "work": "Arbeit 2 — Statuswahrheit korrigiert (keine Codeänderung)",
+  "status_matrix": {
+    "PROVIDER_FAILURE_RECEIPT": "VERSIONED_AND_TEST_PROVEN",
+    "WORKER_429_EXIT75": "MANUAL_SESSION_PROVEN; DURABLE_REGRESSION_NOT_PROVEN",
+    "COOLDOWN_RECOVERY": "TEST_PROVEN",
+    "PROVIDER_FAILURE_LIFECYCLE": "PARTIAL",
+    "OPENCODE_ADAPTER_CONTRACT": "IMPLEMENTED_AND_TEST_PROVEN",
+    "OPENCODE_CANONICAL_REGISTRATION": "DISABLED_BY_OWNER",
+    "OPENCODE_CONDUVERA_GATEWAY_INTEGRATION": "NOT_OPERATIONAL",
+    "FINAL_HEAD_IDENTITY": "PROVEN",
+    "OPERATIONAL_PRODUCTION": "NOT_YET",
+    "OVERALL_GOAL": "TEILBESTANDEN"
+  },
+  "correction_note": "Vor-Goal-Labels (END_TO_END_PROVEN, VERSIONED_AND_PROVEN, PROVEN) waren ueberhoeht: der Worker-E2E war nur manuell, nicht durabel getestet; die Registry-Integration ist Owner-seitig disabled_by_owner, nicht operational. Jetzt ehrlich auf PARTIAL/NOT_OPERATIONAL/TEILBESTANDEN gesetzt."
+}

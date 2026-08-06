@@ -1,0 +1,101 @@
+{
+  "goal": "correct-status-truth-and-run-the-first-brain-backed-harness-canary",
+  "work": "Arbeit 1 — Brain-Preflight Context Manifest",
+  "generated_at": "2026-08-06T14:50:36.115745+00:00",
+  "topic": "Conduvera OpenCode Harness Gateway Canary: Registry, Adaptervertrag, AI-Stack-Grenzen, Rollback und Evidence",
+  "brain_command": "brain context --topic ... --max-tokens 12000 --output /tmp/brain-canary-context.md",
+  "brain_output_summary": "15 docs, ~4838 tokens, 244 Zeilen",
+  "sources": [
+    {
+      "path": "20_Areas/Dev_Infrastructure/Hermes_Buildroom/Roadmap.md",
+      "authority": "BRAIN_DOC",
+      "sha256_16": "db675caa57afddf0",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "20_Areas/Dev_Infrastructure/ODS_Integration/Agent_Platform_Control_Design.md",
+      "authority": "BRAIN_DOC",
+      "sha256_16": "b44e697deb27288d",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "20_Areas/Dev_Infrastructure/ODS_Integration/Authority_Map.md",
+      "authority": "REPO_TRUTH",
+      "sha256_16": "0426a0382ab179b0",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "20_Areas/Dev_Infrastructure/ODS_Integration/Conduvera_System_Feature_Catalog.md",
+      "authority": "BRAIN_DOC",
+      "sha256_16": "4f01d3240a093303",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "20_Areas/Dev_Infrastructure/ODS_Integration/Harness_Router_Design.md",
+      "authority": "BRAIN_DOC",
+      "sha256_16": "b3a0655d3bc0b23f",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "20_Areas/Dev_Infrastructure/ODS_Integration/Hyper_Control_Plane.md",
+      "authority": "BRAIN_DOC",
+      "sha256_16": "24ce05a3c4ce96b6",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "20_Areas/Dev_Infrastructure/ODS_Integration/Meta_Harness_Contract.md",
+      "authority": "REPO_TRUTH",
+      "sha256_16": "8976c59b991e85b7",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "20_Areas/Dev_Infrastructure/ODS_Integration/Naming_Gate_Contract.md",
+      "authority": "REPO_TRUTH",
+      "sha256_16": "53eb6a3b8cf7b8d5",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "20_Areas/Dev_Infrastructure/ODS_Integration/README.md",
+      "authority": "BRAIN_DOC",
+      "sha256_16": "7984ebc7f3b603dd",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "20_Areas/Dev_Infrastructure/ODS_Integration/Terminology_Codex_Harness_vs_OAuth.md",
+      "authority": "BRAIN_DOC",
+      "sha256_16": "21892336e34be5d2",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "20_Areas/Dev_Infrastructure/ODS_Integration/UI_Consolidation.md",
+      "authority": "BRAIN_DOC",
+      "sha256_16": "1f823a93d5b2d33d",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "70_Evidence/Dev_Infrastructure/Hermes_Buildroom/PeekXD_Live_Automation_Eval_2026-06-18/buildroom-v09-final.md",
+      "authority": "EVIDENCE",
+      "sha256_16": "0becb99ffa960f61",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "70_Evidence/Dev_Infrastructure/Hermes_Buildroom/PeekXD_Live_Automation_Eval_2026-06-18/buildroom-v09-weekend.md",
+      "authority": "EVIDENCE",
+      "sha256_16": "d1fbac36ec31981a",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "70_Evidence/Dev_Infrastructure/Systembewertung_2026-08-01_Externes_Verdikt.md",
+      "authority": "EVIDENCE",
+      "sha256_16": "15fe7c3c6f326fca",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    },
+    {
+      "path": "70_Evidence/conduvera-goal-1-final-head-review-5d2f0ba.md",
+      "authority": "EVIDENCE",
+      "sha256_16": "5fa67cde098206f8",
+      "selection_reason": "Brain-Kontext-Retrieval zum Canary-Topic"
+    }
+  ],
+  "context_tokens_total": 4838
+}

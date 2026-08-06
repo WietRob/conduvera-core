@@ -1,0 +1,28 @@
+# Isolated canary harness registry (goal correct-status-truth-and-run-the-
+# first-brain-backed-harness-canary, Arbeit 3).
+#
+# Loaded ONLY via CONDUVERA_HARNESS_REGISTRY pointing at this file (the
+# registry resolver's controlled env-var path). It NEVER overwrites the
+# production registry (~/.local/share/conduvera/.../contracts/
+# harness-registry.yaml), which stays `opencode_cli: disabled_by_owner`.
+#
+# Canary constraints (goal):
+#   - consumes no production jobs;
+#   - receives no production secrets;
+#   - runs only the fixed canary test task;
+#   - fully removable (delete this file + unset the env var);
+#   - never mutates the production registry.
+adapters:
+  hermes:
+    enabled: true
+    module: curaops.harness.hermes_adapter
+    entry_point: HermesAdapter
+    version: hermes-adapter.v1
+    contract: CONDUVERA-GOAL-1.0
+  opencode_cli:
+    enabled: true
+    status: enabled_canary
+    module: hermes_cli.opencode_gateway_adapter
+    entry_point: entry_point
+    version: opencode-adapter.v1
+    contract: CONDUVERA-GOAL-1.0

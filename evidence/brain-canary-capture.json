@@ -1,0 +1,51 @@
+{
+  "goal": "correct-status-truth-and-run-the-first-brain-backed-harness-canary",
+  "captured_at": "2026-08-06T15:03:27.643124+00:00",
+  "work": "Arbeit 6 — Brain-Capture + Pilot-Receipt",
+  "ausgangsfrage": "Kann Brain Runtime V1 fuer eine reale Dev-Infrastructure-Aufgabe (Conduvera OpenCode Harness Gateway Canary) den richtigen Kontext liefern und der bestehende OpenCodeHarnessAdapter ueber die kanonische Registry ansprechbar sein?",
+  "context_manifest": {
+    "file": "evidence/brain-canary-context-manifest.json",
+    "sources": 15,
+    "authority_classes": {
+      "BRAIN_DOC": 10,
+      "REPO_TRUTH": 3,
+      "EVIDENCE": 2,
+      "RUNTIME_TRUTH": 0
+    },
+    "context_tokens": 4838
+  },
+  "tatsaechlich_gelesene_originalquellen": [
+    "20_Areas/Dev_Infrastructure/ODS_Integration/Authority_Map.md",
+    "20_Areas/Dev_Infrastructure/ODS_Integration/Agent_Platform_Control_Design.md",
+    "20_Areas/Dev_Infrastructure/ODS_Integration/Current_State.md",
+    "curaops/harness/registry.py + contracts/harness-registry.yaml (Repo-Truth)",
+    "hermes_cli/opencode_gateway_adapter.py + opencode_harness.py (Repo-Truth)"
+  ],
+  "entscheidungen": [
+    "Canary-Overlay als isolierte Registry-Datei via CONDUVERA_HARNESS_REGISTRY (Produktion nie ueberschrieben)",
+    "Statuswahrheit: Vor-Goal-Labels (END_TO_END_PROVEN/PROVEN) auf ehrliche Werte korrigiert",
+    "Reales OpenCode nur bei gruenem Provider-Health-Gate; Providerblock ehrlich als BLOCKED_EXTERNAL_PROVIDER"
+  ],
+  "evidenz": [
+    "brain doctor: 0 Fehler",
+    "Canary-Registry laedt OpenCodeHarnessAdapter (load_adapter via importlib)",
+    "A/B/C-Pflichtfaelle: SUCCESS/FAILED/BLOCKED_EXTERNAL_PROVIDER via Registry-Pfad",
+    "Rollback: Produktionsregistry Hash 1b9c1de2 unveraendert, disabled_by_owner"
+  ],
+  "verworfene_annahmen": [
+    "Annahme: --include-sources existiert als brain-context-Flag -> verworfen (nicht unterstuetzt, --output genutzt)",
+    "Annahme: Provider-Health-Gate allein reicht fuer realen OpenCode-Success -> verworfen (gpt-5.6-sol aktuell extern blockiert)"
+  ],
+  "dod_ergebnis": "TEILBESTANDEN bis finales Review (DOD-16 offen)",
+  "nicht_geschlossene_punkte": [
+    "Realer OpenCode-Success ueber Canary steht aus (Providerblock extern, DOD-11 ehrlich erfuellt)",
+    "OPENCODE_PRODUCT_INTEGRATION bleibt OPEN"
+  ],
+  "brain_pilot_receipt": {
+    "context_precision": "14/15 ausgewaehlte Quellen relevant (1 marginal: Systembewertung-Externes-Verdikt — Kontext, nicht tragend)",
+    "missed_source_count": "1 (curaops/harness/registry.py + contracts/harness-registry.yaml — Repo-Truth nicht im Brain-Index; aus dem Release gelesen, nicht aus Brain)",
+    "stale_source_count": "0 (keine Brain-Quelle widersprach Repo-/Runtime-Truth; Vor-Goal-Statuslabels waren ueberhoeht, wurden aber aus Goal-Evidence erkannt, nicht aus Brain)",
+    "context_tokens": 4838,
+    "correction_count": 2
+  }
+}
