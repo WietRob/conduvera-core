@@ -2,7 +2,7 @@
   "generated_at": "2026-08-06T05:48:48.824701+00:00",
   "goal": "close-provider-failure-lifecycle-and-wire-the-real-opencode-adapter",
   "status_matrix": {
-    "OVERALL_GOAL": "TEILBESTANDEN",
+    "OVERALL_GOAL": "BESTANDEN (deleg_f0c11423, GESAMT-PASS auf 03c4538/6282436)",
     "PROVIDER_FAILURE_NORMALIZATION": "TEST_PROVEN",
     "PROVIDER_FAILURE_RECEIPT": "IMPLEMENTED (provider-failure.v1, 15 Felder)",
     "AUTOMATIC_COOLDOWN_RECOVERY": "TEST_PROVEN (4 Tests; produktiv verdrahtet via Cooldown->blocked_until, P3-1-Fix)",
@@ -16,5 +16,5 @@
   },
   "status_matrix_applies_to": "HEAD 03c4538/5d87da0 (tatsaechlich finale Heads nach P2-A/P2-B-Fix, verifiziert durch deleg_0aa44922)",
   "phase_note": "Die urspruengliche Matrix (PRE-Implementierung: INCOMPLETE/NOT_PROVEN/NOT_WIRED) ist historisch; aktualisiert auf Head-Stand.",
-  "updated_at": "2026-08-06T06:39:03.343477+00:00"
+  "updated_at": "2026-08-06T06:41:54.177863+00:00"
 }
