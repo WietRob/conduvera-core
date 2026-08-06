@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-08-06T00:15:55.460658+00:00",
+  "goal": "close-worker-terminal-protocol-and-review-the-actual-final-state",
+  "hermes_agent": {
+    "head": "e918f4a2b41e0ba797e8adaf80ec87ffafd2dfb7",
+    "branch": "main",
+    "changed_files": [
+      "hermes_cli/capability_resolver.py (BLOCKED_REGISTRY_UNAVAILABLE, registry_available-Param)",
+      "hermes_cli/kanban_db.py (Registry-Read fail-closed, .name-Extraktion)",
+      "tests/hermes_cli/test_capability_resolver.py (4 neue Negativtests)"
+    ]
+  },
+  "goal_contract": {
+    "head": "430af4abb68258e7081b97aecf69bd5729c50e03",
+    "branch": "task/goal-contract-fixture",
+    "changed_files": [
+      "evidence/route-baseline-terminal-goal-before.json",
+      "evidence/skill-sha-terminal-goal-pre.json",
+      "evidence/worker-terminal-diagnosis.json",
+      "evidence/artifacts/buildroom-regression-20260806.log"
+    ]
+  },
+  "opencode_config": {
+    "path": "~/.config/opencode/opencode.json",
+    "hash": "6c69ae9078d78c9b",
+    "diff": "small_model: deepseek-v4-flash -> glm-5.2 (Pre-Goal-Ruecksetzung, Arbeit 1). main unveraendert. KEINE weiteren Aenderungen."
+  },
+  "brain": {
+    "note": "Keine Aenderungen durch dieses Goal. 8 fremde parallele Aenderungen (Buildroom-Doku) unangetastet."
+  },
+  "skills": {
+    "note": "0 Aenderungen durch dieses Goal (DOD-09: 136 SHAs identisch)."
+  },
+  "routes": {
+    "note": "0 Aenderungen (DOD-01: 55 Routen, Hash cd61881d identisch)."
+  },
+  "worker_e2e_board": {
+    "board": "terminal-e2e",
+    "tasks": {
+      "t_661604cd": "frontend, blocked (EXTERNAL_PROVIDER_LIMIT Z.AI-429)",
+      "t_278421e3": "backend, done (kanban_complete)",
+      "t_d93d741d": "researcher, blocked (EXTERNAL_PROVIDER_LIMIT Z.AI-429)",
+      "t_8c9404bf": "ops, done (kanban_complete)",
+      "t_eab7b1af": "unknown, blocked (BLOCKED_CAPABILITY_UNRESOLVED)",
+      "t_441fcc3a": "mixed, blocked (BLOCKED_CAPABILITY_AMBIGUOUS)"
+    }
+  }
+}
