@@ -7,7 +7,17 @@
     "OPENCODE_DURABLE_CANARY_INTEGRATION": "NOT_PROVEN",
     "FINAL_HEAD_REVIEW": "INVALIDATED_BY_POST_REVIEW_COMMIT",
     "BRAIN_EXTERNAL_REPO_TRUTH_COVERAGE": "PARTIAL",
-    "OVERALL_GOAL": "TEILBESTANDEN"
+    "OVERALL_GOAL": "BESTANDEN (finales Review deleg_15b589b7, GESAMT-PASS)"
   },
-  "note": "Der Canary des Vor-Goals lief ueber sys.path-Insertion auf den Hermes-Source-Checkout (source-coupled) — das ist der Defekt. Der Post-Review-Commit 72ea06e (OVERALL_GOAL=BESTANDEN) invalidiert den FINAL_HEAD_REVIEW des Vor-Goals als Review des finalen Heads. Fruehere Evidence bleibt erhalten."
+  "note": "Der Canary des Vor-Goals lief ueber sys.path-Insertion auf den Hermes-Source-Checkout (source-coupled) — das ist der Defekt. Der Post-Review-Commit 72ea06e (OVERALL_GOAL=BESTANDEN) invalidiert den FINAL_HEAD_REVIEW des Vor-Goals als Review des finalen Heads. Fruehere Evidence bleibt erhalten.",
+  "final_review": {
+    "reviewer": "deleg_15b589b7 (Konsolidierung nach 503-Abbruch von deleg_b25fc07f)",
+    "verdict": "BESTANDEN (GESAMT-PASS, 5/5, 0 Findings)",
+    "hermes_head_reviewed": "6a5e51db8e7669456891399fe84b3e19a2373075",
+    "goal_head_reviewed": "d4d384006bc27b42ca20bf42a6065e7a341155ea",
+    "brain_head_reviewed": "ced1b319e080dc99c1c886aba71ae2aeb991997b",
+    "findings": "0 P1, 0 P2, 0 P3",
+    "note": "Canary aus installiertem Wheel (Source unzugaenglich), Brain V1.1 REPO_TRUTH liefert registry.py + harness-registry.yaml (missed_source_count=0), Prod-Registry 1b9c1de2 disabled_by_owner, Rollback vollstaendig."
+  },
+  "updated_at": "2026-08-06T19:05:14.262581+00:00"
 }
