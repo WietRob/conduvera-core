@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-08-06T12:16:25.293143+00:00",
+  "goal": "close-the-true-provider-lifecycle-e2e-and-freeze-the-actual-final-head",
+  "status_matrix": {
+    "OVERALL_GOAL": "TEILBESTANDEN",
+    "PROVIDER_FAILURE_RECEIPT": "INCOMPLETE_SCHEMA_TAG",
+    "COOLDOWN_STATE_MACHINE": "TEST_PROVEN",
+    "FULL_WORKER_PROVIDER_LIFECYCLE_E2E": "NOT_PROVEN",
+    "OPENCODE_WRAPPER": "LIVE_PROVEN",
+    "OPENCODE_CONDUVERA_GATEWAY_INTEGRATION": "NOT_PROVEN",
+    "ACTUAL_FINAL_HEAD_REVIEW": "NOT_PROVEN",
+    "OPERATIONAL_PRODUCTION": "NOT_YET"
+  },
+  "review_history": {
+    "e594fd9": "Wird NICHT als reviewter Head ausgegeben (Vor-Goal-Commit)",
+    "03c4538_6282436": "Vor-Goal-Review deleg_f0c11423 (BESTANDEN) bleibt als Review DIESER Heads erhalten"
+  }
+}

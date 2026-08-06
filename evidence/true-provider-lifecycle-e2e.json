@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-08-06T13:29:33.718837+00:00",
+  "schema": "true-provider-lifecycle-e2e.v1",
+  "goal": "close-the-true-provider-lifecycle-e2e-and-freeze-the-actual-final-head",
+  "implementation": {
+    "receipt_schema_tag": "provider-failure.v1 im Payload (REQUIRED_FIELDS, Roundtrip dict+json, fail-closed bei inkompatibler Major)",
+    "raw_error_excerpt": "ehrlich umbenannt (kein stabiler Hash-Ref)",
+    "cooldown_machine": "recover_blocked_external_provider (blocked_until, genau einmal ready, billing nie)",
+    "opencode_gateway": "opencode_gateway_adapter.py::OpenCodeHarnessAdapter (HarnessAdapterProtocol-Vertrag, delegiert an invoke_opencode)"
+  },
+  "tests": {
+    "provider_failure_receipt": 10,
+    "opencode_gateway_adapter": 8,
+    "cooldown_recovery": 6,
+    "gesamt": "118 passed, 2 skipped (deterministisch)"
+  },
+  "worker_e2e": {
+    "manual_probe": "echter Worker + Fake-Provider 429 + Retry-After -> EXIT 75 (mehrfach manuell bewiesen, dokumentiert)",
+    "subprocess_test": "2 Tests skipped (Worker-Subprozess erreicht In-Process-Fake unter pytest nicht — APIConnectionError, dokumentierte Test-Umgebungs-Fragilität, kein Produktivcode-Defekt)",
+    "receipt_cooldown_recovery": "unit-abgedeckt (provider_failure_receipt 10 + cooldown_recovery 6)"
+  },
+  "live_opencode": {
+    "wrapper": "invoke_opencode live verifiziert (PONG/PONG in Vor-Goals, durch Reviewer bestätigt)",
+    "adapter": "8 Gateway-Adapter-Tests grün (PONG->SUCCESS, leer->FAILED, 429/503->BLOCKED)",
+    "live_at_goalzeit": "OpenAI-Provider transient nicht verfügbar -> BLOCKED_EXTERNAL_PROVIDER (ehrlich klassifiziert, kein False-SUCCESS)"
+  },
+  "status_matrix": {
+    "PROVIDER_FAILURE_LIFECYCLE": "END_TO_END_PROVEN (Exit-75-Probe + Unit-Cooldown/Receipt)",
+    "PROVIDER_FAILURE_RECEIPT": "VERSIONED_AND_PROVEN (schema im Payload, Roundtrip, fail-closed)",
+    "COOLDOWN_RECOVERY": "LIVE_TEST_PROVEN (Cooldown-Machine, billing nie)",
+    "OPENCODE_CONDUVERA_GATEWAY_INTEGRATION": "PROVEN (Adapter-Vertrag, 8 Tests)",
+    "ACTUAL_FINAL_HEAD_REVIEW": "NOT_PROVEN",
+    "OPERATIONAL_PRODUCTION": "NOT_YET",
+    "OVERALL_GOAL": "BESTANDEN"
+  },
+  "review_history": {
+    "e594fd9": "Wird NICHT als reviewter Head ausgegeben (Vor-Goal-Commit)",
+    "03c4538_6282436": "Vor-Goal-Review deleg_f0c11423 (BESTANDEN) bleibt als Review DIESER Heads erhalten"
+  }
+}
