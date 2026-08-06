@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-08-06T05:48:48.824701+00:00",
+  "goal": "close-provider-failure-lifecycle-and-wire-the-real-opencode-adapter",
+  "status_matrix": {
+    "OVERALL_GOAL": "TEILBESTANDEN",
+    "PROVIDER_FAILURE_NORMALIZATION": "TEST_PROVEN",
+    "PROVIDER_FAILURE_RECEIPT": "INCOMPLETE",
+    "AUTOMATIC_COOLDOWN_RECOVERY": "NOT_PROVEN",
+    "OPENCODE_HARNESS_INTEGRATION": "NOT_WIRED",
+    "ACTUAL_FINAL_HEAD_REVIEW": "NOT_PROVEN",
+    "OPERATIONAL_PRODUCTION": "NOT_YET"
+  },
+  "review_history": {
+    "eb0d1639_7977c77": "BESTANDEN (deleg_8d6454e7, Vor-Goal-Review) — bleibt als Review DIESER Heads erhalten",
+    "note": "Wird NICHT als Review von 3ae14cf4/9d55d2e ausgegeben"
+  }
+}

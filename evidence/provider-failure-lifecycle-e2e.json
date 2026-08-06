@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-08-06T05:56:54.670044+00:00",
+  "schema": "provider-failure-lifecycle-e2e.v1",
+  "goal": "close-provider-failure-lifecycle-and-wire-the-real-opencode-adapter",
+  "implementation": {
+    "exit_code_function": "hermes_cli/kanban_worker_exit.py::provider_failure_exit_code (cli.py + Tests nutzen dieselbe)",
+    "receipt_schema": "provider-failure.v1 (15 Pflichtfelder, source=worker-runtime/provider-failure-normalizer)",
+    "cooldown_machine": "hermes_cli/kanban_db.py::recover_blocked_external_provider (blocked_until, genau einmal ready, billing nie)",
+    "opencode_wrapper": "hermes_cli/opencode_harness.py::invoke_opencode (echter Prozess + classify_opencode_result)"
+  },
+  "tests": {
+    "kanban_worker_exit": 9,
+    "kanban_cooldown_recovery": 4,
+    "opencode_harness": 6,
+    "opencode_result": 8,
+    "kanban_db_rate_limit_receipt": "im Verbund gruen (57/57 Kanban-Files, 96 gesamt deterministisch; 2 vorbestehende Interferenzen separat)"
+  },
+  "live_verification": {
+    "opencode_main": {
+      "model": "gpt-5.6-sol",
+      "status": "SUCCESS",
+      "output": "PONG",
+      "non_empty": true
+    },
+    "opencode_small": {
+      "model": "glm-5.2",
+      "status": "SUCCESS",
+      "output": "PONG",
+      "non_empty": true
+    },
+    "note": "Beide durch invoke_opencode Wrapper ausgefuehrt (echte Verdrahtung, DOD-09/10)"
+  },
+  "status_matrix": {
+    "PROVIDER_FAILURE_CLASSIFICATION": "IMPLEMENTED",
+    "PROVIDER_FAILURE_RECEIPT": "IMPLEMENTED (provider-failure.v1)",
+    "AUTOMATIC_COOLDOWN_RECOVERY": "TEST_PROVEN (4 Cooldown-Tests)",
+    "OPENCODE_HARNESS_INTEGRATION": "WIRED (invoke_opencode, live SUCCESS)",
+    "ACTUAL_FINAL_HEAD_REVIEW": "NOT_PROVEN",
+    "OPERATIONAL_PRODUCTION": "NOT_YET",
+    "OVERALL_GOAL": "TEILBESTANDEN"
+  }
+}
