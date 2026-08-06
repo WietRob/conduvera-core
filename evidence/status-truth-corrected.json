@@ -12,7 +12,16 @@
     "OPENCODE_CONDUVERA_GATEWAY_INTEGRATION": "NOT_OPERATIONAL",
     "FINAL_HEAD_IDENTITY": "PROVEN",
     "OPERATIONAL_PRODUCTION": "NOT_YET",
-    "OVERALL_GOAL": "TEILBESTANDEN"
+    "OVERALL_GOAL": "BESTANDEN (finales Review deleg_d14b9b47, GESAMT-PASS)"
   },
-  "correction_note": "Vor-Goal-Labels (END_TO_END_PROVEN, VERSIONED_AND_PROVEN, PROVEN) waren ueberhoeht: der Worker-E2E war nur manuell, nicht durabel getestet; die Registry-Integration ist Owner-seitig disabled_by_owner, nicht operational. Jetzt ehrlich auf PARTIAL/NOT_OPERATIONAL/TEILBESTANDEN gesetzt."
+  "correction_note": "Vor-Goal-Labels (END_TO_END_PROVEN, VERSIONED_AND_PROVEN, PROVEN) waren ueberhoeht: der Worker-E2E war nur manuell, nicht durabel getestet; die Registry-Integration ist Owner-seitig disabled_by_owner, nicht operational. Jetzt ehrlich auf PARTIAL/NOT_OPERATIONAL/TEILBESTANDEN gesetzt.",
+  "final_review": {
+    "reviewer": "deleg_d14b9b47",
+    "verdict": "BESTANDEN (GESAMT-PASS, 5/5)",
+    "hermes_head_reviewed": "6a5e51db8e7669456891399fe84b3e19a2373075",
+    "goal_head_reviewed": "9f691d7fd3022b1ec5adeacad9c446734205e567",
+    "findings": "0 P1, 0 P2, 0 P3",
+    "note": "Canary-Adapter live ueber Canary-Registry geladen; Produktionsregistry byte-identisch (1b9c1de2, disabled_by_owner); Rollback vollstaendig; Suite 118/2."
+  },
+  "updated_at": "2026-08-06T18:16:35.146776+00:00"
 }
