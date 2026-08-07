@@ -1,0 +1,18 @@
+# Harness adapter registry (CONDUVERA-GOAL-1.0)
+# Adapter werden NUR über diese versionierte Registry/Eintrittspunkte-Schicht
+# geladen (dynamisch, nie direkt importiert). Fehlt der Eintrag, ist der
+# Adapter deaktiviert oder das Modul physisch nicht vorhanden, startet Core
+# trotzdem und liefert strukturiertes CAPABILITY_UNAVAILABLE.
+adapters:
+  hermes:
+    enabled: true
+    module: curaops.harness.hermes_adapter
+    entry_point: HermesAdapter
+    version: hermes-adapter.v1
+    contract: CONDUVERA-GOAL-1.0
+  codex_cli:
+    enabled: false
+    status: disabled_by_owner
+  opencode_cli:
+    enabled: false
+    status: disabled_by_owner
