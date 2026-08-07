@@ -4,17 +4,18 @@
   "candidate_dir": "~/.local/share/conduvera/releases/core/core-2026-08-07-rc1",
   "contents": [
     "venv/ (eigene)",
-    "core-wheel",
-    "adapter-wheel",
+    "core-wheel.whl",
+    "adapter-wheel.whl",
     "registry.yaml",
     "release-manifest.json",
-    "platform.lock.snapshot.yaml"
+    "platform.lock.snapshot.yaml",
+    "verification-receipt.json"
   ],
   "verified": {
     "cli_exit_0": true,
     "package_resource_registry": "site-packages (kein Override/PYTHONPATH)",
-    "gateway_loads_hermes": "HermesAdapter via HarnessGatewayService",
-    "hermes_live_pong": "await_completion completed (exit 0)",
+    "gateway_loads_hermes": "HermesAdapter via HarnessGatewayService — am Lieferzustand (Adapter im venv installiert)",
+    "hermes_live_pong": "await_completion completed (exit 0) — AM LIEFERZUSTAND reproduziert (mxfix_e7d705f1e39f, 2026-08-07 16:44)",
     "evidence_schema": "MXOS-EVIDENCE-1.0.0",
     "source_in_syspath": [],
     "source_imported_modules": []
@@ -33,5 +34,7 @@
     "claims": 0,
     "leases": 0,
     "current_symlink": "kein produktiver Symlink angefasst"
-  }
+  },
+  "updated_at": "2026-08-07T14:44:27.531965+00:00",
+  "fix_note": "F1 (Review deleg_b48f26dc, P2): Adapter-Wheel war nicht im Lieferzustand (Removal-Zustand). Behoben: core-wheel.whl + adapter-wheel.whl im Candidate, Adapter im venv installiert, PONG am Lieferzustand reproduziert."
 }
