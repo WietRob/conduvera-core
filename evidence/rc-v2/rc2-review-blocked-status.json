@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-08-07T17:59:21.661813+00:00",
+  "goal": "replace-the-mutated-rc1-with-a-clean-immutable-rc2-and-close-release-provenance",
+  "arbeitsstatus": "ABGESCHLOSSEN_LOKAL_VERIFIZIERT",
+  "review_status": "BLOCKED_EXTERNAL_PROVIDER",
+  "review_detail": "3 Subagent-Review-Versuche (deleg_779042e8, deleg_1815b51d, deleg_c78bf2b0) scheiterten an HTTP 503 (upstream capacity limits). Kein Modellwechsel/Override per Owner-Regel. DOD-12 offen bis Provider verfügbar.",
+  "dods_1_bis_11": "ALLE ERFUELLT UND LOKAL VERIFIZIERT",
+  "dod_12": "OFFEN (externer Provider-Ausfall)",
+  "heads": {
+    "core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c (unveraendert)",
+    "adapter": "86e33ef (0.1.1, clean)",
+    "platform": "7126d85 (Lock-Fix)",
+    "evidence": "19cf87a (RC2-Evidence)"
+  },
+  "rc2": "IMMUTABLE_ISOLATED_LIVE_PROVEN (read-only, PONG mxfix_b726918fff00, MXOS-EVIDENCE-1.0.0)",
+  "rc1": "SUPERSEDED_NON_IMMUTABLE (eingefroren, 3238 Dateien)"
+}
