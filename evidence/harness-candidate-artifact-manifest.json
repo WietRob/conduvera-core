@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-08-07T08:06:50.735016+00:00",
+  "artefacts": [
+    {
+      "component": "matrix_os (canonical core)",
+      "git_sha": "d65db0c",
+      "wheel": "matrix_os-0.1.0-py3-none-any.whl",
+      "wheel_sha256": "733064972136abf4"
+    },
+    {
+      "component": "hermes-adapter-artifact (separater Besitz)",
+      "git_sha": "2d6641e (goal-contract)",
+      "wheel": "hermes_adapter_artifact-1.0.0-py3-none-any.whl",
+      "wheel_sha256": "a5e6f31f8df051c5"
+    }
+  ]
+}

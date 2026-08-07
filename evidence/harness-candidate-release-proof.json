@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-08-07T08:06:50.734860+00:00",
+  "goal": "make-the-harness-gateway-canonical-in-conduvera-core",
+  "candidate_release_test": {
+    "core_wheel": "matrix_os-0.1.0-py3-none-any.whl (aus kanonischem Core-Worktree d65db0c gebaut)",
+    "hermes_adapter_artefact": "hermes_adapter_artifact-1.0.0-py3-none-any.whl (separater Hermes-Besitz, DOD-05)",
+    "isolated_env": "/tmp/harness-candidate-venv (frisch, keine Source-Pfade)",
+    "source_inaccessibility": "matrix-os + goal-contract + harness-canonical + harness Worktrees physisch chmod 000 waehrend des Laufs",
+    "curaops_module_path": "/tmp/harness-candidate-venv/lib/python3.12/site-packages/curaops/harness/gateway.py",
+    "adapter_module_path": "/tmp/harness-candidate-venv/lib/python3.12/site-packages/hermes_adapter_artifact/__init__.py",
+    "callgraph": "Conduvera Core -> HarnessGatewayService (Registry explicit->env->package) -> HermesAdapter (installiertes Artefakt) -> health_check -> start_session(SIMULATION) -> status -> collect_evidence -> MXOS-EVIDENCE-1.0.0"
+  },
+  "lifecycle_results": {
+    "health_check": "success=True (hermes adapter available)",
+    "start_session": "success=True (hermes fixture session SIMULATION)",
+    "status": "success=True (session completed)",
+    "collect_evidence": "keys=[evidence, ok, session_id]",
+    "evidence_schema": "MXOS-EVIDENCE-1.0.0",
+    "opencode_cli_disabled": "success=False (fail-closed)",
+    "pi_unregistered": "success=False (fail-closed)"
+  },
+  "rollback": {
+    "prod_registry_sha256": "1b9c1de22a3123eb (unveraendert, 2x disabled_by_owner)",
+    "candidate_processes": 0,
+    "claims": 0,
+    "leases": 0,
+    "env_overrides": 0,
+    "gpu_mode": "text",
+    "litellm_route_hash": "1c3d2b96825559fa"
+  }
+}

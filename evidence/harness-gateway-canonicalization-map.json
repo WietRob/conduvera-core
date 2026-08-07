@@ -1,0 +1,67 @@
+{
+  "generated_at": "2026-08-07T07:53:21.823819+00:00",
+  "goal": "make-the-harness-gateway-canonical-in-conduvera-core",
+  "compare_basis": {
+    "core": {
+      "repo": "~/projects/matrix-os",
+      "head": "e5b7e9b"
+    },
+    "candidate": {
+      "repo": "~/projects/matrix-os-wt-goal-contract",
+      "head": "2d6641e",
+      "note": "Release-Candidate-Stand, byte-identisch mit installiertem Release"
+    },
+    "release": {
+      "path": "~/.local/share/conduvera/releases/buildroom-operator/87e1296c.../curaops/harness",
+      "note": "identisch mit Candidate (SHA-gleich)"
+    }
+  },
+  "files": [
+    {
+      "file": "curaops/harness/gateway.py",
+      "canonical_source": "candidate (goal-contract 2d6641e) — HarnessGatewayService +203 Zeilen, einziger oeffentlicher Lifecycle-Einstieg",
+      "current_core_path": "curaops/harness/gateway.py (e5b7e9b, 286 Z., nur Descriptors, runtime_implemented=False)",
+      "candidate_path": "curaops/harness/gateway.py (483 Z., HarnessGatewayService, load_adapter fail-closed)",
+      "semantic_difference": "Core: nur deklarative Boundary-Descriptors (GatewayCapability/RunnerDescriptor/ToolDescriptor/EditorSurfaceDescriptor, alle runtime_implemented=False). Candidate: + HarnessGatewayService (public entry, from_registry, load_adapter -> AdapterResult, fail-closed CAPABILITY_UNAVAILABLE), nutzt Registry.",
+      "tests": "tests/test_harness_gateway_contract.py (6), tests/buildroom/test_adapter_boundary.py (goal-contract)",
+      "decision": "PORT_CANDIDATE"
+    },
+    {
+      "file": "curaops/harness/registry.py",
+      "canonical_source": "candidate (goal-contract 2d6641e) — Runtime-Registry-Authority",
+      "current_core_path": "FEHLT",
+      "candidate_path": "curaops/harness/registry.py (239 Z., HarnessAdapterProtocol runtime_checkable, HarnessAdapterRegistry, resolve_registry_path explicit->env->package, fail-closed)",
+      "semantic_difference": "Core hat keine Registry-Authority. Candidate: AdapterRegistry laedt ueber importlib + entry_point, HarnessAdapterProtocol mit health/start/status/cancel/timeout/await/collect, ExecutionMode Pflicht, CAPABILITY_UNAVAILABLE fail-closed.",
+      "tests": "tests/test_harness_gateway_contract.py, goal-contract tests/buildroom/test_adapter_boundary.py",
+      "decision": "PORT_CANDIDATE"
+    },
+    {
+      "file": "curaops/harness/contracts/harness-registry.yaml",
+      "canonical_source": "candidate (goal-contract 2d6641e)",
+      "current_core_path": "FEHLT",
+      "candidate_path": "curaops/harness/contracts/harness-registry.yaml (hermes enabled; codex_cli/opencode_cli disabled_by_owner)",
+      "semantic_difference": "Produktionsregistry: hermes=true, opencode_cli/codex_cli disabled_by_owner. Pi NICHT registriert.",
+      "tests": "Registry-Resolver-Tests (explizit->env->package)",
+      "decision": "PORT_CANDIDATE"
+    },
+    {
+      "file": "curaops/harness/hermes_adapter.py",
+      "canonical_source": "KEINER im Core — bleibt EIGENSTAENDIGER Hermes-Besitz (Adaptergrenze, DOD-05)",
+      "current_core_path": "FEHLT (korrekt — Hermes-Adapter darf NICHT in den Core portiert werden)",
+      "candidate_path": "curaops/harness/hermes_adapter.py (757 Z., HARNESS-002, goal-contract/Release)",
+      "semantic_difference": "Der Hermes-Adapter ist separat versioniert (goal-contract -> installiertes Artefakt). Der Core konsumiert ihn NUR ueber den oeffentlichen Adaptervertrag. KEIN Vendoring (Goal-Grenze).",
+      "tests": "goal-contract tests (test_adapter_boundary.py, test_goal_contract.py::test_dod08)",
+      "decision": "KEEP_CORE (kein Port — Hermes bleibt Adapter-Eigentuemer; Core konsumiert via Registry/Artefakt)"
+    },
+    {
+      "file": "curaops/harness/__init__.py, operator_status.py, route_plan*.py, scaffolding.py",
+      "canonical_source": "identisch in allen 3 Ständen (SHA-gleich)",
+      "current_core_path": "vorhanden",
+      "candidate_path": "vorhanden",
+      "semantic_difference": "Keine — byte-identisch",
+      "tests": "bestehende",
+      "decision": "KEEP_CORE"
+    }
+  ],
+  "summary": "Port: gateway.py (Service-Erweiterung), registry.py (neu), contracts/harness-registry.yaml (neu). Nicht portieren: hermes_adapter.py (Hermes-Besitz, Adaptergrenze). Keine zweite Registry-/Gateway-Implementierung."
+}
