@@ -1,0 +1,64 @@
+{
+  "generated_at": "2026-08-07T12:05:14.706891+00:00",
+  "pr": 34,
+  "repository": "WietRob/matrix-os",
+  "base_sha": "cc7bac2e43b675af596189c8436653d42f7747a1",
+  "head_sha_before": "e87d88c6007f6029fa31561e4092a942aa57c680",
+  "head_sha_after": "ee8f21f (neuester Push, CI-gruen)",
+  "initial_state": {
+    "PR_34_STATE": "OPEN",
+    "PR_34_REMOTE_CI": "FAILED (beide Gates rot auf e87d88c)",
+    "PR_34_MERGE_READY": "NO",
+    "defekt": "Workflows referenzierten curaops-Pfade nach Rename; Test-Isolation os.chdir ohne Restore; Ruff 0.16 neue Regeln"
+  },
+  "workflow_runs_initial": [
+    {
+      "run_id": 31170988764,
+      "workflow": "Matrix OS Evidence Quality Gate",
+      "head": "e87d88c",
+      "conclusion": "FAILURE",
+      "failed_step": "Evidence/report focused gate (exit 4, curaops/skills/change_request/tests not found)"
+    },
+    {
+      "run_id": 31170988197,
+      "workflow": "PR3 Compliance and Accountability Gates",
+      "head": "e87d88c",
+      "conclusion": "FAILURE"
+    }
+  ],
+  "workflow_runs_after_fix1": [
+    {
+      "run_id": 31175881746,
+      "workflow": "Matrix OS Evidence Quality Gate",
+      "head": "fdaa657",
+      "conclusion": "FAILURE",
+      "failed": "Test-Isolation os.chdir + Ruff 0.16"
+    },
+    {
+      "run_id": 31175881794,
+      "workflow": "PR3 Compliance and Accountability Gates",
+      "head": "fdaa657",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "workflow_runs_final": [
+    {
+      "run_id": 31176629993,
+      "workflow": "Matrix OS Evidence Quality Gate",
+      "head": "ee8f21f",
+      "conclusion": "SUCCESS"
+    },
+    {
+      "run_id": 31176630478,
+      "workflow": "PR3 Compliance and Accountability Gates",
+      "head": "ee8f21f",
+      "conclusion": "SUCCESS"
+    }
+  ],
+  "fixes": [
+    "Workflows: curaops->conduvera-Pfade + conduvera.cli.main (fdaa657)",
+    "Test-Isolation: os.chdir-Restore in test_harness_route_plan + test_route_plan_golden_fixtures (ee8f21f)",
+    "Ruff: B008-Ignore (Typer-idiomatisch) + Version gepinnt >=0.15,<0.16 (ee8f21f)",
+    "I001-Import-Sortierung via ruff --fix (ee8f21f)"
+  ]
+}

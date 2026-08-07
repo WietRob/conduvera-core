@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-08-07T12:05:24.486902+00:00",
+  "goal": "make-pr34-truly-merge-ready-after-the-conduvera-rename",
+  "status": {
+    "PR_34_HEAD": "ee8f21f3760058fea0f9263f2a8e73fb6b2b3887",
+    "PR_34_STATE": "OPEN",
+    "PR_34_REMOTE_CI": "GREEN (beide Gates: 31176629993 + 31176630478 SUCCESS)",
+    "PR_34_MERGE_READY": "YES",
+    "PR_34_MERGEABLE": "MERGEABLE / CLEAN",
+    "CONDUVERA_CORE_CONVERGED_HEAD": "MERGE_READY_CANDIDATE",
+    "CONDUVERA_RELEASE_BUILD_V1": "NOT_STARTED",
+    "OPERATIONAL_PRODUCTION": "NOT_YET",
+    "CONDUVERA_PLATFORM": "LOCAL_CONTRACT_SCAFFOLD",
+    "CONDUVERA_CONTRACTS": "DESIGN_ONLY",
+    "UPSTREAM_UPDATE_AUTOMATION": "NOT_IMPLEMENTED"
+  },
+  "kein_merge_kein_release": "PR bleibt OPEN; kein Merge, kein Release-Build, kein Produktiv-Deployment in diesem Goal"
+}
