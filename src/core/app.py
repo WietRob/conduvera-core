@@ -1,26 +1,30 @@
 """Matrix OS Main Application."""
-from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, Vertical, VerticalScroll
-from textual.widgets import Header, Footer, Static, Button, Label
-from textual.binding import Binding
-from textual.reactive import reactive
-from pathlib import Path
 import sys
+from pathlib import Path
+
+from textual.app import App, ComposeResult
+from textual.binding import Binding
+from textual.containers import Container, Horizontal, Vertical, VerticalScroll
+from textual.reactive import reactive
+from textual.widgets import Button, Footer, Header, Label, Static
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from conduvera.harness.route_plan_artifacts import default_route_plan_artifact, get_route_plan_artifact
-from src.ui.widgets.matrix_rain import MatrixRain
+from conduvera.harness.route_plan_artifacts import (
+    default_route_plan_artifact,
+    get_route_plan_artifact,
+)
+from src.ui.widgets.code_editor import CodeEditor
 from src.ui.widgets.file_browser import FileBrowser
+from src.ui.widgets.git_manager import GitManager
+from src.ui.widgets.matrix_rain import MatrixRain
 from src.ui.widgets.process_monitor import ProcessMonitor
+from src.ui.widgets.route_plan_artifact_picker import MatrixRoutePlanArtifactPicker
+from src.ui.widgets.route_plan_panel import MatrixRoutePlanPanel
+from src.ui.widgets.split_pane import EditorTerminalSplit
 from src.ui.widgets.system_info import SystemInfoPanel
 from src.ui.widgets.terminal import Terminal
-from src.ui.widgets.code_editor import CodeEditor
-from src.ui.widgets.git_manager import GitManager
-from src.ui.widgets.split_pane import EditorTerminalSplit
-from src.ui.widgets.route_plan_panel import MatrixRoutePlanPanel
-from src.ui.widgets.route_plan_artifact_picker import MatrixRoutePlanArtifactPicker
 from src.utils.config import get_config
 from src.utils.logger import logger
 

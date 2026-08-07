@@ -140,29 +140,33 @@ def test_route_plan_cli_json_format_emits_parseable_contract_only() -> None:
 def test_route_plan_cli_output_writes_json_file_without_execution() -> None:
     import tempfile
     import os
-    with tempfile.TemporaryDirectory() as tmpdir:
-        os.chdir(tmpdir)
-        output_path = Path("route-plan.json")
-        result = runner.invoke(
-            app,
-            [
-                "harness",
-                "route-plan",
-                "--intent",
-                "dangerous file operation delete production database",
-                "--format",
-                "json",
-                "--output",
-                str(output_path),
-            ],
-        )
+    old_cwd = os.getcwd()
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            os.chdir(tmpdir)
+            output_path = Path("route-plan.json")
+            result = runner.invoke(
+                app,
+                [
+                    "harness",
+                    "route-plan",
+                    "--intent",
+                    "dangerous file operation delete production database",
+                    "--format",
+                    "json",
+                    "--output",
+                    str(output_path),
+                ],
+            )
 
-        assert result.exit_code == 0
-        assert result.output == f"Wrote dry-run route plan: {output_path}\n"
-        payload = json.loads(output_path.read_text(encoding="utf-8"))
-        assert payload["chosen_candidate_id"] == "safety-guard"
-        assert payload["execute_now"] is False
-        assert payload["required_evidence_outputs"] == ["safety_guard.action.blocked"]
+            assert result.exit_code == 0
+            assert result.output == f"Wrote dry-run route plan: {output_path}\n"
+            payload = json.loads(output_path.read_text(encoding="utf-8"))
+            assert payload["chosen_candidate_id"] == "safety-guard"
+            assert payload["execute_now"] is False
+            assert payload["required_evidence_outputs"] == ["safety_guard.action.blocked"]
+    finally:
+        os.chdir(old_cwd)
 
 
 def test_route_plan_cli_json_unknown_intent_still_fails_closed_with_exit_2() -> None:

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from conduvera.evidence.contract import EventEnvelope, ValidationError
 
