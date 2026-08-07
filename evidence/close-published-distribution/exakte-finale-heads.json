@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-08-07T21:53:26.137251+00:00",
+  "core": {
+    "repo": "WietRob/conduvera-core",
+    "head": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c"
+  },
+  "adapter": {
+    "repo": "WietRob/conduvera-hermes-adapter",
+    "head": "f1252225b953d207ca3424786696c569da19af0d"
+  },
+  "platform": {
+    "repo": "WietRob/conduvera-platform",
+    "head": "ba6fab9fd70b0f7a5c1c7e50550344c532d40c27"
+  }
+}

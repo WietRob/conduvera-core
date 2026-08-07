@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-08-07T21:52:36.980851+00:00",
+  "results": [
+    {
+      "id": "hermes",
+      "repository": "NousResearch/hermes-agent",
+      "current": "v0.20.0",
+      "latest": "v2026.8.3",
+      "status": "UPDATE_AVAILABLE",
+      "policy": "PINNED",
+      "checked_at": "2026-08-07T21:52:36.980851+00:00"
+    },
+    {
+      "id": "ods",
+      "repository": "(lokal ~/dream-server)",
+      "status": "CURRENT",
+      "detail": "kein prüfbares GitHub-Release"
+    },
+    {
+      "id": "opencode",
+      "repository": "anomalyco/opencode",
+      "current": "(nicht aktiviert)",
+      "latest": "v1.18.15",
+      "status": "CURRENT",
+      "policy": "MANUAL (erst nach Owner-Freigabe)",
+      "checked_at": "2026-08-07T21:52:36.980851+00:00"
+    },
+    {
+      "id": "pi",
+      "repository": "earendil-works/pi",
+      "current": "(nicht aktiviert)",
+      "latest": "v0.84.1",
+      "status": "CURRENT",
+      "policy": "MANUAL (blockiert)",
+      "checked_at": "2026-08-07T21:52:36.980851+00:00"
+    },
+    {
+      "id": "litellm",
+      "repository": "BerriAI/litellm",
+      "current": "local gateway (127.0.0.1:4000)",
+      "latest": "v1.95.0",
+      "status": "UPDATE_AVAILABLE",
+      "policy": "PINNED (kein Auto-Update)",
+      "checked_at": "2026-08-07T21:52:36.980851+00:00"
+    },
+    {
+      "id": "comfyui",
+      "repository": "comfy-org/ComfyUI",
+      "current": "(extern)",
+      "latest": "v0.30.0",
+      "status": "LICENSE_REVIEW_REQUIRED",
+      "policy": "MANUAL + LICENSE_REVIEW (GPL)",
+      "checked_at": "2026-08-07T21:52:36.980851+00:00"
+    },
+    {
+      "id": "n8n",
+      "repository": "n8n-io/n8n",
+      "current": "(extern)",
+      "latest": "n8n@2.33.7",
+      "status": "LICENSE_REVIEW_REQUIRED",
+      "policy": "PINNED (Image-Version)",
+      "checked_at": "2026-08-07T21:52:36.980851+00:00"
+    }
+  ]
+}

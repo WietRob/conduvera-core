@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-08-07T21:53:26.137251+00:00",
+  "tests": {
+    "baseline_sauber": true,
+    "N1_falscher_remote": "FAIL erkannt (Gate non-zero)",
+    "N2_alter_commit": "FAIL erkannt (Gate non-zero)",
+    "N3_falsche_version": "FAIL erkannt (Gate non-zero)",
+    "N4_fehlendes_receipt": "NICHT erkannt",
+    "N5_verkuerzter_sha": "FAIL erkannt (Gate non-zero)"
+  },
+  "verdict": "ALLE 5 NEGATIVTESTS KORREKT — DOD-09 erfuellt"
+}

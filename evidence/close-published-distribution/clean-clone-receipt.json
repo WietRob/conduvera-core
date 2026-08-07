@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-08-07T21:53:26.137251+00:00",
+  "clean_checkouts": {
+    "core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "adapter": "f1252225b953d207ca3424786696c569da19af0d"
+  },
+  "adapter_gate_in_checkout": "PASS (clean checkout)",
+  "pong_evidence": "MXOS-EVIDENCE-1.0.0",
+  "removal_test": "PASS (Core standalone, CAPABILITY_UNAVAILABLE)",
+  "receipt_sha256": "910ded1809cba17be538e2ecc1bc322c44b3b65225110b8db44a57c46bd2db5c",
+  "verdict": "DOD-11 BESTANDEN — Composition aus sauberen Lock-Heads proven"
+}
