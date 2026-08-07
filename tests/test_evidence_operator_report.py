@@ -301,7 +301,7 @@ def test_malformed_missing_or_invalid_event_stream_fails_closed(tmp_path: Path) 
 
 
 def test_report_does_not_require_external_runtime(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    def _forbidden(*args, **kwargs):  # noqa: ANN002, ANN003
+    def _forbidden(*args, **kwargs):
         raise AssertionError("operator report must not spawn external runtimes")
 
     monkeypatch.setattr("subprocess.run", _forbidden)

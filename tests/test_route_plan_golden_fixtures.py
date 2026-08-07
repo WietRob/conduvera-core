@@ -102,25 +102,29 @@ def test_cli_json_output_matches_agent_task_golden_fixture() -> None:
 def test_cli_json_output_file_matches_agent_task_golden_fixture() -> None:
     import tempfile
     import os
-    with tempfile.TemporaryDirectory() as tmpdir:
-        os.chdir(tmpdir)
-        output_path = Path("route-plan.json")
-        result = runner.invoke(
-            app,
-            [
-                "harness",
-                "route-plan",
-                "--intent",
-                CASES["agent-task.json"],
-                "--format",
-                "json",
-                "--output",
-                str(output_path),
-            ],
-        )
+    old_cwd = os.getcwd()
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            os.chdir(tmpdir)
+            output_path = Path("route-plan.json")
+            result = runner.invoke(
+                app,
+                [
+                    "harness",
+                    "route-plan",
+                    "--intent",
+                    CASES["agent-task.json"],
+                    "--format",
+                    "json",
+                    "--output",
+                    str(output_path),
+                ],
+            )
 
-        assert result.exit_code == 0
-        assert json.loads(output_path.read_text(encoding="utf-8")) == _load_fixture("agent-task.json")
+            assert result.exit_code == 0
+            assert json.loads(output_path.read_text(encoding="utf-8")) == _load_fixture("agent-task.json")
+    finally:
+        os.chdir(old_cwd)
 
 
 def test_unknown_intent_cli_json_exits_2_and_matches_fixture() -> None:

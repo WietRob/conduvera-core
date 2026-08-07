@@ -48,7 +48,7 @@ class EvidenceProducer(Protocol):
     maintainable and may adapt into it later.
     """
 
-    def produce_events(self) -> list["EventEnvelope"]:
+    def produce_events(self) -> list[EventEnvelope]:
         """Return events ready to validate and append to the Matrix OS store."""
 
 
@@ -106,7 +106,7 @@ class EventEnvelope:
         links: list[dict[str, Any]] | None = None,
         event_id: str | None = None,
         occurred_at: str | None = None,
-    ) -> "EventEnvelope":
+    ) -> EventEnvelope:
         data: dict[str, Any] = {
             "schema_version": SCHEMA_VERSION,
             "event_id": event_id or f"mxev_{uuid.uuid4().hex}",
@@ -136,7 +136,7 @@ class EventEnvelope:
         return cls.from_dict(data)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "EventEnvelope":
+    def from_dict(cls, data: dict[str, Any]) -> EventEnvelope:
         _validate_event_dict(data)
         integrity = data.get("integrity") if isinstance(data.get("integrity"), dict) else {}
         event_hash = data.get("event_hash") or integrity.get("hash")

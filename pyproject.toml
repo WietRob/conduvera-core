@@ -38,7 +38,7 @@ dev = [
     "pytest-cov>=4.1.0",
     "black>=23.0.0",
     "mypy>=1.7.0",
-    "ruff>=0.1.0",
+    "ruff>=0.15.0,<0.16",
     "textual-dev>=1.3.0",
 ]
 
@@ -66,6 +66,9 @@ include = '\.pyi?$'
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+# B008 (typer.Argument()/typer.Option() in defaults) is idiomatic for Typer
+# CLIs; ignore it so the gate is stable across ruff versions.
+lint.ignore = ["B008"]
 
 [tool.mypy]
 python_version = "3.10"

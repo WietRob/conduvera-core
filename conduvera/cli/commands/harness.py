@@ -8,8 +8,16 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from conduvera.harness.operator_status import build_harness_operator_status, render_harness_operator_status
-from conduvera.harness.route_plan import OperatorIntent, plan_route, render_route_plan, route_plan_to_dict
+from conduvera.harness.operator_status import (
+    build_harness_operator_status,
+    render_harness_operator_status,
+)
+from conduvera.harness.route_plan import (
+    OperatorIntent,
+    plan_route,
+    render_route_plan,
+    route_plan_to_dict,
+)
 from conduvera.harness.route_plan_viewer import build_route_plan_view, render_route_plan_view
 
 console = Console(width=200)

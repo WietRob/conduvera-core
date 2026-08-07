@@ -14,8 +14,8 @@ from conduvera.evidence.contract import (
     ValidationError,
 )
 from conduvera.evidence.reporting import (
-    EvidenceOperatorReport,
     REPORT_SCHEMA_VERSION,
+    EvidenceOperatorReport,
     build_operator_report,
     render_operator_report,
 )
@@ -30,12 +30,12 @@ __all__ = [
     "ADAPTER_EVENT_TYPES",
     "CORE_EVENT_TYPES",
     "EVENT_TYPES",
+    "REPORT_SCHEMA_VERSION",
     "SCHEMA_VERSION",
     "EventEnvelope",
     "EvidenceOperatorReport",
     "EvidenceProducer",
     "EvidenceStore",
-    "REPORT_SCHEMA_VERSION",
     "ValidationError",
     "build_operator_report",
     "default_event_store_path",
