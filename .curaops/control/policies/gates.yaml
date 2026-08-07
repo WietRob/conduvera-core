@@ -65,6 +65,6 @@ gate_profiles:
 # The harness stores references, tools manage their own auth.
 credentials:
   github: "gh-auth"
-  sonarqube: "~/.config/curaops/sonar.env"
+  sonarqube: "~/.config/conduvera/sonar.env"
   opencode: "tool-managed"
   local_qwen: "http://localhost:8001/v1"

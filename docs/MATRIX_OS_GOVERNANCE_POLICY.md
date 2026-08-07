@@ -69,7 +69,7 @@ The current governance enforcement decision is recorded in `docs/MATRIX_OS_GOVER
 
 | Role | Review responsibility | Typical surfaces |
 |---|---|---|
-| Evidence/report contract reviewer | report contract stability, golden-output exactness, operator-value answers | `curaops/evidence/reporting.py`, `tests/fixtures/evidence/operator_report/`, report tests |
+| Evidence/report contract reviewer | report contract stability, golden-output exactness, operator-value answers | `conduvera/evidence/reporting.py`, `tests/fixtures/evidence/operator_report/`, report tests |
 | CI/release gate reviewer | required checks, workflow correctness, local-vs-CI parity | `.github/workflows/`, focused pytest and CLI gates |
 | Documentation/release manager | status accuracy, non-overclaiming, release-train consistency | `README.md`, `docs/RELEASE_TRAIN_STATUS.md`, index docs |
 | Adapter/runtime boundary reviewer | no accidental runtime execution, adapter expansion, shell interception, MCP/dashboard drift | adapter docs/code, gateway docs, runtime-adjacent changes |

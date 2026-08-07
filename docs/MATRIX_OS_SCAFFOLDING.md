@@ -27,11 +27,11 @@ The original Matrix UI remains part of Matrix OS and must not be forgotten. The 
 This scaffolding slice adds a discovery-only CLI namespace:
 
 ```bash
-python3 -m curaops.cli.main scaffold --help
-python3 -m curaops.cli.main scaffold status
-python3 -m curaops.cli.main scaffold show ui
-python3 -m curaops.cli.main scaffold show mcp
-python3 -m curaops.cli.main scaffold show editor
+python3 -m conduvera.cli.main scaffold --help
+python3 -m conduvera.cli.main scaffold status
+python3 -m conduvera.cli.main scaffold show ui
+python3 -m conduvera.cli.main scaffold show mcp
+python3 -m conduvera.cli.main scaffold show editor
 ```
 
 These commands print the declared scaffolding status and source paths. They do not launch UI, open network sockets, start an MCP server, register tools, invoke agents, or integrate external engines.
@@ -69,12 +69,12 @@ Required local checks for this slice:
 ```bash
 python3 -m pytest tests/test_packaging_contract.py
 python3 -m pytest tests/test_scaffolding_contract.py
-python3 -m pytest curaops/skills/change_request/tests
-python3 -m pytest curaops/skills/accountable_agent/tests
-python3 -m pytest curaops/skills/aspice_conflict_detector/test_conflict_detector.py
-python3 -m pytest curaops/skills/aspice_link_manager/tests
-python3 -m curaops.cli.main --help
-python3 -m curaops.cli.main scaffold --help
-python3 -m curaops.cli.main scaffold status
-python3 -m curaops.cli.main scaffold show ui
+python3 -m pytest conduvera/skills/change_request/tests
+python3 -m pytest conduvera/skills/accountable_agent/tests
+python3 -m pytest conduvera/skills/aspice_conflict_detector/test_conflict_detector.py
+python3 -m pytest conduvera/skills/aspice_link_manager/tests
+python3 -m conduvera.cli.main --help
+python3 -m conduvera.cli.main scaffold --help
+python3 -m conduvera.cli.main scaffold status
+python3 -m conduvera.cli.main scaffold show ui
 ```

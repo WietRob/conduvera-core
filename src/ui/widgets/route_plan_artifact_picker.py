@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from textual.widgets import Static
 
-from curaops.harness.route_plan_artifacts import (
+from conduvera.harness.route_plan_artifacts import (
     RoutePlanArtifact,
     build_route_plan_artifact_picker_state,
 )

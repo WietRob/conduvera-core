@@ -54,7 +54,7 @@ src/ui/widgets/split_pane.py
 src/ui/themes/matrix.tcss
 ```
 
-The current CLI/harness architecture preserves this basis through `curaops.harness.scaffolding` and `docs/MATRIX_OS_UI_VALUE_MAP.md`.
+The current CLI/harness architecture preserves this basis through `conduvera.harness.scaffolding` and `docs/MATRIX_OS_UI_VALUE_MAP.md`.
 
 ## Future harness preservation
 

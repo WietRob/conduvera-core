@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from curaops.harness.gateway import (
+from conduvera.harness.gateway import (
     HarnessGatewayRegistry,
     list_editor_surfaces,
     list_gateway_capabilities,

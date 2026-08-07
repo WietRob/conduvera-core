@@ -6,9 +6,9 @@ from typer.testing import CliRunner
 
 import pytest
 
-from curaops.cli.main import app
-from curaops.evidence import ValidationError
-from curaops.evidence.adapters.registry import (
+from conduvera.cli.main import app
+from conduvera.evidence import ValidationError
+from conduvera.evidence.adapters.registry import (
     get_adapter_descriptor,
     list_adapter_descriptors,
 )
@@ -31,14 +31,14 @@ def test_agent_evidence_plane_descriptor_metadata() -> None:
 
     assert descriptor.name == "agent-evidence-plane Thin Adapter"
     assert descriptor.source_project == "agent-evidence-plane"
-    assert descriptor.module_path == "curaops.evidence.adapters.agent_evidence_plane"
+    assert descriptor.module_path == "conduvera.evidence.adapters.agent_evidence_plane"
     assert descriptor.docs_path == "docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md"
     assert descriptor.input_contract == "agent-evidence-plane JSONL schema_version 0.1.0"
     assert descriptor.execution_mode == "translation-only"
     assert descriptor.production_status == "local-contract-only / not-production-runtime"
     assert descriptor.external_repo_policy == "standalone; not vendored; not modified by Matrix OS"
     assert descriptor.cli_commands == (
-        "python3 -m curaops.cli.main evidence convert-agent-plane INPUT.jsonl OUTPUT.jsonl",
+        "python3 -m conduvera.cli.main evidence convert-agent-plane INPUT.jsonl OUTPUT.jsonl",
     )
     assert descriptor.supported_event_types == (
         "agent.run.started",
@@ -53,14 +53,14 @@ def test_safety_guard_descriptor_metadata() -> None:
 
     assert descriptor.name == "Safety Guard Adapter Contract"
     assert descriptor.source_project == "CuraOps Safety Guard"
-    assert descriptor.module_path == "curaops.evidence.adapters.safety_guard"
+    assert descriptor.module_path == "conduvera.evidence.adapters.safety_guard"
     assert descriptor.docs_path == "docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md"
     assert descriptor.input_contract == "Safety Guard result JSONL schema_version safety-guard.result.v1"
     assert descriptor.execution_mode == "translation-only"
     assert descriptor.production_status == "local-contract-only / not-production-runtime"
     assert descriptor.external_repo_policy == "standalone; not vendored; not executed by Matrix OS"
     assert descriptor.cli_commands == (
-        "python3 -m curaops.cli.main evidence convert-safety-guard INPUT.jsonl OUTPUT.jsonl",
+        "python3 -m conduvera.cli.main evidence convert-safety-guard INPUT.jsonl OUTPUT.jsonl",
     )
     assert descriptor.supported_event_types == (
         "safety_guard.check.completed",

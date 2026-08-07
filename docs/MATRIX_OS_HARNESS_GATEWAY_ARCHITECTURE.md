@@ -24,7 +24,7 @@ Matrix OS owns generic harness boundaries, not external engines.
 Implemented in:
 
 ```text
-curaops/harness/gateway.py
+conduvera/harness/gateway.py
 ```
 
 Descriptors:
@@ -84,19 +84,19 @@ Matrix OS must not hardcode Zed-specific logic into CCC, AAL, ASPICE, or Evidenc
 Implemented in:
 
 ```text
-curaops/harness/route_plan.py
+conduvera/harness/route_plan.py
 ```
 
 CLI:
 
 ```bash
-python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture"
-python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json
-python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json --output route-plan.json
-python3 -m curaops.cli.main harness route-plan-view --input tests/fixtures/harness/route_plan/agent-task.json
+python3 -m conduvera.cli.main harness route-plan --intent "Run agent task with evidence capture"
+python3 -m conduvera.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json
+python3 -m conduvera.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json --output route-plan.json
+python3 -m conduvera.cli.main harness route-plan-view --input tests/fixtures/harness/route_plan/agent-task.json
 ```
 
-The planner maps an operator intent to ranked descriptor candidates, required evidence outputs, and a required approval gate. It always renders `execute_now: false`. Text output is for operators; `--format json` emits the stable `route-plan.v1` machine-readable contract, and `--output` writes that dry-run contract to a file without executing any candidate. `route-plan-view` is a read-only Matrix UI viewer stub over an existing route-plan JSON artifact; it renders intent, chosen candidate, candidate ranking, evidence requirements, approval gate, and non-execution boundary without starting a runtime or claiming a production dashboard. `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md` defines the operator handoff schema and canonical fixtures under `tests/fixtures/harness/route_plan/`; `docs/MATRIX_OS_ROUTE_PLAN_VIEWER_OUTPUTS.md` defines exact viewer snapshot outputs under `tests/fixtures/harness/route_plan_view/`. `src/ui/widgets/route_plan_panel.py` adapts the validated viewer model into a non-interactive Textual-compatible panel model documented in `docs/MATRIX_OS_ROUTE_PLAN_PANEL_MODEL.md`; exact panel renderer snapshots live under `tests/fixtures/harness/route_plan_panel/` and are documented in `docs/MATRIX_OS_ROUTE_PLAN_PANEL_GOLDEN_OUTPUTS.md`. `curaops/harness/route_plan_artifacts.py` exposes a fixed read-only selector and picker state over the five canonical route-plan artifacts, documented in `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_SELECTOR.md`, `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_PICKER_UI_STATE.md`, and `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_PICKER_WIDGET.md`. `src/core/app.py` exposes a non-live `route_plan` view and sidebar button documented in `docs/MATRIX_OS_ROUTE_PLAN_PANEL_ATTACHMENT.md`. It does not attach runtime execution. Unknown intent and unknown artifact ids fail closed.
+The planner maps an operator intent to ranked descriptor candidates, required evidence outputs, and a required approval gate. It always renders `execute_now: false`. Text output is for operators; `--format json` emits the stable `route-plan.v1` machine-readable contract, and `--output` writes that dry-run contract to a file without executing any candidate. `route-plan-view` is a read-only Matrix UI viewer stub over an existing route-plan JSON artifact; it renders intent, chosen candidate, candidate ranking, evidence requirements, approval gate, and non-execution boundary without starting a runtime or claiming a production dashboard. `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md` defines the operator handoff schema and canonical fixtures under `tests/fixtures/harness/route_plan/`; `docs/MATRIX_OS_ROUTE_PLAN_VIEWER_OUTPUTS.md` defines exact viewer snapshot outputs under `tests/fixtures/harness/route_plan_view/`. `src/ui/widgets/route_plan_panel.py` adapts the validated viewer model into a non-interactive Textual-compatible panel model documented in `docs/MATRIX_OS_ROUTE_PLAN_PANEL_MODEL.md`; exact panel renderer snapshots live under `tests/fixtures/harness/route_plan_panel/` and are documented in `docs/MATRIX_OS_ROUTE_PLAN_PANEL_GOLDEN_OUTPUTS.md`. `conduvera/harness/route_plan_artifacts.py` exposes a fixed read-only selector and picker state over the five canonical route-plan artifacts, documented in `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_SELECTOR.md`, `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_PICKER_UI_STATE.md`, and `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_PICKER_WIDGET.md`. `src/core/app.py` exposes a non-live `route_plan` view and sidebar button documented in `docs/MATRIX_OS_ROUTE_PLAN_PANEL_ATTACHMENT.md`. It does not attach runtime execution. Unknown intent and unknown artifact ids fail closed.
 
 | Intent family | Typical selected descriptor | Required proof |
 |---|---|---|

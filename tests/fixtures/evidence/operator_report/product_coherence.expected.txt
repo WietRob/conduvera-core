@@ -30,7 +30,7 @@ Counts by adapter:
 - native: 3
 
 Operator answers:
-- Which agent changed what under which CR? hermes-agent run run-900 changed curaops/auth.py under approved CR-MXOS-001.
+- Which agent changed what under which CR? hermes-agent run run-900 changed conduvera/auth.py under approved CR-MXOS-001.
 - What risky action was blocked and why? rm production.db was blocked because Path matches protected pattern.
 - What failure was observed and what rule was proposed? Scenario regression failed before rule proposal; proposed rule_product_coherence_regression (not enforced).
 - Which requirement or traceability object is relevant? SW-REQ-AUTH-007 is missing verification_case in docs/requirements/auth.md.
@@ -39,7 +39,7 @@ Operator answers:
 Change requests:
 - CR-MXOS-001: approved bugfix requirements=['SW-REQ-AUTH-007']
 Agent actions:
-- hermes-agent run-900 CR-MXOS-001 ['curaops/auth.py']
+- hermes-agent run-900 CR-MXOS-001 ['conduvera/auth.py']
 Blocked actions:
 - rm production.db blocked because Path matches protected pattern
 Failures:

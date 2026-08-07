@@ -339,7 +339,7 @@ EvidenceService:
 
 ### 9.2 B nutzt C (keine Duplikation):
 ```python
-from curaops.skills.change_request import (
+from conduvera.skills.change_request import (
     ChangeRequestService,
     generate_cr_evidence,
     validate_cr_traceability,

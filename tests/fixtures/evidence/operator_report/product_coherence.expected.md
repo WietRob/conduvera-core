@@ -8,7 +8,7 @@ Total events: 7
 
 | Question | Answer |
 |---|---|
-| Which agent changed what under which CR? | hermes-agent run run-900 changed curaops/auth.py under approved CR-MXOS-001. |
+| Which agent changed what under which CR? | hermes-agent run run-900 changed conduvera/auth.py under approved CR-MXOS-001. |
 | What risky action was blocked and why? | rm production.db was blocked because Path matches protected pattern. |
 | What failure was observed and what rule was proposed? | Scenario regression failed before rule proposal; proposed rule_product_coherence_regression (not enforced). |
 | Which requirement or traceability object is relevant? | SW-REQ-AUTH-007 is missing verification_case in docs/requirements/auth.md. |

@@ -102,12 +102,12 @@ The product-value scenario pack is implemented in `tests/test_product_coherence_
 
 ## Operator report layer
 
-The evidence operator report layer is implemented in `curaops/evidence/reporting.py` with CLI access through:
+The evidence operator report layer is implemented in `conduvera/evidence/reporting.py` with CLI access through:
 
 ```bash
-python3 -m curaops.cli.main evidence report EVENTS.jsonl --format text
-python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
-python3 -m curaops.cli.main evidence report EVENTS.jsonl --format json
+python3 -m conduvera.cli.main evidence report EVENTS.jsonl --format text
+python3 -m conduvera.cli.main evidence report EVENTS.jsonl --format markdown
+python3 -m conduvera.cli.main evidence report EVENTS.jsonl --format json
 ```
 
 It reads existing Matrix OS evidence only. `tests/test_evidence_report_golden_outputs.py` locks a deterministic `tests/fixtures/evidence/operator_report/product_coherence.events.jsonl` stream against expected text, Markdown, and JSON outputs. `tests/test_evidence_report_contract_version.py` pins those outputs to report contract `MXOS-REPORT-1.0`, which is exposed in JSON as `report_schema_version` and in text/Markdown metadata. The golden outputs are regression contracts for operator-facing accountability answers, not production audit retention.

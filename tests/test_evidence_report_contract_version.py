@@ -7,8 +7,8 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from curaops.cli.main import app
-from curaops.evidence.reporting import REPORT_SCHEMA_VERSION, build_operator_report, render_operator_report
+from conduvera.cli.main import app
+from conduvera.evidence.reporting import REPORT_SCHEMA_VERSION, build_operator_report, render_operator_report
 
 runner = CliRunner()
 

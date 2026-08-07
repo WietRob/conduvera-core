@@ -3,7 +3,7 @@
 **Baseline commit:** `0c179ed` — docs(compliance): freeze authoritative change-control and accountability baseline  
 **Audit date:** 2026-04-19  
 **Auditor:** Hermes Agent (strict implementation auditor)  
-**Scope:** All Compliance Change Control / Accountable Agent Layer Python code in `curaops/skills/` and `curaops/cli/` vs. 9 authoritative docs at v2.0.0+
+**Scope:** All Compliance Change Control / Accountable Agent Layer Python code in `conduvera/skills/` and `conduvera/cli/` vs. 9 authoritative docs at v2.0.0+
 
 ---
 
@@ -27,13 +27,13 @@
 
 | File | Role | Git Status | Lines |
 |------|------|------------|-------|
-| `curaops/skills/change-request/__init__.py` | Core service + CLI wrappers | Committed (`64afa19`) | ~695 |
-| `curaops/skills/change-request/tests/test_change_request.py` | Tests (17 tests) | Committed | ~190 |
-| `curaops/skills/aspice-link-manager/__init__.py` | Traceability validation (dep of C) | Committed | ~500 |
-| `curaops/skills/aspice-link-manager/tests/test_aspice_link_manager.py` | Tests | Committed | exists |
-| `curaops/cli/commands/skills.py` | CLI wiring (cr_app) | Committed | ~800 |
-| `curaops/cli/main.py` | CLI entry point | Committed | ~72 |
-| `curaops/skills/change_request` → `change-request` | Symlink | Committed (`8c4c9da`) | alias |
+| `conduvera/skills/change-request/__init__.py` | Core service + CLI wrappers | Committed (`64afa19`) | ~695 |
+| `conduvera/skills/change-request/tests/test_change_request.py` | Tests (17 tests) | Committed | ~190 |
+| `conduvera/skills/aspice-link-manager/__init__.py` | Traceability validation (dep of C) | Committed | ~500 |
+| `conduvera/skills/aspice-link-manager/tests/test_aspice_link_manager.py` | Tests | Committed | exists |
+| `conduvera/cli/commands/skills.py` | CLI wiring (cr_app) | Committed | ~800 |
+| `conduvera/cli/main.py` | CLI entry point | Committed | ~72 |
+| `conduvera/skills/change_request` → `change-request` | Symlink | Committed (`8c4c9da`) | alias |
 
 **No other C code exists.** No `VerificationService`, no `VerificationCase` module, no `CRStatus` enum file, no `VerificationType` enum file.
 
@@ -43,10 +43,10 @@
 
 | File | Role | Git Status | Lines |
 |------|------|------------|-------|
-| `curaops/skills/accountable-agent/__init__.py` | Core service + CLI wrappers | Committed (`0feaffb`) | ~500 |
-| `curaops/skills/accountable-agent/tests/test_accountable_agent.py` | Tests (15 tests) | Committed | ~280 |
-| `curaops/skills/accountable_agent` → `accountable-agent` | Symlink | Committed (`8c4c9da`) | alias |
-| `curaops/cli/commands/skills.py` (lines 664-786) | CLI wiring (accountable_app) | Committed | ~120 |
+| `conduvera/skills/accountable-agent/__init__.py` | Core service + CLI wrappers | Committed (`0feaffb`) | ~500 |
+| `conduvera/skills/accountable-agent/tests/test_accountable_agent.py` | Tests (15 tests) | Committed | ~280 |
+| `conduvera/skills/accountable_agent` → `accountable-agent` | Symlink | Committed (`8c4c9da`) | alias |
+| `conduvera/cli/commands/skills.py` (lines 664-786) | CLI wiring (accountable_app) | Committed | ~120 |
 
 **No `ACEvidenceGenerator` module exists.** No `pre_flight_check` implementation.
 
@@ -208,9 +208,9 @@
 ## E) Repo Hygiene Findings
 
 ### E.1 Symlink-Based Import Workaround
-- `curaops/skills/change_request` → `change-request` (symlink)
-- `curaops/skills/accountable_agent` → `accountable-agent` (symlink)
-- `curaops/skills/aspice_link_manager` → `aspice-link-manager` (symlink)
+- `conduvera/skills/change_request` → `change-request` (symlink)
+- `conduvera/skills/accountable_agent` → `accountable-agent` (symlink)
+- `conduvera/skills/aspice_link_manager` → `aspice-link-manager` (symlink)
 - **Risk:** Symlinks are OS-dependent, may break on Windows or in Docker. Works on Linux/macOS.
 
 ### E.2 `importlib.util` Hack in B Code
@@ -219,7 +219,7 @@
 - **Risk:** Fragile to directory restructuring, no IDE support, no mypy/pyright analysis
 
 ### E.3 `__pycache__` Directories Committed
-- `curaops/skills/change-request/__pycache__/` present in working tree
+- `conduvera/skills/change-request/__pycache__/` present in working tree
 - Should be in `.gitignore`
 
 ### E.4 In-Memory-Only Storage

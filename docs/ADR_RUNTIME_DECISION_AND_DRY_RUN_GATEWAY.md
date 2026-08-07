@@ -39,8 +39,8 @@ Runtime execution remains future work behind separately reviewed adapter contrac
 
 ## Consequences
 
-- `curaops/harness/route_plan.py` owns the first dry-run planner contract.
-- `python3 -m curaops.cli.main harness route-plan --intent <...>` renders the dry-run route plan.
+- `conduvera/harness/route_plan.py` owns the first dry-run planner contract.
+- `python3 -m conduvera.cli.main harness route-plan --intent <...>` renders the dry-run route plan.
 - All candidates remain descriptor-only and non-executing.
 - `pi-agent-harness` may appear as a route candidate only with `runtime_enabled=False` and `execution_status="future-adapter-contract-only"`.
 - Safety Guard, agent-evidence-plane, and failure-loop remain translation/evidence concepts, not launched tools.
@@ -63,6 +63,6 @@ The contract is verified by:
 
 - `tests/test_harness_route_plan.py`
 - `tests/test_harness_gateway_contract.py`
-- CLI smoke: `python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture"`
+- CLI smoke: `python3 -m conduvera.cli.main harness route-plan --intent "Run agent task with evidence capture"`
 
 Expected output must show `execute_now: false`, candidate ranking, later execution boundary, non-execution boundary, required evidence outputs, and approval gate.

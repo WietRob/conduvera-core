@@ -38,26 +38,26 @@ This repository is not yet a production-ready platform. UI/MCP/editor scaffoldin
 ## Current CLI
 
 ```bash
-python3 -m curaops.cli.main --help
-python3 -m curaops.cli.main cr --help
-python3 -m curaops.cli.main accountable --help
-python3 -m curaops.cli.main aspice --help
-python3 -m curaops.cli.main scaffold --help
-python3 -m curaops.cli.main evidence --help
-python3 -m curaops.cli.main evidence adapters
-python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
-python3 -m curaops.cli.main evidence adapter show safety-guard
-python3 -m curaops.cli.main evidence adapter show failure-loop
-python3 -m curaops.cli.main evidence convert-agent-plane --help
-python3 -m curaops.cli.main evidence convert-safety-guard --help
-python3 -m curaops.cli.main evidence convert-failure-loop --help
-python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
-python3 -m curaops.cli.main evidence report-contract
-python3 -m curaops.cli.main harness status --events tests/fixtures/evidence/operator_report/product_coherence.events.jsonl
-python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture"
-python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json
-python3 -m curaops.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json --output route-plan.json
-python3 -m curaops.cli.main harness route-plan-view --input tests/fixtures/harness/route_plan/agent-task.json
+python3 -m conduvera.cli.main --help
+python3 -m conduvera.cli.main cr --help
+python3 -m conduvera.cli.main accountable --help
+python3 -m conduvera.cli.main aspice --help
+python3 -m conduvera.cli.main scaffold --help
+python3 -m conduvera.cli.main evidence --help
+python3 -m conduvera.cli.main evidence adapters
+python3 -m conduvera.cli.main evidence adapter show agent-evidence-plane
+python3 -m conduvera.cli.main evidence adapter show safety-guard
+python3 -m conduvera.cli.main evidence adapter show failure-loop
+python3 -m conduvera.cli.main evidence convert-agent-plane --help
+python3 -m conduvera.cli.main evidence convert-safety-guard --help
+python3 -m conduvera.cli.main evidence convert-failure-loop --help
+python3 -m conduvera.cli.main evidence report EVENTS.jsonl --format markdown
+python3 -m conduvera.cli.main evidence report-contract
+python3 -m conduvera.cli.main harness status --events tests/fixtures/evidence/operator_report/product_coherence.events.jsonl
+python3 -m conduvera.cli.main harness route-plan --intent "Run agent task with evidence capture"
+python3 -m conduvera.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json
+python3 -m conduvera.cli.main harness route-plan --intent "Run agent task with evidence capture" --format json --output route-plan.json
+python3 -m conduvera.cli.main harness route-plan-view --input tests/fixtures/harness/route_plan/agent-task.json
 ```
 
 Root command namespaces:
@@ -113,17 +113,17 @@ Module-specific docs:
 |---|---|
 | Compliance Change Control | `docs/COMPLIANCE_CHANGE_CONTROL_*` |
 | Accountable Agent Layer | `docs/ACCOUNTABLE_AGENT_LAYER_*` |
-| ASPICE Support Utilities | `curaops/skills/aspice_conflict_detector/SKILL.md`, `curaops/skills/aspice_link_manager/README.md` |
-| Evidence Backbone | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`, `curaops/evidence/` |
-| agent-evidence-plane Thin Adapter | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`, `curaops/evidence/adapters/agent_evidence_plane.py` |
-| Safety Guard Adapter Contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`, `curaops/evidence/adapters/safety_guard.py` |
-| Evidence Adapter Registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`, `curaops/evidence/adapters/registry.py` |
-| failure-driven-loop Thin Adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`, `curaops/evidence/adapters/failure_loop.py` |
-| Evidence Operator Reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`, `curaops/evidence/reporting.py`, `tests/fixtures/evidence/operator_report/`, `tests/test_evidence_report_contract_version.py` |
-| Operator Workflow | `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`, `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md`, `curaops/harness/operator_status.py`, `tests/test_harness_operator_status.py` |
+| ASPICE Support Utilities | `conduvera/skills/aspice_conflict_detector/SKILL.md`, `conduvera/skills/aspice_link_manager/README.md` |
+| Evidence Backbone | `docs/MATRIX_OS_EVIDENCE_BACKBONE.md`, `conduvera/evidence/` |
+| agent-evidence-plane Thin Adapter | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md`, `conduvera/evidence/adapters/agent_evidence_plane.py` |
+| Safety Guard Adapter Contract | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md`, `conduvera/evidence/adapters/safety_guard.py` |
+| Evidence Adapter Registry | `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`, `conduvera/evidence/adapters/registry.py` |
+| failure-driven-loop Thin Adapter | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md`, `conduvera/evidence/adapters/failure_loop.py` |
+| Evidence Operator Reports | `docs/MATRIX_OS_EVIDENCE_OPERATOR_REPORTS.md`, `conduvera/evidence/reporting.py`, `tests/fixtures/evidence/operator_report/`, `tests/test_evidence_report_contract_version.py` |
+| Operator Workflow | `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`, `docs/MATRIX_OS_OPERATOR_WORKFLOW_PRODUCT_COHERENCE.md`, `conduvera/harness/operator_status.py`, `tests/test_harness_operator_status.py` |
 | Governance Policy | `docs/MATRIX_OS_GOVERNANCE_POLICY.md`, `CODEOWNERS`, `.github/workflows/matrix-os-evidence-quality.yml` |
 | Product Coherence Scenarios | `docs/MATRIX_OS_PRODUCT_COHERENCE.md`, `tests/test_product_coherence_scenarios.py` |
-| Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `docs/ADR_RUNTIME_DECISION_AND_DRY_RUN_GATEWAY.md`, `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md`, `docs/MATRIX_OS_ROUTE_PLAN_VIEWER_OUTPUTS.md`, `docs/MATRIX_OS_ROUTE_PLAN_PANEL_MODEL.md`, `docs/MATRIX_OS_ROUTE_PLAN_PANEL_GOLDEN_OUTPUTS.md`, `docs/MATRIX_OS_ROUTE_PLAN_PANEL_ATTACHMENT.md`, `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_SELECTOR.md`, `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_PICKER_UI_STATE.md`, `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_PICKER_WIDGET.md`, `curaops/harness/gateway.py`, `curaops/harness/route_plan.py`, `curaops/harness/route_plan_viewer.py`, `curaops/harness/route_plan_artifacts.py`, `src/ui/widgets/route_plan_panel.py`, `src/ui/widgets/route_plan_artifact_picker.py`, `tests/test_harness_route_plan.py`, `tests/test_route_plan_golden_fixtures.py`, `tests/test_matrix_ui_route_plan_viewer.py`, `tests/test_route_plan_viewer_golden_outputs.py`, `tests/test_route_plan_panel_model.py`, `tests/test_route_plan_panel_golden_outputs.py`, `tests/test_matrix_ui_route_plan_panel_attachment.py`, `tests/test_route_plan_artifact_selector.py`, `tests/test_route_plan_artifact_picker_state.py`, `tests/test_route_plan_artifact_picker_widget.py`, `tests/fixtures/harness/route_plan/`, `tests/fixtures/harness/route_plan_view/`, `tests/fixtures/harness/route_plan_panel/` |
+| Harness Gateway Contract | `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`, `docs/ADR_RUNTIME_DECISION_AND_DRY_RUN_GATEWAY.md`, `docs/MATRIX_OS_ROUTE_PLAN_HANDOFF_CONTRACT.md`, `docs/MATRIX_OS_ROUTE_PLAN_VIEWER_OUTPUTS.md`, `docs/MATRIX_OS_ROUTE_PLAN_PANEL_MODEL.md`, `docs/MATRIX_OS_ROUTE_PLAN_PANEL_GOLDEN_OUTPUTS.md`, `docs/MATRIX_OS_ROUTE_PLAN_PANEL_ATTACHMENT.md`, `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_SELECTOR.md`, `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_PICKER_UI_STATE.md`, `docs/MATRIX_OS_ROUTE_PLAN_ARTIFACT_PICKER_WIDGET.md`, `conduvera/harness/gateway.py`, `conduvera/harness/route_plan.py`, `conduvera/harness/route_plan_viewer.py`, `conduvera/harness/route_plan_artifacts.py`, `src/ui/widgets/route_plan_panel.py`, `src/ui/widgets/route_plan_artifact_picker.py`, `tests/test_harness_route_plan.py`, `tests/test_route_plan_golden_fixtures.py`, `tests/test_matrix_ui_route_plan_viewer.py`, `tests/test_route_plan_viewer_golden_outputs.py`, `tests/test_route_plan_panel_model.py`, `tests/test_route_plan_panel_golden_outputs.py`, `tests/test_matrix_ui_route_plan_panel_attachment.py`, `tests/test_route_plan_artifact_selector.py`, `tests/test_route_plan_artifact_picker_state.py`, `tests/test_route_plan_artifact_picker_widget.py`, `tests/fixtures/harness/route_plan/`, `tests/fixtures/harness/route_plan_view/`, `tests/fixtures/harness/route_plan_panel/` |
 | UI Value Map / Provenance | `docs/MATRIX_OS_UI_VALUE_MAP.md`, `docs/MATRIX_OS_ORIGIN_AND_PROVENANCE.md` |
 
 ## Historical docs

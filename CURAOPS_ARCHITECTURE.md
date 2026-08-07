@@ -80,13 +80,13 @@ CuraOps is a **CR-driven development framework** that combines:
 
 | # | Skill | Priority | Tests | Purpose | Location |
 |---|-------|----------|-------|---------|----------|
-| 1 | **safety-guard** | P1-Critical | 9/9 | Protect production data from accidental deletion | `curaops/skills/safety-guard/` |
-| 2 | **change-request** | P1 | 12/12 | CR-driven workflow management | `curaops/skills/change-request/` |
-| 3 | **aspice-link-manager** | P2 | 10/10 | ASPICE traceability compliance | `curaops/skills/aspice-link-manager/` |
-| 4 | **pattern-learning** | P2 | 9/9 | Learn from user behavior | `curaops/skills/pattern-learning/` |
-| 5 | **session-manager** | P2 | 13/13 | Session lifecycle management | `curaops/skills/session-manager/` |
-| 6 | **aspice-conflict-detector** | P2 | 18/18 | Detect ASPICE level conflicts | `curaops/skills/aspice_conflict_detector/` |
-| 7 | **multi-agent-lock** | P2 | 32/32 | File locking between agents | `curaops/skills/multi-agent-lock/` |
+| 1 | **safety-guard** | P1-Critical | 9/9 | Protect production data from accidental deletion | `conduvera/skills/safety-guard/` |
+| 2 | **change-request** | P1 | 12/12 | CR-driven workflow management | `conduvera/skills/change-request/` |
+| 3 | **aspice-link-manager** | P2 | 10/10 | ASPICE traceability compliance | `conduvera/skills/aspice-link-manager/` |
+| 4 | **pattern-learning** | P2 | 9/9 | Learn from user behavior | `conduvera/skills/pattern-learning/` |
+| 5 | **session-manager** | P2 | 13/13 | Session lifecycle management | `conduvera/skills/session-manager/` |
+| 6 | **aspice-conflict-detector** | P2 | 18/18 | Detect ASPICE level conflicts | `conduvera/skills/aspice_conflict_detector/` |
+| 7 | **multi-agent-lock** | P2 | 32/32 | File locking between agents | `conduvera/skills/multi-agent-lock/` |
 
 **Total:** 103 Tests, 100% Pass Rate
 
@@ -100,9 +100,9 @@ CuraOps is a **CR-driven development framework** that combines:
 # Matrix OS imports Hermes skills directly
 # Same Python process → Zero latency
 
-from curaops.skills.safety_guard import SafetyGuard
-from curaops.skills.change_request import ChangeRequest
-from curaops.skills.multi_agent_lock import MultiAgentLock
+from conduvera.skills.safety_guard import SafetyGuard
+from conduvera.skills.change_request import ChangeRequest
+from conduvera.skills.multi_agent_lock import MultiAgentLock
 
 # Matrix OS Widget calls skill directly
 class SafeFileBrowser(FileBrowser):
@@ -185,7 +185,7 @@ matrix-os/
 │   ├── system/
 │   └── utils/
 │
-├── curaops/                      # CuraOps Integration (NEW)
+├── conduvera/                      # CuraOps Integration (NEW)
 │   ├── skills/                   # All 7 Skills
 │   │   ├── safety-guard/
 │   │   │   ├── SKILL.md
@@ -264,7 +264,7 @@ class AgentCoordinator:
     """Coordinates file access between Matrix OS and external agents."""
     
     def __init__(self):
-        self.locks = MultiAgentLock(storage_dir="/tmp/curaops/locks")
+        self.locks = MultiAgentLock(storage_dir="/tmp/conduvera/locks")
     
     def start_session(self, agent_id: str, files: List[str]):
         # Claim files for this agent
@@ -349,10 +349,10 @@ class CuraOpsTracer:
 
 | Level | Scope | Location |
 |-------|-------|----------|
-| Unit | Individual skills | `curaops/skills/*/test_*.py` |
-| Integration | Skill interactions | `curaops/tests/` |
+| Unit | Individual skills | `conduvera/skills/*/test_*.py` |
+| Integration | Skill interactions | `conduvera/tests/` |
 | E2E | Full workflow | `tests/test_curaops_workflow.py` |
-| Safety | P1-Critical paths | `curaops/skills/safety-guard/test_*.py` |
+| Safety | P1-Critical paths | `conduvera/skills/safety-guard/test_*.py` |
 
 ---
 

@@ -12,7 +12,7 @@ The attachment path is:
 Sidebar Route Plan button -> MatrixOS route_plan view -> route-plan artifact selector -> MatrixRoutePlanPanel.from_route_plan_file(...) -> stable panel snapshot contract
 ```
 
-The view resolves its default artifact through `curaops.harness.route_plan_artifacts.default_route_plan_artifact()`. The default remains `agent-task`, but tests can select any canonical artifact id through `MatrixOS._create_route_plan_panel_view(artifact_id)`. The app helper also prepends a read-only picker/list widget render so the panel path displays the selected artifact id, label, scenario, available artifacts, selected marker, and no-runtime/no-browser boundaries before the stable panel body.
+The view resolves its default artifact through `conduvera.harness.route_plan_artifacts.default_route_plan_artifact()`. The default remains `agent-task`, but tests can select any canonical artifact id through `MatrixOS._create_route_plan_panel_view(artifact_id)`. The app helper also prepends a read-only picker/list widget render so the panel path displays the selected artifact id, label, scenario, available artifacts, selected marker, and no-runtime/no-browser boundaries before the stable panel body.
 
 ## Implemented UI surface
 

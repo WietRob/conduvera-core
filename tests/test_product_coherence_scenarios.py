@@ -7,13 +7,13 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from curaops.cli.main import app
-from curaops.evidence import EventEnvelope, EvidenceStore, summarize_event_stream, validate_event_stream
-from curaops.evidence.adapters.agent_evidence_plane import convert_agent_evidence_plane_jsonl
-from curaops.evidence.adapters.failure_loop import convert_failure_loop_jsonl
-from curaops.evidence.adapters.registry import get_adapter_descriptor, list_adapter_descriptors
-from curaops.evidence.adapters.safety_guard import convert_safety_guard_jsonl
-from curaops.harness.scaffolding import get_scaffolding_slice
+from conduvera.cli.main import app
+from conduvera.evidence import EventEnvelope, EvidenceStore, summarize_event_stream, validate_event_stream
+from conduvera.evidence.adapters.agent_evidence_plane import convert_agent_evidence_plane_jsonl
+from conduvera.evidence.adapters.failure_loop import convert_failure_loop_jsonl
+from conduvera.evidence.adapters.registry import get_adapter_descriptor, list_adapter_descriptors
+from conduvera.evidence.adapters.safety_guard import convert_safety_guard_jsonl
+from conduvera.harness.scaffolding import get_scaffolding_slice
 
 runner = CliRunner()
 
@@ -87,7 +87,7 @@ def _agent_run_fixture() -> dict:
         "severity": "info",
         "correlation_id": "CR-MXOS-001",
         "run_id": "run-900",
-        "payload": {"exit_code": 0, "changed_files": ["curaops/auth.py"]},
+        "payload": {"exit_code": 0, "changed_files": ["conduvera/auth.py"]},
         "evidence": {"artifact_path": "artifacts/run-900/stdout.txt", "sha256": "abc123"},
         "links": [{"rel": "implements", "event_id": "evt_cr_mxos_001"}],
     }

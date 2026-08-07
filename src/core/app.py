@@ -10,7 +10,7 @@ import sys
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from curaops.harness.route_plan_artifacts import default_route_plan_artifact, get_route_plan_artifact
+from conduvera.harness.route_plan_artifacts import default_route_plan_artifact, get_route_plan_artifact
 from src.ui.widgets.matrix_rain import MatrixRain
 from src.ui.widgets.file_browser import FileBrowser
 from src.ui.widgets.process_monitor import ProcessMonitor

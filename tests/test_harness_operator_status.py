@@ -7,9 +7,9 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from curaops.cli.main import app
-from curaops.evidence import EventEnvelope, EvidenceStore
-from curaops.harness.operator_status import build_harness_operator_status, render_harness_operator_status
+from conduvera.cli.main import app
+from conduvera.evidence import EventEnvelope, EvidenceStore
+from conduvera.harness.operator_status import build_harness_operator_status, render_harness_operator_status
 
 runner = CliRunner()
 
@@ -57,7 +57,7 @@ def _operator_stream(tmp_path: Path) -> Path:
             "agent_id": "hermes-agent",
             "run_id": "run-r-001",
             "change_request_id": "CR-MXOS-R-001",
-            "changed_files": ["curaops/harness/operator_status.py"],
+            "changed_files": ["conduvera/harness/operator_status.py"],
             "requirement_refs": ["MXOS-OP-001"],
         },
         occurred_at="2026-05-18T07:01:00Z",

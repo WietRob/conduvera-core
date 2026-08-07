@@ -9,7 +9,7 @@
 * @WietRob
 
 # Evidence report contract, golden fixtures, and report quality surface.
-/curaops/evidence/ @WietRob
+/conduvera/evidence/ @WietRob
 /tests/fixtures/evidence/ @WietRob
 /tests/test_evidence_* @WietRob
 /docs/MATRIX_OS_EVIDENCE_* @WietRob
@@ -23,15 +23,15 @@
 /CODEOWNERS @WietRob
 
 # Compliance/accountability support surfaces.
-/curaops/skills/change_request/ @WietRob
-/curaops/skills/accountable_agent/ @WietRob
-/curaops/skills/aspice_conflict_detector/ @WietRob
-/curaops/skills/aspice_link_manager/ @WietRob
+/conduvera/skills/change_request/ @WietRob
+/conduvera/skills/accountable_agent/ @WietRob
+/conduvera/skills/aspice_conflict_detector/ @WietRob
+/conduvera/skills/aspice_link_manager/ @WietRob
 /docs/COMPLIANCE_CHANGE_CONTROL_* @WietRob
 /docs/ACCOUNTABLE_AGENT_LAYER_* @WietRob
 
 # Harness gateway, UI/MCP/editor boundaries, and runtime-adjacent docs.
-/curaops/harness/ @WietRob
+/conduvera/harness/ @WietRob
 /docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md @WietRob
 /docs/MATRIX_OS_SCAFFOLDING.md @WietRob
 /docs/MATRIX_OS_UI_VALUE_MAP.md @WietRob

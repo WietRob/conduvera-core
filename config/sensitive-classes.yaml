@@ -1,5 +1,5 @@
 # sensitive-classes.yaml
-# Loaded by curaops/control/gateway/config.py via _load_yaml()
+# Loaded by conduvera/control/gateway/config.py via _load_yaml()
 # Expected format: top-level 'sensitive_classes' key
 # class-name -> cloud_allowed, description
 

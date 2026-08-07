@@ -8,9 +8,9 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from curaops.cli.main import app
-from curaops.evidence import ValidationError, validate_event_stream
-from curaops.evidence.reporting import build_operator_report, render_operator_report
+from conduvera.cli.main import app
+from conduvera.evidence import ValidationError, validate_event_stream
+from conduvera.evidence.reporting import build_operator_report, render_operator_report
 
 runner = CliRunner()
 

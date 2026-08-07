@@ -49,13 +49,13 @@ Each adapter descriptor contains:
 |---|---|
 | Adapter ID | `agent-evidence-plane` |
 | Source project | `agent-evidence-plane` |
-| Module path | `curaops.evidence.adapters.agent_evidence_plane` |
+| Module path | `conduvera.evidence.adapters.agent_evidence_plane` |
 | Docs path | `docs/MATRIX_OS_AGENT_EVIDENCE_PLANE_ADAPTER.md` |
 | Input contract | `agent-evidence-plane JSONL schema_version 0.1.0` |
 | Execution mode | `translation-only` |
 | Production status | `local-contract-only / not-production-runtime` |
 | External repo policy | standalone; not vendored; not modified by Matrix OS |
-| CLI | `python3 -m curaops.cli.main evidence convert-agent-plane INPUT.jsonl OUTPUT.jsonl` |
+| CLI | `python3 -m conduvera.cli.main evidence convert-agent-plane INPUT.jsonl OUTPUT.jsonl` |
 
 Supported event types:
 
@@ -70,13 +70,13 @@ Supported event types:
 |---|---|
 | Adapter ID | `safety-guard` |
 | Source project | `CuraOps Safety Guard` |
-| Module path | `curaops.evidence.adapters.safety_guard` |
+| Module path | `conduvera.evidence.adapters.safety_guard` |
 | Docs path | `docs/MATRIX_OS_SAFETY_GUARD_ADAPTER.md` |
 | Input contract | `Safety Guard result JSONL schema_version safety-guard.result.v1` |
 | Execution mode | `translation-only` |
 | Production status | `local-contract-only / not-production-runtime` |
 | External repo policy | standalone; not vendored; not executed by Matrix OS |
-| CLI | `python3 -m curaops.cli.main evidence convert-safety-guard INPUT.jsonl OUTPUT.jsonl` |
+| CLI | `python3 -m conduvera.cli.main evidence convert-safety-guard INPUT.jsonl OUTPUT.jsonl` |
 
 Supported event types:
 
@@ -91,13 +91,13 @@ Supported event types:
 |---|---|
 | Adapter ID | `failure-loop` |
 | Source project | `failure-driven-loop` |
-| Module path | `curaops.evidence.adapters.failure_loop` |
+| Module path | `conduvera.evidence.adapters.failure_loop` |
 | Docs path | `docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md` |
 | Input contract | `failure-loop result JSONL schema_version failure-loop.result.v1` |
 | Execution mode | `translation-only` |
 | Production status | `local-contract-only / not-production-runtime` |
 | External repo policy | standalone; not vendored; not executed by Matrix OS |
-| CLI | `python3 -m curaops.cli.main evidence convert-failure-loop INPUT.jsonl OUTPUT.jsonl` |
+| CLI | `python3 -m conduvera.cli.main evidence convert-failure-loop INPUT.jsonl OUTPUT.jsonl` |
 
 Supported event types:
 
@@ -109,16 +109,16 @@ Supported event types:
 ## CLI discovery
 
 ```bash
-python3 -m curaops.cli.main evidence adapters
-python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
-python3 -m curaops.cli.main evidence adapter show safety-guard
-python3 -m curaops.cli.main evidence adapter show failure-loop
+python3 -m conduvera.cli.main evidence adapters
+python3 -m conduvera.cli.main evidence adapter show agent-evidence-plane
+python3 -m conduvera.cli.main evidence adapter show safety-guard
+python3 -m conduvera.cli.main evidence adapter show failure-loop
 ```
 
 Unknown adapter IDs fail closed with a non-zero exit code:
 
 ```bash
-python3 -m curaops.cli.main evidence adapter show unknown-adapter
+python3 -m conduvera.cli.main evidence adapter show unknown-adapter
 ```
 
 ## Boundary

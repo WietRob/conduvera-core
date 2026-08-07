@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from curaops.harness.route_plan_artifacts import (
+from conduvera.harness.route_plan_artifacts import (
     CANONICAL_ROUTE_PLAN_ARTIFACT_IDS,
     default_route_plan_artifact,
     get_route_plan_artifact,

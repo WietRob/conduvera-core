@@ -100,7 +100,7 @@ Future external producers must adapt into this registry through explicit PRs.
 Python API:
 
 ```python
-from curaops.evidence import EventEnvelope, EvidenceStore
+from conduvera.evidence import EventEnvelope, EvidenceStore
 
 event = EventEnvelope.create(
     event_type="gate.run.completed",
@@ -114,7 +114,7 @@ EvidenceStore().append(event)
 Reader/validator:
 
 ```python
-from curaops.evidence import validate_event_stream, summarize_event_stream
+from conduvera.evidence import validate_event_stream, summarize_event_stream
 
 validate_event_stream("changes/evidence/events.jsonl")
 summarize_event_stream("changes/evidence/events.jsonl")
@@ -123,7 +123,7 @@ summarize_event_stream("changes/evidence/events.jsonl")
 Adapter protocol:
 
 ```python
-from curaops.evidence import EvidenceProducer
+from conduvera.evidence import EvidenceProducer
 
 class FutureAdapter(EvidenceProducer):
     def produce_events(self):
@@ -135,16 +135,16 @@ This protocol is only the Matrix OS harness-side boundary. It is not an external
 ## CLI
 
 ```text
-python3 -m curaops.cli.main evidence --help
-python3 -m curaops.cli.main evidence adapters
-python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
-python3 -m curaops.cli.main evidence adapter show safety-guard
-python3 -m curaops.cli.main evidence adapter show failure-loop
-python3 -m curaops.cli.main evidence validate changes/evidence/events.jsonl
-python3 -m curaops.cli.main evidence summarize changes/evidence/events.jsonl
-python3 -m curaops.cli.main evidence convert-agent-plane agent-plane.jsonl matrix-os-events.jsonl
-python3 -m curaops.cli.main evidence convert-safety-guard safety-guard.jsonl matrix-os-events.jsonl
-python3 -m curaops.cli.main evidence convert-failure-loop failure-loop.jsonl matrix-os-events.jsonl
+python3 -m conduvera.cli.main evidence --help
+python3 -m conduvera.cli.main evidence adapters
+python3 -m conduvera.cli.main evidence adapter show agent-evidence-plane
+python3 -m conduvera.cli.main evidence adapter show safety-guard
+python3 -m conduvera.cli.main evidence adapter show failure-loop
+python3 -m conduvera.cli.main evidence validate changes/evidence/events.jsonl
+python3 -m conduvera.cli.main evidence summarize changes/evidence/events.jsonl
+python3 -m conduvera.cli.main evidence convert-agent-plane agent-plane.jsonl matrix-os-events.jsonl
+python3 -m conduvera.cli.main evidence convert-safety-guard safety-guard.jsonl matrix-os-events.jsonl
+python3 -m conduvera.cli.main evidence convert-failure-loop failure-loop.jsonl matrix-os-events.jsonl
 ```
 
 The CLI discovers registered adapters, validates/summarizes streams, and performs narrow explicit conversions into Matrix OS event streams. It does not start an MCP runtime, dashboard, broad external adapter, cloud persistence, or production audit service.
