@@ -30,30 +30,30 @@ jobs:
         run: python -m pytest tests/test_packaging_contract.py
 
       - name: Compliance Change Control tests
-        run: python -m pytest curaops/skills/change_request/tests
+        run: python -m pytest conduvera/skills/change_request/tests
 
       - name: Accountable Agent Layer tests
-        run: python -m pytest curaops/skills/accountable_agent/tests
+        run: python -m pytest conduvera/skills/accountable_agent/tests
 
       - name: ASPICE conflict detector tests
-        run: python -m pytest curaops/skills/aspice_conflict_detector/test_conflict_detector.py
+        run: python -m pytest conduvera/skills/aspice_conflict_detector/test_conflict_detector.py
 
       - name: ASPICE link manager tests
-        run: python -m pytest curaops/skills/aspice_link_manager/tests
+        run: python -m pytest conduvera/skills/aspice_link_manager/tests
 
       - name: Combined compliance/accountability/ASPICE gate
         run: >-
           python -m pytest
-          curaops/skills/change_request/tests
-          curaops/skills/accountable_agent/tests
-          curaops/skills/aspice_conflict_detector/test_conflict_detector.py
-          curaops/skills/aspice_link_manager/tests
+          conduvera/skills/change_request/tests
+          conduvera/skills/accountable_agent/tests
+          conduvera/skills/aspice_conflict_detector/test_conflict_detector.py
+          conduvera/skills/aspice_link_manager/tests
 
       - name: CLI smoke
         run: |
-          python -m curaops.cli.main --help
-          python -m curaops.cli.main cr --help
-          python -m curaops.cli.main accountable --help
+          python -m conduvera.cli.main --help
+          python -m conduvera.cli.main cr --help
+          python -m conduvera.cli.main accountable --help
 
       - name: Prohibited shorthand grep
         run: |
