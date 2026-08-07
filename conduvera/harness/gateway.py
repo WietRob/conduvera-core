@@ -253,15 +253,19 @@ class HarnessGatewayRegistry:
         )
 
     def load_adapter(self, adapter_id: str) -> Any:
-        """Resolve a runtime adapter through the single registry authority.
+        """REMOVED public runtime loader (Arbeit 4 / DOD-07).
 
-        Fail-closed: missing/disabled/unavailable -> CAPABILITY_UNAVAILABLE.
+        Concrete adapters are never returned to core callers. Use
+        HarnessGatewayService for lifecycle access; this facade only
+        serves declarative descriptors.
         """
-        if self.adapters is None:
-            from conduvera.harness.registry import HarnessAdapterRegistry
+        from conduvera.harness.registry import HarnessCapabilityUnavailableError
 
-            self.adapters = HarnessAdapterRegistry(None)
-        return self.adapters.load_adapter(adapter_id)
+        raise HarnessCapabilityUnavailableError(
+            adapter_id,
+            "runtime adapter loading is private to HarnessGatewayService; "
+            "use the public service entry (DOD-07)",
+        )
 
     def get_runner(self, runner_id: str) -> RunnerDescriptor:
         """Return a runner descriptor or fail closed for unknown runner ids."""
