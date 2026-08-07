@@ -1,15 +1,19 @@
 {
-  "generated_at": "2026-08-07T21:53:26.137251+00:00",
+  "generated_at": "2026-08-07T21:55:08.025268+00:00",
   "core": {
     "repo": "WietRob/conduvera-core",
     "head": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c"
   },
   "adapter": {
     "repo": "WietRob/conduvera-hermes-adapter",
-    "head": "f1252225b953d207ca3424786696c569da19af0d"
+    "head": "d74dd3d35972797044074fc6db4f3a0fa481fcd4"
   },
   "platform": {
     "repo": "WietRob/conduvera-platform",
-    "head": "ba6fab9fd70b0f7a5c1c7e50550344c532d40c27"
+    "head": "1061dd6fbe31ff0e4f57887d2675e0805b212a59"
+  },
+  "goal_contract": {
+    "repo": "(lokal)",
+    "head": "e8de060913647cb5512ae7f9df46187554095b3d"
   }
 }
