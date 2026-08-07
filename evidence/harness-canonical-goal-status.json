@@ -3,7 +3,7 @@
   "goal": "make-the-harness-gateway-canonical-in-conduvera-core",
   "kontextwahrheit": {
     "BOOK_WRITING_PILOT": "NOT_STARTED — kein Praxisfeedback, nicht erwaehnt",
-    "LATEST_REBASELINE_GOAL": "TEILBESTANDEN",
+    "LATEST_REBASELINE_GOAL": "BESTANDEN (finales Review deleg_bcdf2324, GESAMT-PASS)",
     "MATRIX_OS_DOMAIN_SALVAGE_AUDIT": "COMPLETE",
     "MATRIX_OS_FILE_LEVEL_SALVAGE_AUDIT": "PARTIAL",
     "MATRIX_UI_REUSE": "PARTIAL",
@@ -11,5 +11,25 @@
     "CONDUVERA_CORE": "PARTIAL",
     "CONDUVERA_OPERATOR_INTEGRATION": "DESIGNED_ONLY",
     "harness_gateway_status": "HarnessGatewayService + Runtime-Registry im goal-contract-Worktree als RELEASE_CANDIDATE bewiesen, aber nicht als einzige kanonische Implementierung im Core-Hauptrepo"
-  }
+  },
+  "abschlussstatus": {
+    "CONDUVERA_CORE": "PARTIAL",
+    "HARNESS_GATEWAY_CANONICAL_CORE": "RELEASE_CANDIDATE",
+    "HERMES_GATEWAY_INTEGRATION": "LIVE_PROVEN",
+    "OPENCODE_PRODUCTION_REGISTRATION": "DISABLED_BY_OWNER",
+    "CODEX_PRODUCTION_REGISTRATION": "DISABLED_BY_OWNER",
+    "PI_RUNTIME": "BLOCKED",
+    "MATRIX_UI_STATE_INTEGRATION": "NOT_STARTED",
+    "CONDUVERA_OPERATOR_INTEGRATION": "DESIGNED_ONLY",
+    "OPERATIONAL_PRODUCTION": "NOT_YET"
+  },
+  "final_review": {
+    "reviewer": "deleg_bcdf2324",
+    "verdict": "GESAMT-PASS (7/7 Pruefpunkte, 0 P1/P2, 2 P3-Advisories)",
+    "core_head_reviewed": "d65db0cfe07b48eb4be5db495b1075817c9e9436",
+    "evidence_head_reviewed": "ef7b796715bd826dc8bd2eb3bf02d9e831c38b62",
+    "matrix_os_root": "e5b7e9b0b987065154a367ee3610eb8dd4fbe98a (unveraendert)",
+    "files_changed": "nur 4 Dateien (gateway.py, registry.py, harness-registry.yaml, test_harness_gateway_negative.py)"
+  },
+  "updated_at": "2026-08-07T08:10:24.732294+00:00"
 }
