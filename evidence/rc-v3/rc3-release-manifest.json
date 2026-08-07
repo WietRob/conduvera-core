@@ -1,0 +1,14 @@
+{
+  "release_id": "core-2026-08-07-rc3",
+  "generated_at": "2026-08-07T18:44:24.351120+00:00",
+  "platform_commit": "7126d85a23018f1ab6376d2d50b120f38ad7fcef",
+  "core": {
+    "commit": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "wheel_sha256": "eeb659be93b3b43023cd52c4b8bc533fdf979263fba831883ab5e8ad29049981"
+  },
+  "adapter": {
+    "commit": "95ed9d3d468d50fa615018d7ed36f132d9af4105",
+    "version": "0.1.2",
+    "wheel_sha256": "b4076f578a233604acee5784d876005b517b88d9cc2c3eeeda6937828c509995"
+  }
+}
