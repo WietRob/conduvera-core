@@ -17,5 +17,6 @@
     "adapter": "feac07eb53eb1533d21a460569b6d392aa5f4f7b",
     "platform": "61beaec"
   },
-  "release_id": "core-2026-08-07-rc1"
+  "release_id": "core-2026-08-07-rc1",
+  "historical_status": "RC1 = SUPERSEDED_NON_IMMUTABLE (2026-08-07: ersetzt durch RC2; dieser Status ist historisch, NICHT aktuell)"
 }
