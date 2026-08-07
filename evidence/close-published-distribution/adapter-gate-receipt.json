@@ -1,0 +1,16 @@
+{
+  "repository": "WietRob/conduvera-hermes-adapter",
+  "full_git_head": "fe001df47cb3c62df8bcbec567880f372a9f42fd",
+  "porcelain": 0,
+  "python_version": "3.12.3",
+  "pytest_count": 6,
+  "test_exit_code": 0,
+  "coverage": "coverage.xml (pytest-cov)",
+  "sonar_ceTaskId": "AZ_eOYqZ5IUNJ8uKesjJ",
+  "sonar_analysisId": "AZ_eOYqZ5IUNJ8uKesjJ",
+  "quality_gate_status": "OK",
+  "start_time": "20260807T215534Z",
+  "end_time": "20260807T215545Z",
+  "gate_failed": 0,
+  "receipt_sha256": "ac8870bc30fa57b8ad2a0ead51f27f7a1b53c31d1d50c1d30bceff1cd13020f4"
+}
