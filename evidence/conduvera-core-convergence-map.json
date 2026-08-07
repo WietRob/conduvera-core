@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-08-07T10:17:44.439988+00:00",
+  "goal": "converge-conduvera-core-gateway-adapter-and-rename-into-one-live-proven-head",
+  "branches": [
+    {
+      "branch": "origin/main",
+      "exact_sha": "cc7bac2e43b675af596189c8436653d42f7747a1",
+      "parent": "e5b7e9b",
+      "enthaltene_faehigkeiten": "typer-0.26.8-Kompatibilitaet (isolated_filesystem->tempfile), compliance-Reconciliation, alles aus e5b7e9b",
+      "fehlende_faehigkeiten": "HarnessGatewayService, Registry-Authority, conduvera-Namespace",
+      "supersedes": "—",
+      "promotion_status": "BASIS_FUER_REBASE"
+    },
+    {
+      "branch": "remote-doctor-base (lokaler main-Stand)",
+      "exact_sha": "e5b7e9b0b987065154a367ee3610eb8dd4fbe98a",
+      "parent": "9241329",
+      "enthaltene_faehigkeiten": "tux compliance features, alte Descriptors-Gateway (kein Service)",
+      "fehlende_faehigkeiten": "Gateway-Service, Registry, conduvera-Namespace, typer-Fix",
+      "supersedes": "—",
+      "promotion_status": "SUPERSEDED_BY_ORIGIN_MAIN + D65DB0C"
+    },
+    {
+      "branch": "task/harness-gateway-canonical",
+      "exact_sha": "d65db0cfe07b48eb4be5db495b1075817c9e9436",
+      "parent": "e5b7e9b",
+      "enthaltene_faehigkeiten": "HarnessGatewayService, HarnessAdapterRegistry, harness-registry.yaml, 10 Negativtests (217 Suite)",
+      "fehlende_faehigkeiten": "conduvera-Namespace, typer-Fix, dauerhaftes Adapter-Repo",
+      "supersedes": "e5b7e9b (Gateway-Teil)",
+      "promotion_status": "REVIEWED (deleg_bcdf2324, GESAMT-PASS) — SUPERSEDED durch converged"
+    },
+    {
+      "branch": "task/rename-conduvera",
+      "exact_sha": "8b9ff16",
+      "parent": "d65db0c",
+      "enthaltene_faehigkeiten": "curaops->conduvera Rename (177 Dateien), Golden-Fixture-Hashes, .conduvera-State",
+      "fehlende_faehigkeiten": "typer-Fix, dauerhaftes Adapter-Repo, Legacy-State-Migration, LIVE-Beweis",
+      "supersedes": "d65db0c (Namespace-Teil)",
+      "promotion_status": "NACHFOLGER — Basis fuer converged Branch"
+    },
+    {
+      "branch": "installierter Release",
+      "exact_sha": "87e1296ca161b49f083fd707933be547c452b481 (Release-Dir, Legacy-Namespace)",
+      "parent": "—",
+      "enthaltene_faehigkeiten": "curaops-Namespace-Release mit Hermes-Adapter (Legacy)",
+      "fehlende_faehigkeiten": "conduvera-Namespace, Gateway-Service im Release",
+      "supersedes": "—",
+      "promotion_status": "PRODUKTIV-UNVERAENDERT (bis naechster Build)"
+    }
+  ],
+  "ziel_linie": {
+    "branch": "task/conduvera-core-converged",
+    "basis": "8b9ff16 (Rename-Nachfolger)",
+    "rebase_auf": "origin/main cc7bac2 (typer-Fix)",
+    "ergebnis": "EIN kanonischer Candidate: Gateway + conduvera-Namespace + typer-Fix"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-08-07T10:33:24.576016+00:00",
+  "goal": "converge-conduvera-core-gateway-adapter-and-rename-into-one-live-proven-head",
+  "candidate_release_dir": "/tmp/conduvera-candidate-release",
+  "artefacts": [
+    {
+      "component": "conduvera-core",
+      "wheel": "matrix_os-0.1.0-py3-none-any.whl",
+      "wheel_sha256": "38704280b5593b37"
+    },
+    {
+      "component": "conduvera-hermes-adapter",
+      "wheel": "conduvera_hermes_adapter-0.1.0-py3-none-any.whl",
+      "wheel_sha256": "3aa366d6d5d89355"
+    }
+  ],
+  "live_proof": {
+    "execution_mode": "LIVE",
+    "registry": "package-resource (KEIN Override, KEIN PYTHONPATH, KEIN sys.path)",
+    "source_inaccessible": true,
+    "callgraph": "Conduvera Core -> HarnessGatewayService -> package-resource registry -> conduvera-hermes-adapter -> echter Hermes-Prozess -> workload/local -> PONG -> MXOS-EVIDENCE-1.0.0 -> Cleanup",
+    "health_check": true,
+    "start_session": "True (hermes managed session started)",
+    "status": "True (running)",
+    "await_completion": "True (completed, exit 0)",
+    "collect_evidence": "True (schema MXOS-EVIDENCE-1.0.0)",
+    "opencode_cli": "disabled_by_owner (unveraendert)",
+    "codex_cli": "disabled_by_owner (unveraendert)",
+    "pi": "blocked (nicht registriert)"
+  },
+  "rollback": {
+    "candidate_processes": 0,
+    "claims": 0,
+    "leases": 0,
+    "registry_overrides": 0,
+    "source_fds": 0,
+    "prod_registry_sha256": "1b9c1de22a3123eb",
+    "gpu_mode": "text",
+    "litellm_route_hash": "1c3d2b96825559fa"
+  }
+}
