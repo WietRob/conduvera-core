@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-08-07T12:56:23.166349+00:00",
+  "pr": 34,
+  "merged": true,
+  "merge_method": "GitHub Rebase-Merge",
+  "merge_commit": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+  "old_main_head": "cc7bac2e43b675af596189c8436653d42f7747a1",
+  "new_main_head": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+  "pr_head": "ee8f21f3760058fea0f9263f2a8e73fb6b2b3887",
+  "pr_run_ids": {
+    "evidence": 31176629993,
+    "pr3": 31176630478
+  },
+  "post_merge_main_run_ids": {
+    "evidence": 31180215768,
+    "pr3": 31180217876
+  },
+  "clean_install": {
+    "wheel": "matrix_os-0.1.0-py3-none-any.whl (von main 63fb334)",
+    "registry": "site-packages Package-Resource, conduvera_hermes_adapter geladen",
+    "cli": "conduvera.cli.main --help exit 0",
+    "legacy_migration": "Dry-run nur (3 WOULD_COPY, kein Apply)"
+  },
+  "no_runtime_change": "keine ODS/LiteLLM/Routen/Modell/GPU-Änderung; kein Release; kein Deployment",
+  "status": {
+    "PR_34": "MERGED",
+    "CONDUVERA_CORE_MAIN": "CANONICAL_AND_CI_GREEN",
+    "CONDUVERA_RELEASE_BUILD_V1": "UNBLOCKED_BUT_NOT_STARTED",
+    "OPERATIONAL_PRODUCTION": "NOT_YET"
+  }
+}

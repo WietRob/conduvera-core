@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-08-07T12:56:23.166216+00:00",
+  "goal": "merge-pr34-and-establish-the-canonical-conduvera-main",
+  "follow_ups": [
+    {
+      "id": "A",
+      "title": "CuraOps-Allowlist als echtes CI-Regression-Gate ausführen",
+      "detail": ".github/curaops-allowlist.yaml ist dokumentiert, aber nicht als CI-Gate verdrahtet. Ein Workflow-Schritt sollte grep-Abweichungen von der Allowlist als Fehler melden, damit ein künftiger curaops-Rückfall den Merge blockiert.",
+      "status": "DOKUMENTIERT_NICHT_UMGESETZT"
+    },
+    {
+      "id": "B",
+      "title": "Kontrollierte Migration von Ruff 0.15 auf eine aktuelle Version",
+      "detail": "pyproject pinnt ruff>=0.15.0,<0.16 (bestehender Code-Standard). Ruff 0.16+ führt neue Regeln ein (TRY004/RUF012/C414). Eine kontrollierte Migration = neue Regeln fixen/ignorieren + Pin heben, getrennt von Featurearbeit.",
+      "status": "DOKUMENTIERT_NICHT_UMGESETZT"
+    }
+  ]
+}
