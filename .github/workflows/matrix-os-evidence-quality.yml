@@ -48,38 +48,38 @@ jobs:
           tests/test_evidence_operator_report.py
           tests/test_evidence_report_golden_outputs.py
           tests/test_evidence_report_contract_version.py
-          curaops/skills/change_request/tests
-          curaops/skills/accountable_agent/tests
-          curaops/skills/aspice_conflict_detector/test_conflict_detector.py
-          curaops/skills/aspice_link_manager/tests
+          conduvera/skills/change_request/tests
+          conduvera/skills/accountable_agent/tests
+          conduvera/skills/aspice_conflict_detector/test_conflict_detector.py
+          conduvera/skills/aspice_link_manager/tests
           -q
 
       - name: Compare CLI text golden output
         run: |
-          python -m curaops.cli.main evidence report tests/fixtures/evidence/operator_report/product_coherence.events.jsonl --format text > /tmp/report.txt
+          python -m conduvera.cli.main evidence report tests/fixtures/evidence/operator_report/product_coherence.events.jsonl --format text > /tmp/report.txt
           cmp -s /tmp/report.txt tests/fixtures/evidence/operator_report/product_coherence.expected.txt
 
       - name: Compare CLI Markdown golden output
         run: |
-          python -m curaops.cli.main evidence report tests/fixtures/evidence/operator_report/product_coherence.events.jsonl --format markdown > /tmp/report.md
+          python -m conduvera.cli.main evidence report tests/fixtures/evidence/operator_report/product_coherence.events.jsonl --format markdown > /tmp/report.md
           cmp -s /tmp/report.md tests/fixtures/evidence/operator_report/product_coherence.expected.md
 
       - name: Compare CLI JSON golden output
         run: |
-          python -m curaops.cli.main evidence report tests/fixtures/evidence/operator_report/product_coherence.events.jsonl --format json > /tmp/report.json
+          python -m conduvera.cli.main evidence report tests/fixtures/evidence/operator_report/product_coherence.events.jsonl --format json > /tmp/report.json
           cmp -s /tmp/report.json tests/fixtures/evidence/operator_report/product_coherence.expected.json
 
       - name: Run ruff on evidence/report surface
         run: >-
           python -m ruff check
-          curaops/evidence
-          curaops/harness/route_plan_viewer.py
-          curaops/cli/commands/evidence.py
-          curaops/cli/commands/harness.py
+          conduvera/evidence
+          conduvera/harness/route_plan_viewer.py
+          conduvera/cli/commands/evidence.py
+          conduvera/cli/commands/harness.py
           src/core/app.py
           src/ui/widgets/route_plan_panel.py
           src/ui/widgets/route_plan_artifact_picker.py
-          curaops/harness/route_plan_artifacts.py
+          conduvera/harness/route_plan_artifacts.py
           tests/test_evidence_operator_report.py
           tests/test_evidence_report_golden_outputs.py
           tests/test_evidence_report_contract_version.py

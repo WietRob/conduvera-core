@@ -1,0 +1,26 @@
+# Allowlist — legitime curaops-Vorkommen (PR-34-CI-Fix, 2026-08-07)
+# Diese Vorkommen BLEIBEN absichtlich; alles andere ausführungsrelevante
+# curaops ist ein Defekt (Namespace-Abschluss conduvera).
+
+allowlist:
+  - id: "legacy_state_migration"
+    path: "conduvera/cli/legacy_state.py"
+    reason: "referenziert .curaops als Legacy-Lesequelle (Migration .curaops->.conduvera, DOD-04 converge-goal)"
+  - id: "legacy_migration_tests"
+    paths: ["tests/test_legacy_state_migration.py"]
+    reason: "testet die .curaops->.conduvera-Migration mit .curaops-Fixtures"
+  - id: "historical_provenance_docs"
+    paths: ["docs/**", "CURAOPS_ARCHITECTURE.md"]
+    reason: "historische Dokumente beschreiben den alten Namen; keine ausführbare Wirkung"
+  - id: "product_names"
+    paths: []
+    reason: "'CuraOps VRP' (Fremdprojekt) und 'curaops-safety-guard' (Producer-Name in Evidence-Envelopes) sind echte Produktnamen, kein Paketpfad"
+  - id: "build_artifacts_gitignored"
+    paths: ["build/", "*.egg-info/"]
+    reason: "generierte Artefakte, gitignored, keine ausführbare Wirkung im CI"
+
+check_command: |
+  grep -rn 'curaops' .github/ pyproject.toml run.sh Makefile 2>/dev/null \
+    | grep -v safety-guard
+
+expected_after_fix: "keine Treffer ausser safety-guard"
