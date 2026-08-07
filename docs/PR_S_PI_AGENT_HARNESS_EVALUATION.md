@@ -40,10 +40,10 @@ Matrix OS sources:
 - `docs/MATRIX_OS_HARNESS_GATEWAY_ARCHITECTURE.md`
 - `docs/MATRIX_OS_EVIDENCE_ADAPTER_REGISTRY.md`
 - `docs/MATRIX_OS_OPERATOR_WORKFLOW.md`
-- `curaops/harness/gateway.py`
-- `curaops/harness/operator_status.py`
-- `curaops/evidence/adapters/registry.py`
-- `curaops/evidence/reporting.py`
+- `conduvera/harness/gateway.py`
+- `conduvera/harness/operator_status.py`
+- `conduvera/evidence/adapters/registry.py`
+- `conduvera/evidence/reporting.py`
 
 ## A) Pi Agent Harness inventory
 
@@ -118,10 +118,10 @@ Matrix OS sources:
 
 | Matrix OS concept | Current Matrix OS evidence | Pi concept | Fit |
 |---|---|---|---|
-| Gateway | `curaops/harness/gateway.py` lines 1-5: declarative only, no launch/socket/MCP/shell mutation | `AgentHarness` orchestrates actual prompt/run lifecycle | Conceptually adjacent but not same layer. Matrix OS Gateway is a policy/descriptor boundary; Pi Harness is an execution harness. |
+| Gateway | `conduvera/harness/gateway.py` lines 1-5: declarative only, no launch/socket/MCP/shell mutation | `AgentHarness` orchestrates actual prompt/run lifecycle | Conceptually adjacent but not same layer. Matrix OS Gateway is a policy/descriptor boundary; Pi Harness is an execution harness. |
 | HarnessGatewayRegistry | `HarnessGatewayRegistry.default()` returns static descriptors for runners/tools/surfaces/capabilities | Pi has runtime resources, tool maps, provider registry, extensions, skills | Good reference for future backend registry, but direct replacement would collapse descriptor-only boundary into runtime execution. |
-| Evidence Backbone | `curaops/evidence/reporting.py` validates EventEnvelope JSONL streams and builds reports | Pi sessions are JSONL/in-memory session stores, not Matrix OS EventEnvelope streams | Requires explicit adapter/contract if Pi run events are ever consumed. Do not treat Pi session JSONL as Matrix OS evidence. |
-| Evidence Adapter Registry | `curaops/evidence/adapters/registry.py` lists only agent-evidence-plane, safety-guard, failure-loop translation-only adapters | Pi has no Matrix OS adapter in current repo | No current compatibility. A future adapter must be a separate focused PR. This task must not create it. |
+| Evidence Backbone | `conduvera/evidence/reporting.py` validates EventEnvelope JSONL streams and builds reports | Pi sessions are JSONL/in-memory session stores, not Matrix OS EventEnvelope streams | Requires explicit adapter/contract if Pi run events are ever consumed. Do not treat Pi session JSONL as Matrix OS evidence. |
+| Evidence Adapter Registry | `conduvera/evidence/adapters/registry.py` lists only agent-evidence-plane, safety-guard, failure-loop translation-only adapters | Pi has no Matrix OS adapter in current repo | No current compatibility. A future adapter must be a separate focused PR. This task must not create it. |
 | Operator Status | `build_harness_operator_status` only reads evidence and registries; no runner execution | Pi can run agents interactively/print/RPC | Pi could be a future backend observed by status, but current operator status must remain read-only. |
 | Matrix UI/TUI preservation | `matrix-ui-code-editor` surface descriptor points to existing Matrix UI widget paths | Pi has its own TUI package and interactive mode | Borrow TUI patterns possible; replacing Matrix UI with Pi TUI would be scope risk. |
 | Hermes/OpenCode/local-shell runners | Matrix OS registers them as future descriptors with `runtime_enabled=False` | Pi is itself a coding-agent runtime and has provider support for `opencode`/`opencode-go` model/provider IDs | Pi could be an additional future runner/backend descriptor, not a substitute for Hermes/OpenCode control. |

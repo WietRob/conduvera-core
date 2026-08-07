@@ -8,12 +8,12 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from curaops.cli.main import app
-from curaops.evidence import EventEnvelope, EvidenceStore, ValidationError
-from curaops.evidence.adapters.agent_evidence_plane import convert_agent_evidence_plane_jsonl
-from curaops.evidence.adapters.failure_loop import convert_failure_loop_jsonl
-from curaops.evidence.adapters.safety_guard import convert_safety_guard_jsonl
-from curaops.evidence.reporting import build_operator_report, render_operator_report
+from conduvera.cli.main import app
+from conduvera.evidence import EventEnvelope, EvidenceStore, ValidationError
+from conduvera.evidence.adapters.agent_evidence_plane import convert_agent_evidence_plane_jsonl
+from conduvera.evidence.adapters.failure_loop import convert_failure_loop_jsonl
+from conduvera.evidence.adapters.safety_guard import convert_safety_guard_jsonl
+from conduvera.evidence.reporting import build_operator_report, render_operator_report
 
 runner = CliRunner()
 
@@ -58,7 +58,7 @@ def _agent_run_fixture() -> dict:
         "severity": "info",
         "correlation_id": "CR-MXOS-001",
         "run_id": "run-900",
-        "payload": {"exit_code": 0, "changed_files": ["curaops/auth.py"]},
+        "payload": {"exit_code": 0, "changed_files": ["conduvera/auth.py"]},
         "evidence": {"artifact_path": "artifacts/run-900/stdout.txt", "sha256": "abc123"},
         "links": [{"rel": "implements", "event_id": "evt_cr_mxos_001"}],
     }
@@ -127,7 +127,7 @@ def _combined_stream(tmp_path: Path) -> Path:
             "agent_id": "hermes-agent",
             "run_id": "run-900",
             "change_request_id": "CR-MXOS-001",
-            "changed_files": ["curaops/auth.py"],
+            "changed_files": ["conduvera/auth.py"],
             "requirement_refs": ["SW-REQ-AUTH-007"],
             "linkage_valid": True,
         },
@@ -190,7 +190,7 @@ def test_report_answers_which_agent_changed_what_under_which_cr(tmp_path: Path) 
             "agent_id": "hermes-agent",
             "run_id": "run-900",
             "change_request_id": "CR-MXOS-001",
-            "changed_files": ["curaops/auth.py"],
+            "changed_files": ["conduvera/auth.py"],
             "requirements": ["SW-REQ-AUTH-007"],
             "adapter": "native",
         }

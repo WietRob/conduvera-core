@@ -52,7 +52,7 @@ RoutePlanArtifact registry
 -> existing route-plan panel body
 ```
 
-The picker widget does not duplicate selector metadata. It reads through the existing `curaops.harness.route_plan_artifacts` registry/state helpers.
+The picker widget does not duplicate selector metadata. It reads through the existing `conduvera.harness.route_plan_artifacts` registry/state helpers.
 
 ## Boundaries
 

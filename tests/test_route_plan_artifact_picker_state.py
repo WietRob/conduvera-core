@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from curaops.harness.route_plan_artifacts import (
+from conduvera.harness.route_plan_artifacts import (
     build_route_plan_artifact_picker_state,
     render_route_plan_artifact_picker_state,
 )

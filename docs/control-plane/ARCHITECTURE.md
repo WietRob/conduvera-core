@@ -26,13 +26,13 @@ Der Harness Core bildet das Fundament. Er verwaltet Agent-Zustand, erfasst Ereig
 ### Module
 
 #### `registry.py` — AgentRegistry
-Zentrales Zustandsverzeichnis aller Agenten. Jeder Agent wird als `AgentRecord` mit Feldern wie `agent_id`, `tool`, `task`, `issue`, `worktree`, `session`, `gate_profile`, `status`, `scope_files`, `credentials_ref`, `blocked_reason` und `ready_evidence` registriert. Statuswerte: `BOOTING`, `ACTIVE`, `READY`, `BLOCKED`, `STOPPED`, `CRASHED`. Persistenz ueber `.curaops/control/registry.json`.
+Zentrales Zustandsverzeichnis aller Agenten. Jeder Agent wird als `AgentRecord` mit Feldern wie `agent_id`, `tool`, `task`, `issue`, `worktree`, `session`, `gate_profile`, `status`, `scope_files`, `credentials_ref`, `blocked_reason` und `ready_evidence` registriert. Statuswerte: `BOOTING`, `ACTIVE`, `READY`, `BLOCKED`, `STOPPED`, `CRASHED`. Persistenz ueber `.conduvera/control/registry.json`.
 
 #### `eventlog.py` — EventLog
-Append-only JSONL-Logfile unter `.curaops/control/events.jsonl`. Jede signifikante Harness-Aktion (Registrierung, Gate-Run, Statuswechsel, Stream-Transition) wird mit Zeitstempel und Kontext dokumentiert. Dient als Audit-Trail und Grundlage fuer Debugging.
+Append-only JSONL-Logfile unter `.conduvera/control/events.jsonl`. Jede signifikante Harness-Aktion (Registrierung, Gate-Run, Statuswechsel, Stream-Transition) wird mit Zeitstempel und Kontext dokumentiert. Dient als Audit-Trail und Grundlage fuer Debugging.
 
 #### `gates.py` — GateRunner + Builtin Gates
-Evaluiert vordefinierte Qualitaets- und Berechtigungsregeln bevor ein Agent in den READY-Zustand wechselt. Fuenf eingebaute Gates: `FinishGate`, `TestGate`, `SonarGate`, `DirtyCheckGate`, `ScopeGate`. Gate-Profile werden in `.curaops/control/policies/gates.yaml` konfiguriert und jedem Agent bei der Registrierung zugewiesen.
+Evaluiert vordefinierte Qualitaets- und Berechtigungsregeln bevor ein Agent in den READY-Zustand wechselt. Fuenf eingebaute Gates: `FinishGate`, `TestGate`, `SonarGate`, `DirtyCheckGate`, `ScopeGate`. Gate-Profile werden in `.conduvera/control/policies/gates.yaml` konfiguriert und jedem Agent bei der Registrierung zugewiesen.
 
 #### `stream_state.py` — StreamStateStore
 Verwaltet den Lebenszyklus von Agent-Interaktionen ueber 12 Zustaende und 5 Reply-Typen (`AgentReply`). Erzwingt `head_sha`-Konsistenz bei `READY_FOR_REVIEW`. Pro-Agent-Zustand in `.captain/state/streams/<agent>.json` persistiert. Transition-Matrix definiert gueltige Zustandswechsel.

@@ -214,7 +214,7 @@ requirement_refs: [String]  # Min 1, valid IDs
 Accountable Agent Layer consumes:
 
 ```python
-from curaops.skills.change_request import (
+from conduvera.skills.change_request import (
     ChangeRequestService,
     generate_cr_evidence,
     validate_cr_traceability,

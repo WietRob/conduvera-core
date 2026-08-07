@@ -22,7 +22,7 @@ The report layer proves the merged evidence backbone, adapter registry, and prod
 Input is a local Matrix OS `EventEnvelope` JSONL stream:
 
 ```bash
-python3 -m curaops.cli.main evidence report changes/evidence/events.jsonl
+python3 -m conduvera.cli.main evidence report changes/evidence/events.jsonl
 ```
 
 The report command uses the evidence backbone reader, so malformed JSON, unsupported event types, missing hashes, or invalid envelopes fail closed before any report is produced.
@@ -30,10 +30,10 @@ The report command uses the evidence backbone reader, so malformed JSON, unsuppo
 ## Output formats
 
 ```bash
-python3 -m curaops.cli.main evidence report EVENTS.jsonl
-python3 -m curaops.cli.main evidence report EVENTS.jsonl --format text
-python3 -m curaops.cli.main evidence report EVENTS.jsonl --format markdown
-python3 -m curaops.cli.main evidence report EVENTS.jsonl --format json
+python3 -m conduvera.cli.main evidence report EVENTS.jsonl
+python3 -m conduvera.cli.main evidence report EVENTS.jsonl --format text
+python3 -m conduvera.cli.main evidence report EVENTS.jsonl --format markdown
+python3 -m conduvera.cli.main evidence report EVENTS.jsonl --format json
 ```
 
 Text and Markdown are for operators. JSON is for tests and future local tooling. Output is deterministic: events are sorted by timestamp and event id, and counts are sorted by key. The report also carries Change Request status so the operator-facing agent/action answer can distinguish an approved CR from an unknown or unapproved CR. Every report exposes the explicit report contract version `MXOS-REPORT-1.0` as `report_schema_version` in JSON and as a stable metadata line in text/Markdown.
@@ -41,7 +41,7 @@ Text and Markdown are for operators. JSON is for tests and future local tooling.
 The current contract version can be discovered locally with:
 
 ```bash
-python3 -m curaops.cli.main evidence report-contract
+python3 -m conduvera.cli.main evidence report-contract
 ```
 
 ## Operator questions answered

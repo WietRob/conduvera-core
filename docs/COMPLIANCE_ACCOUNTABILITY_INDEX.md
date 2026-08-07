@@ -81,7 +81,7 @@
 /home/roberto_schmidt/projects/
 ├── curaops-safety-guard/          # Safety Guard (standalone)
 └── matrix-os/                     # Compliance & Accountability
-    ├── curaops/skills/
+    ├── conduvera/skills/
     │   ├── change_request/        # Compliance Change Control
     │   ├── accountable_agent/     # Accountable Agent Layer
     │   └── aspice_link_manager/   # Shared Link Management

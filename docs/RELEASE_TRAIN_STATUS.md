@@ -35,21 +35,21 @@ Closed as superseded:
 ## Current merged command surface
 
 ```bash
-python3 -m curaops.cli.main --help
-python3 -m curaops.cli.main cr --help
-python3 -m curaops.cli.main accountable --help
-python3 -m curaops.cli.main aspice --help
-python3 -m curaops.cli.main scaffold --help
-python3 -m curaops.cli.main evidence --help
-python3 -m curaops.cli.main evidence convert-agent-plane --help
-python3 -m curaops.cli.main evidence convert-safety-guard --help
-python3 -m curaops.cli.main evidence adapters
-python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
-python3 -m curaops.cli.main evidence adapter show safety-guard
-python3 -m curaops.cli.main evidence adapter show failure-loop
-python3 -m curaops.cli.main evidence convert-failure-loop --help
-python3 -m curaops.cli.main evidence report EVENTS.jsonl --format json
-python3 -m curaops.cli.main evidence report-contract
+python3 -m conduvera.cli.main --help
+python3 -m conduvera.cli.main cr --help
+python3 -m conduvera.cli.main accountable --help
+python3 -m conduvera.cli.main aspice --help
+python3 -m conduvera.cli.main scaffold --help
+python3 -m conduvera.cli.main evidence --help
+python3 -m conduvera.cli.main evidence convert-agent-plane --help
+python3 -m conduvera.cli.main evidence convert-safety-guard --help
+python3 -m conduvera.cli.main evidence adapters
+python3 -m conduvera.cli.main evidence adapter show agent-evidence-plane
+python3 -m conduvera.cli.main evidence adapter show safety-guard
+python3 -m conduvera.cli.main evidence adapter show failure-loop
+python3 -m conduvera.cli.main evidence convert-failure-loop --help
+python3 -m conduvera.cli.main evidence report EVENTS.jsonl --format json
+python3 -m conduvera.cli.main evidence report-contract
 python3 -m pytest tests/test_evidence_report_golden_outputs.py tests/test_evidence_report_contract_version.py
 ```
 
@@ -83,24 +83,24 @@ The current release train is verified locally with these focused gates:
 
 ```bash
 python3 -m pytest tests/test_packaging_contract.py
-python3 -m pytest curaops/skills/change_request/tests
-python3 -m pytest curaops/skills/accountable_agent/tests
-python3 -m pytest curaops/skills/aspice_conflict_detector/test_conflict_detector.py
-python3 -m pytest curaops/skills/aspice_link_manager/tests
-python3 -m curaops.cli.main --help
-python3 -m curaops.cli.main cr --help
-python3 -m curaops.cli.main accountable --help
-python3 -m curaops.cli.main aspice --help
-python3 -m curaops.cli.main scaffold --help
-python3 -m curaops.cli.main evidence --help
-python3 -m curaops.cli.main evidence convert-agent-plane --help
-python3 -m curaops.cli.main evidence convert-safety-guard --help
-python3 -m curaops.cli.main evidence adapters
-python3 -m curaops.cli.main evidence adapter show agent-evidence-plane
-python3 -m curaops.cli.main evidence adapter show safety-guard
-python3 -m curaops.cli.main evidence adapter show failure-loop
-python3 -m curaops.cli.main evidence convert-failure-loop --help
-python3 -m curaops.cli.main evidence report EVENTS.jsonl --format json
+python3 -m pytest conduvera/skills/change_request/tests
+python3 -m pytest conduvera/skills/accountable_agent/tests
+python3 -m pytest conduvera/skills/aspice_conflict_detector/test_conflict_detector.py
+python3 -m pytest conduvera/skills/aspice_link_manager/tests
+python3 -m conduvera.cli.main --help
+python3 -m conduvera.cli.main cr --help
+python3 -m conduvera.cli.main accountable --help
+python3 -m conduvera.cli.main aspice --help
+python3 -m conduvera.cli.main scaffold --help
+python3 -m conduvera.cli.main evidence --help
+python3 -m conduvera.cli.main evidence convert-agent-plane --help
+python3 -m conduvera.cli.main evidence convert-safety-guard --help
+python3 -m conduvera.cli.main evidence adapters
+python3 -m conduvera.cli.main evidence adapter show agent-evidence-plane
+python3 -m conduvera.cli.main evidence adapter show safety-guard
+python3 -m conduvera.cli.main evidence adapter show failure-loop
+python3 -m conduvera.cli.main evidence convert-failure-loop --help
+python3 -m conduvera.cli.main evidence report EVENTS.jsonl --format json
 ```
 
 ## Not production-ready yet

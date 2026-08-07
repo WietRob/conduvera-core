@@ -11,7 +11,7 @@
       "agent_id": "hermes-agent",
       "change_request_id": "CR-MXOS-001",
       "changed_files": [
-        "curaops/auth.py"
+        "conduvera/auth.py"
       ],
       "requirements": [
         "SW-REQ-AUTH-007"

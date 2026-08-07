@@ -6,8 +6,8 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from curaops.cli.main import app
-from curaops.harness.route_plan_viewer import build_route_plan_view, render_route_plan_view
+from conduvera.cli.main import app
+from conduvera.harness.route_plan_viewer import build_route_plan_view, render_route_plan_view
 
 runner = CliRunner()
 ROUTE_PLAN_FIXTURE_DIR = Path(__file__).parent / "fixtures" / "harness" / "route_plan"

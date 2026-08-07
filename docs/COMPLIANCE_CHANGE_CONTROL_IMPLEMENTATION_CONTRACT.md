@@ -49,18 +49,18 @@ Deliver production-ready Compliance Change Control module that:
 
 | Module | Path | Language | Owner |
 |--------|------|----------|-------|
-| Compliance Change Control Core | `curaops/skills/change_request/` | Python | C implementation |
-| Compliance Change Control CLI | `curaops/cli/commands/cr.py` | Python | C CLI interface |
-| Accountable Agent Layer Core | `curaops/skills/accountable_agent/` | Python | B implementation |
-| Accountable Agent Layer CLI | `curaops/cli/commands/accountable.py` | Python | B CLI interface |
-| Shared | `curaops/skills/aspice_link_manager/` | Python | Bidirectional links |
+| Compliance Change Control Core | `conduvera/skills/change_request/` | Python | C implementation |
+| Compliance Change Control CLI | `conduvera/cli/commands/cr.py` | Python | C CLI interface |
+| Accountable Agent Layer Core | `conduvera/skills/accountable_agent/` | Python | B implementation |
+| Accountable Agent Layer CLI | `conduvera/cli/commands/accountable.py` | Python | B CLI interface |
+| Shared | `conduvera/skills/aspice_link_manager/` | Python | Bidirectional links |
 | Evidence | `changes/evidence/` | JSON/Markdown | Generated output |
 
 ### B.3 Directory Structure <!-- shared-interface: duplicated in ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md -->
 
 ```
 /home/roberto_schmidt/projects/matrix-os/
-├── curaops/
+├── conduvera/
 │   ├── skills/
 │   │   ├── change_request/           # Compliance Change Control Core
 │   │   │   ├── __init__.py           # CR service, state machine
@@ -109,9 +109,9 @@ Deliver production-ready Compliance Change Control module that:
 
 | Module | File | Reuse Decision |
 |--------|------|----------------|
-| ASPICE Link Manager | `curaops/skills/aspice_link_manager/__init__.py` | **REUSE** — Bidirectional link management |
-| CLI Framework | `curaops/cli/main.py` | **REUSE** — Typer-based CLI structure |
-| Session Manager | `curaops/skills/session_manager/` | **REFERENCE** — For session_id integration |
+| ASPICE Link Manager | `conduvera/skills/aspice_link_manager/__init__.py` | **REUSE** — Bidirectional link management |
+| CLI Framework | `conduvera/cli/main.py` | **REUSE** — Typer-based CLI structure |
+| Session Manager | `conduvera/skills/session_manager/` | **REFERENCE** — For session_id integration |
 
 ### C.2 From CuraOps_Framework (Reference Only)
 
@@ -743,8 +743,8 @@ def test_e2e_cr_lifecycle():
 ### K.1 Current State (Provisional)
 
 ```
-curaops/skills/change-request/__init__.py         # +175 lines, needs alignment
-curaops/skills/aspice-link-manager/__init__.py    # Exists, reuse
+conduvera/skills/change-request/__init__.py         # +175 lines, needs alignment
+conduvera/skills/aspice-link-manager/__init__.py    # Exists, reuse
 ```
 
 > **B provisional code** (`accountable-agent/__init__.py`) migration is in [ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md](./ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md) Section K.

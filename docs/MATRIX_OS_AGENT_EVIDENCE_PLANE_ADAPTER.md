@@ -62,9 +62,9 @@ Matrix OS recomputes its own `event_hash` and `integrity.hash`; external hash se
 ## CLI
 
 ```bash
-python3 -m curaops.cli.main evidence convert-agent-plane INPUT.jsonl OUTPUT.jsonl
-python3 -m curaops.cli.main evidence validate OUTPUT.jsonl
-python3 -m curaops.cli.main evidence summarize OUTPUT.jsonl
+python3 -m conduvera.cli.main evidence convert-agent-plane INPUT.jsonl OUTPUT.jsonl
+python3 -m conduvera.cli.main evidence validate OUTPUT.jsonl
+python3 -m conduvera.cli.main evidence summarize OUTPUT.jsonl
 ```
 
 ## Non-goals

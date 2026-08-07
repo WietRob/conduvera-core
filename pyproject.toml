@@ -45,15 +45,15 @@ dev = [
 [project.scripts]
 matrix-os = "src.core.app:main"
 mxos = "src.core.app:main"
-matrix-cli = "curaops.cli.main:main"
+matrix-cli = "conduvera.cli.main:main"
 
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["src*", "curaops*"]
-exclude = ["curaops.tests*"]
+include = ["src*", "conduvera*"]
+exclude = ["conduvera.tests*"]
 
 [tool.black]
 line-length = 100

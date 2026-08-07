@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from curaops.harness.scaffolding import get_scaffolding_slice, list_scaffolding_slices
+from conduvera.harness.scaffolding import get_scaffolding_slice, list_scaffolding_slices
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 

@@ -127,10 +127,10 @@ Matrix OS does not turn a proposal into an enforced rule in this adapter.
 ## CLI
 
 ```bash
-python3 -m curaops.cli.main evidence convert-failure-loop INPUT.jsonl OUTPUT.jsonl
-python3 -m curaops.cli.main evidence adapter show failure-loop
-python3 -m curaops.cli.main evidence validate OUTPUT.jsonl
-python3 -m curaops.cli.main evidence summarize OUTPUT.jsonl
+python3 -m conduvera.cli.main evidence convert-failure-loop INPUT.jsonl OUTPUT.jsonl
+python3 -m conduvera.cli.main evidence adapter show failure-loop
+python3 -m conduvera.cli.main evidence validate OUTPUT.jsonl
+python3 -m conduvera.cli.main evidence summarize OUTPUT.jsonl
 ```
 
 ## Fail-closed behavior

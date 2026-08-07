@@ -16,7 +16,7 @@ Status: authoritative boundary map for the merged Matrix OS state including UI/M
 | Area | Inside current Matrix OS? | Owner in this repo | Notes |
 |---|---:|---|---|
 | Python package baseline | Yes | Foundation / Packaging / CLI Baseline | Merged in PR #4 |
-| CLI shell and root commands | Yes | Foundation / Packaging / CLI Baseline | `curaops.cli.main` |
+| CLI shell and root commands | Yes | Foundation / Packaging / CLI Baseline | `conduvera.cli.main` |
 | CR lifecycle | Yes | Compliance Change Control | Merged in PR #5 |
 | CR evidence generation | Yes | Compliance Change Control | CCC evidence only |
 | Verification-case management | Yes | Compliance Change Control | Under `cr verification` |
@@ -50,8 +50,8 @@ Status: authoritative boundary map for the merged Matrix OS state including UI/M
 | ASPICE Support Utilities | Filesystem/project documents | ASPICE utilities should not require CCC/AAL runtime state |
 | Compliance Change Control | Foundation package/CLI baseline | CCC remains the CR lifecycle authority |
 | CLI commands | Corresponding module services | CLI should stay thin and not duplicate domain logic |
-| Future evidence adapters | `curaops.evidence.EvidenceProducer` protocol and Evidence Adapter Registry | Adapters may emit Matrix OS events but external projects remain separately maintainable |
-| Future runner/editor integrations | `curaops.harness.gateway` descriptors | Gateway metadata must remain generic and must not execute external runtimes |
+| Future evidence adapters | `conduvera.evidence.EvidenceProducer` protocol and Evidence Adapter Registry | Adapters may emit Matrix OS events but external projects remain separately maintainable |
+| Future runner/editor integrations | `conduvera.harness.gateway` descriptors | Gateway metadata must remain generic and must not execute external runtimes |
 
 ## Disallowed coupling
 

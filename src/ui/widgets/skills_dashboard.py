@@ -164,7 +164,7 @@ class SkillsDashboard(VerticalScroll):
         try:
             import sys
             sys.path.insert(0, str(Path.cwd()))
-            from curaops.skills.multi_agent_lock import MultiAgentLock
+            from conduvera.skills.multi_agent_lock import MultiAgentLock
             
             lock_mgr = MultiAgentLock()
             active_locks = lock_mgr.get_active_locks()
@@ -193,7 +193,7 @@ class SkillsDashboard(VerticalScroll):
         try:
             import sys
             sys.path.insert(0, str(Path.cwd()))
-            from curaops.skills.session_manager import AgentSessionManager
+            from conduvera.skills.session_manager import AgentSessionManager
             
             sm = AgentSessionManager()
             sessions = sm.list_sessions()
@@ -232,7 +232,7 @@ class SkillsDashboard(VerticalScroll):
         try:
             import sys
             sys.path.insert(0, str(Path.cwd()))
-            from curaops.skills.aspice_conflict_detector import ConflictDetector
+            from conduvera.skills.aspice_conflict_detector import ConflictDetector
             
             detector = ConflictDetector()
             conflicts = detector.detect_conflicts()
@@ -256,7 +256,7 @@ class SkillsDashboard(VerticalScroll):
         try:
             import sys
             sys.path.insert(0, str(Path.cwd()))
-            from curaops.skills.change_request import ChangeRequest
+            from conduvera.skills.change_request import ChangeRequest
             
             crs = ChangeRequest.list_all(limit=10)
             
@@ -285,7 +285,7 @@ class SkillsDashboard(VerticalScroll):
         try:
             import sys
             sys.path.insert(0, str(Path.cwd()))
-            from curaops.skills.safety_guard import SafetyGuard
+            from conduvera.skills.safety_guard import SafetyGuard
             
             sg = SafetyGuard()
             
@@ -306,7 +306,7 @@ class SkillsDashboard(VerticalScroll):
         try:
             import sys
             sys.path.insert(0, str(Path.cwd()))
-            from curaops.skills.pattern_learning import PatternLearningEngine
+            from conduvera.skills.pattern_learning import PatternLearningEngine
             
             pl = PatternLearningEngine()
             patterns = pl.load_all_patterns()

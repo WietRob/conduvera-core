@@ -113,7 +113,7 @@ class AccountableChange:
 # accountable_agent/intervention.py
 
 from typing import Tuple, Optional
-from curaops.skills.change_request import ChangeRequestService, CRStatus
+from conduvera.skills.change_request import ChangeRequestService, CRStatus
 
 class BIntervention:
     """Implements blocking logic from COMPLIANCE_CHANGE_CONTROL_RULES.md Section 9."""
@@ -585,8 +585,8 @@ def test_b_evidence_includes_bugfix_context():
 ### H.1 Current State (Provisional)
 
 ```
-curaops/skills/accountable-agent/__init__.py      # 518 lines, needs refactoring
-curaops/skills/aspice-link-manager/__init__.py    # Exists, reuse
+conduvera/skills/accountable-agent/__init__.py      # 518 lines, needs refactoring
+conduvera/skills/aspice-link-manager/__init__.py    # Exists, reuse
 ```
 
 > **C provisional code** (`change-request/__init__.py`) migration is in [COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md](./COMPLIANCE_CHANGE_CONTROL_IMPLEMENTATION_CONTRACT.md) Section H.

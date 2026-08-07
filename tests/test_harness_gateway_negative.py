@@ -17,19 +17,19 @@ from pathlib import Path
 
 import pytest
 
-from curaops.harness.registry import (
+from conduvera.harness.registry import (
     HarnessAdapterRegistry,
     HarnessCapabilityUnavailableError,
     ExecutionMode,
 )
-from curaops.harness.gateway import HarnessGatewayService
+from conduvera.harness.gateway import HarnessGatewayService
 
 # A minimal valid registry for positive control cases.
 VALID_REGISTRY = """\
 adapters:
   hermes:
     enabled: true
-    module: curaops.harness.hermes_adapter
+    module: conduvera.harness.hermes_adapter
     entry_point: HermesAdapter
     version: hermes-adapter.v1
     contract: CONDUVERA-GOAL-1.0
@@ -70,8 +70,8 @@ class TestGatewayNegative:
 
     def test_missing_module_fails_closed(self, tmp_path):
         content = VALID_REGISTRY.replace(
-            "module: curaops.harness.hermes_adapter",
-            "module: curaops.harness.no_such_module",
+            "module: conduvera.harness.hermes_adapter",
+            "module: conduvera.harness.no_such_module",
         )
         service = _service(tmp_path, content)
         result = service.start_session(adapter_id="hermes", task="x")
@@ -81,8 +81,8 @@ class TestGatewayNegative:
         # Adapter entry pointing at a module that does NOT implement the
         # HarnessAdapterProtocol surface.
         content = VALID_REGISTRY.replace(
-            "module: curaops.harness.hermes_adapter\n    entry_point: HermesAdapter",
-            "module: curaops.harness.registry\n    entry_point: HarnessAdapterRegistry",
+            "module: conduvera.harness.hermes_adapter\n    entry_point: HermesAdapter",
+            "module: conduvera.harness.registry\n    entry_point: HarnessAdapterRegistry",
         )
         service = _service(tmp_path, content)
         result = service.start_session(adapter_id="hermes", task="x")
@@ -100,7 +100,7 @@ class TestGatewayNegative:
         monkeypatch.delenv("CONDUVERA_HARNESS_REGISTRY", raising=False)
         reg = HarnessAdapterRegistry("/nonexistent/registry.yaml")
         assert reg.registry_path.is_file()
-        assert "curaops" in str(reg.registry_path)
+        assert "conduvera" in str(reg.registry_path)
 
     def test_execution_mode_required_no_default(self, tmp_path):
         # The service MUST NOT boot without an explicit execution mode.

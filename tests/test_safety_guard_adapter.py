@@ -8,9 +8,9 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from curaops.cli.main import app
-from curaops.evidence import EventEnvelope, EvidenceStore, ValidationError, validate_event_stream
-from curaops.evidence.adapters.safety_guard import (
+from conduvera.cli.main import app
+from conduvera.evidence import EventEnvelope, EvidenceStore, ValidationError, validate_event_stream
+from conduvera.evidence.adapters.safety_guard import (
     SAFETY_GUARD_EVENT_TYPES,
     convert_safety_guard_jsonl,
     translate_safety_guard_result,

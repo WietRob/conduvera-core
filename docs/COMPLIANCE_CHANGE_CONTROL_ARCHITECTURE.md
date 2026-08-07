@@ -69,11 +69,11 @@ Current gaps in typical development workflows:
 
 | Component | Current Source | Decision |
 |-----------|---------------|----------|
-| CR Datamodel | `curaops/skills/change-request/__init__.py` | **PROVISIONAL** — needs architecture alignment |
-| CR Service | `curaops/skills/change-request/__init__.py` | **PROVISIONAL** — extracted from Framework |
-| Evidence Generation | `curaops/skills/change-request/__init__.py` | **PROVISIONAL** — new code |
-| Traceability Validation | `curaops/skills/change-request/__init__.py` | **PROVISIONAL** — uses ASPICE Link Manager |
-| ASPICE Link Manager | `curaops/skills/aspice-link-manager/__init__.py` | **REUSE** — existing skill |
+| CR Datamodel | `conduvera/skills/change-request/__init__.py` | **PROVISIONAL** — needs architecture alignment |
+| CR Service | `conduvera/skills/change-request/__init__.py` | **PROVISIONAL** — extracted from Framework |
+| Evidence Generation | `conduvera/skills/change-request/__init__.py` | **PROVISIONAL** — new code |
+| Traceability Validation | `conduvera/skills/change-request/__init__.py` | **PROVISIONAL** — uses ASPICE Link Manager |
+| ASPICE Link Manager | `conduvera/skills/aspice-link-manager/__init__.py` | **REUSE** — existing skill |
 
 ### Framework Reuse Candidates
 

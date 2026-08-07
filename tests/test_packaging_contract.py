@@ -113,12 +113,12 @@ def test_console_scripts_preserve_matrix_os_app_entrypoints() -> None:
 
     assert scripts["matrix-os"] == "src.core.app:main"
     assert scripts["mxos"] == "src.core.app:main"
-    assert scripts["matrix-cli"] == "curaops.cli.main:main"
+    assert scripts["matrix-cli"] == "conduvera.cli.main:main"
 
 
-def test_setuptools_includes_matrix_os_and_curaops_packages() -> None:
+def test_setuptools_includes_matrix_os_and_conduvera_packages() -> None:
     """Editable/wheel installs include both the Matrix OS app and CuraOps CLI packages."""
     package_include = _setuptools_package_includes()
 
     assert "src*" in package_include
-    assert "curaops*" in package_include
+    assert "conduvera*" in package_include

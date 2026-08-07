@@ -1,5 +1,5 @@
 # gateway-models.yaml
-# Loaded by curaops/control/gateway/config.py via _load_yaml()
+# Loaded by conduvera/control/gateway/config.py via _load_yaml()
 # Key: model-name -> profile, backend, max_tokens, context_length
 
 models:

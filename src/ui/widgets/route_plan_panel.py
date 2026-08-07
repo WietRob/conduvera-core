@@ -14,7 +14,7 @@ from typing import Any
 
 from textual.widgets import Static
 
-from curaops.harness.route_plan_viewer import MatrixUiRoutePlanView, build_route_plan_view
+from conduvera.harness.route_plan_viewer import MatrixUiRoutePlanView, build_route_plan_view
 
 
 @dataclass(frozen=True)

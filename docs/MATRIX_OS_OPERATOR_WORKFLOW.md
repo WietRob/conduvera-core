@@ -15,13 +15,13 @@ This is a product-value slice, not another governance expansion. It connects exi
 Default local evidence-store convention:
 
 ```bash
-python3 -m curaops.cli.main harness status
+python3 -m conduvera.cli.main harness status
 ```
 
 Committed product-coherence fixture:
 
 ```bash
-python3 -m curaops.cli.main harness status --events tests/fixtures/evidence/operator_report/product_coherence.events.jsonl
+python3 -m conduvera.cli.main harness status --events tests/fixtures/evidence/operator_report/product_coherence.events.jsonl
 ```
 
 The command prints:

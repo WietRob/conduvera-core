@@ -103,7 +103,7 @@ AI-assisted code changes bypass the CR process:
 
 | Component | Location | Status |
 |-----------|----------|--------|
-| AccountableAgentService | `curaops/skills/accountable_agent/__init__.py` | **REVISION REQUIRED** — add active intervention |
+| AccountableAgentService | `conduvera/skills/accountable_agent/__init__.py` | **REVISION REQUIRED** — add active intervention |
 | AgentContext dataclass | Same file | **REVISION REQUIRED** |
 | ChangeIntent dataclass | Same file | **REVISION REQUIRED** |
 | Pre-flight check logic | Same file | **CREATE** — new |
@@ -114,7 +114,7 @@ AI-assisted code changes bypass the CR process:
 
 ```python
 # B's __init__.py
-from curaops.skills.change_request import (
+from conduvera.skills.change_request import (
     ChangeRequestService,
     submit_change_request,
     generate_cr_evidence,

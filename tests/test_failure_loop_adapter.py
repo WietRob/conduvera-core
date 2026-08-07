@@ -8,14 +8,14 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from curaops.cli.main import app
-from curaops.evidence import EvidenceStore, ValidationError, validate_event_stream
-from curaops.evidence.adapters.failure_loop import (
+from conduvera.cli.main import app
+from conduvera.evidence import EvidenceStore, ValidationError, validate_event_stream
+from conduvera.evidence.adapters.failure_loop import (
     FAILURE_LOOP_EVENT_TYPES,
     convert_failure_loop_jsonl,
     translate_failure_loop_result,
 )
-from curaops.evidence.adapters.registry import get_adapter_descriptor
+from conduvera.evidence.adapters.registry import get_adapter_descriptor
 
 runner = CliRunner()
 
@@ -172,13 +172,13 @@ def test_registry_descriptor_for_failure_loop() -> None:
 
     assert descriptor.name == "failure-driven-loop Thin Adapter"
     assert descriptor.source_project == "failure-driven-loop"
-    assert descriptor.module_path == "curaops.evidence.adapters.failure_loop"
+    assert descriptor.module_path == "conduvera.evidence.adapters.failure_loop"
     assert descriptor.docs_path == "docs/MATRIX_OS_FAILURE_LOOP_ADAPTER.md"
     assert descriptor.input_contract == "failure-loop result JSONL schema_version failure-loop.result.v1"
     assert descriptor.execution_mode == "translation-only"
     assert descriptor.production_status == "local-contract-only / not-production-runtime"
     assert descriptor.external_repo_policy == "standalone; not vendored; not executed by Matrix OS"
     assert descriptor.cli_commands == (
-        "python3 -m curaops.cli.main evidence convert-failure-loop INPUT.jsonl OUTPUT.jsonl",
+        "python3 -m conduvera.cli.main evidence convert-failure-loop INPUT.jsonl OUTPUT.jsonl",
     )
     assert descriptor.supported_event_types == ("failure.observed", "rule.proposed")

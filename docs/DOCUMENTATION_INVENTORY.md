@@ -42,8 +42,8 @@ This inventory classifies authoritative and historical Matrix OS documents acros
 | `docs/ACCOUNTABLE_AGENT_LAYER_IMPLEMENTATION.md` | Current AAL implementation | Keep | Describes merged PR #6 files and behavior |
 | `docs/ACCOUNTABLE_AGENT_LAYER_PROCESS.md` | Current AAL process | Keep | Describes merged PR #6 process |
 | `docs/ACCOUNTABLE_AGENT_LAYER_RULES.md` | Current AAL rules | Keep | Describes merged PR #6 rules |
-| `curaops/skills/aspice_conflict_detector/SKILL.md` | Current ASPICE utility doc | Keep | Describes merged PR #7 conflict detector |
-| `curaops/skills/aspice_link_manager/README.md` | Current ASPICE utility doc | Keep | Describes merged PR #7 link manager |
+| `conduvera/skills/aspice_conflict_detector/SKILL.md` | Current ASPICE utility doc | Keep | Describes merged PR #7 conflict detector |
+| `conduvera/skills/aspice_link_manager/README.md` | Current ASPICE utility doc | Keep | Describes merged PR #7 link manager |
 | `docs/QUICKSTART.md` | Historical / deprecated | Deprecate | Describes older app-centric quickstart; current CLI docs are authoritative |
 | `docs/UI_DESIGN_COMPARISON.md` | Historical / deprecated | Deprecate | UI comparison is not merged runtime scope |
 | `docs/PHASE1_ENHANCEMENTS.md` | Historical / deprecated | Deprecate | Older UI/phase planning document; not current architecture |

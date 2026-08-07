@@ -10,32 +10,32 @@
 
 | What | Decision | Rationale |
 |------|----------|-----------|
-| `curaops/skills/aspice-link-manager/` | KEEP AS-IS | Reuse per C-IMPLEMENTATION_CONTRACT §C.1 |
-| `curaops/cli/main.py` | KEEP | CLI framework reuse per §C.1 |
-| `curaops/cli/completion.py` | KEEP | Shell completion utility |
-| `curaops/skills/session-manager/` | KEEP | Reference only, per §C.1 |
+| `conduvera/skills/aspice-link-manager/` | KEEP AS-IS | Reuse per C-IMPLEMENTATION_CONTRACT §C.1 |
+| `conduvera/cli/main.py` | KEEP | CLI framework reuse per §C.1 |
+| `conduvera/cli/completion.py` | KEEP | Shell completion utility |
+| `conduvera/skills/session-manager/` | KEEP | Reference only, per §C.1 |
 
 ## B) FREEZE AS LEGACY (do not delete, do not import from new code)
 
 | What | Decision | Rationale |
 |------|----------|-----------|
-| `curaops/skills/change-request/` | FREEZE | Old v0.x prototype. 6/9 states, 4/20 fields, 0 bugfix rules. Tests test prototype, not docs. |
-| `curaops/skills/change_request` symlink | FREEZE | Packaging hack for hyphenated dir. Will be replaced. |
-| `curaops/skills/accountable-agent/` | FREEZE | Accountable Agent Layer is out of scope for this step. Will be rebuilt separately. |
-| `curaops/skills/accountable_agent` symlink | FREEZE | Same packaging hack. |
-| `curaops/cli/commands/skills.py` (Compliance Change Control / Accountable Agent Layer sections) | FREEZE | CLI wiring for old prototype. Will be replaced per §G. |
+| `conduvera/skills/change-request/` | FREEZE | Old v0.x prototype. 6/9 states, 4/20 fields, 0 bugfix rules. Tests test prototype, not docs. |
+| `conduvera/skills/change_request` symlink | FREEZE | Packaging hack for hyphenated dir. Will be replaced. |
+| `conduvera/skills/accountable-agent/` | FREEZE | Accountable Agent Layer is out of scope for this step. Will be rebuilt separately. |
+| `conduvera/skills/accountable_agent` symlink | FREEZE | Same packaging hack. |
+| `conduvera/cli/commands/skills.py` (Compliance Change Control / Accountable Agent Layer sections) | FREEZE | CLI wiring for old prototype. Will be replaced per §G. |
 
 ## C) REPLACE COMPLETELY
 
 | What | Old | New |
 |------|-----|-----|
-| C core package | `curaops/skills/change-request/__init__.py` (monolith) | `curaops/skills/change_request/` (proper Python package with submodules) |
-| C CLI commands | Inline in `curaops/cli/commands/skills.py` | `curaops/cli/commands/cr.py` (per §B.2) |
+| C core package | `conduvera/skills/change-request/__init__.py` (monolith) | `conduvera/skills/change_request/` (proper Python package with submodules) |
+| C CLI commands | Inline in `conduvera/cli/commands/skills.py` | `conduvera/cli/commands/cr.py` (per §B.2) |
 
 ## D) Exact Target Module Tree
 
 ```
-curaops/skills/change_request/              # Python-package-safe (underscore)
+conduvera/skills/change_request/              # Python-package-safe (underscore)
 ├── __init__.py                             # Public API re-exports
 ├── models.py                               # CRStatus, ChangeType, ImpactLevel, SafetyImpact,
 │                                           # VerificationType, VerificationStatus,
@@ -53,7 +53,7 @@ curaops/skills/change_request/              # Python-package-safe (underscore)
     ├── test_persistence.py                 # Markdown read/write roundtrip
     └── test_contracts.py                   # 8 required contract scenarios from spec
 
-curaops/cli/commands/
+conduvera/cli/commands/
 └── cr.py                                   # C CLI (replaces cr_app section in skills.py)
 ```
 

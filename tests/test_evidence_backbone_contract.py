@@ -8,9 +8,9 @@ from pathlib import Path
 from typer.testing import CliRunner
 import pytest
 
-from curaops.cli.main import app
+from conduvera.cli.main import app
 
-from curaops.evidence import (
+from conduvera.evidence import (
     ADAPTER_EVENT_TYPES,
     CORE_EVENT_TYPES,
     EventEnvelope,

@@ -1,5 +1,5 @@
 # gateway-policies.yaml
-# Loaded by curaops/control/gateway/config.py via _load_yaml()
+# Loaded by conduvera/control/gateway/config.py via _load_yaml()
 # Key: policy-name -> rules (cloud_block, sensitive_class_check, etc.)
 
 policies:

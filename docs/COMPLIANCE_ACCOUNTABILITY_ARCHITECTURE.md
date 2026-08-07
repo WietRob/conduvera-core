@@ -109,8 +109,8 @@ B enforces this for AI-assisted work.
 
 | Component | Location | Status |
 |-----------|----------|--------|
-| CR Service | `curaops/skills/change_request/__init__.py` | **REVISION REQUIRED** — align with Framework patterns |
-| ASPICE Link Manager | `curaops/skills/aspice_link_manager/__init__.py` | **REUSE** — bidirectional link management |
+| CR Service | `conduvera/skills/change_request/__init__.py` | **REVISION REQUIRED** — align with Framework patterns |
+| ASPICE Link Manager | `conduvera/skills/aspice_link_manager/__init__.py` | **REUSE** — bidirectional link management |
 | CR Template | New in C | **CREATE** — based on Framework v3.1 TEIL 10 |
 | Quality Checker | New in C | **CREATE** — AI-supported validation |
 | Impact Classifier | New in C | **CREATE** — level detection |
@@ -486,7 +486,7 @@ AI-assisted code changes bypass the CR process:
 
 | Component | Location | Status |
 |-----------|----------|--------|
-| AccountableAgentService | `curaops/skills/accountable_agent/__init__.py` | **REVISION REQUIRED** — add active intervention |
+| AccountableAgentService | `conduvera/skills/accountable_agent/__init__.py` | **REVISION REQUIRED** — add active intervention |
 | AgentContext dataclass | Same file | **REVISION REQUIRED** |
 | ChangeIntent dataclass | Same file | **REVISION REQUIRED** |
 | Pre-flight check logic | Same file | **CREATE** — new |
@@ -497,7 +497,7 @@ AI-assisted code changes bypass the CR process:
 
 ```python
 # B's __init__.py
-from curaops.skills.change_request import (
+from conduvera.skills.change_request import (
     ChangeRequestService,
     submit_change_request,
     generate_cr_evidence,

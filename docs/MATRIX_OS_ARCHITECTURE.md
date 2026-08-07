@@ -12,25 +12,25 @@ This document describes the current merged repository state. It is not a product
 Matrix OS Harness
 ├── Foundation / Packaging / CLI Baseline
 │   ├── Python package: curaops
-│   └── CLI entrypoint: python3 -m curaops.cli.main
+│   └── CLI entrypoint: python3 -m conduvera.cli.main
 ├── Compliance Change Control
-│   ├── Package: curaops.skills.change_request
+│   ├── Package: conduvera.skills.change_request
 │   └── CLI: matrix CLI namespace `cr`
 ├── Accountable Agent Layer
-│   ├── Package: curaops.skills.accountable_agent
+│   ├── Package: conduvera.skills.accountable_agent
 │   └── CLI: matrix CLI namespace `accountable`
 ├── ASPICE Support Utilities
-│   ├── Package: curaops.skills.aspice_conflict_detector
-│   ├── Package: curaops.skills.aspice_link_manager
+│   ├── Package: conduvera.skills.aspice_conflict_detector
+│   ├── Package: conduvera.skills.aspice_link_manager
 │   └── CLI: matrix CLI namespace `aspice`
 └── Evidence Backbone Adapter Contract
-    ├── Package: curaops.evidence
+    ├── Package: conduvera.evidence
     ├── Store: changes/evidence/events.jsonl
     ├── Adapters: agent-evidence-plane, Safety Guard, failure-loop
-    ├── Registry: curaops.evidence.adapters.registry
+    ├── Registry: conduvera.evidence.adapters.registry
     └── CLI: matrix CLI namespace `evidence`
 └── Harness Gateway Contract
-    ├── Package: curaops.harness.gateway
+    ├── Package: conduvera.harness.gateway
     └── Scope: descriptors only; no runtime execution
 ```
 
@@ -63,12 +63,12 @@ Product-coherence validation adds scenario tests showing that translation-only e
 Authoritative command discovery is the CLI itself:
 
 ```bash
-python3 -m curaops.cli.main --help
-python3 -m curaops.cli.main cr --help
-python3 -m curaops.cli.main accountable --help
-python3 -m curaops.cli.main aspice --help
-python3 -m curaops.cli.main scaffold --help
-python3 -m curaops.cli.main evidence --help
+python3 -m conduvera.cli.main --help
+python3 -m conduvera.cli.main cr --help
+python3 -m conduvera.cli.main accountable --help
+python3 -m conduvera.cli.main aspice --help
+python3 -m conduvera.cli.main scaffold --help
+python3 -m conduvera.cli.main evidence --help
 ```
 
 Current root commands:

@@ -47,7 +47,7 @@ Die folgenden Skills sind in der Planung aber nicht implementiert:
 
 Es gibt kein automatisiertes Bootstrap-Skript fuer die Pi-Umgebung. Folgendes fehlt:
 
-- Automatische Verzeichniserstellung (`.curaops/control/`, `.captain/state/streams/`)
+- Automatische Verzeichniserstellung (`.conduvera/control/`, `.captain/state/streams/`)
 - Initiale Konfigurationsdatei-Generierung (`gates.yaml`, Gateway-Config)
 - Registry-Initialisierung
 - Erster Health-Check

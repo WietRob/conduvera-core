@@ -23,11 +23,11 @@
 
 | Datei | Pfad | Zweck | Status |
 |-------|------|-------|--------|
-| CLI Main | `curaops/cli/main.py` | Entry Point für CLI | ✅ |
-| CLI Commands | `curaops/cli/commands/skills.py` | 6 Command Groups | ✅ |
-| CLI Init | `curaops/cli/__init__.py` | Package Marker | ✅ |
-| Commands Init | `curaops/cli/commands/__init__.py` | Package Marker | ✅ |
-| Vergleichstest | `curaops/tests/test_skills_cli_comparison.py` | Hermes vs CLI Test | ✅ |
+| CLI Main | `conduvera/cli/main.py` | Entry Point für CLI | ✅ |
+| CLI Commands | `conduvera/cli/commands/skills.py` | 6 Command Groups | ✅ |
+| CLI Init | `conduvera/cli/__init__.py` | Package Marker | ✅ |
+| Commands Init | `conduvera/cli/commands/__init__.py` | Package Marker | ✅ |
+| Vergleichstest | `conduvera/tests/test_skills_cli_comparison.py` | Hermes vs CLI Test | ✅ |
 
 ### 2.2 Dokumentation
 
@@ -76,13 +76,13 @@ d0dd77f feat(cli): Fix CLI commands for all 7 Skills + Comparison Test
 ┌─────────────────────────────────────────┐
 │         Matrix OS CLI Layer             │
 │  ┌─────────────────────────────────┐    │
-│  │  curaops/cli/main.py            │    │
+│  │  conduvera/cli/main.py            │    │
 │  │  - Typer App                    │    │
 │  │  - Command Routing              │    │
 │  └─────────────────────────────────┘    │
 │                   │                     │
 │  ┌─────────────────────────────────┐    │
-│  │  curaops/cli/commands/skills.py │    │
+│  │  conduvera/cli/commands/skills.py │    │
 │  │  - safety_app                   │    │
 │  │  - cr_app                       │    │
 │  │  - session_app                  │    │
@@ -92,7 +92,7 @@ d0dd77f feat(cli): Fix CLI commands for all 7 Skills + Comparison Test
 │  └─────────────────────────────────┘    │
 │                   │                     │
 │  ┌─────────────────────────────────┐    │
-│  │  curaops/skills/*/              │    │
+│  │  conduvera/skills/*/              │    │
 │  │  - Skill Implementierungen      │    │
 │  └─────────────────────────────────┘    │
 └─────────────────────────────────────────┘
@@ -106,7 +106,7 @@ d0dd77f feat(cli): Fix CLI commands for all 7 Skills + Comparison Test
 
 ```
 /home/roberto_schmidt/projects/matrix-os/
-├── curaops/
+├── conduvera/
 │   ├── cli/
 │   │   ├── __init__.py
 │   │   ├── main.py                 ← CLI Entry Point
@@ -158,7 +158,7 @@ d0dd77f feat(cli): Fix CLI commands for all 7 Skills + Comparison Test
 
 ### 5.1 Test-Ergebnisse
 
-**Vergleichstest:** `curaops/tests/test_skills_cli_comparison.py`
+**Vergleichstest:** `conduvera/tests/test_skills_cli_comparison.py`
 
 | Skill | Hermes (Python) | Matrix UI (CLI) | Status |
 |-------|-----------------|-----------------|--------|
@@ -177,19 +177,19 @@ d0dd77f feat(cli): Fix CLI commands for all 7 Skills + Comparison Test
 ```bash
 # In Matrix OS
 cd /home/roberto_schmidt/projects/matrix-os
-python -m curaops.tests.test_skills_cli_comparison
+python -m conduvera.tests.test_skills_cli_comparison
 
 # Oder einzelne Skills testen
-python -m curaops.cli.main safety check /tmp/test.txt --operation delete
-python -m curaops.cli.main cr create --title "Test" --description "Test CR"
+python -m conduvera.cli.main safety check /tmp/test.txt --operation delete
+python -m conduvera.cli.main cr create --title "Test" --description "Test CR"
 ```
 
 ### 5.3 CLI Hilfe
 
 ```bash
-python -m curaops.cli.main --help
-python -m curaops.cli.main safety --help
-python -m curaops.cli.main cr --help
+python -m conduvera.cli.main --help
+python -m conduvera.cli.main safety --help
+python -m conduvera.cli.main cr --help
 ```
 
 ---
@@ -200,34 +200,34 @@ python -m curaops.cli.main cr --help
 
 ```bash
 # Safety Guard (P1-Critical)
-python -m curaops.cli.main safety check /tmp/test.txt --operation delete
-python -m curaops.cli.main safety check .git --operation delete  # 🚫 BLOCKED
+python -m conduvera.cli.main safety check /tmp/test.txt --operation delete
+python -m conduvera.cli.main safety check .git --operation delete  # 🚫 BLOCKED
 
 # Change Request
-python -m curaops.cli.main cr create \
+python -m conduvera.cli.main cr create \
     --title "Fix auth bug" \
     --description "Fixed login issue" \
     --scope "src/auth.py" \
     --priority HIGH
 
 # Session Manager
-python -m curaops.cli.main session start \
+python -m conduvera.cli.main session start \
     --agent cursor \
     --model claude-sonnet \
     --prompt "Refactor auth module"
-python -m curaops.cli.main session status
-python -m curaops.cli.main session list
+python -m conduvera.cli.main session status
+python -m conduvera.cli.main session list
 
 # ASPICE Compliance
-python -m curaops.cli.main aspice check --path ./myproject
-python -m curaops.cli.main aspice link --req SW-REQ-001 --file src/main.py
+python -m conduvera.cli.main aspice check --path ./myproject
+python -m conduvera.cli.main aspice link --req SW-REQ-001 --file src/main.py
 
 # Multi-Agent Lock
-python -m curaops.cli.main lock claim --file src/payment.rs --agent cursor
-python -m curaops.cli.main lock status --path src/payment.rs
+python -m conduvera.cli.main lock claim --file src/payment.rs --agent cursor
+python -m conduvera.cli.main lock status --path src/payment.rs
 
 # Pattern Learning
-python -m curaops.cli.main pattern record "refactor_function" \
+python -m conduvera.cli.main pattern record "refactor_function" \
     --context "def old(): pass" \
     --success
 ```
@@ -236,16 +236,16 @@ python -m curaops.cli.main pattern record "refactor_function" \
 
 ```bash
 # In ~/.bashrc oder ~/.zshrc
-alias matrix='python -m curaops.cli.main'
-alias m-safety='python -m curaops.cli.main safety'
-alias m-cr='python -m curaops.cli.main cr'
-alias m-session='python -m curaops.cli.main session'
-alias m-aspice='python -m curaops.cli.main aspice'
-alias m-lock='python -m curaops.cli.main lock'
-alias m-pattern='python -m curaops.cli.main pattern'
+alias matrix='python -m conduvera.cli.main'
+alias m-safety='python -m conduvera.cli.main safety'
+alias m-cr='python -m conduvera.cli.main cr'
+alias m-session='python -m conduvera.cli.main session'
+alias m-aspice='python -m conduvera.cli.main aspice'
+alias m-lock='python -m conduvera.cli.main lock'
+alias m-pattern='python -m conduvera.cli.main pattern'
 
 # Safe delete
-alias rm-safe='python -m curaops.cli.main safety validate-delete'
+alias rm-safe='python -m conduvera.cli.main safety validate-delete'
 ```
 
 ---
@@ -284,29 +284,29 @@ alias rm-safe='python -m curaops.cli.main safety validate-delete'
 ```bash
 # Lösung: Von Matrix OS Root ausführen
 cd /home/roberto_schmidt/projects/matrix-os
-python -m curaops.cli.main ...
+python -m conduvera.cli.main ...
 ```
 
 **Problem:** `ImportError: safety_guard skill not found`
 ```bash
 # Lösung: Prüfe ob Skills existieren
-ls curaops/skills/safety-guard/
+ls conduvera/skills/safety-guard/
 ```
 
 **Problem:** CLI timeout bei ASPICE Link
 ```bash
 # Lösung: Nutze Python API direkt
-python -c "from curaops.skills.aspice_link_manager import ASPICELinkManager; ..."
+python -c "from conduvera.skills.aspice_link_manager import ASPICELinkManager; ..."
 ```
 
 ### 8.2 Debug Mode
 
 ```bash
 # Mit Python -v für verbose
-python -v -m curaops.cli.main safety check /tmp/test.txt
+python -v -m conduvera.cli.main safety check /tmp/test.txt
 
 # Mit Logging
-LOG_LEVEL=DEBUG python -m curaops.cli.main ...
+LOG_LEVEL=DEBUG python -m conduvera.cli.main ...
 ```
 
 ---
@@ -317,7 +317,7 @@ LOG_LEVEL=DEBUG python -m curaops.cli.main ...
 
 - `docs/architecture/ADR-007_Skill_CLI_Integration.md` - Architektur-Entscheidung
 - `docs/architecture/CLI_SKILLS_INTEGRATION.md` - Nutzungsanleitung
-- `curaops/skills/*/README.md` - Skill-spezifische Doku
+- `conduvera/skills/*/README.md` - Skill-spezifische Doku
 
 ### 9.2 Externe Referenzen
 

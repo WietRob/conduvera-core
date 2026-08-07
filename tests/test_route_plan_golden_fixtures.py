@@ -7,8 +7,8 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from curaops.cli.main import app
-from curaops.harness.route_plan import plan_route, route_plan_to_dict
+from conduvera.cli.main import app
+from conduvera.harness.route_plan import plan_route, route_plan_to_dict
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "harness" / "route_plan"
 
