@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-08-07T14:31:38.660637+00:00",
+  "goal": "rebaseline-platform-truth-and-build-the-first-isolated-modular-release-candidate",
+  "abschlussstatus": {
+    "CONDUVERA_CORE_MAIN": "CANONICAL_AND_CI_GREEN",
+    "CONDUVERA_PLATFORM": "REVIEWED_LOCAL_COMPOSITION_AUTHORITY",
+    "MODULAR_RELEASE_CANDIDATE_V1": "ISOLATED_LIVE_PROVEN",
+    "CORE_STANDALONE": "PROVEN",
+    "HERMES_ADAPTER_STANDALONE": "PROVEN",
+    "OPTIONAL_ADAPTER_REMOVAL": "PROVEN",
+    "GITHUB_DISTRIBUTION": "PARTIAL (Platform- und Adapter-Remote sowie Naming Gate offen)",
+    "CONDUVERA_CONTRACTS": "NOT_STARTED",
+    "OPERATIONAL_PRODUCTION": "NOT_YET"
+  },
+  "heads": {
+    "core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "adapter": "feac07eb53eb1533d21a460569b6d392aa5f4f7b",
+    "platform": "61beaec"
+  },
+  "release_id": "core-2026-08-07-rc1"
+}

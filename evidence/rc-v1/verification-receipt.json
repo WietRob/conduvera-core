@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-08-07T14:31:05.734786+00:00",
+  "release_id": "core-2026-08-07-rc1",
+  "candidate_dir": "~/.local/share/conduvera/releases/core/core-2026-08-07-rc1",
+  "contents": [
+    "venv/ (eigene)",
+    "core-wheel",
+    "adapter-wheel",
+    "registry.yaml",
+    "release-manifest.json",
+    "platform.lock.snapshot.yaml"
+  ],
+  "verified": {
+    "cli_exit_0": true,
+    "package_resource_registry": "site-packages (kein Override/PYTHONPATH)",
+    "gateway_loads_hermes": "HermesAdapter via HarnessGatewayService",
+    "hermes_live_pong": "await_completion completed (exit 0)",
+    "evidence_schema": "MXOS-EVIDENCE-1.0.0",
+    "source_in_syspath": [],
+    "source_imported_modules": []
+  },
+  "removal_test": {
+    "core_starts_without_adapter": true,
+    "hermes_capability": "CAPABILITY_UNAVAILABLE fail-closed"
+  },
+  "rollback": {
+    "prod_registry_sha256": "1b9c1de22a3123eb",
+    "prod_release": "unveraendert",
+    "state_migration_apply": "keiner (Dry-run nur)",
+    "ods": "text",
+    "litellm": "1c3d2b96825559fa",
+    "restprozesse": 0,
+    "claims": 0,
+    "leases": 0,
+    "current_symlink": "kein produktiver Symlink angefasst"
+  }
+}

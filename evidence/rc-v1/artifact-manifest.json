@@ -1,0 +1,20 @@
+{
+  "core": {
+    "wheel": "matrix_os-0.1.0-py3-none-any.whl",
+    "wheel_sha256": "0a6e1ae595b9786a0947f5291918170674b9e9711e444e0d37a63d87d71fa6c4",
+    "git_commit": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "source_tree_hash": "1eb5f2ed89573fdf2e1daabf00b5b66a965c8c24",
+    "python": "3.11.15",
+    "build_cmd": "python3 -m pip wheel /home/roberto_schmidt/projects/matrix-os -w /tmp/rc-artifacts --no-deps",
+    "built_at": "2026-08-07T14:29:08.552798+00:00"
+  },
+  "adapter": {
+    "wheel": "conduvera_hermes_adapter-0.1.0-py3-none-any.whl",
+    "wheel_sha256": "9a0192cee207495b4b7ece78de0f5857dbff3cf666f57574f52f169f2af73452",
+    "git_commit": "feac07eb53eb1533d21a460569b6d392aa5f4f7b",
+    "source_tree_hash": "ff70af4f35dfd6f29108938c5bb7dead51480731",
+    "python": "3.11.15",
+    "build_cmd": "python3 -m pip wheel /home/roberto_schmidt/projects/conduvera-hermes-adapter -w /tmp/rc-artifacts --no-deps",
+    "built_at": "2026-08-07T14:29:08.554639+00:00"
+  }
+}
