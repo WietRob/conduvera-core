@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-08-07T17:52:02.023407+00:00",
+  "goal": "replace-the-mutated-rc1-with-a-clean-immutable-rc2-and-close-release-provenance",
+  "rc1": {
+    "status": "SUPERSEDED_NON_IMMUTABLE",
+    "reason": "F1 repair mutated existing release directory"
+  },
+  "rc2": {
+    "status": "IMMUTABLE_ISOLATED_LIVE_PROVEN",
+    "path": "~/.local/share/conduvera/releases/core/core-2026-08-07-rc2",
+    "read_only": true
+  },
+  "heads": {
+    "core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "adapter": "86e33ef (Version 0.1.1, clean tree)",
+    "platform": "(siehe release-manifest.json — NICHT selbstreferenziell im Lock)"
+  },
+  "artifacts": {
+    "core_wheel_sha256": "eeb659be93b3b430 (reproduzierbar)",
+    "adapter_wheel_sha256": "3aab59b3cab6e559 (reproduzierbar)"
+  }
+}

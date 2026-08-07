@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-08-07T17:51:50.633492+00:00",
+  "release_id": "core-2026-08-07-rc2",
+  "status": "IMMUTABLE_ISOLATED_LIVE_PROVEN",
+  "candidate_dir": "~/.local/share/conduvera/releases/core/core-2026-08-07-rc2 (read-only, atomar gemovt aus /tmp/rc2-staging)",
+  "verified_at_final_rc2": {
+    "cli_exit_0": true,
+    "package_resource_registry": "site-packages (kein Override)",
+    "gateway_loads_hermes": true,
+    "hermes_live_pong": "mxfix_b726918fff00 completed (exit 0)",
+    "evidence_schema": "MXOS-EVIDENCE-1.0.0",
+    "source_in_syspath": [],
+    "source_imported_modules": []
+  },
+  "removal_test": {
+    "at_copy": "/tmp/rc2-removal-copy (vollständige Kopie)",
+    "core_starts_without_adapter": true,
+    "hermes_capability": "CAPABILITY_UNAVAILABLE fail-closed",
+    "original_rc2_byte_identical": true
+  },
+  "reproducible_builds": {
+    "core": {
+      "sha": "eeb659be93b3b430",
+      "double_build_identical": true,
+      "SOURCE_DATE_EPOCH": "aus 63fb334-Commit-Zeit"
+    },
+    "adapter": {
+      "sha": "3aab59b3cab6e559",
+      "double_build_identical": true,
+      "SOURCE_DATE_EPOCH": "aus 86e33ef-Commit-Zeit"
+    }
+  },
+  "invariants": {
+    "rc1_frozen": "SUPERSEDED_NON_IMMUTABLE (rc1-freeze-receipt.json, 3238 Dateien gehasht)",
+    "rc2_read_only": true,
+    "prod_release": "unveraendert (1b9c1de2)",
+    "current_symlink": "kein Wechsel",
+    "state_migration": "keine",
+    "ods": "text",
+    "litellm": "1c3d2b96"
+  }
+}

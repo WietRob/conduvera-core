@@ -1,0 +1,70 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "conduvera-hermes-adapter-0.1.1",
+  "documentNamespace": "https://local/conduvera-hermes-adapter/0.1.1/20260807174931",
+  "creationInfo": {
+    "created": "2026-08-07T17:49:31.339321+00:00",
+    "creators": [
+      "Tool: conduvera-rc2-build"
+    ]
+  },
+  "packages": [
+    {
+      "name": "conduvera-hermes-adapter",
+      "versionInfo": "0.1.1",
+      "SPDXID": "SPDXRef-PACKAGE-CONDUVERA-HERMES-ADAPTER",
+      "licenseConcluded": "LicenseRef-Proprietary",
+      "licenseDeclared": "LicenseRef-Proprietary",
+      "copyrightText": "Copyright (c) 2026 WietRob",
+      "filesAnalyzed": true,
+      "supplier": "WietRob"
+    }
+  ],
+  "files": [
+    {
+      "fileName": "./conduvera_hermes_adapter/__init__.py",
+      "SPDXID": "SPDXRef-FILE-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6e89aaed0a8034aa680f95f58be31653850c84bb74046d2dde2585f396531d83"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-Proprietary",
+      "copyrightText": "Copyright (c) 2026 WietRob"
+    },
+    {
+      "fileName": "./conduvera_hermes_adapter/contracts.py",
+      "SPDXID": "SPDXRef-FILE-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ad845bc3856941a6d33e7d1421a2472ad1ca21b0d8895984a4fa0f1a81018b88"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-Proprietary",
+      "copyrightText": "Copyright (c) 2026 WietRob"
+    },
+    {
+      "fileName": "./conduvera_hermes_adapter/hermes_adapter.py",
+      "SPDXID": "SPDXRef-FILE-2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c2b2521c841dff11d2bead5e0387c4123d3c65d01c9e8e86db9fada898344bae"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-Proprietary",
+      "copyrightText": "Copyright (c) 2026 WietRob"
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-PACKAGE-CONDUVERA-HERMES-ADAPTER"
+    }
+  ]
+}

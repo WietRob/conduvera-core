@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-08-07T17:49:31.426961+00:00",
+  "package": "conduvera-hermes-adapter",
+  "version": "0.1.1",
+  "source_provenance": "Uebernommen aus matrix-os-wt-goal-contract @ 2d6641e (curaops/harness/hermes_adapter.py, HARNESS-002); Weiterentwicklung im Adapter-Repo (feac07e -> 0.1.1)",
+  "current_head": "feac07eb53eb1533d21a460569b6d392aa5f4f7b",
+  "license": "Proprietary (LICENSE); keine Apache-Komponenten im Produktbestand; Apache-2.0 nur als Referenztext in LICENSES/",
+  "sbom": "SBOM.spdx.json",
+  "third_party": "THIRD_PARTY_NOTICES.md (keine Drittkomponenten)"
+}
