@@ -1,0 +1,216 @@
+{
+  "goal": "rebaseline-existing-matrix-os-conduvera-ui-pi-and-operator",
+  "generated_at": "2026-08-07T06:56:45.389378+00:00",
+  "audit_basis": {
+    "matrix_os": {
+      "repo": "~/projects/matrix-os",
+      "branch": "remote-doctor-base",
+      "head": "e5b7e9b",
+      "tracked_files": 272,
+      "py_files": 151,
+      "tests": 207
+    },
+    "matrix_os_harness": {
+      "repo": "~/projects/matrix-os-harness",
+      "branch": "main",
+      "head": "b2dfbb1",
+      "note": "aeltester Checkout desselben Repos (Vorfahre von e5b7e9b), 709 Dateien inkl. venv/"
+    },
+    "buildroom_slice": {
+      "repo": "~/projects/matrix-os-wt-buildroom-slice",
+      "branch": "task/buildroom-legacy-baseline",
+      "head": "95c363c",
+      "tracked": 342,
+      "tests": 215
+    },
+    "goal_contract": {
+      "repo": "~/projects/matrix-os-wt-goal-contract",
+      "branch": "task/goal-contract-fixture",
+      "head": "2d6641e",
+      "tracked": 627,
+      "tests": 412
+    },
+    "peekxd": {
+      "repo": "~/projects/peekxd-linux-computer-use",
+      "branch": "main",
+      "head": "fe63cf9",
+      "files": 8937
+    },
+    "file_count_note": "312 getrackte Dateien sind mit keiner Zaehlweise reproduzierbar; git ls-files = 272, find ohne Caches = 278; 151 .py stimmt exakt."
+  },
+  "a1_salvage_audit": {
+    "capabilities": 17,
+    "summary": [
+      {
+        "id": "C01",
+        "name": "TUI-Kern (Textual)",
+        "status": "REUSED",
+        "empfehlung": "KEEP",
+        "einstieg": "python -m src.core.app / matrix-os / mxos"
+      },
+      {
+        "id": "C02",
+        "name": "CLI-Entrypoints",
+        "status": "REUSED",
+        "empfehlung": "KEEP",
+        "einstieg": "matrix-cli <ns> <cmd>"
+      },
+      {
+        "id": "C03",
+        "name": "Route-Plan (Panel/Viewer/Artifacts)",
+        "status": "REUSED",
+        "empfehlung": "KEEP",
+        "einstieg": "matrix-cli harness route-plan",
+        "tests": 60
+      },
+      {
+        "id": "C04",
+        "name": "Harness Gateway (Boundary)",
+        "status": "SCAFFOLD_ONLY->PARTIAL",
+        "empfehlung": "PORT",
+        "note": "e5b7e9b nur Descriptors runtime_implemented=False; goal-contract HarnessGatewayService RELEASE_CANDIDATE"
+      },
+      {
+        "id": "C05",
+        "name": "Control-Layer (Registry/Task/Session ALT)",
+        "status": "SUPERSEDED",
+        "empfehlung": "ARCHIVE"
+      },
+      {
+        "id": "C06",
+        "name": "AI-Gateway (control/gateway ALT)",
+        "status": "SUPERSEDED",
+        "empfehlung": "ARCHIVE",
+        "note": "abgeloest durch ODS/LiteLLM"
+      },
+      {
+        "id": "C07",
+        "name": "Adapter (Execution-Backends)",
+        "status": "OLD_ONLY/REUSED",
+        "empfehlung": "MERGE",
+        "note": "hermes_adapter live; Codex/OpenCode DESIGNED_ONLY"
+      },
+      {
+        "id": "C08",
+        "name": "Evidence Backbone",
+        "status": "REUSED",
+        "empfehlung": "KEEP",
+        "tests": 77,
+        "schema": "MXOS-EVIDENCE-1.0.0"
+      },
+      {
+        "id": "C09",
+        "name": "Reports/Operator-Reports",
+        "status": "REUSED",
+        "empfehlung": "KEEP"
+      },
+      {
+        "id": "C10",
+        "name": "Policies/Approvals/Safety-Gates",
+        "status": "PARTIALLY_REUSED",
+        "empfehlung": "ADAPT"
+      },
+      {
+        "id": "C11",
+        "name": "Pi (PI-Agent)",
+        "status": "SCAFFOLD_ONLY/BLOCKED",
+        "empfehlung": "KEEP als Template",
+        "note": "kein Pi-Code, nur Evaluation + pi-binding.md + HARNESS-005 BLOCKED"
+      },
+      {
+        "id": "C12",
+        "name": "PeekXD/Safety",
+        "status": "OLD_ONLY(frozen)/REUSED(Safety)",
+        "empfehlung": "ARCHIVE/KEEP"
+      },
+      {
+        "id": "C13",
+        "name": "Buildroom",
+        "status": "PARTIALLY_REUSED",
+        "empfehlung": "PORT",
+        "tests": "legacy 447 + goal-contract 124"
+      },
+      {
+        "id": "C14",
+        "name": "MCP",
+        "status": "SCAFFOLD_ONLY",
+        "empfehlung": "ADAPT oder ARCHIVE"
+      },
+      {
+        "id": "C15",
+        "name": "Editor-Integration",
+        "status": "SCAFFOLD_ONLY",
+        "empfehlung": "ARCHIVE"
+      },
+      {
+        "id": "C16",
+        "name": "Registry (State)",
+        "status": "SUPERSEDED/REUSED",
+        "empfehlung": "MERGE"
+      },
+      {
+        "id": "C17",
+        "name": "Release/Update & CI",
+        "status": "REUSED",
+        "empfehlung": "KEEP"
+      }
+    ]
+  },
+  "a2_reuse_matrix": {
+    "goal_contract": "REUSED (nur goal-contract: contracts/goal-execution.v1.yaml, system-capabilities.yaml mit 41 feature_ids)",
+    "evidence": "REUSED (curaops/evidence/contract.py, Schema unveraendert)",
+    "reports": "REUSED (reporting.py:229-311, operator_status.py:57)",
+    "route_plan": "REUSED (route_plan.py 312Z, viewer, panel, picker)",
+    "harness_gateway": "SCAFFOLD_ONLY->PARTIAL (e5b7e9b Descriptors; goal-contract Service +203Z)",
+    "hermes_adapter": "PARTIAL (nur goal-contract hermes_adapter.py 757Z, einziger echter Adapter)",
+    "opencode_adapter": "OLD_ONLY->SCAFFOLD_ONLY (control/adapters/opencode.py tmux; Registry disabled_by_owner)",
+    "codex_adapter": "SCAFFOLD_ONLY (kein Code in e5b7e9b; Registry disabled_by_owner)",
+    "pi": "SCAFFOLD_ONLY/BLOCKED (PR_S_PI Evaluation, pi-binding.md PI_START_BLOCKED)",
+    "buildroom": "PARTIAL (Strangler: legacy frozen 61 Dateien -> dispatcher.py 599Z + managed_execution + fixture_runner)",
+    "registry": "SUPERSEDED->REUSED (control/registry -> harness/registry + evidence/adapters/registry)",
+    "policy_safety": "PARTIAL (gates.py -> backend_policy.py + safety_guard.py REUSED)",
+    "ui": "REUSED (src/core/app.py + 16 Widgets identisch in allen Checkouts)",
+    "mcp": "SCAFFOLD_ONLY (mcp_server.py Zed-Fokus, keine Runtime-Integration)",
+    "editor": "SCAFFOLD_ONLY (scaffolding.py + EditorSurfaceDescriptor deklarativ)",
+    "release_update": "REUSED (pyproject + CI-Workflows)",
+    "klarstellung": "gateway.py ist KEINE Control Plane (nur Boundary); dispatcher.py besitzt nur Pfadwahl; Task/Policy/Evidence=Conduvera Core, Modell=LiteLLM, Runtime=ODS, Secrets=BWS"
+  },
+  "a3_ui_audit": {
+    "tui": "Textual-App startbar (Import verifiziert, 14 Views, 16 Widgets, Einstieg pyproject:49-51/run.sh:53/app.py:480-491)",
+    "panels_implementiert": "RoutePlan, OperatorStatus, Git, Docker, DB, Terminal, Monitoring, AIAssistant, ProcessMonitor, SystemInfo",
+    "panels_scaffolding": "MySQL-Stub (database_browser.py:321), 2 TODOs, skills_dashboard orphan",
+    "datenquellen": "UI liest changes/evidence/events.jsonl (existiert NICHT) statt .curaops/control/ (existiert, 1 Agent/3 Events) -> Anschluss-Luecke, kleiner Adapter noetig",
+    "optionen": {
+      "A_matrix_ui_console": {
+        "machbarkeit": "JA - startbar belegt",
+        "aufwand": "klein",
+        "risiko": "mittel"
+      },
+      "B_panels_in_dream": {
+        "machbarkeit": "bedingt - nur Modelle/Renderer portabel",
+        "aufwand": "mittel",
+        "risiko": "mittel (Boundary-Konflikt dashboard_claim=False)"
+      },
+      "C_owner_launcher": {
+        "machbarkeit": "JA - geringster Aufwand, captain dashboard liest bereits echten State",
+        "aufwand": "klein (1 Modul ~100-200Z)",
+        "risiko": "gering"
+      }
+    },
+    "empfehlung": "C (dünner Owner-Launcher) - nutzt vorhandene echte State-Reader"
+  },
+  "a4_pi_audit": {
+    "PI_DUPLICATE_RUNTIME": "PROVEN_NONE",
+    "begruendung": "Pi nur als Evaluation-Doku + descriptor-only Adapter-Code (runtime_enabled=False, future-adapter-contract-only, not executed by Matrix OS); keine installierte Runtime, kein Prozess, kein systemd/docker/pip/npm/MCP/Profil; HARNESS-005 existiert nirgends; einzige Doppelung kosmetisch (2 Checkouts desselben Repos)"
+  },
+  "a5_operator_peekxd_audit": {
+    "CONDUVERA_OPERATOR_INTEGRATION": "DESIGNED_ONLY",
+    "adapter": "ABSENT (nur ToolDescriptor gateway.py:176-186 future-capability-descriptor-only, can_emit_evidence=False)",
+    "capability_manifest": "PARTIAL (4 _GATEWAY_CAPABILITIES alle runtime_implemented=False)",
+    "doctor_health": "PARTIAL (Hermes-Adapter health_check; kein Conduvera-PeekXD-Health)",
+    "safety_provider": "DESIGNED_ONLY (HCP04 design_draft, curaops/isolation/ fehlt, MXOS-SAFETY 0-mal im Code)",
+    "softbox_ghost_evidence": "PARTIAL (CuraOps-Safety-Guard-Uebersetzung real+getestet; PeekXD-Softbox/Ghost ABSENT)",
+    "e2e_callgraph": "ABSENT (kein Adapter, keine e2e-Markierungen)",
+    "p0_gaps": "ALLE 4 OFFEN (R1 macro_run ohne Gate, R2 Pattern-Heuristik ohne DENY, R4 Approval-Receipts nicht replay-safe, R5 Provenance 404)"
+  }
+}
