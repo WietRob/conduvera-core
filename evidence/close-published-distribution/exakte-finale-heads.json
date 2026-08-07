@@ -1,19 +1,22 @@
 {
-  "generated_at": "2026-08-07T21:55:08.025268+00:00",
-  "core": {
-    "repo": "WietRob/conduvera-core",
-    "head": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c"
-  },
-  "adapter": {
-    "repo": "WietRob/conduvera-hermes-adapter",
-    "head": "d74dd3d35972797044074fc6db4f3a0fa481fcd4"
-  },
-  "platform": {
-    "repo": "WietRob/conduvera-platform",
-    "head": "1061dd6fbe31ff0e4f57887d2675e0805b212a59"
-  },
-  "goal_contract": {
-    "repo": "(lokal)",
-    "head": "e8de060913647cb5512ae7f9df46187554095b3d"
+  "generated_at": "2026-08-07T21:58:51.723438+00:00",
+  "frozen": true,
+  "heads": {
+    "core": {
+      "repo": "WietRob/conduvera-core",
+      "head": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c"
+    },
+    "adapter": {
+      "repo": "WietRob/conduvera-hermes-adapter",
+      "head": "8a7955ec8f492035096069cb1417eff2e9a5de77"
+    },
+    "platform": {
+      "repo": "WietRob/conduvera-platform",
+      "head": "73e2572b90c8f8399b6e9d36ad1c1dec59b67029"
+    },
+    "goal_contract": {
+      "repo": "(lokal)",
+      "head": "d75b95409aa28c4d590d423fb4d0cf903961e9d4"
+    }
   }
 }
