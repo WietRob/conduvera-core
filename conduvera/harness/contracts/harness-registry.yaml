@@ -6,7 +6,7 @@
 adapters:
   hermes:
     enabled: true
-    module: conduvera.harness.hermes_adapter
+    module: conduvera_hermes_adapter.hermes_adapter
     entry_point: HermesAdapter
     version: hermes-adapter.v1
     contract: CONDUVERA-GOAL-1.0
