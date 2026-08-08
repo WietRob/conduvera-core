@@ -1,14 +1,10 @@
 {
-  "generated_at": "2026-08-08T09:31:32.375896+00:00",
+  "generated_at": "2026-08-08T09:32:14.050962+00:00",
   "frozen": true,
   "heads": {
     "conduvera-core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
     "conduvera-hermes-adapter": "43edf9a119d366df3522ce3ea5262ef70d21ee73",
-    "conduvera-platform": "7df122ff68e54bbb3618676439ad06444c01c093"
+    "conduvera-platform": "52c4b82ee91224494c6007cfad9b9e7c0eb2ed0f"
   },
-  "local_match": {
-    "core": true,
-    "adapter": true,
-    "platform": true
-  }
+  "note": "Eingefroren nach letzter Mutation. DOD-15: ab Review-Beginn keine Mutation."
 }
