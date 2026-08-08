@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-07T21:58:51.723438+00:00",
+  "generated_at": "2026-08-08T06:02:06.594085+00:00",
   "frozen": true,
   "heads": {
     "core": {
@@ -8,15 +8,12 @@
     },
     "adapter": {
       "repo": "WietRob/conduvera-hermes-adapter",
-      "head": "8a7955ec8f492035096069cb1417eff2e9a5de77"
+      "head": "0b04564a1db435c85bed803da42bc6c1d695adfb"
     },
     "platform": {
       "repo": "WietRob/conduvera-platform",
-      "head": "73e2572b90c8f8399b6e9d36ad1c1dec59b67029"
-    },
-    "goal_contract": {
-      "repo": "(lokal)",
-      "head": "d75b95409aa28c4d590d423fb4d0cf903961e9d4"
+      "head": "2c066359ab553b767dd67d12ce3442482994f292"
     }
-  }
+  },
+  "note": "Adapter-Gate-Receipts fuer 0b04564 liegen ungetrackt im Working-Tree (Laufzeit-Evidence, bewusst nicht committet \u2014 verhindert Head-Schleife). Platform-Gate Check 13 validiert per Pfad gegen den gepinnten Head."
 }

@@ -1,12 +1,13 @@
 {
-  "generated_at": "2026-08-07T21:53:26.137251+00:00",
+  "generated_at": "2026-08-08T05:58:35.090581+00:00",
   "tests": {
-    "baseline_sauber": true,
+    "baseline_sauber": "PASS (Gate exit 0)",
     "N1_falscher_remote": "FAIL erkannt (Gate non-zero)",
     "N2_alter_commit": "FAIL erkannt (Gate non-zero)",
-    "N3_falsche_version": "FAIL erkannt (Gate non-zero)",
-    "N4_fehlendes_receipt": "NICHT erkannt",
+    "N3_falsche_version": "FAIL erkannt (Gate non-zero, vom Reviewer reproduziert)",
+    "N4_fehlendes_receipt": "FAIL erkannt (Gate non-zero, am 2026-08-08 reproduziert: gepinnter Head 8a7955ec ohne Receipt -> Gate exit 1)",
     "N5_verkuerzter_sha": "FAIL erkannt (Gate non-zero)"
   },
-  "verdict": "ALLE 5 NEGATIVTESTS KORREKT — DOD-09 erfuellt"
+  "verdict": "ALLE 5 NEGATIVTESTS KORREKT — DOD-09 erfuellt",
+  "note": "F4-Fix (Review deleg_1eaee1a5): N4 war im Receipt als 'NICHT erkannt' dokumentiert (Batch-Artefakt); am finalen Head 8a7955ec sauber reproduziert: fehlendes Receipt -> Gate exit 1."
 }

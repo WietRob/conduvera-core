@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-08-08T06:00:53.216978+00:00",
+  "review": "deleg_1eaee1a5 (lokale Inferenz, read-only)",
+  "findings_fixed": {
+    "F1": "Manifest git_head + Provenance current_head + SBOM checksumValue (64 Z.) auf finalen Head b791853 gebunden (Code byte-identisch zu 8ab8404)",
+    "F2": "doctor-local-gates.sh: grep erkennt squ_- und sqp_-Tokens; pipefail-Bruch behoben. Doctor: ALLE CHECKS OK, exit 0 (beide Repos)",
+    "F3": "Kein Defekt: 1b9c1de2 = Prod-Linie (buildroom-operator, 3 Registrys reproduzierbar); dbb3143e = conduvera-Core-Linie (rc1-3). Lock kommentiert.",
+    "F4": "N4-Negativtest am finalen Head reproduziert (fehlendes Receipt -> Gate exit 1); Receipt korrigiert"
+  },
+  "final_heads": {
+    "core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "adapter": "b79185368a9e69047cc177d9d8586d8ab80f8284",
+    "platform": "0fef695ea0b9d329f6812c00779f4d75d76f1b28"
+  },
+  "note": "Adapter-Gate-Receipts fuer b791853 liegen ungetrackt im Working-Tree (Laufzeit-Evidence, bewusst nicht committet — verhindert Head-Schleife). Platform-Gate Check 13 validiert sie per Pfad.",
+  "final_note": "Artefakt-Bindung: artifact-manifest/provenance binden b791853 (der Head, dessen Produktcode sie beschreiben und auf dem die funktionale Gate-Verifikation mit diesen Werten lief). Der Platform-Lock pinnt 0b04564 (finaler Git-Head, enthaelt alle Fixes inkl. der b791853-Bindung). Produktcode b791853..0b04564 ist byte-identisch (nur Artefakt-Referenzierung geaendert) — Vorgaenger-Bindung, wie vom Reviewer bei 8ab8404->8a7955ec als akzeptabel eingeordnet. Gate-Receipts fuer beide Heads existieren."
+}
