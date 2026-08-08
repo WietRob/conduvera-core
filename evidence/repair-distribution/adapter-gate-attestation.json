@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-08-08T09:30:25.562105+00:00",
+  "kind": "adapter-gate-attestation",
+  "adapter_commit": "43edf9a119d366df3522ce3ea5262ef70d21ee73",
+  "version": "0.1.3",
+  "wheel_sha256": "32b96d9373e7585e966000da108f5a421ba9c7d0b257a7343e692a8b6d535f54",
+  "source_tree_digest": "a78776018cc5dff58dbad66157563de53b4f1de387b13a23a32518d4fddf34cb",
+  "note": "Gate lief aus frischem GitHub-Clone; Sonar-Analyse commit-genau (sonar.projectVersion=Commit). ceTaskId/analysisId pro Lauf im Gate-Output."
+}

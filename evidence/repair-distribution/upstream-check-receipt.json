@@ -1,0 +1,75 @@
+{
+  "generated_at": "2026-08-08T09:25:36.100847+00:00",
+  "results": [
+    {
+      "id": "hermes",
+      "repository": "NousResearch/hermes-agent",
+      "upstream_update_status": "UPDATE_AVAILABLE",
+      "integration_activation_status": "ACTIVE",
+      "license_review_status": "NO_REVIEW_NEEDED",
+      "pinned": "UNPINNED",
+      "current_ref": "v0.20.0",
+      "checked_at": "2026-08-08T09:25:36.100847+00:00"
+    },
+    {
+      "id": "ods",
+      "repository": "(lokal ~/dream-server)",
+      "upstream_update_status": "SOURCE_UNAVAILABLE",
+      "integration_activation_status": "ACTIVE",
+      "license_review_status": "NO_REVIEW_NEEDED",
+      "pinned": "UNPINNED",
+      "current_ref": "local deploy",
+      "checked_at": "2026-08-08T09:25:36.100847+00:00"
+    },
+    {
+      "id": "opencode",
+      "repository": "anomalyco/opencode",
+      "upstream_update_status": "UPDATE_AVAILABLE",
+      "integration_activation_status": "DISABLED_BY_OWNER",
+      "license_review_status": "NO_REVIEW_NEEDED",
+      "pinned": "UNPINNED",
+      "current_ref": "DISABLED_BY_OWNER (nicht aktiviert)",
+      "checked_at": "2026-08-08T09:25:36.100847+00:00"
+    },
+    {
+      "id": "pi",
+      "repository": "earendil-works/pi",
+      "upstream_update_status": "UPDATE_AVAILABLE",
+      "integration_activation_status": "BLOCKED",
+      "license_review_status": "NO_REVIEW_NEEDED",
+      "pinned": "UNPINNED",
+      "current_ref": "BLOCKED (nicht aktiviert)",
+      "checked_at": "2026-08-08T09:25:36.100847+00:00"
+    },
+    {
+      "id": "litellm",
+      "repository": "BerriAI/litellm",
+      "upstream_update_status": "UPDATE_AVAILABLE",
+      "integration_activation_status": "ACTIVE",
+      "license_review_status": "NO_REVIEW_NEEDED",
+      "pinned": "UNPINNED",
+      "current_ref": "local gateway (127.0.0.1:4000)",
+      "checked_at": "2026-08-08T09:25:36.100847+00:00"
+    },
+    {
+      "id": "comfyui",
+      "repository": "comfy-org/ComfyUI",
+      "upstream_update_status": "UPDATE_AVAILABLE",
+      "integration_activation_status": "ACTIVE",
+      "license_review_status": "LICENSE_REVIEW_REQUIRED",
+      "pinned": "UNPINNED",
+      "current_ref": "extern (Workflows versioniert, Engine nicht gepinnt)",
+      "checked_at": "2026-08-08T09:25:36.100847+00:00"
+    },
+    {
+      "id": "n8n",
+      "repository": "n8n-io/n8n",
+      "upstream_update_status": "UPDATE_AVAILABLE",
+      "integration_activation_status": "ACTIVE",
+      "license_review_status": "LICENSE_REVIEW_REQUIRED",
+      "pinned": "UNPINNED",
+      "current_ref": "extern (Workflows exportiert, Image nicht gepinnt)",
+      "checked_at": "2026-08-08T09:25:36.100847+00:00"
+    }
+  ]
+}

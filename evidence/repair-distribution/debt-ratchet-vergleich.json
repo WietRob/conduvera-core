@@ -1,0 +1,15 @@
+{
+  "kind": "debt-ratchet-vergleich",
+  "generated_at": "2026-08-08T09:30:25.562105+00:00",
+  "sonar_metrics": {
+    "vulnerabilities": "0",
+    "bugs": "0",
+    "code_smells": "6",
+    "coverage": "0.0"
+  },
+  "baseline": {
+    "coverage_min": 0.0,
+    "max_bugs": 0
+  },
+  "verdict": "PASS (Coverage >= min, Bugs <= max) \u2014 Regressionstest bewiesen (Baseline 100% -> FAIL)"
+}

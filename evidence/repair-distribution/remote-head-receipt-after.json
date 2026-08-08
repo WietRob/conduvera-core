@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-08-08T09:30:25.562105+00:00",
+  "kind": "remote-head-receipt",
+  "phase": "AFTER_PROMOTION",
+  "heads": {
+    "conduvera-core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "conduvera-hermes-adapter": "43edf9a119d366df3522ce3ea5262ef70d21ee73",
+    "conduvera-platform": "01ec2f624086c05b499c1029a7c742d344747232"
+  },
+  "local_match": {
+    "core": true,
+    "adapter": true,
+    "platform": true
+  }
+}

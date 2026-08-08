@@ -1,0 +1,13 @@
+{
+  "kind": "composition-attestation",
+  "core_commit": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+  "adapter_commit": "43edf9a119d366df3522ce3ea5262ef70d21ee73",
+  "wheel_sha256": "32b96d9373e7585e966000da108f5a421ba9c7d0b257a7343e692a8b6d535f54",
+  "digest_match": "PASS",
+  "pong_evidence": "MXOS-EVIDENCE-1.0.0",
+  "removal_test": "PASS (Core standalone, CAPABILITY_UNAVAILABLE)",
+  "clones": "git@github.com:WietRob/* (kein file://)",
+  "start": "20260808T092900Z",
+  "end": "20260808T092923Z",
+  "receipt_sha256": "c9ea27b0ddc994421909de60e8e5bf5b7c195f03ca034cec6e9268ebcc09585c"
+}

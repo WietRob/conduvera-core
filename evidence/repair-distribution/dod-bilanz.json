@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-08-08T09:31:32.375896+00:00",
+  "dods": {
+    "DOD-01": "Lock pinnt GitHub-existierenden Adapter-Commit 43edf9a (per API verifiziert) — PASS",
+    "DOD-02": "Adapter-main == Lock == Attestations == Manifest == Provenance == 43edf9a — PASS",
+    "DOD-03": "Kein aktuelles Gate-Receipt im Adapter-Working-Tree/Verlauf (0 Porcelain, nur Legacy-Historie) — PASS",
+    "DOD-04": "platform-truth nur GitHub-API (refs/heads/main+commit endpoint+visibility); Drift nur Vergleich — PASS",
+    "DOD-05": "verify-composition klont nur git@github.com:WietRob/* (kein file://) — PASS",
+    "DOD-06": "Platform-Gate im frischen GitHub-Clone 6/6 PASS ohne ~/projects — PASS",
+    "DOD-07": "Dirty Adapter-Checkout -> Gate FAIL (Porcelain-Check) — PASS",
+    "DOD-08": "Sonar commit-genau (projectVersion=Commit, SCM aktiv); ceTaskId+analysisId getrennt — PASS",
+    "DOD-09": "Debt-Ratchet real (Coverage+Bugs aus API vs. numerische Baseline); Regression (100%) -> FAIL — PASS",
+    "DOD-10": "Kein Hook/Gate liest ~/.config/curaops/sonar.env (0 aktive Loads, Adapter+Platform) — PASS",
+    "DOD-11": "Clean-Clone-PONG MXOS-EVIDENCE-1.0.0 + Removal-Test grün (finale Composition-Attestation) — PASS",
+    "DOD-12": "Alle 7 Upstreams UNPINNED ehrlich; Checker mit 3 Dimensionen; deaktivierte melden UPDATE — PASS",
+    "DOD-13": "GitHub-Remote-Heads == finaler Lock (43edf9a/63fb334) — PASS",
+    "DOD-14": "Finales Review — AUSSTEHEND",
+    "DOD-15": "Nach Review-Beginn keine Mutation — AUSSTEHEND"
+  }
+}
