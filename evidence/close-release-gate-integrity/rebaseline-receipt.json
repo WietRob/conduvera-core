@@ -1,0 +1,39 @@
+{
+  "generated_at": "2026-08-10T08:21:48.181335+00:00",
+  "repos": {
+    "conduvera-core": {
+      "expected": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+      "github": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+      "github_expected_match": true,
+      "local": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+      "local_github_match": true,
+      "visibility": "public",
+      "porcelain": ""
+    },
+    "conduvera-hermes-adapter": {
+      "expected": "43edf9a119d366df3522ce3ea5262ef70d21ee73",
+      "github": "43edf9a119d366df3522ce3ea5262ef70d21ee73",
+      "github_expected_match": true,
+      "local": "43edf9a119d366df3522ce3ea5262ef70d21ee73",
+      "local_github_match": true,
+      "visibility": "private",
+      "porcelain": ""
+    },
+    "conduvera-platform": {
+      "expected": "52c4b82ee91224494c6007cfad9b9e7c0eb2ed0f",
+      "github": "52c4b82ee91224494c6007cfad9b9e7c0eb2ed0f",
+      "github_expected_match": true,
+      "local": "52c4b82ee91224494c6007cfad9b9e7c0eb2ed0f",
+      "local_github_match": true,
+      "visibility": "private",
+      "porcelain": ""
+    }
+  },
+  "all_heads_match": true,
+  "phase": "PRE_MUTATION",
+  "inspected": {
+    "F-A": "scripts/local-quality-gate.sh Z.41: PYTEST_OUT=\"$(... pytest ... || true)\" -> PYTEST_RC immer 0 (BESTAETIGT)",
+    "F-B": "Root-Artefakte: artifact-manifest.json, provenance-receipt.json, SBOM.spdx.json (Legacy, e3dc820/8ab8404, Wheel e793dc8a) (BESTAETIGT)",
+    "F-C": "platform-truth.py Z.20: PLATFORM = Path.home()/'projects/conduvera-platform'; Z.60/67: Path.home()/f'projects/{repo}' (BESTAETIGT)"
+  }
+}
