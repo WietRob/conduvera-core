@@ -1,0 +1,43 @@
+{
+  "fixtures": {
+    "T1_MATCH": {
+      "expected": "LOCAL_MATCH",
+      "observed": "LOCAL_MATCH",
+      "pass": true
+    },
+    "T2_BEHIND": {
+      "expected": "LOCAL_BEHIND",
+      "observed": "LOCAL_BEHIND",
+      "pass": true
+    },
+    "T3_AHEAD": {
+      "expected": "LOCAL_AHEAD",
+      "observed": "LOCAL_AHEAD",
+      "pass": true
+    },
+    "T4_DIVERGED": {
+      "expected": "LOCAL_DIVERGED",
+      "observed": "LOCAL_DIVERGED",
+      "pass": true
+    },
+    "T5_UNAVAILABLE": {
+      "expected": "LOCAL_UNAVAILABLE",
+      "observed": "LOCAL_UNAVAILABLE",
+      "pass": true
+    },
+    "T6_EMPTY": {
+      "expected": "LOCAL_UNAVAILABLE",
+      "observed": "LOCAL_UNAVAILABLE",
+      "pass": true
+    },
+    "T7_REMOTE_MISSING": {
+      "expected": [
+        "LOCAL_UNAVAILABLE",
+        "LOCAL_DIVERGED"
+      ],
+      "observed": "LOCAL_UNAVAILABLE",
+      "pass": true
+    }
+  },
+  "all_pass": true
+}

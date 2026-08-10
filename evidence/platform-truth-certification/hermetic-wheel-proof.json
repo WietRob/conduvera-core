@@ -1,0 +1,11 @@
+{
+  "adapter_commit": "1826b1d639d8abcfab077f503529b3e06bc29aaf",
+  "sde": "1786355013",
+  "builds": {
+    "A": "b90385244c0c2e2c122e5398db49269af91bcd98ebd4ab81eb02b37a8d7d5a6a",
+    "B": "b90385244c0c2e2c122e5398db49269af91bcd98ebd4ab81eb02b37a8d7d5a6a",
+    "C": "b90385244c0c2e2c122e5398db49269af91bcd98ebd4ab81eb02b37a8d7d5a6a"
+  },
+  "reproducible": true,
+  "wheel_name": "conduvera_hermes_adapter-0.1.5-py3-none-any.whl"
+}

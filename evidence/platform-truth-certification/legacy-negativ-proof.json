@@ -1,0 +1,11 @@
+{
+  "canonical_authority": "WietRob/conduvera-platform/attestations/4853c368365876121aae08c817b6890b3e9019d5/",
+  "verifier_contract": "Aktive Verifier (platform gate check 4, verify-composition, platform-truth) lesen ausschliesslich attestations/<canonical_adapter_commit>/ \u2014 Legacy-Artefakte sind nie Autoritaet.",
+  "negativ_beweis": {
+    "root_manifest_bound_commit": "e3dc82023f01",
+    "canonical_commit": "4853c3683658",
+    "kann_composition_erfuellen": false,
+    "verdict": "Legacy kann aktuelle Composition NICHT erfuellen (ignorierbar, keine Ambiguitaet)",
+    "alle_legacy_marker_zeigen_auf_final": true
+  }
+}

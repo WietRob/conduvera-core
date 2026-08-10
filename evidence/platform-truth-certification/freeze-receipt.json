@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-08-10T09:50:18.152174+00:00",
+  "phase": "PRE_REVIEW_FREEZE_FINAL",
+  "heads": {
+    "conduvera-core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "conduvera-hermes-adapter": "1826b1d639d8abcfab077f503529b3e06bc29aaf",
+    "conduvera-platform": "7ac84f2f79ca505d189623f6c60f0b13ebe59e93"
+  },
+  "local_match": {
+    "conduvera-core": true,
+    "conduvera-hermes-adapter": true,
+    "conduvera-platform": true
+  },
+  "porcelain": {
+    "conduvera-core": 0,
+    "conduvera-hermes-adapter": 0,
+    "conduvera-platform": 0
+  },
+  "note": "Nach diesem Receipt keine persistente Mutation (DOD-14)."
+}
