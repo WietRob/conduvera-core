@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-08-10T12:28:12.709651+00:00",
+  "dods": {
+    "WorkA": "Mutation-Surface-Inventar (8 Roots, 15k+ Dateien, Baseline-Hash 81bbbad2); B1-Ursache: Skills mtime 13:15-13:53 waehrend Review 13:12-13:19 (immutable-release-candidate-provenance SKILL.md + Reference) — persistente Mutation nach Dispatch",
+    "WorkA_prevention": "prepare-review-env.sh: isolierter HERMES_HOME (read-only Skills/Config, a-w), FREEZE_MODE-Marker, Schreibrecht nur /tmp — deterministischer read-only Review-Modus",
+    "WorkB": "Fully resolved Build-Lock: Wheelhouse+Lockfile (6 Dists, SHA256, --require-hashes), offline (--no-index), Python-3.12-Gate, constraints.txt entfernt (irreführend)",
+    "WorkB_negativ": "N1 Hash-Mismatch -> failt; N2 fehlendes Wheel -> failt; N3 falsche Python (3.11 Fake) -> FEHLER-Pfad",
+    "WorkB_positiv": "4x byte-identisch 9cfcb91b (0.1.7-Commit), final 1e6523cb auf d1cedd2 (normal/Cache/2.Umgebung/offline)",
+    "WorkC": "Recompose d1cedd2 (0.1.7): Attestations/Lock/canonicality; alle via PRs #6-#9; e61bea7a/918d683 SUPERSEDED",
+    "WorkD": "Pre-Review-Freeze: Heads MATCH (63fb334/d1cedd2/ed3b951), Porcelain 0/0/0, Checksums TOTAL ea318eb0, random-Clone-Gate 6/6, Composition PASS"
+  }
+}
