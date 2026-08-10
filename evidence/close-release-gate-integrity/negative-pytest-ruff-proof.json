@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-08-10T08:25:40.392116+00:00",
+  "kind": "negative-pytest-ruff-proof",
+  "adapter_commit": "ed6a491f789fc24af72dac03065f0c465fa2f71c",
+  "fixture": "frischer GitHub-Clone (sauber, kein dirty-Tree-Shortcut)",
+  "proofs": {
+    "N1_pytest_fail": {
+      "fixture": "stub-pytest-Modul (PYTHONPATH) rc=7",
+      "expected_pytest_rc": 7,
+      "observed_pytest_rc": 7,
+      "gate_rc": 1,
+      "failure_reason": "FAIL pytest — exit=7 (echter Return-Code, nicht gelesen aus Output)",
+      "result": "BLOCKT (DOD-01 PASS)"
+    },
+    "N2_ruff_fail": {
+      "fixture": "echter pytest (rc=0) + stub-ruff-Modul (PYTHONPATH) rc=5",
+      "expected_ruff_rc": 5,
+      "observed_ruff_rc": 5,
+      "gate_rc": 1,
+      "failure_reason": "FAIL ruff — exit=5 (echter Return-Code); pytest PASS isoliert",
+      "result": "BLOCKT (DOD-02 PASS)"
+    },
+    "N3_real_pass": {
+      "fixture": "echte pytest + echte ruff auf ed6a491f",
+      "expected_pytest_rc": 0,
+      "expected_ruff_rc": 0,
+      "gate_rc": 0,
+      "failure_reason": "keine — beide PASS",
+      "result": "PASS (DOD-03 PASS)"
+    }
+  },
+  "conclusion": "Ein fehlschlagender pytest ODER ruff kann NIE mehr als Gate-Erfolg gemeldet werden; F-A geschlossen."
+}

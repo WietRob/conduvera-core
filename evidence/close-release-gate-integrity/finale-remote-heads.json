@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-08-10T08:31:03.879750+00:00",
+  "frozen": true,
+  "heads": {
+    "conduvera-core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "conduvera-hermes-adapter": "4853c368365876121aae08c817b6890b3e9019d5",
+    "conduvera-platform": "a846f627d30695b1b24a8ddf33e52946c16edebe"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-08-10T08:31:03.879750+00:00",
+  "dods": {
+    "DOD-01": "Adapter-Gate non-zero bei stub-pytest rc=7 in sauberem Clone (GATE-RC 1, FAIL pytest exit=7) — PASS",
+    "DOD-02": "Adapter-Gate non-zero bei stub-ruff rc=5 in sauberem Clone (GATE-RC 1, FAIL ruff exit=5) — PASS",
+    "DOD-03": "Echte pytest+ruff liefern eigene Status, beide PASS auf 4853c36 (pre-push Gate 5/5) — PASS",
+    "DOD-04": "Kein '|| true' um bindende Test-/Lint-Kommandos (set +e/set -e + Log-Datei) — PASS",
+    "DOD-05": "Eine aktive Autoritaet: platform/attestations/4853c36/; Root-Artefakte NON_CANONICAL-markiert + ignoriert — PASS",
+    "DOD-06": "platform-truth aus random mktemp-Clone ohne hardcodierte Pfade (--platform/PLATFORM_ROOT/Script-Lage) — PASS",
+    "DOD-07": "Adapter 4853c36 GitHub-resolvable; Lock/Manifest/Attestations/Wheel/Tree konsistent 0.1.4 — PASS",
+    "DOD-08": "Wheel aus frischem GitHub-Clone reproduziert: f05586fb == Lock — PASS",
+    "DOD-09": "Clean-Clone-Composition: PONG + MXOS-EVIDENCE-1.0.0 + Removal-Test gruen — PASS",
+    "DOD-10": "Platform-Gate aus random Clone exit 0; Negativ-Fixture (falscher Commit) exit 1 — PASS",
+    "DOD-11": "Alle lokalen Heads == GitHub (63fb334/4853c36/a846f627), Porcelain 0/0/0 — PASS",
+    "DOD-12": "Unabhaengiges Exact-Head-Review — AUSSTEHEND",
+    "DOD-13": "Keine Mutation nach Review-Beginn — AUSSTEHEND"
+  }
+}
