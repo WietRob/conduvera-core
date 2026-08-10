@@ -1,0 +1,14 @@
+{
+  "WorkB_canonicality": "Adapter-canonicality referenziell (Platform=Autoritaet), Validierungstest PASS gegen e61bea7a — keine self-referential Konstruktion",
+  "WorkC_toolchain": "canonical-build.sh: venv + pip 25.3/build 1.2.2.post1/setuptools 84.0.0/wheel 0.45.1, Versions-Check fail-closed, SDE/locale/TZ, git archive, Receipt",
+  "WorkC_reproducible": "4 Builds auf e61bea7a identisch 4da66af8 (aufeinanderfolgend, Cache-Loeschung, 2. Umgebung)",
+  "WorkD_pr_only": "Branch-Protection aktiv (PR-required, enforce_admins, keine Force-Pushes); direkter Push -> GH006 rejected (bewiesen); 4 historische direkte Commits als Prozess-Breach dokumentiert, nie umgeschrieben",
+  "WorkE_recompose": "Attestations/Lock/cv/canonicality auf e61bea7a; alle Platform-Commits via PR (PR #2-#6); Zwischen-Attestationen SUPERSEDED",
+  "WorkF_green": "Alle Heads==GitHub, Porcelain 0/0/0, canonicality==Lock==GitHub, Protection aktiv, Toolchain-Pins exakt, PR-Merges in Historie",
+  "final_heads": {
+    "core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "adapter": "e61bea7a6d6e866138ef3c8c2c642e3e6a792ae3",
+    "platform": "8177fbaf5909392c0c19ddbbbd9aa8e4533bf1f8"
+  },
+  "wheel": "4da66af849ea6e33e289480a0acdffdb04906733063f0fef47a67a1dd873d781"
+}

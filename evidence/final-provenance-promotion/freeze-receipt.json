@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-08-10T11:11:22.007376+00:00",
+  "phase": "PRE_REVIEW_FREEZE",
+  "heads": {
+    "conduvera-core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "conduvera-hermes-adapter": "e61bea7a6d6e866138ef3c8c2c642e3e6a792ae3",
+    "conduvera-platform": "8177fbaf5909392c0c19ddbbbd9aa8e4533bf1f8"
+  },
+  "local_match": {
+    "conduvera-core": true,
+    "conduvera-hermes-adapter": true,
+    "conduvera-platform": true
+  },
+  "porcelain": {
+    "conduvera-core": 0,
+    "conduvera-hermes-adapter": 0,
+    "conduvera-platform": 0
+  },
+  "wheel_sha256": "4da66af849ea6e33e289480a0acdffdb04906733063f0fef47a67a1dd873d781",
+  "source_tree_digest": "2a3fde1f85c4b474d05d663fb170aa419ac579b68f7d7e99178ce0312152cbcf",
+  "note": "Nach diesem Receipt keine persistente Mutation (Hard Rule 8).",
+  "historical_direct_main_commits": {
+    "repo": "conduvera-platform",
+    "commits": [
+      "f2b49a51",
+      "2f10f2f",
+      "b716409",
+      "7ac84f2"
+    ],
+    "documented": "Vorgaenger-Goal-Prozess-Breach — NIE umgeschrieben (Hard Rule 5), als historisch SUPERSEDED dokumentiert; seit Branch-Protection sind direkte main-Pushes technisch abgelehnt (GH006)."
+  }
+}
