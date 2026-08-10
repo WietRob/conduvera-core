@@ -1,0 +1,110 @@
+{
+  "generated_at": "2026-08-10T15:30:00+00:00",
+  "goal": "correct-conduvera-certification-record-and-stop-the-meta-loop",
+  "purpose": "Work B — Evidence-Matrix: 7 Achsen getrennt bewertet, KEINE Aggregation zu einem 'BESTANDEN'. Produkt-Integritaet ist von Reviewer-Prozess-Integritaet getrennt.",
+  "product_heads": {
+    "core": "63fb334cc02ee101f95c48e41de9dcfcfd5f6f9c",
+    "adapter": "d1cedd219478c44f6fec662f3208a4d4537f6323",
+    "adapter_version": "0.1.7",
+    "platform": "ed3b951701d4fad53d19591da5623106f2184069",
+    "wheel_sha256": "1e6523cbeb9240fb49d19aeb0e38be47906ad17eb3a56a03b58691f6624b602a"
+  },
+  "axes": {
+    "A_product_artifact_integrity": {
+      "claim": "Adapter 0.1.7-Artefakte (Commit d1cedd2, Wheel 1e6523cb, Attestations, Lock, SBOM, Provenance) sind konsistent und gegen die Platform-Autoritaet verifiziert",
+      "verdict": "PROVEN (Release-Kandidat)",
+      "supporting_evidence": [
+        "canonicality-index (Platform) == d1cedd2/0.1.7/1e6523cb/1fe8b30b",
+        "test_canonicality_index.py exit 0 (liest Platform-Autoritaet)",
+        "Lock hermes_adapter.commit == d1cedd2, 6 Attestations-SHAs == sha256sum",
+        "genau eine aktive Autoritaet attestations/d1cedd2.../ (aeltere SUPERSEDED)"
+      ],
+      "missing_evidence": "keine — Produkt-Artefaktkette ist vollstaendig belegt",
+      "blocks_release_candidate": false,
+      "blocks_operational_production": false
+    },
+    "B_dependency_artifact_locking": {
+      "claim": "6 Python-Build-Distributionen (pip/build/setuptools/wheel/packaging/pyproject_hooks) sind artefakt-hash-gesperrt",
+      "verdict": "PROVEN",
+      "supporting_evidence": [
+        "build-contract/wheelhouse/lockfile.txt: 6 Eintraege name==version --hash=sha256:<64hex>",
+        "pip install --require-hashes --no-index --find-links=wheelhouse",
+        "Negativ: Hash-Mismatch failt (rc=1), fehlendes Wheel failt (rc=1)"
+      ],
+      "missing_evidence": "keine fuer die 6 Distributions-Artefakte",
+      "blocks_release_candidate": false,
+      "blocks_operational_production": false
+    },
+    "C_interpreter_runtime_hermeticity": {
+      "claim": "Python-Runtime ist vollstaendig hermetisch gepinnt",
+      "verdict": "PARTIAL",
+      "supporting_evidence": [
+        "Build-Gate prueft Python major/minor (3.12, cp312-ABI-Check); Fake-3.11 -> FEHLER bewiesen",
+        "canonical-build.sh setzt SDE/locale/TZ deterministisch"
+      ],
+      "missing_evidence": [
+        "kein immutables Interpreter-Artefakt (kein OCI-Image-Digest, keine verifizierte Python-Binary-SHA)",
+        "Patch-Level der Python-Runtime nicht gepinnt (3.12.x exakt)",
+        "Wheel-Reproduzierbarkeit nur auf dem aktuellen Host/Runtime bewiesen (CURRENT_HOST-Wortlaut)"
+      ],
+      "blocks_release_candidate": false,
+      "blocks_operational_production": true
+    },
+    "D_network_isolation": {
+      "claim": "Offline-Build ist netzwerkisoliert",
+      "verdict": "PARTIAL",
+      "supporting_evidence": [
+        "pip --no-index + --find-links=wheelhouse: Paketindex unerreichbar fuer pip",
+        "Wheelhouse-only-Installation bewiesen (fehlendes Wheel -> failt)"
+      ],
+      "missing_evidence": [
+        "--no-index ist KEINE Netzwerk-Namespace-Isolation: andere Prozesse/Endpoints sind nicht blockiert",
+        "kein Netzwerk-Namespace-Disabled-Beweis waehrend des Builds"
+      ],
+      "blocks_release_candidate": false,
+      "blocks_operational_production": true
+    },
+    "E_product_repository_promotion_discipline": {
+      "claim": "Alle Produkt-Aenderungen erreichten main ausschliesslich ueber PRs mit Branch-Protection",
+      "verdict": "PROVEN",
+      "supporting_evidence": [
+        "Adapter: PRs #1-#7 alle gemergt; Platform: PRs #1-#9 alle gemergt",
+        "Branch-Protection aktiv (kein 404, required_pull_request_reviews, enforce_admins, allow_force_pushes=false)",
+        "Wegwerf-Branch-Push zu main -> GH006 'Changes must be made through a pull request' (live bewiesen)",
+        "4 historische direkte main-Commits (f2b49a5/2f10f2f/b716409/7ac84f2) als Prozess-Breach dokumentiert, nie umgeschrieben"
+      ],
+      "missing_evidence": "keine",
+      "blocks_release_candidate": false,
+      "blocks_operational_production": false
+    },
+    "F_reviewer_independence": {
+      "claim": "Ein unabhaengiger finaler Reviewer hat das 0.1.7-Release vollstaendig geprueft",
+      "verdict": "NOT_COMPLETED",
+      "supporting_evidence": [
+        "4 Delegationen (deleg_84a914cd, f501af3b, 3bd5739c, 7e1b14b2) brachen ab: Iterationslimit bzw. HTTP-503 der Cloud-Provider",
+        "Live-Transkripte + /tmp/review-final-x1/review.log belegen reale Teil-Reproduktionen (23/29 Punkte, F-A-Negativ, 3x Wheel, Negativ-Beweise, Drift, Platform-Gate, Composition)",
+        "6 gemeldete FAILs wurden als Artefakte entkraeftet (Fixture-Aufbaufehler, YAML-Parse, Zaehl-Skript, Baseline-V1 zu frueh)"
+      ],
+      "missing_evidence": "KEIN unabhängiger Reviewer hat die vollstaendige Pruefung (inkl. Global-Freeze-Vergleich) abgeschlossen; Orchestrator-Selbstverifikation ersetzt KEINE unabhaengige Pruefung",
+      "blocks_release_candidate": false,
+      "blocks_operational_production": true
+    },
+    "G_orchestrator_persistent_state_freeze": {
+      "claim": "GLOBAL_REVIEW_FREEZE: keine persistente Mutation ausserhalb /tmp nach Review-Dispatch",
+      "verdict": "FAILED_BY_STATED_CONTRACT",
+      "supporting_evidence": [
+        "B1-Ursache identifiziert: Skill-Writes 14:31-14:43 (immutable-release-candidate-provenance SKILL.md + Reference) durch Review-Subagent mit vollem Toolset + echtem HERMES_HOME",
+        "Kontroll-Massnahmen: terminal-only-Toolset, Skills chmod a-w, 6 Cron-Jobs pausiert",
+        "Finale Verifikation: 0 Skill-Mutationen seit Freeze-V2; produktrelevante Roots 100% invariant"
+      ],
+      "missing_evidence": [
+        "Die Baseline-V2 umfasste orchestrator_state; der Post-Review-Vergleich fand dort persistente Aenderungen (agent.log, state.db, Heartbeats, Delegations-Cache) — Laufzeit-Side-Effekte des Hermes-Prozesses selbst",
+        "Diese Dateien duerfen nach Beobachtung des Mismatch NICHT nachtraeglich ausgeschlossen werden (Kontrakt-Konformitaet)",
+        "Cron-Jobs wurden pausiert/resumiert und Skill-Permissions geaendert/zurueckgesetzt — temporaere Zertifizierungs-Kontroll-Mutationen"
+      ],
+      "blocks_release_candidate": false,
+      "blocks_operational_production": true
+    }
+  },
+  "note": "Achsen werden NICHT zu einem Aggregat-BESTANDEN zusammengefasst. 0.1.7 bleibt akzeptierter Release-Kandidat (keine Achse blockiert das); operative Produktion ist aus gruenden der Achsen C/D/F/G blockiert."
+}

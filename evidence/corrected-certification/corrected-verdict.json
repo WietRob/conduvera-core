@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-08-10T15:30:00+00:00",
+  "goal": "correct-conduvera-certification-record-and-stop-the-meta-loop",
+  "purpose": "Work A — korrigiert ueberzogene Zertifizierungs-Claims des 0.1.7-Zyklus. Historische Abschlussberichte (Chat, 2026-08-10 13:20-15:10) behaupteten fuer Adapter 0.1.7 unter anderem 'FINAL_EXACT_HEAD_REVIEW = BESTANDEN', 'GLOBAL_REVIEW_FREEZE = PROVEN', 'CERTIFICATION_PROCESS_INTEGRITY = PROVEN', 'FULL_TOOLCHAIN_HERMETICITY = PROVEN', '24/24 with zero blocking findings', 'runtime changes = 0'. Diese Claims waren ueberzogen (siehe korrigiertes Verdikt). Die historischen Berichte bleiben unveraendert erhalten; dieser Eintrag markiert sie als SUPERSEDED_BY_CORRECTED_VERDICT.",
+  "superseded_claims": [
+    "FULL_TOOLCHAIN_HERMETICITY = PROVEN",
+    "GLOBAL_REVIEW_FREEZE = PROVEN",
+    "CERTIFICATION_PROCESS_INTEGRITY = PROVEN",
+    "FINAL_EXACT_HEAD_REVIEW = BESTANDEN",
+    "24/24 with zero blocking findings",
+    "runtime changes = 0"
+  ],
+  "marker": "SUPERSEDED_BY_CORRECTED_VERDICT",
+  "corrected_status_exact": {
+    "PUBLISHED_MODULAR_DISTRIBUTION": "VERIFIED_RELEASE_CANDIDATE",
+    "RELEASE_GATES": "BINDING",
+    "PLATFORM_TRUTH_DRIFT_CLASSIFICATION": "PROVEN",
+    "SINGLE_PROVENANCE_AUTHORITY": "PROVEN",
+    "PR_ONLY_PROMOTION": "PROVEN",
+    "HASH_LOCKED_BUILD_DEPENDENCIES": "PROVEN",
+    "OFFLINE_PACKAGE_RESOLUTION": "PROVEN",
+    "CURRENT_HOST_WHEEL_REPRODUCIBILITY": "PROVEN",
+    "FULL_TOOLCHAIN_HERMETICITY": "PARTIAL",
+    "SKILL_CONTENT_FREEZE_FINAL_WINDOW": "SELF_VERIFIED_PASS",
+    "GLOBAL_REVIEW_FREEZE": "FAILED_BY_STATED_CONTRACT",
+    "INDEPENDENT_FINAL_REVIEW": "NOT_COMPLETED",
+    "CERTIFICATION_PROCESS_INTEGRITY": "NOT_PROVEN",
+    "FINAL_EXACT_HEAD_REVIEW": "NICHT BESTANDEN",
+    "OPERATIONAL_PRODUCTION": "NOT_YET"
+  }
+}
