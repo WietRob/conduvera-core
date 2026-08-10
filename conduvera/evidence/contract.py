@@ -31,6 +31,16 @@ ADAPTER_EVENT_TYPES = {
     "safety_guard.action.allowed",
     "safety_guard.action.blocked",
     "safety_guard.approval.required",
+    # Managed harness session lifecycle events (MXOS-SAFETY-1 / MXOS-RUNTIME-1
+    # vertical slice). Explicit contract types for the managed-session runtime.
+    "session.created",
+    "session.start.requested",
+    "session.started",
+    "session.status.observed",
+    "session.cancel.requested",
+    "session.cancelled",
+    "session.cleanup.completed",
+    "session.failed",
 }
 EVENT_TYPES = CORE_EVENT_TYPES | ADAPTER_EVENT_TYPES
 SEVERITIES = {"debug", "info", "warning", "error", "critical"}
