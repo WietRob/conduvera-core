@@ -55,6 +55,16 @@ class HarnessSpec:
     doctor_cmd: tuple[str, ...] | None = None
     extra_env: dict[str, str] | None = None
     allowlist_extra: tuple[str, ...] = ()
+    npx_package: str | None = None
+
+    def resolve_binary(self) -> str | None:
+        """Resolve the executable, optionally through npx."""
+        if self.npx_package:
+            npx = shutil.which("npx")
+            if npx:
+                return npx
+            return None
+        return shutil.which(self.binary)
 
 
 def _systemd_scope_available() -> bool:
@@ -91,17 +101,22 @@ class ScopedProcessAdapter:
     # -- capability --------------------------------------------------------
 
     def health_check(self) -> AdapterResult:
-        binary = shutil.which(self._spec.binary)
+        binary = self._spec.resolve_binary()
         if binary is None:
             return AdapterResult(
                 success=False,
                 message=f"CAPABILITY_UNAVAILABLE: {self._spec.binary} not on PATH",
                 detail={"code": "CAPABILITY_UNAVAILABLE", "binary": self._spec.binary},
             )
+        version_cmd = [binary]
+        if self._spec.npx_package:
+            version_cmd += ["--yes", self._spec.npx_package, "--version"]
+        else:
+            version_cmd += list(self._spec.version_args)
         try:
             r = subprocess.run(
-                [binary, *self._spec.version_args],
-                capture_output=True, text=True, timeout=15,
+                version_cmd,
+                capture_output=True, text=True, timeout=30,
             )
         except (OSError, subprocess.TimeoutExpired):
             return AdapterResult(
@@ -169,7 +184,7 @@ class ScopedProcessAdapter:
         prompt = str(config.get("prompt", "PONG"))
         task_command = config.get("task_command")
         timeout_s = float(config.get("timeout_s", self._task_timeout_s))
-        binary = shutil.which(self._spec.binary)
+        binary = self._spec.resolve_binary()
         if binary is None:
             return AdapterResult(
                 success=False,
@@ -182,7 +197,10 @@ class ScopedProcessAdapter:
 
         args = self._spec.start_args_builder(prompt, config) if self._spec.start_args_builder \
             else [prompt]
-        cmd = [binary, *args]
+        cmd = [binary]
+        if self._spec.npx_package:
+            cmd += ["--yes", self._spec.npx_package]
+        cmd += args
         if task_command:
             # Deterministic fixture task: run a bounded shell command in the
             # worktree via the harness scope (systemd-run --scope). Used for
@@ -443,6 +461,36 @@ def _opencode_args(prompt: str, config: dict[str, Any]) -> list[str]:
     return ["run", prompt]
 
 
+def _pi_args(prompt: str, config: dict[str, Any]) -> list[str]:
+    # Pi Agent Harness: non-interactive print mode against the local
+    # LiteLLM provider (models.json: litellm-local), offline startup.
+    # The API key is passed via --api-key from the process environment
+    # (never persisted, never logged).
+    model = config.get("model", "litellm-local/local/qwen-3.6-35b")
+    args = ["--model", model, "--print", prompt, "--offline"]
+    api_key = (os.environ.get("LITELLM_API_KEY")
+               or os.environ.get("LITELLM_KEY")
+               or os.environ.get("LITELLM_MASTER_KEY")
+               or os.environ.get("OPENAI_API_KEY"))
+    if api_key:
+        args += ["--api-key", api_key]
+    return args
+
+
+def pi_cli_adapter() -> ScopedProcessAdapter:
+    return ScopedProcessAdapter(
+        spec=HarnessSpec(
+            # Pi Agent Harness CLI (global install @earendil-works/pi-coding-agent).
+            binary="pi",
+            version_args=("--version",),
+            start_args_builder=_pi_args,
+            doctor_cmd=("pi", "--version"),
+            extra_env={"PI_OFFLINE": "1"},
+        ),
+        task_timeout_s=300.0,
+    )
+
+
 def hermes_scoped_adapter() -> ScopedProcessAdapter:
     return ScopedProcessAdapter(
         spec=HarnessSpec(binary="hermes", start_args_builder=_hermes_args),
@@ -479,4 +527,5 @@ def _register_instances() -> dict[str, ScopedProcessAdapter]:
         "hermes_scoped": hermes_scoped_adapter(),
         "codex_cli": codex_cli_adapter(),
         "opencode_cli": opencode_cli_adapter(),
+        "pi_cli": pi_cli_adapter(),
     }

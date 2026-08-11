@@ -179,7 +179,7 @@ class ControlPlaneService:
         gateway_service: Any,
         config: ControlPlaneConfig,
         adapter_ids: tuple[str, ...] = ("hermes_scoped", "codex_cli",
-                                        "opencode_cli", "hermes"),
+                                        "opencode_cli", "hermes", "pi_cli"),
         global_concurrency: int = 4,
         per_harness_limits: dict[str, int] | None = None,
         retention_s: float = 3600.0,
@@ -208,6 +208,7 @@ class ControlPlaneService:
             Path(__file__).resolve().parent.parent.parent
         )
         self._pending_task_command: dict[str, str] = {}
+        self._pending_prompts: dict[str, str] = {}
         self._outbox = None
 
     def set_outbox(self, outbox: Any) -> None:
@@ -372,6 +373,9 @@ class ControlPlaneService:
         self.scheduler.store.save_attempt(attempt)
         if task_command:
             self._pending_task_command[attempt_id_safe] = task_command
+        # Keep the prompt in-memory ONLY (never persisted) for dispatch-time
+        # injection into the harness. The store holds only a content hash.
+        self._pending_prompts[attempt_id_safe] = prompt
         self._emit("session.queued", {"job_id": job_id,
                                       "attempt_id": attempt_id_safe,
                                       "task_id": task_id_safe,
@@ -439,9 +443,9 @@ class ControlPlaneService:
                 "execution_mode": "LIVE",
                 "route": job.model_binding.get("route", "workload/local"),
                 "model_binding": job.model_binding,
-                "prompt": "",  # never forwarded raw from the store; the caller
-                # supplied the prompt at submit time and the engine re-injects
-                # it via the job hash reference.
+                "prompt": self._pending_prompts.pop(attempt.attempt_id, ""),
+                # Never forwarded raw from the store; the prompt is held only
+                # in-memory (per attempt) and the store keeps the hash.
                 "prompt_hash": job.prompt_hash,
                 "timeout_s": job.timeout_s,
             },
@@ -456,7 +460,7 @@ class ControlPlaneService:
                     "execution_mode": "LIVE",
                     "route": job.model_binding.get("route", "workload/local"),
                     "model_binding": job.model_binding,
-                    "prompt": job.prompt_summary,
+                    "prompt": self._pending_prompts.pop(attempt.attempt_id, ""),
                     "task_command": task_command,
                     "timeout_s": job.timeout_s,
                 },
