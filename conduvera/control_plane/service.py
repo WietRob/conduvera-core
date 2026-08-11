@@ -66,7 +66,7 @@ def _redact_command(cmd: str) -> str:
     The command string is observational only and never a fingerprint-match
     criterion. Keep the leading spawn shape (systemd-run / binary) and drop
     the trailing prompt argument so raw task text never persists in the
-    registry.
+    registry. Covers both legacy (`exec`) and cwd_exec (`--`) spawn shapes.
     """
     if not cmd:
         return cmd
@@ -74,7 +74,7 @@ def _redact_command(cmd: str) -> str:
     keep: list[str] = []
     drop_tail = False
     for tok in parts:
-        if tok == "exec":
+        if tok in ("--", "exec"):
             keep.append(tok)
             drop_tail = True
             continue
