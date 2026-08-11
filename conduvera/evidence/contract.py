@@ -41,6 +41,15 @@ ADAPTER_EVENT_TYPES = {
     "session.cancelled",
     "session.cleanup.completed",
     "session.failed",
+    # Internal-alpha scheduler/queue lifecycle events (CONTROL-PLANE-ALPHA-V1).
+    "job.accepted",
+    "attempt.created",
+    "session.queued",
+    "session.timeout.requested",
+    "session.reconciled",
+    "session.lost",
+    "session.completed",
+    "session.retained",
 }
 EVENT_TYPES = CORE_EVENT_TYPES | ADAPTER_EVENT_TYPES
 SEVERITIES = {"debug", "info", "warning", "error", "critical"}

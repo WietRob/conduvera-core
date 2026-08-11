@@ -24,11 +24,14 @@ def build_service(state_dir: str | None = None) -> ControlPlaneService:
         registry_path=Path(__file__).resolve().parent.parent / "harness" / "contracts" / "harness-registry.yaml",
         execution_mode="LIVE",
     )
-    return ControlPlaneService(
+    svc = ControlPlaneService(
         registry=registry,
         gateway_service=gateway,
         config=config,
     )
+    from conduvera.control_plane.outbox import EventOutbox
+    svc.set_outbox(EventOutbox(config.outbox_path, webhook_url=None))
+    return svc
 
 
 def main(argv: list[str] | None = None) -> int:
