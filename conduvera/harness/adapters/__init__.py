@@ -69,9 +69,13 @@ class HarnessSpec:
 
 def _systemd_scope_available() -> bool:
     try:
+        # Unique unit name: a fixed probe unit collides on repeat calls
+        # (the scope lingers briefly), making the check unstable.
+        import uuid
+        unit = f"conduvera-probe-{uuid.uuid4().hex[:8]}"
         r = subprocess.run(
-            ["systemd-run", "--user", "--scope", "--unit=conduvera-probe",
-             "/bin/true"],
+            ["systemd-run", "--user", "--scope", f"--unit={unit}",
+             "--collect", "--quiet", "/bin/true"],
             capture_output=True, text=True, timeout=15,
         )
         return r.returncode == 0
@@ -80,6 +84,18 @@ def _systemd_scope_available() -> bool:
 
 
 _SCOPE_AVAILABLE = _systemd_scope_available()
+
+
+def _use_scope() -> bool:
+    """Re-check scope availability at dispatch time (module-import caching of
+    _SCOPE_AVAILABLE is unreliable during daemon startup when the transient
+    probe unit may collide). Falling back to a raw process group must never
+    silently run the harness outside the dedicated worktree, so the scope
+    path (which pins --working-directory) is preferred whenever available.
+    """
+    if _SCOPE_AVAILABLE:
+        return True
+    return _systemd_scope_available()
 
 
 class ScopedProcessAdapter:
@@ -201,9 +217,22 @@ class ScopedProcessAdapter:
             cmd += ["--yes", self._spec.npx_package]
         cmd += args
 
-        if _SCOPE_AVAILABLE:
+        use_scope = _use_scope()
+        if use_scope:
+            # systemd-run's --working-directory sets the opencode "instance
+            # directory" but NOT the actual grandchild process cwd that
+            # opencode uses for git resolution (it inherits the caller's PWD).
+            # Force the worktree cwd with a fixed internal wrapper (NOT a
+            # caller-controlled shell string): every argument — including the
+            # caller-provided prompt — is shell-quoted so it can never inject
+            # a command, while the harness edits only the dedicated worktree.
+            import shlex
+            shell = shutil.which("bash") or "/bin/bash"
+            quoted = [shlex.quote(a) for a in ([str(wt)] + cmd)]
+            cmd_str = "cd {0} && exec {1}".format(quoted[0], " ".join(quoted[1:]))
             spawn = ["systemd-run", "--user", "--scope", "--unit", scope,
-                     "--collect", "--quiet"] + cmd
+                     "--collect", "--quiet",
+                     shell, "-c", cmd_str]
         else:
             # process-group fallback (only when scopes demonstrably unavailable)
             spawn = cmd
@@ -219,7 +248,7 @@ class ScopedProcessAdapter:
                     spawn,
                     stdout=out, stderr=err, stdin=subprocess.DEVNULL,
                     env=env, cwd=str(wt),
-                    start_new_session=not _SCOPE_AVAILABLE,
+                    start_new_session=not use_scope,
                 )
         except OSError as exc:
             return AdapterResult(
@@ -229,7 +258,7 @@ class ScopedProcessAdapter:
         # With systemd-run --scope the wrapper PID is transient: resolve the
         # scope MainPID so the fingerprint tracks the real harness process.
         resolved_pid = pid
-        if _SCOPE_AVAILABLE:
+        if use_scope:
             try:
                 r = subprocess.run(
                     ["systemctl", "--user", "show", scope,
@@ -248,8 +277,8 @@ class ScopedProcessAdapter:
             "start_time": _process_start_time(pid),
             "boot_id": _boot_id(),
             "command": _process_cmd(pid),
-            "scope": scope if _SCOPE_AVAILABLE else str(pid),
-            "scope_isolation": _SCOPE_AVAILABLE,
+            "scope": scope if use_scope else str(pid),
+            "scope_isolation": use_scope,
             "status": "running",
             "output_path": str(stdout_path),
             "stderr_path": str(stderr_path),
@@ -455,8 +484,11 @@ def _codex_args(prompt: str, config: dict[str, Any]) -> list[str]:
 
 
 def _opencode_args(prompt: str, config: dict[str, Any]) -> list[str]:
-    # Real OpenCode CLI run interface.
-    return ["run", prompt]
+    # Real OpenCode CLI run interface, non-interactive, JSON events for
+    # clean exit handling. OpenCode uses its own native auth domain
+    # (~/.local/share/opencode/auth.json) and its configured default model
+    # (opencode.json); no ODS/LiteLLM/route change.
+    return ["run", "--format", "json", prompt]
 
 
 def _pi_args(prompt: str, config: dict[str, Any]) -> list[str]:
