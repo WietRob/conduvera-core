@@ -101,6 +101,62 @@ def list_sessions(json_output: bool = typer.Option(False, "--json", help="JSON o
     _emit(_call("list"), json_output)
 
 
+@control_app.command("console")
+def console_view(
+    json_output: bool = typer.Option(False, "--json", help="JSON output"),
+    limit: int = typer.Option(20, "--limit", help="max rows per section"),
+) -> None:
+    """Konsolidierte Operator-Console: queued / running / terminal.
+
+    Nutzt NUR die reale Control-Plane-API (console endpoint) — kein Öffnen
+    von State-Dateien. Zeigt payload_ref/hash, worktree/base, elapsed/deadline,
+    terminal reason/exit und Evidence-Referenzen; NIE raw Prompts.
+    """
+    result = _call("console")
+    if json_output or not result.get("ok"):
+        _emit(result, json_output)
+        return
+    r = result.get("result", {})
+    counts = r.get("counts", {})
+    typer.echo(f"Operator Console — queued={counts.get('queued')} "
+               f"running={counts.get('running')} terminal={counts.get('terminal')} "
+               f"({r.get('server_time_utc','')})")
+
+    q = r.get("queued", [])[:limit]
+    if q:
+        typer.echo("\n[QUEUED]")
+        for a in q:
+            typer.echo(f"  {a.get('job_id',''):20s} {a.get('task_id',''):18s} "
+                       f"harness={a.get('harness',''):14s} type={a.get('task_type',''):12s} "
+                       f"payload={a.get('payload_ref','')[:14]}")
+            typer.echo(f"    base={a.get('base_commit','')[:10]} "
+                       f"queued={a.get('elapsed_s')}s "
+                       f"hash={str(a.get('content_sha256',''))[:16]}")
+
+    rn = r.get("running", [])[:limit]
+    if rn:
+        typer.echo("\n[RUNNING]")
+        for s in rn:
+            typer.echo(f"  {s.get('session_id',''):20s} {s.get('task_id',''):18s} "
+                       f"harness={s.get('harness',''):14s} elapsed={s.get('elapsed_s')}s")
+            typer.echo(f"    scope={s.get('scope_id','')} pid={s.get('pid')}")
+            typer.echo(f"    worktree={s.get('worktree','')}")
+            typer.echo(f"    base={s.get('base_commit','')[:10]} "
+                       f"deadline={s.get('deadline_utc','')}")
+
+    t = r.get("terminal", [])[:limit]
+    if t:
+        typer.echo("\n[TERMINAL]")
+        for j in t:
+            typer.echo(f"  {j.get('job_id',''):20s} {j.get('task_id',''):18s} "
+                       f"{j.get('state',''):12s} exit={j.get('exit_code')} "
+                       f"reason={j.get('terminal_reason','')[:40]}")
+            if j.get("result_refs"):
+                typer.echo(f"    evidence={j['result_refs']}")
+            typer.echo(f"    payload={j.get('payload_ref','')[:14]} "
+                       f"hash={str(j.get('content_sha256',''))[:16]}")
+
+
 @control_app.command("queue")
 def queue_overview(
     json_output: bool = typer.Option(False, "--json", help="JSON output"),
