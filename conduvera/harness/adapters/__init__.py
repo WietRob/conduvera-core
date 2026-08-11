@@ -29,6 +29,7 @@ import os
 import shutil
 import signal
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -210,7 +211,12 @@ class ScopedProcessAdapter:
         stdout_path = wt / f"{sid}.stdout.txt"
         stderr_path = wt / f"{sid}.stderr.txt"
 
-        args = self._spec.start_args_builder(prompt, config) if self._spec.start_args_builder \
+        # expose the worktree to harness-specific argument builders (e.g.
+        # opencode --dir) so the harness pins its working directory even when
+        # it would otherwise inherit the caller's PWD.
+        cfg = dict(config)
+        cfg.setdefault("worktree", str(wt))
+        args = self._spec.start_args_builder(prompt, cfg) if self._spec.start_args_builder \
             else [prompt]
         cmd = [binary]
         if self._spec.npx_package:
@@ -219,23 +225,24 @@ class ScopedProcessAdapter:
 
         use_scope = _use_scope()
         if use_scope:
-            # systemd-run's --working-directory sets the opencode "instance
-            # directory" but NOT the actual grandchild process cwd that
-            # opencode uses for git resolution (it inherits the caller's PWD).
-            # Force the worktree cwd with a fixed internal wrapper (NOT a
-            # caller-controlled shell string): every argument — including the
-            # caller-provided prompt — is shell-quoted so it can never inject
-            # a command, while the harness edits only the dedicated worktree.
-            import shlex
-            shell = shutil.which("bash") or "/bin/bash"
-            quoted = [shlex.quote(a) for a in ([str(wt)] + cmd)]
-            cmd_str = "cd {0} && exec {1}".format(quoted[0], " ".join(quoted[1:]))
+            # Shell-free cwd executor: systemd-run's --working-directory sets
+            # opencode's instance-directory but NOT the grandchild process cwd
+            # that opencode uses for git resolution (it inherits the caller's
+            # PWD). Invoke conduvera.harness.cwd_exec through systemd-run as
+            # ordinary argv elements: it os.chdir()s into the validated
+            # worktree and os.execvpe()s the harness with the prompt passed
+            # through UNCHANGED (no bash/sh, no string concatenation, no shell
+            # evaluation, no injection surface).
             spawn = ["systemd-run", "--user", "--scope", "--unit", scope,
                      "--collect", "--quiet",
-                     shell, "-c", cmd_str]
+                     sys.executable, "-m", "conduvera.harness.cwd_exec",
+                     "--cwd", str(wt), "--"] + cmd
         else:
-            # process-group fallback (only when scopes demonstrably unavailable)
-            spawn = cmd
+            # process-group fallback (only when scopes demonstrably unavailable):
+            # still use the shell-free cwd executor so the worktree boundary and
+            # injection protection hold regardless of scope availability.
+            spawn = [sys.executable, "-m", "conduvera.harness.cwd_exec",
+                     "--cwd", str(wt), "--"] + cmd
 
         env = dict(os.environ)
         for k, v in (self._spec.extra_env or {}).items():
@@ -487,8 +494,15 @@ def _opencode_args(prompt: str, config: dict[str, Any]) -> list[str]:
     # Real OpenCode CLI run interface, non-interactive, JSON events for
     # clean exit handling. OpenCode uses its own native auth domain
     # (~/.local/share/opencode/auth.json) and its configured default model
-    # (opencode.json); no ODS/LiteLLM/route change.
-    return ["run", "--format", "json", prompt]
+    # (opencode.json); no ODS/LiteLLM/route change. --dir pins the worktree
+    # because OpenCode otherwise inherits the caller's PWD (the cwd_exec
+    # os.chdir does not propagate to OpenCode's server instance).
+    args = ["run", "--format", "json"]
+    wt = config.get("worktree")
+    if wt:
+        args += ["--dir", str(wt)]
+    args.append(prompt)
+    return args
 
 
 def _pi_args(prompt: str, config: dict[str, Any]) -> list[str]:
