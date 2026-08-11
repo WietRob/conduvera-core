@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import socket
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -81,8 +82,22 @@ def service(tmp_path):
     config = ControlPlaneConfig.default(state_dir=tmp_path / "state")
     reg = PersistentSessionRegistry(config.registry_path)
     gw = _FakeGateway()
-    svc = ControlPlaneService(registry=reg, gateway_service=gw, config=config)
-    return svc, gw, reg, config
+    # Real Git fixture repo with an exact base commit (worktree proof needs it)
+    repo = tmp_path / "fixture-repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.email", "t@t"], check=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.name", "t"], check=True)
+    (repo / "README.md").write_text("fixture\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-qm", "base"], check=True)
+    base = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
+                          capture_output=True, text=True, check=True).stdout.strip()
+    svc = ControlPlaneService(
+        registry=reg, gateway_service=gw, config=config,
+        repo_path=repo,
+    )
+    return svc, gw, reg, config, base
 
 
 def _job(task_id: str = "T", attempt_id: str = "A", **kw: Any):
@@ -117,9 +132,9 @@ class TestRegistryPersistence:
 
 class TestControlPlaneOps:
     def test_start_registers_managed(self, service):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         r = svc.start(task_id="T1", attempt_id="A1", harness="hermes_scoped",
-                      repo="r", base_commit="c", model_binding={}, prompt="PONG")
+                      repo="r", base_commit=base, model_binding={}, prompt="PONG")
         assert r["success"]
         sid = r["session"]["session_id"]
         s = reg.get(sid)
@@ -129,20 +144,19 @@ class TestControlPlaneOps:
         assert gw.started[-1]["adapter"] == "hermes_scoped"
 
     def test_worktree_collision_rejected(self, service, tmp_path):
-        svc, gw, reg, config = service
-        wt = tmp_path / "shared"
+        svc, gw, reg, config, base = service
+        # Same task/attempt -> same worktree path -> WorktreeManager rejects
+        # the existing path (collision protection).
         r1 = svc.start(task_id="T1", attempt_id="A1", harness="hermes_scoped",
-                       repo="r", base_commit="c", model_binding={}, prompt="P",
-                       worktree=str(wt))
+                       repo="r", base_commit=base, model_binding={}, prompt="P")
         assert r1["success"]
-        r2 = svc.start(task_id="T2", attempt_id="A2", harness="hermes_scoped",
-                       repo="r", base_commit="c", model_binding={}, prompt="P",
-                       worktree=str(wt))
+        r2 = svc.start(task_id="T1", attempt_id="A1", harness="hermes_scoped",
+                       repo="r", base_commit=base, model_binding={}, prompt="P")
         assert not r2["success"]
-        assert r2["code"] == "WORKTREE_COLLISION"
+        assert r2["code"] == "WORKTREE_ERROR"
 
     def test_cancel_rejects_external(self, service):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         ext = ManagedSession(
             session_id="ext1", task_id="", attempt_id="",
             ownership_class=OwnershipClass.EXTERNAL_MANUAL_OBSERVED,
@@ -153,16 +167,16 @@ class TestControlPlaneOps:
         assert r["code"] == "EXTERNAL_SESSION_NOT_CONTROLLABLE"
 
     def test_cleanup_only_session_owned(self, service):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         r = svc.start(task_id="T", attempt_id="A", harness="hermes_scoped",
-                      repo="r", base_commit="c", model_binding={}, prompt="P")
+                      repo="r", base_commit=base, model_binding={}, prompt="P")
         sid = r["session"]["session_id"]
         cr = svc.cleanup(sid)
         assert cr["success"]
         assert not Path(svc.config.worktree_base / "T-A").exists()
 
     def test_reconcile_marks_gone_completed(self, service):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         s = ManagedSession.create(job=_job(worktree=str(config.worktree_base / "x")))
         s.fingerprint = ProcessFingerprint(pid=999999, start_time="0",
                                            boot_id="b", command="c")
@@ -172,7 +186,7 @@ class TestControlPlaneOps:
         assert got.state in (SessionState.COMPLETED, SessionState.LOST)
 
     def test_reconcile_rediscover_fingerprint(self, service):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         # Reale PID: dieser Testprozess
         s = ManagedSession.create(job=_job(worktree=str(config.worktree_base / "y")))
         pid = os.getpid()
@@ -188,14 +202,14 @@ class TestControlPlaneOps:
         assert got.state is SessionState.RUNNING
 
     def test_unknown_harness_rejected(self, service):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         r = svc.start(task_id="T", attempt_id="A", harness="nonexistent",
-                      repo="r", base_commit="c", model_binding={}, prompt="P")
+                      repo="r", base_commit=base, model_binding={}, prompt="P")
         assert not r["success"]
         assert r["code"] == "UNKNOWN_HARNESS"
 
     def test_capabilities_declared_unsupported(self, service):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         caps = svc.capabilities("hermes_scoped")
         assert caps["start"] == "supported"
         assert caps["cancel"] == "supported"
@@ -204,7 +218,7 @@ class TestControlPlaneOps:
         assert caps["checkpoint"] == "UNSUPPORTED"
 
     def test_doctor(self, service):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         d = svc.doctor()
         assert d["ok"] is True
         assert d["registry_schema"] == 1
@@ -219,7 +233,7 @@ class TestDaemonSocket:
         return t
 
     def test_roundtrip(self, service, tmp_path):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         sock = tmp_path / "cp.sock"
         daemon = ControlPlaneDaemon(service=svc, socket_path=sock)
         daemon.start()
@@ -247,7 +261,7 @@ class TestDaemonSocket:
             daemon.stop()
 
     def test_socket_0600(self, service, tmp_path):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         sock = tmp_path / "cp.sock"
         daemon = ControlPlaneDaemon(service=svc, socket_path=sock)
         daemon.start()
@@ -336,7 +350,7 @@ class TestScopedAdapterSpawn:
         assert hc.success in (True, False)  # depends on binary presence
 
     def test_cancel_external_rejected_via_service(self, service):
-        svc, gw, reg, config = service
+        svc, gw, reg, config, base = service
         ext = ManagedSession(
             session_id="ext-x", task_id="", attempt_id="",
             ownership_class=OwnershipClass.EXTERNAL_UNKNOWN,

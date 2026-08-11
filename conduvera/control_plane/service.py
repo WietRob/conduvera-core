@@ -24,7 +24,6 @@ import os
 import shutil
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -39,6 +38,16 @@ from conduvera.harness.managed_session import (
     _process_cmd,
     _process_start_time,
 )
+from conduvera.control_plane.scheduler import (
+    AttemptDescriptor,
+    AttemptState,
+    JobDescriptor,
+    JobState,
+    Scheduler,
+    SchedulerStore,
+    _utc_now,
+)
+from conduvera.control_plane.worktree import WorktreeManager, WorktreeError
 
 REGISTRY_SCHEMA_VERSION = 1
 
@@ -157,6 +166,10 @@ class ControlPlaneService:
         config: ControlPlaneConfig,
         adapter_ids: tuple[str, ...] = ("hermes_scoped", "codex_cli",
                                         "opencode_cli", "hermes"),
+        global_concurrency: int = 4,
+        per_harness_limits: dict[str, int] | None = None,
+        retention_s: float = 3600.0,
+        repo_path: str | Path | None = None,
     ):
         self.registry = registry
         self.gateway = gateway_service
@@ -166,6 +179,37 @@ class ControlPlaneService:
         config.worktree_base.mkdir(parents=True, exist_ok=True)
         config.evidence_dir.mkdir(parents=True, exist_ok=True)
         config.outbox_path.parent.mkdir(parents=True, exist_ok=True)
+        self.scheduler = Scheduler(
+            store=SchedulerStore(config.state_dir / "scheduler" / "queue.json"),
+            global_limit=global_concurrency,
+            per_harness_limits=per_harness_limits,
+            retention_s=retention_s,
+        )
+        self.worktrees = WorktreeManager(config.worktree_base)
+        # repo_path: the Git repository MANAGED worktrees are created from.
+        # Defaults to the conduvera-core checkout when running from source.
+        self.repo_path = Path(repo_path).expanduser().resolve() if repo_path else (
+            Path(__file__).resolve().parent.parent.parent
+        )
+        self._outbox = None
+
+    def set_outbox(self, outbox: Any) -> None:
+        """Attach the durable redacted event outbox (called by the daemon)."""
+        self._outbox = outbox
+
+    def _emit(self, event_type: str, payload: dict[str, Any]) -> None:
+        """Persist a lifecycle event (registry + outbox)."""
+        from conduvera.evidence.contract import EventEnvelope
+        envelope = EventEnvelope.create(
+            event_type=event_type,
+            producer={"name": "conduvera-control-plane", "version": "v1",
+                      "adapter": "control-plane"},
+            subject={"kind": "harness_job", "core": "conduvera-core"},
+            payload=payload,
+            correlation_id=str(payload.get("job_id") or payload.get("session_id") or ""),
+        )
+        if self._outbox is not None:
+            self._outbox.append(envelope.to_dict())
 
     # -- reconciliation ----------------------------------------------------
 
@@ -197,23 +241,82 @@ class ControlPlaneService:
                     session.state = SessionState.COMPLETED
                     session.ended_at = _utc_now()
                     self.registry.update(session)
+                self._mark_attempt_terminal(session, AttemptState.COMPLETED)
                 results[session.session_id] = {"state": session.state.value,
                                                "transitioned": "process_gone"}
+                self._emit("session.reconciled", {"session_id": session.session_id,
+                                                  "state": session.state.value,
+                                                  "transitioned": "process_gone"})
             elif live.matches(fp):
                 if session.state is not SessionState.RUNNING:
                     session.state = SessionState.RUNNING
                     self.registry.update(session)
                 results[session.session_id] = {"state": "RUNNING",
                                                "transitioned": "rediscovered"}
+                self._emit("session.reconciled", {"session_id": session.session_id,
+                                                  "state": "RUNNING",
+                                                  "transitioned": "rediscovered"})
             else:
                 session.state = SessionState.LOST
                 session.ended_at = _utc_now()
                 self.registry.update(session)
                 results[session.session_id] = {"state": "LOST",
                                                "transitioned": "pid_reuse"}
+                self._emit("session.reconciled", {"session_id": session.session_id,
+                                                  "state": "LOST",
+                                                  "transitioned": "pid_reuse"})
         return results
 
     # -- job operations -----------------------------------------------------
+
+    def submit(
+        self,
+        *,
+        task_id: str,
+        attempt_id: str,
+        harness: str,
+        repo: str,
+        base_commit: str,
+        model_binding: dict[str, Any],
+        prompt: str,
+        timeout_s: float = 120.0,
+    ) -> dict[str, Any]:
+        """Submit one job: accept -> create attempt -> queue/start."""
+        if harness not in self.adapter_ids:
+            return {"success": False, "message": f"unknown harness {harness}",
+                    "code": "UNKNOWN_HARNESS"}
+        job_id = f"job_{uuid.uuid4().hex[:12]}"
+        now = _utc_now()
+        job = JobDescriptor(
+            job_id=job_id, task_id=task_id, repo=repo, base_commit=base_commit,
+            harness=harness, model_binding=dict(model_binding), prompt=prompt,
+            timeout_s=timeout_s, created_at=now, updated_at=now,
+        )
+        job.attempts.append(attempt_id)
+        self.scheduler.store.save_job(job)
+        self._emit("job.accepted", {"job_id": job_id, "task_id": task_id,
+                                    "harness": harness})
+
+        attempt = AttemptDescriptor(
+            attempt_id=attempt_id, job_id=job_id, task_id=task_id,
+            harness=harness, created_at=now, updated_at=now,
+        )
+        self.scheduler.store.save_attempt(attempt)
+        self._emit("attempt.created", {"job_id": job_id, "attempt_id": attempt_id,
+                                       "task_id": task_id, "harness": harness})
+
+        can_start, reason = self.scheduler.can_start(harness)
+        if can_start:
+            return self._start_attempt(job, attempt)
+        # Queue the attempt (bounded concurrency) — deterministic.
+        attempt.state = AttemptState.QUEUED
+        attempt.updated_at = _utc_now()
+        self.scheduler.store.save_attempt(attempt)
+        self._emit("session.queued", {"job_id": job_id, "attempt_id": attempt_id,
+                                      "task_id": task_id, "harness": harness,
+                                      "reason": reason})
+        return {"success": True, "message": f"job queued ({reason})",
+                "job_id": job_id, "attempt_id": attempt_id, "queued": True}
 
     def start(
         self,
@@ -229,39 +332,71 @@ class ControlPlaneService:
         worktree: str | None = None,
         execution_mode: str = "LIVE",
     ) -> dict[str, Any]:
-        """Start one job through the gateway (adapter-selected by harness)."""
-        if harness not in self.adapter_ids:
-            return {"success": False, "message": f"unknown harness {harness}",
-                    "code": "UNKNOWN_HARNESS"}
-        if worktree is None:
-            worktree = str(self.config.worktree_base / f"{task_id}-{attempt_id}")
-        wt = Path(worktree).expanduser().resolve()
-        # collision protection: no two sessions may own the same worktree
-        for s in self.registry.all():
-            if s.ownership_class is OwnershipClass.MANAGED and s.worktree:
-                if Path(s.worktree).resolve() == wt:
-                    return {"success": False, "message": f"worktree collision: {wt}",
-                            "code": "WORKTREE_COLLISION"}
-        wt.mkdir(parents=True, exist_ok=True)
-        (wt / "README.txt").write_text(
-            f"control-plane job\ntask={task_id}\nattempt={attempt_id}\n"
-            f"harness={harness}\nrepo={repo}\nbase={base_commit}\n",
-            encoding="utf-8",
+        """Start one job (compat path: submit with immediate start)."""
+        return self.submit(
+            task_id=task_id, attempt_id=attempt_id, harness=harness,
+            repo=repo, base_commit=base_commit, model_binding=model_binding,
+            prompt=prompt, timeout_s=timeout_s,
         )
+
+    def _start_attempt(
+        self,
+        job: JobDescriptor,
+        attempt: AttemptDescriptor,
+    ) -> dict[str, Any]:
+        """Start one queued/accepted attempt: real worktree -> gateway -> session."""
+        harness = job.harness
+        task_id = job.task_id
+        attempt_id = attempt.attempt_id
+        # 1) Real Git worktree from the exact base commit (proven via Git).
+        try:
+            binding = self.worktrees.create(
+                repo_path=self.repo_path, base_commit=job.base_commit,
+                task_id=task_id, attempt_id=attempt_id,
+            )
+        except WorktreeError as exc:
+            attempt.state = AttemptState.FAILED
+            attempt.updated_at = _utc_now()
+            self.scheduler.store.save_attempt(attempt)
+            self._emit("session.failed", {"job_id": job.job_id,
+                                          "attempt_id": attempt_id,
+                                          "task_id": task_id,
+                                          "reason": f"worktree: {exc}"})
+            return {"success": False, "message": str(exc),
+                    "code": "WORKTREE_ERROR"}
+        wt = Path(binding.path)
+        attempt.worktree = binding.to_dict()
+        attempt.state = AttemptState.RUNNING
+        attempt.updated_at = _utc_now()
+        self.scheduler.store.save_attempt(attempt)
+        self._emit("session.start.requested", {"job_id": job.job_id,
+                                               "attempt_id": attempt_id,
+                                               "task_id": task_id,
+                                               "harness": harness,
+                                               "worktree": binding.to_dict(),
+                                               "base_commit": job.base_commit})
+
         result = self.gateway.start_session(
             adapter_id=harness,
             agent_id=task_id,
             worktree=str(wt),
             task=task_id,
             config={
-                "execution_mode": execution_mode,
-                "route": model_binding.get("route", "workload/local"),
-                "model_binding": model_binding,
-                "prompt": prompt,
-                "timeout_s": timeout_s,
+                "execution_mode": "LIVE",
+                "route": job.model_binding.get("route", "workload/local"),
+                "model_binding": job.model_binding,
+                "prompt": job.prompt,
+                "timeout_s": job.timeout_s,
             },
         )
         if not result.success:
+            attempt.state = AttemptState.FAILED
+            attempt.updated_at = _utc_now()
+            self.scheduler.store.save_attempt(attempt)
+            self._emit("session.failed", {"job_id": job.job_id,
+                                          "attempt_id": attempt_id,
+                                          "task_id": task_id,
+                                          "reason": result.message})
             return {"success": False, "message": result.message,
                     "detail": dict(result.detail), "code": result.detail.get("code")}
         detail = dict(result.detail)
@@ -284,14 +419,31 @@ class ControlPlaneService:
             created_at=_utc_now(),
             started_at=_utc_now(),
             worktree=str(wt),
-            base_commit=base_commit,
+            base_commit=job.base_commit,
             adapter_session_id=str(detail.get("session_id", "")),
             harness_descriptor=harness,
-            model_binding=dict(model_binding),
-            timeout_s=timeout_s,
+            model_binding=dict(job.model_binding),
+            timeout_s=job.timeout_s,
         )
         self.registry.register(session)
+        attempt.session_id = session_id
+        attempt.scope_id = session.scope_id
+        attempt.updated_at = _utc_now()
+        self.scheduler.store.save_attempt(attempt)
+        job.state = JobState.RUNNING
+        job.updated_at = _utc_now()
+        self.scheduler.store.save_job(job)
+        self._emit("session.started", {"job_id": job.job_id,
+                                       "attempt_id": attempt_id,
+                                       "session_id": session_id,
+                                       "task_id": task_id,
+                                       "harness": harness,
+                                       "worktree": binding.to_dict(),
+                                       "base_commit": job.base_commit,
+                                       "scope": session.scope_id,
+                                       "pid": session.fingerprint.pid if session.fingerprint else 0})
         return {"success": True, "message": f"job started via {harness}",
+                "job_id": job.job_id, "attempt_id": attempt_id,
                 "session": session.to_dict()}
 
     def status(self, session_id: str) -> dict[str, Any]:
@@ -342,6 +494,10 @@ class ControlPlaneService:
             session.state = SessionState.CANCELLED
             session.ended_at = _utc_now()
             self.registry.update(session)
+            self._mark_attempt_terminal(session, AttemptState.CANCELLED)
+            self._emit("session.cancelled", {"session_id": session_id,
+                                             "task_id": session.task_id,
+                                             "attempt_id": session.attempt_id})
             return {"success": True, "state": "CANCELLED", "session_id": session_id}
         # Fallback after service restart: the adapter in-memory session map is
         # gone, but the scope/cgroup still owns the process. Terminate the
@@ -357,10 +513,25 @@ class ControlPlaneService:
                     session.state = SessionState.CANCELLED
                     session.ended_at = _utc_now()
                     self.registry.update(session)
+                    self._mark_attempt_terminal(session, AttemptState.CANCELLED)
+                    self._emit("session.cancelled", {"session_id": session_id,
+                                                     "task_id": session.task_id,
+                                                     "attempt_id": session.attempt_id})
                     return {"success": True, "state": "CANCELLED",
                             "session_id": session_id,
                             "message": f"cancelled via scope {session.scope_id}"}
         return {"success": False, "message": result.message, "detail": dict(result.detail)}
+
+    def _mark_attempt_terminal(
+        self, session: ManagedSession, state: AttemptState
+    ) -> None:
+        """Mark the scheduler attempt terminal (synchronized with session state)."""
+        attempt = self.scheduler.store.get_attempt(session.attempt_id)
+        if attempt is not None and not attempt.terminal:
+            attempt.state = state
+            attempt.terminal = True
+            attempt.updated_at = _utc_now()
+            self.scheduler.store.save_attempt(attempt)
 
     def cleanup(self, session_id: str) -> dict[str, Any]:
         """Remove only session-owned temporary resources (worktree + evidence)."""
@@ -433,7 +604,3 @@ class ControlPlaneService:
         if not report["registry_permissions_ok"]:
             report["ok"] = False
         return report
-
-
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat()

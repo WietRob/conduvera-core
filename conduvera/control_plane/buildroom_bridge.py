@@ -87,13 +87,16 @@ class BuildroomBridge:
             "model_binding": decision.model_binding.to_dict(),
             "prompt": prompt, "timeout_s": timeout_s,
         }
-        result = self._call("start", params)
+        result = self._call("submit", params)
         if result.get("ok") and result.get("result", {}).get("success"):
+            rres = result.get("result", {})
             return {
                 "ok": True,
                 "task_id": task_id, "attempt_id": attempt_id,
                 "harness": decision.harness,
-                "session": result["result"]["session"],
+                "job_id": rres.get("job_id", ""),
+                "session": rres.get("session", {}),
+                "queued": rres.get("queued", False),
                 "route_decision": decision.to_dict(),
             }
         return result

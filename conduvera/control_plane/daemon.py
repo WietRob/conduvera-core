@@ -109,6 +109,9 @@ class ControlPlaneDaemon:
             if method == "start":
                 r = self.service.start(**params)
                 return {"ok": r.get("success", False), "result": r}
+            if method == "submit":
+                r = self.service.submit(**params)
+                return {"ok": r.get("success", False), "result": r}
             if method == "list":
                 return {"ok": True, "result": {"sessions": self.service.list_sessions(),
                                                "jobs": self.service.list_jobs()}}
