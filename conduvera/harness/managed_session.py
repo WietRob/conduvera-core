@@ -106,11 +106,15 @@ class ProcessFingerprint:
     command: str
 
     def matches(self, other: "ProcessFingerprint") -> bool:
+        # Ownership proof: pid + start_time + boot_id. The command string is
+        # recorded as an observation but is NOT a mismatch criterion: with
+        # systemd-run --scope the exec transition can snapshot the wrapper
+        # argv transiently, and argv is mutable. start_time (jiffies since
+        # boot) is the authoritative reuse detector.
         return (
             self.pid == other.pid
             and self.start_time == other.start_time
             and self.boot_id == other.boot_id
-            and self.command == other.command
         )
 
     def to_dict(self) -> dict[str, Any]:

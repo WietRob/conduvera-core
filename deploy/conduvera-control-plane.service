@@ -1,0 +1,17 @@
+[Unit]
+Description=Conduvera Operational Harness Control Plane v1
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -m conduvera.control_plane.server
+WorkingDirectory=/home/roberto_schmidt/projects/matrix-os
+Environment=PYTHONPATH=/home/roberto_schmidt/projects/matrix-os:/home/roberto_schmidt/projects/conduvera-hermes-adapter
+Environment=PATH=/home/roberto_schmidt/.local/bin:/home/linuxbrew/.linuxbrew/bin:/home/roberto_schmidt/.nvm/versions/node/v22.22.0/bin:/usr/local/bin:/usr/bin:/bin
+Restart=on-failure
+RestartSec=3
+StateDirectory=conduvera
+StateDirectoryMode=0700
+
+[Install]
+WantedBy=default.target

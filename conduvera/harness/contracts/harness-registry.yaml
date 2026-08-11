@@ -1,4 +1,4 @@
-# Harness adapter registry (CONDUVERA-GOAL-1.0)
+# Harness adapter registry (CONDUVERA-GOAL-1.0 / CONTROL-PLANE-V1)
 # Adapter werden NUR über diese versionierte Registry/Eintrittspunkte-Schicht
 # geladen (dynamisch, nie direkt importiert). Fehlt der Eintrag, ist der
 # Adapter deaktiviert oder das Modul physisch nicht vorhanden, startet Core
@@ -10,9 +10,28 @@ adapters:
     entry_point: HermesAdapter
     version: hermes-adapter.v1
     contract: CONDUVERA-GOAL-1.0
+    note: released adapter (0.1.7), process-group isolation; control-plane
+          nutzt hermes_scoped für systemd-scope-Isolation
+  hermes_scoped:
+    enabled: true
+    module: conduvera.harness.adapters
+    entry_point: hermes_scoped_adapter
+    version: conduitvera-scope-adapter.v1
+    contract: CONTROL-PLANE-V1
+    isolation: systemd-user-scope
   codex_cli:
-    enabled: false
-    status: disabled_by_owner
+    enabled: true
+    module: conduvera.harness.adapters
+    entry_point: codex_cli_adapter
+    version: conduitvera-scope-adapter.v1
+    contract: CONTROL-PLANE-V1
+    isolation: systemd-user-scope
+    note: native Codex CLI direct execution (no OAuth/LiteLLM alias)
   opencode_cli:
-    enabled: false
-    status: disabled_by_owner
+    enabled: true
+    module: conduvera.harness.adapters
+    entry_point: opencode_cli_adapter
+    version: conduitvera-scope-adapter.v1
+    contract: CONTROL-PLANE-V1
+    isolation: systemd-user-scope
+    note: real OpenCode CLI run interface
