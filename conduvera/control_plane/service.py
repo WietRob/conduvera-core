@@ -38,6 +38,14 @@ from conduvera.harness.managed_session import (
     _process_cmd,
     _process_start_time,
 )
+from conduvera.control_plane.payload import (
+    PayloadCorruptError,
+    PayloadError,
+    PayloadMissingError,
+    TaskPayloadEnvelope,
+    TaskPayloadStore,
+    new_payload_id,
+)
 from conduvera.control_plane.scheduler import (
     AttemptDescriptor,
     AttemptState,
@@ -51,18 +59,46 @@ from conduvera.control_plane.worktree import WorktreeManager, WorktreeError
 
 REGISTRY_SCHEMA_VERSION = 1
 
+
+def _redact_command(cmd: str) -> str:
+    """Strip task prompt / secret material from an observed process command.
+
+    The command string is observational only and never a fingerprint-match
+    criterion. Keep the leading spawn shape (systemd-run / binary) and drop
+    the trailing prompt argument so raw task text never persists in the
+    registry.
+    """
+    if not cmd:
+        return cmd
+    parts = cmd.split()
+    keep: list[str] = []
+    drop_tail = False
+    for tok in parts:
+        if tok == "exec":
+            keep.append(tok)
+            drop_tail = True
+            continue
+        if drop_tail:
+            break
+        keep.append(tok)
+    if keep:
+        return " ".join(keep) + (" …[redacted]" if drop_tail else "")
+    return cmd[:120]
+
 # Repository allowlist: stable repo ids -> canonical local paths.
 # Only allowlisted repositories can be used as task base repositories.
 REPO_ALLOWLIST: dict[str, Path] = {
     "conduvera-core": Path.home() / "projects" / "matrix-os",
     "conduvera-adapter": Path.home() / "projects" / "conduvera-hermes-adapter",
     "conduvera-platform": Path.home() / "projects" / "conduvera-platform",
+    "conduit-fixture": Path.home() / "projects" / "conduit-fixture",
 }
 
 REPO_ALIASES: dict[str, str] = {
     "core": "conduvera-core",
     "adapter": "conduvera-adapter",
     "platform": "conduvera-platform",
+    "fixture": "conduit-fixture",
 }
 
 
@@ -179,7 +215,7 @@ class ControlPlaneService:
         gateway_service: Any,
         config: ControlPlaneConfig,
         adapter_ids: tuple[str, ...] = ("hermes_scoped", "codex_cli",
-                                        "opencode_cli", "hermes", "pi_cli"),
+                                        "opencode_cli", "hermes"),
         global_concurrency: int = 4,
         per_harness_limits: dict[str, int] | None = None,
         retention_s: float = 3600.0,
@@ -207,8 +243,8 @@ class ControlPlaneService:
         self.repo_path = Path(repo_path).expanduser().resolve() if repo_path else (
             Path(__file__).resolve().parent.parent.parent
         )
-        self._pending_task_command: dict[str, str] = {}
         self._pending_prompts: dict[str, str] = {}
+        self._payload_store = TaskPayloadStore(Path(config.state_dir))
         self._outbox = None
 
     def set_outbox(self, outbox: Any) -> None:
@@ -288,8 +324,15 @@ class ControlPlaneService:
     # -- job operations -----------------------------------------------------
 
     def resolve_repo(self, repo: str) -> Path:
-        """Resolve a stable repo id to its canonical path (allowlist)."""
-        rid = REPO_ALIASES.get(repo, repo)
+        """Resolve a stable repo id to its canonical path (allowlist).
+
+        Instance-level allowlist wins (tests/fixtures map custom ids); only
+        then the global alias table is consulted.
+        """
+        if repo in self._repo_allowlist:
+            rid = repo
+        else:
+            rid = REPO_ALIASES.get(repo, repo)
         if rid not in self._repo_allowlist:
             raise ValueError(f"repository not allowlisted: {repo}")
         path = self._repo_allowlist[rid]
@@ -309,20 +352,22 @@ class ControlPlaneService:
         prompt: str,
         timeout_s: float = 120.0,
         execute: bool = True,
-        task_command: str | None = None,
+        task_type: str = "code_change",
+        expected_artifacts: list[str] | None = None,
+        test_plan: str = "",
     ) -> dict[str, Any]:
         """THE single public mutation entry point.
 
         All submissions (CLI, BuildroomBridge, Console) go through here.
         - repository allowlist resolution;
         - duplicate attempt rejection (idempotent, never overwrite);
-        - prompt redaction (only hash + summary persisted);
+        - the full task payload is durably stored (TaskPayloadStore); queue/
+          registry/outbox hold only payload_ref + content_sha256 — never raw
+          task text;
         - queued -> claimed -> dispatched by the daemon-owned engine.
         Direct `start` bypasses this path and is internal-only (adapter tests).
 
-        `task_command` (optional, deterministic fixture tasks only) is passed
-        to the harness scope runner for acceptance proofs; it is never
-        persisted — only referenced via the attempt id.
+        No caller-controlled shell command is accepted (task_command removed).
         """
         if harness not in self.adapter_ids:
             return {"success": False, "message": f"unknown harness {harness}",
@@ -345,17 +390,33 @@ class ControlPlaneService:
 
         job_id = f"job_{uuid.uuid4().hex[:12]}"
         now = _utc_now()
+        # durable payload: full task text stored only in the payload store
+        payload_id = new_payload_id()
+        envelope = TaskPayloadEnvelope(
+            payload_id=payload_id,
+            task_type=task_type,
+            instructions=prompt,
+            repo=repo,
+            base_commit=base_commit,
+            expected_artifacts=list(expected_artifacts or []),
+            test_plan=test_plan,
+        )
+        self._payload_store.put(envelope)
         job = JobDescriptor(
             job_id=job_id, task_id=task_id_safe, repo=repo,
             base_commit=base_commit, harness=harness,
             model_binding=dict(model_binding), prompt="",
             timeout_s=timeout_s, created_at=now, updated_at=now,
+            payload_ref=payload_id, content_sha256=envelope.content_sha256,
+            task_type=task_type,
         )
         job.bind_prompt(prompt)
         job.attempts.append(attempt_id_safe)
         self.scheduler.store.save_job(job)
         self._emit("job.accepted", {"job_id": job_id, "task_id": task_id_safe,
-                                    "harness": harness, "repo": repo})
+                                    "harness": harness, "repo": repo,
+                                    "payload_ref": payload_id,
+                                    "content_sha256": envelope.content_sha256})
 
         attempt = AttemptDescriptor(
             attempt_id=attempt_id_safe, job_id=job_id, task_id=task_id_safe,
@@ -371,17 +432,17 @@ class ControlPlaneService:
         attempt.state = AttemptState.QUEUED
         attempt.updated_at = _utc_now()
         self.scheduler.store.save_attempt(attempt)
-        if task_command:
-            self._pending_task_command[attempt_id_safe] = task_command
-        # Keep the prompt in-memory ONLY (never persisted) for dispatch-time
-        # injection into the harness. The store holds only a content hash.
+        # memory cache only as an optimization over the persistent payload
+        # store (the persistent authority is _payload_store).
         self._pending_prompts[attempt_id_safe] = prompt
         self._emit("session.queued", {"job_id": job_id,
                                       "attempt_id": attempt_id_safe,
                                       "task_id": task_id_safe,
                                       "harness": harness})
         return {"success": True, "message": "job accepted and queued",
-                "job_id": job_id, "attempt_id": attempt_id_safe, "queued": True}
+                "job_id": job_id, "attempt_id": attempt_id_safe,
+                "payload_ref": payload_id,
+                "content_sha256": envelope.content_sha256, "queued": True}
 
     def dispatch_claimed(self, attempt_id: str) -> dict[str, Any]:
         """Dispatcher-owned: start one CLAIMED attempt (worktree -> gateway)."""
@@ -434,6 +495,43 @@ class ControlPlaneService:
                                                "worktree": binding.to_dict(),
                                                "base_commit": job.base_commit})
 
+        # Durable task payload: reload from the persistent store and verify the
+        # content hash. Missing/corrupt/hash-mismatch fails the attempt loudly
+        # (never falls back to an empty or redacted prompt).
+        try:
+            envelope = self._payload_store.get(job.payload_ref)
+        except (PayloadMissingError, PayloadCorruptError, PayloadError) as exc:
+            attempt.state = AttemptState.FAILED
+            attempt.terminal = True
+            attempt.terminal_reason = f"payload: {exc}"
+            attempt.updated_at = _utc_now()
+            self.scheduler.store.save_attempt(attempt)
+            job.state = JobState.FAILED
+            job.terminal_reason = f"payload: {exc}"
+            job.updated_at = _utc_now()
+            self.scheduler.store.save_job(job)
+            self._emit("session.failed", {"job_id": job.job_id,
+                                          "attempt_id": attempt.attempt_id,
+                                          "task_id": task_id,
+                                          "reason": f"payload: {exc}"})
+            return {"success": False, "message": str(exc), "code": "PAYLOAD_ERROR"}
+        if envelope.content_sha256 != job.content_sha256:
+            attempt.state = AttemptState.FAILED
+            attempt.terminal = True
+            attempt.terminal_reason = "payload hash mismatch"
+            attempt.updated_at = _utc_now()
+            self.scheduler.store.save_attempt(attempt)
+            job.state = JobState.FAILED
+            job.terminal_reason = "payload hash mismatch"
+            job.updated_at = _utc_now()
+            self.scheduler.store.save_job(job)
+            self._emit("session.failed", {"job_id": job.job_id,
+                                          "attempt_id": attempt.attempt_id,
+                                          "task_id": task_id,
+                                          "reason": "payload hash mismatch"})
+            return {"success": False, "message": "payload hash mismatch",
+                    "code": "PAYLOAD_HASH_MISMATCH"}
+
         result = self.gateway.start_session(
             adapter_id=harness,
             agent_id=task_id,
@@ -443,28 +541,14 @@ class ControlPlaneService:
                 "execution_mode": "LIVE",
                 "route": job.model_binding.get("route", "workload/local"),
                 "model_binding": job.model_binding,
-                "prompt": self._pending_prompts.pop(attempt.attempt_id, ""),
-                # Never forwarded raw from the store; the prompt is held only
-                # in-memory (per attempt) and the store keeps the hash.
+                # exact original task instructions from the durable payload
+                "prompt": envelope.instructions,
+                "payload_ref": envelope.payload_id,
+                "content_sha256": envelope.content_sha256,
                 "prompt_hash": job.prompt_hash,
                 "timeout_s": job.timeout_s,
             },
         )
-        if task_command := self._pending_task_command.pop(attempt.attempt_id, None):
-            result = self.gateway.start_session(
-                adapter_id=harness,
-                agent_id=task_id,
-                worktree=str(wt),
-                task=task_id,
-                config={
-                    "execution_mode": "LIVE",
-                    "route": job.model_binding.get("route", "workload/local"),
-                    "model_binding": job.model_binding,
-                    "prompt": self._pending_prompts.pop(attempt.attempt_id, ""),
-                    "task_command": task_command,
-                    "timeout_s": job.timeout_s,
-                },
-            )
         if not result.success:
             attempt.state = AttemptState.FAILED
             attempt.terminal = True
@@ -494,7 +578,10 @@ class ControlPlaneService:
                 pid=int(detail.get("pid", 0)),
                 start_time=_process_start_time(int(detail.get("pid", 0))),
                 boot_id=_boot_id(),
-                command=_process_cmd(int(detail.get("pid", 0))),
+                # command is observational only (never a mismatch criterion);
+                # strip any task prompt / secret material from the argv string
+                # so raw task text never persists in the registry.
+                command=_redact_command(_process_cmd(int(detail.get("pid", 0)))),
             ),
             scope_id=str(detail.get("pgid", "") or detail.get("scope", "")),
             state=SessionState.RUNNING,

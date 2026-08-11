@@ -50,9 +50,6 @@ TASK_CLASSES: dict[str, TaskClass] = {
     "native_opencode": TaskClass("native_opencode", "MEDIUM",
                                  ("start", "status", "cancel", "collect_evidence"),
                                  "opencode_cli"),
-    "native_pi": TaskClass("native_pi", "MEDIUM",
-                           ("start", "status", "cancel", "collect_evidence"),
-                           "pi_cli"),
     "dangerous": TaskClass("dangerous", "HIGH",
                            ("start", "status", "cancel", "collect_evidence",
                             "steer"), None),
@@ -116,8 +113,6 @@ DEFAULT_BINDINGS: dict[str, ModelBinding] = {
                               provider="codex-cli"),
     "opencode_cli": ModelBinding(route="opencode-native", model="opencode",
                                  provider="opencode-cli"),
-    "pi_cli": ModelBinding(route="workload/local", model="local",
-                           provider="litellm-local"),
 }
 
 

@@ -27,35 +27,29 @@ class TestPiAdapter:
         hc = a.health_check()
         assert hc.success, hc.message
 
-    def test_pi_registry_entry_enabled(self, tmp_path):
-        """harness-registry.yaml: pi_cli ist enabled."""
+    def test_pi_registry_entry_disabled(self, tmp_path):
+        """harness-registry.yaml: pi_cli ist production-disabled (Quarantäne)."""
         import yaml
         reg_path = Path("conduvera/harness/contracts/harness-registry.yaml")
         data = yaml.safe_load(reg_path.read_text())
         pi = data["adapters"]["pi_cli"]
-        assert pi["enabled"] is True
+        assert pi["enabled"] is False
         assert pi["entry_point"] == "pi_cli_adapter"
         assert pi["isolation"] == "systemd-user-scope"
 
-    def test_router_native_pi(self):
-        """native_pi hat pi_cli in der Verfügbarkeits-Fallback-Kette und ein
-        litellm-local Model-Binding (deterministisches Pi-Binding)."""
-        from conduvera.harness.router import DeterministicRouter
-        r = DeterministicRouter()
-        d = r.route(task_id="t", task_class="native_pi")
-        assert "pi_cli" in d.fallback_chain
-        # pi_cli ist ein gültiges Ziel (Binding vorhanden)
-        from conduvera.harness.router import DEFAULT_BINDINGS
-        assert "pi_cli" in DEFAULT_BINDINGS
-        assert DEFAULT_BINDINGS["pi_cli"].provider == "litellm-local"
+    def test_router_no_native_pi(self):
+        """Es gibt kein automatisches native_pi-Routing (Pi nicht routbar)."""
+        from conduvera.harness.router import TASK_CLASSES, DEFAULT_BINDINGS
+        assert "native_pi" not in TASK_CLASSES
+        assert "pi_cli" not in DEFAULT_BINDINGS
 
-    def test_router_native_pi_override(self):
-        """Bei explizitem pi_cli-Override wird deterministisch auf pi_cli
-        geroutet (kein verstecktes Modell-Switching)."""
-        from conduvera.harness.router import DeterministicRouter
-        r = DeterministicRouter()
-        d = r.route(task_id="t", task_class="native_pi", override_harness="pi_cli")
-        assert d.harness == "pi_cli"
+    def test_pi_cli_not_in_default_adapters(self):
+        """Der Service startet standardmäßig ohne pi_cli (Quarantäne)."""
+        import inspect
+        from conduvera.control_plane.service import ControlPlaneService
+        sig = inspect.signature(ControlPlaneService.__init__)
+        default_ids = sig.parameters["adapter_ids"].default
+        assert "pi_cli" not in default_ids
 
 
 class TestPiPromptHandling:

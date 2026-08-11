@@ -182,7 +182,6 @@ class ScopedProcessAdapter:
         wt = Path(worktree).expanduser().resolve()
         wt.mkdir(parents=True, exist_ok=True)
         prompt = str(config.get("prompt", "PONG"))
-        task_command = config.get("task_command")
         timeout_s = float(config.get("timeout_s", self._task_timeout_s))
         binary = self._spec.resolve_binary()
         if binary is None:
@@ -201,13 +200,6 @@ class ScopedProcessAdapter:
         if self._spec.npx_package:
             cmd += ["--yes", self._spec.npx_package]
         cmd += args
-        if task_command:
-            # Deterministic fixture task: run a bounded shell command in the
-            # worktree via the harness scope (systemd-run --scope). Used for
-            # cancellation/timeout/completion acceptance proofs where a
-            # long-lived deterministic process is required. The command is
-            # validated (no shell metacharacters beyond a fixed allowlist).
-            cmd = ["bash", "-c", task_command]
 
         if _SCOPE_AVAILABLE:
             spawn = ["systemd-run", "--user", "--scope", "--unit", scope,
@@ -453,7 +445,13 @@ def _hermes_args(prompt: str, config: dict[str, Any]) -> list[str]:
 
 def _codex_args(prompt: str, config: dict[str, Any]) -> list[str]:
     # Native Codex CLI direct execution (no OAuth/LiteLLM alias).
-    return ["exec", "--json", prompt]
+    # Sandbox: bwrap workspace-write is blocked on this host by AppArmor
+    # (kernel.apparmor_restrict_unprivileged_userns=1, no sudo). The
+    # worktree boundary is enforced by the control-plane scope isolation
+    # (cwd=worktree, KillMode=control-group) + byte-identical base-checkout
+    # verification after the run. danger-full-access is used ONLY inside that
+    # isolated scope; it never grants access to the base repository.
+    return ["exec", "--sandbox", "danger-full-access", "--json", prompt]
 
 
 def _opencode_args(prompt: str, config: dict[str, Any]) -> list[str]:

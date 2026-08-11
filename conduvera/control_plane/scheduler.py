@@ -65,6 +65,9 @@ class JobDescriptor:
     timeout_s: float = 180.0
     prompt_hash: str = ""
     prompt_summary: str = "[redacted]"
+    payload_ref: str = ""
+    content_sha256: str = ""
+    task_type: str = "code_change"
     attempts: list[str] = field(default_factory=list)
     state: JobState = JobState.ACCEPTED
     created_at: str = ""
@@ -78,7 +81,9 @@ class JobDescriptor:
                 "base_commit": self.base_commit, "harness": self.harness,
                 "model_binding": _redact(self.model_binding), "prompt": "",
                 "prompt_hash": self.prompt_hash, "prompt_summary": self.prompt_summary,
-                "timeout_s": self.timeout_s, "attempts": list(self.attempts),
+                "payload_ref": self.payload_ref, "content_sha256": self.content_sha256,
+                "task_type": self.task_type, "timeout_s": self.timeout_s,
+                "attempts": list(self.attempts),
                 "state": self.state.value, "created_at": self.created_at,
                 "updated_at": self.updated_at, "terminal_reason": self.terminal_reason,
                 "result_refs": list(self.result_refs), "exit_code": self.exit_code}
@@ -91,6 +96,9 @@ class JobDescriptor:
             model_binding=dict(d.get("model_binding", {})), prompt="",
             prompt_hash=d.get("prompt_hash", ""),
             prompt_summary=d.get("prompt_summary", "[redacted]"),
+            payload_ref=d.get("payload_ref", ""),
+            content_sha256=d.get("content_sha256", ""),
+            task_type=d.get("task_type", "code_change"),
             timeout_s=float(d.get("timeout_s", 180.0)),
             attempts=list(d.get("attempts", [])),
             state=JobState(d.get("state", "ACCEPTED")),

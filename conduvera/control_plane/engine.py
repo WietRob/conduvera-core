@@ -241,7 +241,7 @@ class ControlPlaneEngine:
         self, session: Any, attempt: Any, sid: str,
         session_state: SessionState, attempt_state: AttemptState,
         job_state: JobState, reason: str, exit_code: int | None = None,
-        event_type: str | None = None,
+        event_type: str | None = None, result_refs: list[str] | None = None,
     ) -> None:
         if sid in self._emitted_terminal:
             return  # exactly-once
@@ -253,6 +253,8 @@ class ControlPlaneEngine:
             attempt.terminal = True
             attempt.terminal_reason = reason
             attempt.exit_code = exit_code
+            if result_refs:
+                attempt.result_refs = list(result_refs)
             attempt.updated_at = _utc_now()
             self.scheduler.store.save_attempt(attempt)
             job = self.scheduler.store.get_job(attempt.job_id)
@@ -260,6 +262,8 @@ class ControlPlaneEngine:
                 job.state = job_state
                 job.terminal_reason = reason
                 job.exit_code = exit_code
+                if result_refs:
+                    job.result_refs = list(result_refs)
                 job.updated_at = _utc_now()
                 self.scheduler.store.save_job(job)
         self._emitted_terminal.add(sid)
@@ -272,6 +276,7 @@ class ControlPlaneEngine:
 
     def _handle_process_gone(self, session: Any, attempt: Any, sid: str) -> None:
         exit_code = None
+        result_refs: list[str] = []
         if session.adapter_session_id:
             try:
                 ev = self.service.gateway.collect_evidence(
@@ -279,6 +284,11 @@ class ControlPlaneEngine:
                     session_id=session.adapter_session_id)
                 if isinstance(ev, dict) and ev.get("exit_code") is not None:
                     exit_code = int(ev["exit_code"])
+                if isinstance(ev, dict):
+                    for art in (ev.get("artifacts") or []):
+                        if isinstance(art, dict) and art.get("path"):
+                            result_refs.append(
+                                f"{art['path']}#{art.get('sha256','').split(':')[-1][:16]}")
             except Exception:  # noqa: BLE001
                 pass
         if exit_code is not None and exit_code != 0:
@@ -286,12 +296,13 @@ class ControlPlaneEngine:
                 session, attempt, sid,
                 SessionState.FAILED, AttemptState.FAILED, JobState.FAILED,
                 f"process exited with code {exit_code}", exit_code,
-                "session.failed")
+                "session.failed", result_refs=result_refs)
             return
         self._finalize(
             session, attempt, sid,
             SessionState.COMPLETED, AttemptState.COMPLETED, JobState.COMPLETED,
-            "process exited normally", exit_code, "session.completed")
+            "process exited normally", exit_code, "session.completed",
+            result_refs=result_refs)
 
     def _handle_timeout(self, session: Any, attempt: Any, sid: str) -> None:
         # session.timeout.requested -> SIGTERM -> grace -> SIGKILL
