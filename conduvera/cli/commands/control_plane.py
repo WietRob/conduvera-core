@@ -1,0 +1,153 @@
+"""Control plane CLI client (CONDUVERA-CLI control-plane commands).
+
+Talks to the daemon over the Unix socket. All commands support human and
+JSON output.
+
+Commands: doctor, health, submit, list, inspect, cancel, cleanup, reconcile,
+logs/evidence, capabilities.
+"""
+
+from __future__ import annotations
+
+import json
+import socket
+import typer
+from pathlib import Path
+
+from conduvera.control_plane.service import ControlPlaneConfig
+
+console = typer.echo
+control_app = typer.Typer(help="Conduvera operational harness control plane")
+
+
+def _socket_path() -> str:
+    return str(ControlPlaneConfig.default().socket_path)
+
+
+def _call(method: str, params: dict | None = None) -> dict:
+    path = _socket_path()
+    if not Path(path).exists():
+        return {"ok": False, "error": {"code": "SERVICE_DOWN",
+                                       "message": f"control plane not running ({path})"}}
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        sock.settimeout(30)
+        sock.connect(path)
+        sock.sendall(json.dumps({"method": method, "params": params or {}}).encode("utf-8"))
+        data = b""
+        while True:
+            chunk = sock.recv(65536)
+            if not chunk:
+                break
+            data += chunk
+            if len(data) > 2 * 1024 * 1024:
+                break
+        return json.loads(data.decode("utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {"ok": False, "error": {"code": "SERVICE_ERROR", "message": str(exc)}}
+    finally:
+        sock.close()
+
+
+def _emit(result: dict, as_json: bool) -> None:
+    if as_json:
+        console(json.dumps(result, indent=2, ensure_ascii=False))
+        return
+    if not result.get("ok"):
+        err = result.get("error", {})
+        console(f"[ERROR] {err.get('code', 'ERROR')}: {err.get('message', result)}")
+        raise typer.Exit(1)
+    payload = result.get("result", {})
+    if isinstance(payload, dict) and payload.get("message"):
+        console(payload["message"])
+
+
+@control_app.command("doctor")
+def doctor(json_output: bool = typer.Option(False, "--json", help="JSON output")) -> None:
+    """Service doctor: harness availability + registry health."""
+    _emit(_call("doctor"), json_output)
+
+
+@control_app.command("health")
+def health(json_output: bool = typer.Option(False, "--json", help="JSON output")) -> None:
+    """Service health."""
+    _emit(_call("health"), json_output)
+
+
+@control_app.command("submit")
+def submit(
+    task_id: str = typer.Option(..., "--task", help="task identifier"),
+    attempt_id: str = typer.Option(..., "--attempt", help="attempt identifier"),
+    harness: str = typer.Option("hermes_scoped", "--harness", help="hermes_scoped|codex_cli|opencode_cli"),
+    prompt: str = typer.Option("Antworte mit genau einem Wort: PONG", "--prompt", help="job prompt"),
+    repo: str = typer.Option("conduvera-core", "--repo", help="repository"),
+    base_commit: str = typer.Option("", "--base-commit", help="base commit"),
+    timeout: float = typer.Option(120.0, "--timeout", help="timeout seconds"),
+    json_output: bool = typer.Option(False, "--json", help="JSON output"),
+) -> None:
+    """Submit a job through the router + control plane."""
+    result = _call("start", {
+        "task_id": task_id, "attempt_id": attempt_id, "harness": harness,
+        "repo": repo, "base_commit": base_commit,
+        "model_binding": {"route": "workload/local"},
+        "prompt": prompt, "timeout_s": timeout,
+    })
+    _emit(result, json_output)
+
+
+@control_app.command("list")
+def list_sessions(json_output: bool = typer.Option(False, "--json", help="JSON output")) -> None:
+    """List sessions and jobs."""
+    _emit(_call("list"), json_output)
+
+
+@control_app.command("inspect")
+def inspect(
+    session_id: str = typer.Argument(..., help="session identifier"),
+    json_output: bool = typer.Option(False, "--json", help="JSON output"),
+) -> None:
+    """Inspect/status a session."""
+    _emit(_call("inspect", {"session_id": session_id}), json_output)
+
+
+@control_app.command("cancel")
+def cancel(
+    session_id: str = typer.Argument(..., help="session identifier"),
+    json_output: bool = typer.Option(False, "--json", help="JSON output"),
+) -> None:
+    """Cancel a managed session."""
+    _emit(_call("cancel", {"session_id": session_id}), json_output)
+
+
+@control_app.command("cleanup")
+def cleanup(
+    session_id: str = typer.Argument(..., help="session identifier"),
+    json_output: bool = typer.Option(False, "--json", help="JSON output"),
+) -> None:
+    """Clean up session-owned temporary resources."""
+    _emit(_call("cleanup", {"session_id": session_id}), json_output)
+
+
+@control_app.command("reconcile")
+def reconcile(json_output: bool = typer.Option(False, "--json", help="JSON output")) -> None:
+    """Reconcile registry with reality (restart-safe)."""
+    _emit(_call("reconcile"), json_output)
+
+
+@control_app.command("capabilities")
+def capabilities(
+    harness: str = typer.Argument("hermes_scoped", help="harness id"),
+    json_output: bool = typer.Option(False, "--json", help="JSON output"),
+) -> None:
+    """Declared capabilities for a harness."""
+    _emit(_call("capabilities", {"harness": harness}), json_output)
+
+
+@control_app.command("logs")
+def logs(
+    session_id: str = typer.Argument(..., help="session identifier"),
+    json_output: bool = typer.Option(False, "--json", help="JSON output"),
+) -> None:
+    """Show evidence/logs for a session (via collect_evidence)."""
+    result = _call("inspect", {"session_id": session_id})
+    _emit(result, json_output)

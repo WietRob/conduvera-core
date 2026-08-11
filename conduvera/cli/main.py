@@ -12,6 +12,7 @@ from conduvera.cli.commands.accountable import accountable_app
 from conduvera.cli.commands.aspice import aspice_app
 from conduvera.cli.commands.cr import cr_app
 from conduvera.cli.commands.evidence import evidence_app
+from conduvera.cli.commands.control_plane import control_app
 from conduvera.cli.commands.harness import harness_app
 from conduvera.cli.commands.scaffold import scaffold_app
 
@@ -23,6 +24,7 @@ app = typer.Typer(
 )
 
 
+app.add_typer(control_app, name="control-plane", help="Conduvera operational harness control plane")
 app.add_typer(cr_app, name="cr", help="Compliance Change Control — CR lifecycle")
 app.add_typer(accountable_app, name="accountable", help="Accountable Agent - AI change accountability")
 app.add_typer(aspice_app, name="aspice", help="ASPICE support utilities - traceability checks")
