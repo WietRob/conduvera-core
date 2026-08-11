@@ -791,6 +791,104 @@ class ControlPlaneService:
             jobs[key]["latest_state"] = s.state.value
         return list(jobs.values())
 
+    def console_view(self) -> dict[str, Any]:
+        """Konsolidierte Operator-Console über die reale Control-Plane-API.
+
+        Vereinigt Queue/Jobs + Sessions in einem zusammenhängenden View:
+        - queued: Attempts, die auf Dispatch warten (payload_ref + hash)
+        - running: laufende Sessions mit elapsed/deadline/worktree/base
+        - terminal: abgeschlossene mit reason/exit/result_refs
+        - evidence: Ergebnis-Referenzen je Job
+        Nutzt nur persistierte/observierte Daten; reicht NIE raw Prompts durch.
+        """
+        import datetime as _dt
+        now = _dt.datetime.now(_dt.timezone.utc)
+        sessions = self.list_sessions()
+        by_key: dict[str, dict] = {}
+        for s in sessions:
+            key = f"{s.get('task_id')}/{s.get('attempt_id')}"
+            by_key.setdefault(key, {"task_id": s.get("task_id"),
+                                    "attempt_id": s.get("attempt_id")})
+            by_key[key].setdefault("sessions", []).append(s)
+
+        jobs = [j.to_dict() for j in self.scheduler.store.all_jobs()]
+        job_by_id = {j["job_id"]: j for j in jobs}
+
+        def _elapsed_deadline(started_at: str, timeout_s: float) -> dict:
+            d = {"elapsed_s": None, "deadline_utc": None}
+            if not started_at:
+                return d
+            try:
+                st = _dt.datetime.fromisoformat(started_at)
+                if st.tzinfo is None:
+                    st = st.replace(tzinfo=_dt.timezone.utc)
+                d["elapsed_s"] = round((now - st).total_seconds(), 1)
+                d["deadline_utc"] = (
+                    st + _dt.timedelta(seconds=float(timeout_s))).isoformat()
+            except (ValueError, TypeError):
+                pass
+            return d
+
+        # --- queued ---
+        queued = []
+        for a in self.scheduler.store.all_attempts():
+            if a.state.value in ("QUEUED", "ACCEPTED"):
+                j = job_by_id.get(a.job_id, {})
+                queued.append({
+                    "job_id": a.job_id, "attempt_id": a.attempt_id,
+                    "task_id": j.get("task_id", ""),
+                    "harness": j.get("harness", ""),
+                    "task_type": j.get("task_type", ""),
+                    "state": a.state.value,
+                    "payload_ref": j.get("payload_ref", ""),
+                    "content_sha256": j.get("content_sha256", ""),
+                    "base_commit": j.get("base_commit", ""),
+                    "created_at": j.get("created_at", ""),
+                    ** _elapsed_deadline(j.get("created_at", ""),
+                                         float(j.get("timeout_s", 180.0))),
+                })
+
+        # --- running ---
+        running = []
+        for s in sessions:
+            if s.get("state") in ("RUNNING", "STARTING"):
+                ed = _elapsed_deadline(s.get("started_at", ""),
+                                       float(s.get("timeout_s", 180.0)))
+                running.append({
+                    "session_id": s.get("session_id"),
+                    "task_id": s.get("task_id"), "attempt_id": s.get("attempt_id"),
+                    "scope_id": s.get("scope_id", ""),
+                    "pid": s.get("pid"),
+                    "harness": s.get("harness_descriptor", ""),
+                    "worktree": s.get("worktree", ""),
+                    "base_commit": s.get("base_commit", ""),
+                    **ed,
+                })
+
+        # --- terminal ---
+        terminal = []
+        for j in jobs:
+            if j.get("state") in ("COMPLETED", "FAILED", "CANCELLED",
+                                  "TIMED_OUT"):
+                terminal.append({
+                    "job_id": j["job_id"], "task_id": j.get("task_id", ""),
+                    "attempt_id": (j.get("attempts") or [None])[0],
+                    "state": j.get("state"),
+                    "terminal_reason": j.get("terminal_reason", ""),
+                    "exit_code": j.get("exit_code"),
+                    "result_refs": list(j.get("result_refs", [])),
+                    "harness": j.get("harness", ""),
+                    "payload_ref": j.get("payload_ref", ""),
+                    "content_sha256": j.get("content_sha256", ""),
+                })
+
+        return {
+            "counts": {"queued": len(queued), "running": len(running),
+                       "terminal": len(terminal)},
+            "queued": queued, "running": running, "terminal": terminal,
+            "server_time_utc": now.isoformat(),
+        }
+
     # -- capability declarations -------------------------------------------
 
     def capabilities(self, harness: str) -> dict[str, str]:

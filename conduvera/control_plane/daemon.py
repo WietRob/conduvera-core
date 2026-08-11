@@ -119,6 +119,8 @@ class ControlPlaneDaemon:
                     "jobs": [j.to_dict()
                              for j in self.service.scheduler.store.all_jobs()],
                 }}
+            if method == "console":
+                return {"ok": True, "result": self.service.console_view()}
             if method == "list":
                 return {"ok": True, "result": {"sessions": self.service.list_sessions(),
                                                "jobs": self.service.list_jobs()}}
