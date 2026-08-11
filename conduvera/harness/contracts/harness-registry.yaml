@@ -35,3 +35,12 @@ adapters:
     contract: CONTROL-PLANE-V1
     isolation: systemd-user-scope
     note: real OpenCode CLI run interface
+  pi_cli:
+    enabled: true
+    module: conduvera.harness.adapters
+    entry_point: pi_cli_adapter
+    version: conduitvera-scope-adapter.v1
+    contract: CONTROL-PLANE-V1
+    isolation: systemd-user-scope
+    note: Pi Agent Harness CLI (print mode, local LiteLLM provider via
+          ~/.pi/agent/models.json; sandbox = control-plane isolation contract)
