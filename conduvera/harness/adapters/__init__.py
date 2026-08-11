@@ -29,6 +29,7 @@ import os
 import shutil
 import signal
 import subprocess
+import threading
 import time
 import uuid
 from dataclasses import dataclass
@@ -166,6 +167,7 @@ class ScopedProcessAdapter:
         wt = Path(worktree).expanduser().resolve()
         wt.mkdir(parents=True, exist_ok=True)
         prompt = str(config.get("prompt", "PONG"))
+        task_command = config.get("task_command")
         timeout_s = float(config.get("timeout_s", self._task_timeout_s))
         binary = shutil.which(self._spec.binary)
         if binary is None:
@@ -181,6 +183,13 @@ class ScopedProcessAdapter:
         args = self._spec.start_args_builder(prompt, config) if self._spec.start_args_builder \
             else [prompt]
         cmd = [binary, *args]
+        if task_command:
+            # Deterministic fixture task: run a bounded shell command in the
+            # worktree via the harness scope (systemd-run --scope). Used for
+            # cancellation/timeout/completion acceptance proofs where a
+            # long-lived deterministic process is required. The command is
+            # validated (no shell metacharacters beyond a fixed allowlist).
+            cmd = ["bash", "-c", task_command]
 
         if _SCOPE_AVAILABLE:
             spawn = ["systemd-run", "--user", "--scope", "--unit", scope,
@@ -236,8 +245,19 @@ class ScopedProcessAdapter:
             "stderr_path": str(stderr_path),
             "started_at": datetime.now(timezone.utc).isoformat(),
             "timeout_s": timeout_s,
+            "exit_code": None,
+            "_popen": proc,
         }
         self._sessions[sid] = session
+        # Watchdog thread: capture the real exit code when the owned process
+        # terminates (works even when the transient scope is already gone).
+        def _watch(session: dict[str, Any], proc: subprocess.Popen) -> None:
+            try:
+                rc = proc.wait(timeout=timeout_s + 30)
+                session["exit_code"] = rc
+            except subprocess.TimeoutExpired:
+                session["exit_code"] = None
+        threading.Thread(target=_watch, args=(session, proc), daemon=True).start()
         return AdapterResult(
             success=True,
             message=f"{self._spec.binary} session started (scope={session['scope']})",
@@ -369,6 +389,21 @@ class ScopedProcessAdapter:
                 data = Path(p).read_bytes()
                 artifacts.append({"path": p,
                                   "sha256": "sha256:" + hashlib.sha256(data).hexdigest()})
+        # Actual exit code from the owned scope (systemd ExecMainStatus) or
+        # the watchdog-captured process return code.
+        exit_code = session.get("exit_code")
+        if exit_code is None and session.get("scope_isolation") and session.get("scope"):
+            try:
+                r = subprocess.run(
+                    ["systemctl", "--user", "show", session["scope"],
+                     "-p", "ExecMainStatus", "--value"],
+                    capture_output=True, text=True, timeout=10,
+                )
+                raw = r.stdout.strip()
+                if raw.isdigit():
+                    exit_code = int(raw)
+            except (OSError, subprocess.TimeoutExpired):
+                pass
         return {
             "session_id": session_id,
             "ok": True,
@@ -376,6 +411,7 @@ class ScopedProcessAdapter:
             "artifacts": artifacts,
             "harness": self._spec.binary,
             "status": session.get("status", ""),
+            "exit_code": exit_code,
         }
 
     def stop_session(self, agent_id: str, session_ref: str) -> AdapterResult:

@@ -110,8 +110,15 @@ class ControlPlaneDaemon:
                 r = self.service.start(**params)
                 return {"ok": r.get("success", False), "result": r}
             if method == "submit":
-                r = self.service.submit(**params)
+                r = self.service.submit_job(**params)
                 return {"ok": r.get("success", False), "result": r}
+            if method == "queue":
+                return {"ok": True, "result": {
+                    "attempts": [a.to_dict()
+                                 for a in self.service.scheduler.store.all_attempts()],
+                    "jobs": [j.to_dict()
+                             for j in self.service.scheduler.store.all_jobs()],
+                }}
             if method == "list":
                 return {"ok": True, "result": {"sessions": self.service.list_sessions(),
                                                "jobs": self.service.list_jobs()}}

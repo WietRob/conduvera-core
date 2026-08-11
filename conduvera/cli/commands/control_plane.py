@@ -101,13 +101,60 @@ def list_sessions(json_output: bool = typer.Option(False, "--json", help="JSON o
     _emit(_call("list"), json_output)
 
 
+@control_app.command("queue")
+def queue_overview(
+    json_output: bool = typer.Option(False, "--json", help="JSON output"),
+) -> None:
+    """Queue overview: attempts + jobs with lifecycle states."""
+    result = _call("queue")
+    if json_output or not result.get("ok"):
+        _emit(result, json_output)
+        return
+    attempts = result.get("result", {}).get("attempts", [])
+    jobs = result.get("result", {}).get("jobs", [])
+    typer.echo(f"Queue: {len(attempts)} attempts, {len(jobs)} jobs")
+    for a in sorted(attempts, key=lambda x: x.get("created_at", "")):
+        typer.echo(f"  {a.get('attempt_id'):20s} {a.get('state'):12s} "
+                   f"harness={a.get('harness',''):14s} terminal={a.get('terminal')}")
+    for j in sorted(jobs, key=lambda x: x.get("created_at", ""))[-10:]:
+        typer.echo(f"  Job {j.get('job_id'):20s} {j.get('state'):12s} "
+                   f"task={j.get('task_id','')}")
+
+
 @control_app.command("inspect")
 def inspect(
     session_id: str = typer.Argument(..., help="session identifier"),
     json_output: bool = typer.Option(False, "--json", help="JSON output"),
 ) -> None:
     """Inspect/status a session."""
-    _emit(_call("inspect", {"session_id": session_id}), json_output)
+    result = _call("inspect", {"session_id": session_id})
+    if json_output or not result.get("ok"):
+        _emit(result, json_output)
+        return
+    r = result.get("result", {})
+    typer.echo(f"Session {session_id}: {r.get('state')}")
+    if r.get("pid"):
+        typer.echo(f"  pid={r.get('pid')} scope={r.get('scope_id','')}")
+    # elapsed time + deadline
+    lst = _call("list")
+    for s in lst.get("result", {}).get("sessions", []):
+        if s.get("session_id") == session_id:
+            import datetime as _dt
+            st = s.get("started_at", "")
+            if st:
+                try:
+                    started = _dt.datetime.fromisoformat(st)
+                    elapsed = (_dt.datetime.now(_dt.timezone.utc) - started.replace(
+                        tzinfo=_dt.timezone.utc)).total_seconds()
+                    typer.echo(f"  elapsed={elapsed:.0f}s timeout={s.get('timeout_s')}s "
+                               f"deadline={started.replace(tzinfo=_dt.timezone.utc) + _dt.timedelta(seconds=s.get('timeout_s', 0))}")
+                except ValueError:
+                    pass
+            typer.echo(f"  worktree={s.get('worktree','')}")
+            typer.echo(f"  base_commit={s.get('base_commit','')}")
+            typer.echo(f"  harness={s.get('harness_descriptor','')} "
+                       f"model={s.get('model_binding',{}).get('route','')}")
+            break
 
 
 @control_app.command("cancel")

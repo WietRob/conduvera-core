@@ -90,13 +90,23 @@ class BuildroomBridge:
         result = self._call("submit", params)
         if result.get("ok") and result.get("result", {}).get("success"):
             rres = result.get("result", {})
+            attempt_id = rres.get("attempt_id", attempt_id)
+            session = rres.get("session", {})
+            # The daemon queues the attempt; the session is created later by
+            # the dispatcher. Resolve the session id from the queue state.
+            if not session and attempt_id:
+                q = self._call("queue")
+                for a in q.get("result", {}).get("attempts", []):
+                    if a.get("attempt_id") == attempt_id and a.get("session_id"):
+                        session = {"session_id": a["session_id"]}
+                        break
             return {
                 "ok": True,
                 "task_id": task_id, "attempt_id": attempt_id,
                 "harness": decision.harness,
                 "job_id": rres.get("job_id", ""),
-                "session": rres.get("session", {}),
-                "queued": rres.get("queued", False),
+                "session": session,
+                "queued": rres.get("queued", True),
                 "route_decision": decision.to_dict(),
             }
         return result
@@ -109,3 +119,69 @@ class BuildroomBridge:
 
     def evidence(self, session_id: str) -> dict[str, Any]:
         return self._call("inspect", {"session_id": session_id})
+
+    def wait_terminal(
+        self,
+        session_id: str,
+        timeout_s: float = 300.0,
+        poll_interval_s: float = 3.0,
+        attempt_id: str = "",
+    ) -> dict[str, Any]:
+        """Synchronous wait/poll until the session reaches a terminal state.
+
+        If session_id is empty but attempt_id is given, the session id is
+        resolved from the queue state once it is created by the dispatcher.
+
+        Returns the normalized EvidenceBundle (task/attempt/session IDs,
+        lifecycle state, terminal result, exit code, harness/model binding,
+        worktree/base-commit binding, artifact references).
+        """
+        import time as _time
+        deadline = _time.monotonic() + timeout_s
+        resolved = session_id
+        while _time.monotonic() < deadline:
+            if not resolved and attempt_id:
+                q = self._call("queue")
+                for a in q.get("result", {}).get("attempts", []):
+                    if a.get("attempt_id") == attempt_id and a.get("session_id"):
+                        resolved = a["session_id"]
+                        break
+                if not resolved:
+                    _time.sleep(poll_interval_s)
+                    continue
+            st = self.status(resolved)
+            state = st.get("result", {}).get("state", "")
+            if state in ("COMPLETED", "FAILED", "CANCELLED", "TIMED_OUT", "LOST"):
+                return self.build_bundle(resolved, state)
+            _time.sleep(poll_interval_s)
+        return {"ok": False, "error": {"code": "WAIT_TIMEOUT",
+                                       "message": f"session {session_id or attempt_id} not terminal within {timeout_s}s"}}
+
+    def build_bundle(self, session_id: str, terminal_state: str) -> dict[str, Any]:
+        """Normalized EvidenceBundle for one terminal session."""
+        lst = self._call("list")
+        session = next((s for s in lst.get("result", {}).get("sessions", [])
+                        if s.get("session_id") == session_id), None)
+        q = self._call("queue")
+        attempts = {a["attempt_id"]: a for a in q.get("result", {}).get("attempts", [])}
+        jobs = {j["job_id"]: j for j in q.get("result", {}).get("jobs", [])}
+        attempt = attempts.get((session or {}).get("attempt_id", ""), {})
+        job = jobs.get(attempt.get("job_id", ""), {})
+        return {
+            "ok": True,
+            "schema_version": "MXOS-EVIDENCE-1.0.0",
+            "task_id": (session or {}).get("task_id", ""),
+            "job_id": job.get("job_id", ""),
+            "attempt_id": (session or {}).get("attempt_id", ""),
+            "session_id": session_id,
+            "lifecycle_state": terminal_state,
+            "terminal_reason": attempt.get("terminal_reason", ""),
+            "exit_code": attempt.get("exit_code"),
+            "harness": (session or {}).get("harness_descriptor", ""),
+            "model_binding": (session or {}).get("model_binding", {}),
+            "worktree": (session or {}).get("worktree", ""),
+            "base_commit": (session or {}).get("base_commit", ""),
+            "scope_id": (session or {}).get("scope_id", ""),
+            "artifact_refs": attempt.get("result_refs", []),
+            "evidence_ref": f"conduvera://session/{session_id}/evidence",
+        }
