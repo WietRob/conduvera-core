@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import signal
 import sys
 from pathlib import Path
@@ -28,11 +29,11 @@ def build_service(state_dir: str | None = None) -> ControlPlaneService:
         registry=registry,
         gateway_service=gateway,
         config=config,
+        global_concurrency=int(os.environ.get("CONDUVERA_GLOBAL_CONCURRENCY", "4")),
     )
     from conduvera.control_plane.outbox import EventOutbox
     svc.set_outbox(EventOutbox(config.outbox_path, webhook_url=None))
     return svc
-
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="conduvera-control-plane")
@@ -45,6 +46,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.socket:
         config.socket_path = Path(args.socket)
     service = build_service(args.state_dir)
+    engine = None
 
     daemon = ControlPlaneDaemon(service=service, socket_path=config.socket_path)
     daemon.start()
@@ -57,11 +59,23 @@ def main(argv: list[str] | None = None) -> int:
 
     def _shutdown(signum, frame):  # noqa: ARG001
         daemon.stop()
+        if engine is not None:
+            engine.stop()
         sys.exit(0)
 
     signal.signal(signal.SIGTERM, _shutdown)
     signal.signal(signal.SIGINT, _shutdown)
-    print(f"conduvera-control-plane listening on {config.socket_path}", flush=True)
+
+    # Daemon-owned dispatcher + monitor loops (BUILDROOM-PILOT-V1)
+    from conduvera.control_plane.engine import ControlPlaneEngine
+    engine = ControlPlaneEngine(
+        service=service,
+        scheduler=service.scheduler,
+        registry=service.registry,
+    )
+    engine.start()
+    print(f"conduvera-control-plane listening on {config.socket_path} "
+          f"(engine: dispatcher+monitor)", flush=True)
     daemon.serve_forever()
     return 0
 

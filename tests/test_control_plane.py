@@ -96,6 +96,7 @@ def service(tmp_path):
     svc = ControlPlaneService(
         registry=reg, gateway_service=gw, config=config,
         repo_path=repo,
+        repo_allowlist={"fixture": repo},
     )
     return svc, gw, reg, config, base
 
@@ -103,6 +104,13 @@ def service(tmp_path):
 def _job(task_id: str = "T", attempt_id: str = "A", **kw: Any):
     from conduvera.harness.managed_session import ManagedJob
     return ManagedJob(task_id=task_id, attempt_id=attempt_id, **kw)
+
+
+def _dispatch(svc: Any, attempt_id: str) -> dict[str, Any]:
+    """Simulate the daemon-owned dispatcher: claim + dispatch one attempt."""
+    claimed = svc.scheduler.claim(attempt_id, dispatcher_id="test")
+    assert claimed is not None, f"attempt {attempt_id} not claimable"
+    return svc.dispatch_claimed(attempt_id)
 
 
 class TestRegistryPersistence:
@@ -133,10 +141,13 @@ class TestRegistryPersistence:
 class TestControlPlaneOps:
     def test_start_registers_managed(self, service):
         svc, gw, reg, config, base = service
-        r = svc.start(task_id="T1", attempt_id="A1", harness="hermes_scoped",
-                      repo="r", base_commit=base, model_binding={}, prompt="PONG")
+        r = svc.submit_job(task_id="T1", attempt_id="A1", harness="hermes_scoped",
+                           repo="fixture", base_commit=base, model_binding={},
+                           prompt="PONG")
         assert r["success"]
-        sid = r["session"]["session_id"]
+        d = _dispatch(svc, "A1")
+        assert d["success"]
+        sid = d["session"]["session_id"]
         s = reg.get(sid)
         assert s.ownership_class is OwnershipClass.MANAGED
         assert s.state is SessionState.RUNNING
@@ -145,15 +156,15 @@ class TestControlPlaneOps:
 
     def test_worktree_collision_rejected(self, service, tmp_path):
         svc, gw, reg, config, base = service
-        # Same task/attempt -> same worktree path -> WorktreeManager rejects
-        # the existing path (collision protection).
-        r1 = svc.start(task_id="T1", attempt_id="A1", harness="hermes_scoped",
-                       repo="r", base_commit=base, model_binding={}, prompt="P")
+        # Same task/attempt -> duplicate rejected (idempotent, never overwrite)
+        r1 = svc.submit_job(task_id="T1", attempt_id="A1", harness="hermes_scoped",
+                            repo="fixture", base_commit=base, model_binding={}, prompt="P")
         assert r1["success"]
-        r2 = svc.start(task_id="T1", attempt_id="A1", harness="hermes_scoped",
-                       repo="r", base_commit=base, model_binding={}, prompt="P")
+        assert _dispatch(svc, "A1")["success"]
+        r2 = svc.submit_job(task_id="T1", attempt_id="A1", harness="hermes_scoped",
+                            repo="fixture", base_commit=base, model_binding={}, prompt="P")
         assert not r2["success"]
-        assert r2["code"] == "WORKTREE_ERROR"
+        assert r2["code"] == "DUPLICATE_ATTEMPT"
 
     def test_cancel_rejects_external(self, service):
         svc, gw, reg, config, base = service
@@ -168,9 +179,12 @@ class TestControlPlaneOps:
 
     def test_cleanup_only_session_owned(self, service):
         svc, gw, reg, config, base = service
-        r = svc.start(task_id="T", attempt_id="A", harness="hermes_scoped",
-                      repo="r", base_commit=base, model_binding={}, prompt="P")
-        sid = r["session"]["session_id"]
+        r = svc.submit_job(task_id="T", attempt_id="A", harness="hermes_scoped",
+                           repo="fixture", base_commit=base, model_binding={}, prompt="P")
+        assert r["success"]
+        d = _dispatch(svc, "A")
+        assert d["success"]
+        sid = d["session"]["session_id"]
         cr = svc.cleanup(sid)
         assert cr["success"]
         assert not Path(svc.config.worktree_base / "T-A").exists()
@@ -204,7 +218,7 @@ class TestControlPlaneOps:
     def test_unknown_harness_rejected(self, service):
         svc, gw, reg, config, base = service
         r = svc.start(task_id="T", attempt_id="A", harness="nonexistent",
-                      repo="r", base_commit=base, model_binding={}, prompt="P")
+                      repo="fixture", base_commit=base, model_binding={}, prompt="P")
         assert not r["success"]
         assert r["code"] == "UNKNOWN_HARNESS"
 

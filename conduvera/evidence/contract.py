@@ -50,6 +50,17 @@ ADAPTER_EVENT_TYPES = {
     "session.lost",
     "session.completed",
     "session.retained",
+    # Buildroom operational pilot events (BUILDROOM-PILOT-V1).
+    "session.claimed",
+    "session.timed_out",
+    "session.evidence.collected",
+    "attempt.completed",
+    "attempt.failed",
+    "attempt.cancelled",
+    "attempt.timed_out",
+    "job.completed",
+    "job.failed",
+    "job.cancelled",
 }
 EVENT_TYPES = CORE_EVENT_TYPES | ADAPTER_EVENT_TYPES
 SEVERITIES = {"debug", "info", "warning", "error", "critical"}

@@ -51,6 +51,20 @@ from conduvera.control_plane.worktree import WorktreeManager, WorktreeError
 
 REGISTRY_SCHEMA_VERSION = 1
 
+# Repository allowlist: stable repo ids -> canonical local paths.
+# Only allowlisted repositories can be used as task base repositories.
+REPO_ALLOWLIST: dict[str, Path] = {
+    "conduvera-core": Path.home() / "projects" / "matrix-os",
+    "conduvera-adapter": Path.home() / "projects" / "conduvera-hermes-adapter",
+    "conduvera-platform": Path.home() / "projects" / "conduvera-platform",
+}
+
+REPO_ALIASES: dict[str, str] = {
+    "core": "conduvera-core",
+    "adapter": "conduvera-adapter",
+    "platform": "conduvera-platform",
+}
+
 
 class Capability(str, Enum):
     """Capability-based harness selection (v1)."""
@@ -170,11 +184,13 @@ class ControlPlaneService:
         per_harness_limits: dict[str, int] | None = None,
         retention_s: float = 3600.0,
         repo_path: str | Path | None = None,
+        repo_allowlist: dict[str, Path] | None = None,
     ):
         self.registry = registry
         self.gateway = gateway_service
         self.config = config
         self.adapter_ids = adapter_ids
+        self._repo_allowlist = dict(repo_allowlist) if repo_allowlist else dict(REPO_ALLOWLIST)
         config.state_dir.mkdir(parents=True, exist_ok=True)
         config.worktree_base.mkdir(parents=True, exist_ok=True)
         config.evidence_dir.mkdir(parents=True, exist_ok=True)
@@ -191,6 +207,7 @@ class ControlPlaneService:
         self.repo_path = Path(repo_path).expanduser().resolve() if repo_path else (
             Path(__file__).resolve().parent.parent.parent
         )
+        self._pending_task_command: dict[str, str] = {}
         self._outbox = None
 
     def set_outbox(self, outbox: Any) -> None:
@@ -269,7 +286,17 @@ class ControlPlaneService:
 
     # -- job operations -----------------------------------------------------
 
-    def submit(
+    def resolve_repo(self, repo: str) -> Path:
+        """Resolve a stable repo id to its canonical path (allowlist)."""
+        rid = REPO_ALIASES.get(repo, repo)
+        if rid not in self._repo_allowlist:
+            raise ValueError(f"repository not allowlisted: {repo}")
+        path = self._repo_allowlist[rid]
+        if not path.is_dir() or not (path / ".git").exists():
+            raise ValueError(f"repository path not available: {path}")
+        return path
+
+    def submit_job(
         self,
         *,
         task_id: str,
@@ -280,97 +307,124 @@ class ControlPlaneService:
         model_binding: dict[str, Any],
         prompt: str,
         timeout_s: float = 120.0,
+        execute: bool = True,
+        task_command: str | None = None,
     ) -> dict[str, Any]:
-        """Submit one job: accept -> create attempt -> queue/start."""
+        """THE single public mutation entry point.
+
+        All submissions (CLI, BuildroomBridge, Console) go through here.
+        - repository allowlist resolution;
+        - duplicate attempt rejection (idempotent, never overwrite);
+        - prompt redaction (only hash + summary persisted);
+        - queued -> claimed -> dispatched by the daemon-owned engine.
+        Direct `start` bypasses this path and is internal-only (adapter tests).
+
+        `task_command` (optional, deterministic fixture tasks only) is passed
+        to the harness scope runner for acceptance proofs; it is never
+        persisted — only referenced via the attempt id.
+        """
         if harness not in self.adapter_ids:
             return {"success": False, "message": f"unknown harness {harness}",
                     "code": "UNKNOWN_HARNESS"}
+        # duplicate attempt rejection: never silently overwrite
+        existing = self.scheduler.store.get_attempt(attempt_id)
+        if existing is not None:
+            return {"success": False, "message": f"duplicate attempt {attempt_id}",
+                    "code": "DUPLICATE_ATTEMPT", "attempt_id": attempt_id}
+        try:
+            self.resolve_repo(repo)
+        except ValueError as exc:
+            return {"success": False, "message": str(exc), "code": "REPO_NOT_ALLOWED"}
+        # normalize path components (task/attempt -> safe identifiers)
+        try:
+            task_id_safe, attempt_id_safe = _normalize_identifiers(
+                task_id, attempt_id)
+        except ValueError as exc:
+            return {"success": False, "message": str(exc), "code": "INVALID_IDENTIFIER"}
+
         job_id = f"job_{uuid.uuid4().hex[:12]}"
         now = _utc_now()
         job = JobDescriptor(
-            job_id=job_id, task_id=task_id, repo=repo, base_commit=base_commit,
-            harness=harness, model_binding=dict(model_binding), prompt=prompt,
+            job_id=job_id, task_id=task_id_safe, repo=repo,
+            base_commit=base_commit, harness=harness,
+            model_binding=dict(model_binding), prompt="",
             timeout_s=timeout_s, created_at=now, updated_at=now,
         )
-        job.attempts.append(attempt_id)
+        job.bind_prompt(prompt)
+        job.attempts.append(attempt_id_safe)
         self.scheduler.store.save_job(job)
-        self._emit("job.accepted", {"job_id": job_id, "task_id": task_id,
-                                    "harness": harness})
+        self._emit("job.accepted", {"job_id": job_id, "task_id": task_id_safe,
+                                    "harness": harness, "repo": repo})
 
         attempt = AttemptDescriptor(
-            attempt_id=attempt_id, job_id=job_id, task_id=task_id,
+            attempt_id=attempt_id_safe, job_id=job_id, task_id=task_id_safe,
             harness=harness, created_at=now, updated_at=now,
         )
         self.scheduler.store.save_attempt(attempt)
-        self._emit("attempt.created", {"job_id": job_id, "attempt_id": attempt_id,
-                                       "task_id": task_id, "harness": harness})
+        self._emit("attempt.created", {"job_id": job_id,
+                                       "attempt_id": attempt_id_safe,
+                                       "task_id": task_id_safe,
+                                       "harness": harness})
 
-        can_start, reason = self.scheduler.can_start(harness)
-        if can_start:
-            return self._start_attempt(job, attempt)
-        # Queue the attempt (bounded concurrency) — deterministic.
+        # queue: the daemon-owned dispatcher claims + starts automatically
         attempt.state = AttemptState.QUEUED
         attempt.updated_at = _utc_now()
         self.scheduler.store.save_attempt(attempt)
-        self._emit("session.queued", {"job_id": job_id, "attempt_id": attempt_id,
-                                      "task_id": task_id, "harness": harness,
-                                      "reason": reason})
-        return {"success": True, "message": f"job queued ({reason})",
-                "job_id": job_id, "attempt_id": attempt_id, "queued": True}
+        if task_command:
+            self._pending_task_command[attempt_id_safe] = task_command
+        self._emit("session.queued", {"job_id": job_id,
+                                      "attempt_id": attempt_id_safe,
+                                      "task_id": task_id_safe,
+                                      "harness": harness})
+        return {"success": True, "message": "job accepted and queued",
+                "job_id": job_id, "attempt_id": attempt_id_safe, "queued": True}
 
-    def start(
-        self,
-        *,
-        task_id: str,
-        attempt_id: str,
-        harness: str,
-        repo: str,
-        base_commit: str,
-        model_binding: dict[str, Any],
-        prompt: str,
-        timeout_s: float = 120.0,
-        worktree: str | None = None,
-        execution_mode: str = "LIVE",
-    ) -> dict[str, Any]:
-        """Start one job (compat path: submit with immediate start)."""
-        return self.submit(
-            task_id=task_id, attempt_id=attempt_id, harness=harness,
-            repo=repo, base_commit=base_commit, model_binding=model_binding,
-            prompt=prompt, timeout_s=timeout_s,
-        )
-
-    def _start_attempt(
-        self,
-        job: JobDescriptor,
-        attempt: AttemptDescriptor,
-    ) -> dict[str, Any]:
-        """Start one queued/accepted attempt: real worktree -> gateway -> session."""
+    def dispatch_claimed(self, attempt_id: str) -> dict[str, Any]:
+        """Dispatcher-owned: start one CLAIMED attempt (worktree -> gateway)."""
+        attempt = self.scheduler.store.get_attempt(attempt_id)
+        if attempt is None or attempt.state is not AttemptState.CLAIMED:
+            return {"success": False, "message": f"attempt {attempt_id} not claimed",
+                    "code": "NOT_CLAIMED"}
+        job = self.scheduler.store.get_job(attempt.job_id)
+        if job is None:
+            return {"success": False, "message": "job missing", "code": "JOB_MISSING"}
         harness = job.harness
         task_id = job.task_id
-        attempt_id = attempt.attempt_id
-        # 1) Real Git worktree from the exact base commit (proven via Git).
+        # real Git worktree from the exact base commit (allowlisted repo)
         try:
+            repo_path = self.resolve_repo(job.repo)
             binding = self.worktrees.create(
-                repo_path=self.repo_path, base_commit=job.base_commit,
-                task_id=task_id, attempt_id=attempt_id,
+                repo_path=repo_path, base_commit=job.base_commit,
+                task_id=task_id, attempt_id=attempt.attempt_id,
             )
         except WorktreeError as exc:
+            # Terminal FAILED — never return to the queue (would loop forever
+            # on the same unresolvable commit and spam failed events).
             attempt.state = AttemptState.FAILED
+            attempt.terminal = True
+            attempt.terminal_reason = f"worktree: {exc}"
             attempt.updated_at = _utc_now()
             self.scheduler.store.save_attempt(attempt)
+            job.state = JobState.FAILED
+            job.terminal_reason = f"worktree: {exc}"
+            job.updated_at = _utc_now()
+            self.scheduler.store.save_job(job)
             self._emit("session.failed", {"job_id": job.job_id,
-                                          "attempt_id": attempt_id,
+                                          "attempt_id": attempt.attempt_id,
                                           "task_id": task_id,
                                           "reason": f"worktree: {exc}"})
-            return {"success": False, "message": str(exc),
-                    "code": "WORKTREE_ERROR"}
+            return {"success": False, "message": str(exc), "code": "WORKTREE_ERROR"}
         wt = Path(binding.path)
         attempt.worktree = binding.to_dict()
         attempt.state = AttemptState.RUNNING
         attempt.updated_at = _utc_now()
         self.scheduler.store.save_attempt(attempt)
+        self._emit("session.claimed", {"job_id": job.job_id,
+                                       "attempt_id": attempt.attempt_id,
+                                       "task_id": task_id,
+                                       "harness": harness})
         self._emit("session.start.requested", {"job_id": job.job_id,
-                                               "attempt_id": attempt_id,
+                                               "attempt_id": attempt.attempt_id,
                                                "task_id": task_id,
                                                "harness": harness,
                                                "worktree": binding.to_dict(),
@@ -385,16 +439,40 @@ class ControlPlaneService:
                 "execution_mode": "LIVE",
                 "route": job.model_binding.get("route", "workload/local"),
                 "model_binding": job.model_binding,
-                "prompt": job.prompt,
+                "prompt": "",  # never forwarded raw from the store; the caller
+                # supplied the prompt at submit time and the engine re-injects
+                # it via the job hash reference.
+                "prompt_hash": job.prompt_hash,
                 "timeout_s": job.timeout_s,
             },
         )
+        if task_command := self._pending_task_command.pop(attempt.attempt_id, None):
+            result = self.gateway.start_session(
+                adapter_id=harness,
+                agent_id=task_id,
+                worktree=str(wt),
+                task=task_id,
+                config={
+                    "execution_mode": "LIVE",
+                    "route": job.model_binding.get("route", "workload/local"),
+                    "model_binding": job.model_binding,
+                    "prompt": job.prompt_summary,
+                    "task_command": task_command,
+                    "timeout_s": job.timeout_s,
+                },
+            )
         if not result.success:
             attempt.state = AttemptState.FAILED
+            attempt.terminal = True
+            attempt.terminal_reason = result.message
             attempt.updated_at = _utc_now()
             self.scheduler.store.save_attempt(attempt)
+            job.state = JobState.FAILED
+            job.terminal_reason = result.message
+            job.updated_at = _utc_now()
+            self.scheduler.store.save_job(job)
             self._emit("session.failed", {"job_id": job.job_id,
-                                          "attempt_id": attempt_id,
+                                          "attempt_id": attempt.attempt_id,
                                           "task_id": task_id,
                                           "reason": result.message})
             return {"success": False, "message": result.message,
@@ -404,10 +482,10 @@ class ControlPlaneService:
         session = ManagedSession(
             session_id=session_id,
             task_id=task_id,
-            attempt_id=attempt_id,
+            attempt_id=attempt.attempt_id,
             ownership_class=OwnershipClass.MANAGED,
             managed=True,
-            instance_id=f"{attempt_id}-{uuid.uuid4().hex[:8]}",
+            instance_id=f"{attempt.attempt_id}-{uuid.uuid4().hex[:8]}",
             fingerprint=ProcessFingerprint(
                 pid=int(detail.get("pid", 0)),
                 start_time=_process_start_time(int(detail.get("pid", 0))),
@@ -434,7 +512,7 @@ class ControlPlaneService:
         job.updated_at = _utc_now()
         self.scheduler.store.save_job(job)
         self._emit("session.started", {"job_id": job.job_id,
-                                       "attempt_id": attempt_id,
+                                       "attempt_id": attempt.attempt_id,
                                        "session_id": session_id,
                                        "task_id": task_id,
                                        "harness": harness,
@@ -443,8 +521,45 @@ class ControlPlaneService:
                                        "scope": session.scope_id,
                                        "pid": session.fingerprint.pid if session.fingerprint else 0})
         return {"success": True, "message": f"job started via {harness}",
-                "job_id": job.job_id, "attempt_id": attempt_id,
+                "job_id": job.job_id, "attempt_id": attempt.attempt_id,
                 "session": session.to_dict()}
+
+    def emit(self, event_type: str, payload: dict[str, Any]) -> None:
+        """Public event emission used by the engine (exactly-once terminal)."""
+        self._emit(event_type, payload)
+
+    def emit_observed(self, session_id: str, fp: Any) -> None:
+        """Status observation event (throttled by caller cadence)."""
+        self._emit("session.status.observed", {
+            "session_id": session_id, "pid": fp.pid,
+            "state": "RUNNING"})
+
+
+
+    def submit(self, **kw: Any) -> dict[str, Any]:
+        """Compatibility alias — routes to the single public path submit_job."""
+        return self.submit_job(**kw)
+
+    def start(
+        self,
+        *,
+        task_id: str,
+        attempt_id: str,
+        harness: str,
+        repo: str,
+        base_commit: str,
+        model_binding: dict[str, Any],
+        prompt: str,
+        timeout_s: float = 120.0,
+        worktree: str | None = None,
+        execution_mode: str = "LIVE",
+    ) -> dict[str, Any]:
+        """Start one job (compat path: submit with immediate start)."""
+        return self.submit_job(
+            task_id=task_id, attempt_id=attempt_id, harness=harness,
+            repo=repo, base_commit=base_commit, model_binding=model_binding,
+            prompt=prompt, timeout_s=timeout_s,
+        )
 
     def status(self, session_id: str) -> dict[str, Any]:
         session = self.registry.get(session_id)
@@ -530,8 +645,20 @@ class ControlPlaneService:
         if attempt is not None and not attempt.terminal:
             attempt.state = state
             attempt.terminal = True
+            attempt.terminal_reason = f"session {session.state.value}"
             attempt.updated_at = _utc_now()
             self.scheduler.store.save_attempt(attempt)
+            job = self.scheduler.store.get_job(attempt.job_id)
+            if job is not None and job.state is not JobState.COMPLETED:
+                job.state = {
+                    AttemptState.CANCELLED: JobState.CANCELLED,
+                    AttemptState.COMPLETED: JobState.COMPLETED,
+                    AttemptState.FAILED: JobState.FAILED,
+                    AttemptState.TIMED_OUT: JobState.TIMED_OUT,
+                }.get(state, job.state)
+                job.terminal_reason = f"session {session.state.value}"
+                job.updated_at = _utc_now()
+                self.scheduler.store.save_job(job)
 
     def cleanup(self, session_id: str) -> dict[str, Any]:
         """Remove only session-owned temporary resources (worktree + evidence)."""
@@ -604,3 +731,26 @@ class ControlPlaneService:
         if not report["registry_permissions_ok"]:
             report["ok"] = False
         return report
+
+
+def _normalize_identifiers(task_id: str, attempt_id: str) -> tuple[str, str]:
+    """Normalize task/attempt path components (reject traversal/separators).
+
+    Accepts only [A-Za-z0-9._-]; rejects absolute paths, '..', '/', control
+    characters and empty values. Used as worktree path components.
+    """
+    import re as _re
+    allowed = _re.compile(r"^[A-Za-z0-9._-]+$")
+    bad = []
+    for ident, name in ((task_id, "task_id"), (attempt_id, "attempt_id")):
+        if not ident:
+            bad.append(f"{name} empty")
+        elif not allowed.match(ident):
+            bad.append(f"{name} contains forbidden characters")
+        elif ident in (".", ".."):
+            bad.append(f"{name} is a path component")
+        elif ident.startswith("/") or "\\" in ident:
+            bad.append(f"{name} is an absolute/separator path")
+    if bad:
+        raise ValueError("; ".join(bad))
+    return task_id, attempt_id
