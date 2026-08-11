@@ -260,14 +260,16 @@ class TestNoShellBackdoor:
         assert "task_command" not in sig.parameters
 
     def test_adapter_no_task_command_branch(self, tmp_path):
-        """Der Adapter hat keinen task_command-Backdoor-Zweig; der scope-Wrapper
-        quotet alle Caller-Argumente via shlex (kein `bash -c <caller>`-Injection)."""
+        """Der Adapter hat keinen task_command-Backdoor-Zweig; der scope-Spawn
+        nutzt den shell-freien cwd_exec (os.execvpe), kein bash/sh und kein
+        shlex-Ketten-Wrapper."""
         from conduvera.harness import adapters
         src = Path(adapters.__file__).read_text()
         assert "task_command" not in src
-        # Der feste cwd-Wrapper quotet Caller-Input, nie roh:
-        assert "shlex.quote" in src
-        assert "cd {0} && exec {1}" in src
+        # shell-freier cwd_exec statt bash -c / shlex-String-Wrapper:
+        assert "cwd_exec" in src
+        assert "shlex.quote" not in src
+        assert "cd {0} && exec" not in src
 
     def test_shell_metacharacter_payload_cannot_invoke_shell(self, tmp_path):
         """Shell-Metazeichen im Payload erreichen nie einen Shell-Aufruf."""
