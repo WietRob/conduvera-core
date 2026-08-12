@@ -103,3 +103,6 @@ class TestConsoleView:
         r = running[0]
         assert "worktree" in r and "base_commit" in r
         assert "elapsed_s" in r and "deadline_utc" in r
+        # WS-B: running-Eintrag muss ein eindeutiges state-Label tragen,
+        # damit die grafische Workspace RUNNING statt UNKNOWN anzeigt.
+        assert r["state"] == "RUNNING"

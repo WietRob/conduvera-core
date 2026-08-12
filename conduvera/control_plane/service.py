@@ -899,6 +899,7 @@ class ControlPlaneService:
                     "harness": s.get("harness_descriptor", ""),
                     "worktree": s.get("worktree", ""),
                     "base_commit": s.get("base_commit", ""),
+                    "state": "RUNNING",
                     "started_at": s.get("started_at", ""),
                     **ed,
                 })
