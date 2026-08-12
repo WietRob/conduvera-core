@@ -130,6 +130,7 @@ class AcceptanceRunner:
         if base:
             page.fill("#f_base", base)
         page.fill("#f_timeout", str(timeout_s))
+        page.fill("#f_hold", str(hold_s))
         page.fill("#f_prompt", prompt)
         page.click("#submitForm button[type=submit]")
         # wait for the async submit to settle (success or rejection)
@@ -238,9 +239,13 @@ class AcceptanceRunner:
 
             # STEP 5: retry B from UI (same job, new attempt)
             self._retry_job(page, b_job["job_id"])
-            time.sleep(3)
+            time.sleep(2)
+            # DOD-05: wait for the retry attempt to reach a terminal state
+            rjob = self._wait_job_terminal(b_job["job_id"], timeout_s=120)
+            self._record("5", "retry B", **{k: rjob.get(k) for k in
+                         ("job_id", "attempts", "state", "exit_code", "terminal_reason")})
             c = self._console()
-            self._record("5", "retry B", counts=c["counts"])
+            self._record("5b", "retry B console", counts=c["counts"])
             self._shot(page, "step5_retry")
 
             # STEP 6: submit C EXIT_7 from UI
@@ -317,6 +322,19 @@ class AcceptanceRunner:
                 pass
         return {"job_id": job, "attempt_id": att, "payload_ref": pl,
                 "task_id": task_id, "ui_result": txt}
+
+    def _wait_job_terminal(self, job_id, timeout_s=120) -> dict:
+        """Wait for a job (any attempt) to reach a terminal state."""
+        deadline = time.time() + timeout_s
+        while time.time() < deadline:
+            d = json.loads((self.state_dir / "scheduler" / "queue.json")
+                           .read_text(encoding="utf-8"))
+            j = d.get("jobs", {}).get(job_id)
+            if j and j.get("state") in ("COMPLETED", "FAILED", "CANCELLED",
+                                        "TIMED_OUT"):
+                return j
+            time.sleep(2)
+        raise TimeoutError(f"job {job_id} (retry) did not reach terminal")
 
     def _wait_running(self, task_id, page, timeout_s=60):
         deadline = time.time() + timeout_s
