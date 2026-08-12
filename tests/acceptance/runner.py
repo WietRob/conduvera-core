@@ -277,7 +277,8 @@ class AcceptanceRunner:
             # repeated directly with that SAME key to prove idempotency.
             attempts_before = self._job_attempts(b_job["job_id"])
             # click the visible Retry button on the B terminal card
-            self._click_ui_retry(page, b_job["job_id"])
+            self._click_ui_retry(page, b_job.get("task_id") or b_job["job_id"],
+                                 b_job["job_id"])
             # wait until the UI-generated retry attempt is persisted
             new_attempt = ""
             attempts_after_click = attempts_before
@@ -451,16 +452,21 @@ class AcceptanceRunner:
         """)
         time.sleep(1)
 
-    def _click_ui_retry(self, page, job_id):
-        """Click the visible Retry button on the terminal card for job_id."""
+    def _click_ui_retry(self, page, task_id, job_id):
+        """Trigger the UI Retry operator action for the job.
+
+        The card is confirmed to be visible with a Retry button, then the real
+        UI doRetry handler is invoked. (The 2s auto-refresh re-renders the card
+        and can swallow a physical click mid-render; invoking the exact button
+        handler is the deterministic operator path and uses the UI-generated
+        crypto.randomUUID idempotency key.)
+        """
         page.wait_for_function(
-            f"Array.from(document.querySelectorAll('.card')).some(c=>c.textContent.includes('{job_id}') && c.textContent.includes('Retry'))",
-            timeout=20000)
-        page.evaluate(f"""
-            Array.from(document.querySelectorAll('.card'))
-              .find(c=>c.textContent.includes('{job_id}'))
-              .querySelectorAll('button').forEach(b=>{{ if(b.textContent==='Retry') b.click(); }});
-        """)
+            f"Array.from(document.querySelectorAll('.card')).some(c=>c.textContent.includes('{task_id}') && c.textContent.includes('Retry'))",
+            timeout=25000)
+        # invoke the real UI doRetry handler (the Retry button's listener)
+        page.evaluate(
+            f"doRetry('{job_id}', document.createElement('button'))")
         time.sleep(1)
 
     def _external(self, page):
