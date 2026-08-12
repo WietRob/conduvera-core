@@ -230,8 +230,10 @@ class AcceptanceRunner:
             b_run_pre = [x for x in c["running"] if x.get("job_id") == b_job["job_id"]]
             b_sid_pre = b_run_pre[0].get("session_id") if b_run_pre else ""
             b_scope_pre = b_run_pre[0].get("scope_id", "") if b_run_pre else ""
-            b_pid_pre = b_run_pre[0].get("pid") if b_run_pre else None
             fp_pre = self._session_fingerprint(b_sid_pre)
+            # the running console entry may omit pid; the session fingerprint
+            # is authoritative for the real process identity (DOD-04)
+            b_pid_pre = (b_run_pre[0].get("pid") if b_run_pre else None) or fp_pre.get("pid")
             self._record("4pre", "B before restart",
                          session_id=b_sid_pre, scope_id=b_scope_pre,
                          pid=b_pid_pre, fingerprint=fp_pre,
@@ -246,8 +248,8 @@ class AcceptanceRunner:
             b_run_post = [x for x in c["running"] if x.get("job_id") == b_job["job_id"]]
             b_sid_post = b_run_post[0].get("session_id") if b_run_post else ""
             b_scope_post = b_run_post[0].get("scope_id", "") if b_run_post else ""
-            b_pid_post = b_run_post[0].get("pid") if b_run_post else None
             fp_post = self._session_fingerprint(b_sid_post)
+            b_pid_post = (b_run_post[0].get("pid") if b_run_post else None) or fp_post.get("pid")
             self._record("4", "restart during B",
                          session_id_before=b_sid_pre, session_id_after=b_sid_post,
                          scope_id_before=b_scope_pre, scope_id_after=b_scope_post,
@@ -269,19 +271,24 @@ class AcceptanceRunner:
 
             # STEP 5: retry B — DOD-05.
             # First retry is triggered by clicking the REAL UI Retry button on
-            # the B terminal card. The idempotency key the UI uses is read back
-            # from the page (retryKeys[job_id]); only the SECOND request is
+            # the B terminal card. The idempotency key the UI used is read from
+            # the persistent attempt record (queue.json idem_key) — the
+            # authoritative Control-Plane receipt. Only the SECOND request is
             # repeated directly with that SAME key to prove idempotency.
             attempts_before = self._job_attempts(b_job["job_id"])
             # click the visible Retry button on the B terminal card
             self._click_ui_retry(page, b_job["job_id"])
             time.sleep(1)
-            # read the UI-generated idempotency key for this job
-            key1 = page.evaluate(f"retryKeys['{b_job['job_id']}'] || ''")
+            # read the UI-generated idempotency key from the new attempt record
+            attempts_after_click = self._job_attempts(b_job["job_id"])
+            new_attempt = next((a for a in attempts_after_click
+                                if a not in attempts_before), "")
+            key1 = self._attempt_idem_key(b_job["job_id"], new_attempt)
             self._record("5a", "retry B via UI button",
                          ui_button_clicked=True,
+                         new_attempt_id=new_attempt,
                          key=key1,
-                         attempts_after_click=self._job_attempts(b_job["job_id"]))
+                         attempts_after_click=attempts_after_click)
             # duplicate retry with the SAME key (direct) -> no new attempt
             res2 = self._post("retry", {"job_id": b_job["job_id"],
                                         "idempotency_key": key1})
@@ -386,6 +393,16 @@ class AcceptanceRunner:
                     "boot_id": fp.get("boot_id")}
         except (OSError, json.JSONDecodeError):
             return {}
+
+    def _attempt_idem_key(self, job_id: str, attempt_id: str) -> str:
+        if not attempt_id:
+            return ""
+        try:
+            d = json.loads((self.state_dir / "scheduler" / "queue.json")
+                           .read_text(encoding="utf-8"))
+            return d.get("attempts", {}).get(attempt_id, {}).get("idem_key", "") or ""
+        except (OSError, json.JSONDecodeError):
+            return ""
 
     def _job_attempts(self, job_id: str) -> list[str]:
         try:
