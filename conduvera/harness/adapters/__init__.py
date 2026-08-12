@@ -553,6 +553,32 @@ def _pi_args(prompt: str, config: dict[str, Any]) -> list[str]:
     return args
 
 
+def _acceptance_args(prompt: str, config: dict[str, Any]) -> list[str]:
+    """Acceptance-only fixture args: a FIXED enum scenario, never a command.
+
+    The scenario is read from config['scenario'] (validated against the fixed
+    enum) and passed as `--scenario <ENUM>`. No arbitrary command, no shell,
+    no caller-controlled exec. hold-s is a bounded float from config.
+    """
+    from conduvera.harness.acceptance_fixture import SCENARIOS
+    scenario = config.get("scenario", "")
+    if scenario not in SCENARIOS:
+        raise ValueError(f"invalid acceptance scenario: {scenario!r}")
+    args = ["-m", "conduvera.harness.acceptance_fixture",
+            "--scenario", scenario]
+    hold = config.get("hold_s", 60.0)
+    if hold is not None:
+        args += ["--hold-s", str(float(hold))]
+    out = config.get("fixture_out")
+    if out:
+        # resolve relative to the managed worktree (config has it)
+        wt = config.get("worktree")
+        if wt and not os.path.isabs(out):
+            out = str(Path(wt) / out)
+        args += ["--out", str(out)]
+    return args
+
+
 def pi_cli_adapter() -> ScopedProcessAdapter:
     return ScopedProcessAdapter(
         spec=HarnessSpec(
@@ -596,6 +622,27 @@ def opencode_cli_adapter() -> ScopedProcessAdapter:
             stdin_prompt=True,
         ),
         task_timeout_s=300.0,
+    )
+
+
+def acceptance_fixture_cli_adapter() -> ScopedProcessAdapter:
+    """Acceptance-only fixture harness (CONDUVERA_ACCEPTANCE_MODE=1 only).
+
+    Runs the deterministic acceptance_fixture module as a REAL managed OS
+    process through the normal Control-Plane scope/worktree path. Registered
+    only on the isolated acceptance service; never in normal doctor/runtime.
+    """
+    return ScopedProcessAdapter(
+        spec=HarnessSpec(
+            binary=sys.executable,
+            version_args=("-m", "conduvera.harness.acceptance_fixture",
+                          "--scenario", "HOLD_THEN_EXIT_0"),
+            start_args_builder=_acceptance_args,
+            doctor_cmd=(sys.executable, "-m",
+                        "conduvera.harness.acceptance_fixture",
+                        "--scenario", "HOLD_THEN_EXIT_0"),
+        ),
+        task_timeout_s=120.0,
     )
 
 

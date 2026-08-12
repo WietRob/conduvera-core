@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import importlib
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from importlib import resources
 from pathlib import Path
@@ -185,13 +185,21 @@ class HarnessAdapterRegistry:
             return {}
         raw = data.get("adapters", data)
         out: dict[str, AdapterRegistration] = {}
+        acceptance_mode = os.environ.get("CONDUVERA_ACCEPTANCE_MODE") == "1"
         if isinstance(raw, dict):
             for adapter_id, cfg in raw.items():
                 if not isinstance(cfg, dict):
                     continue
+                acceptance_only = bool(cfg.get("acceptance_only", False))
+                # acceptance-only harness: enabled solely under the explicit
+                # acceptance-mode flag (isolated acceptance service); disabled
+                # fail-closed in normal doctor/default runtime.
+                enabled = bool(cfg.get("enabled", False))
+                if acceptance_only:
+                    enabled = acceptance_mode
                 out[adapter_id] = AdapterRegistration(
                     adapter_id=str(adapter_id),
-                    enabled=bool(cfg.get("enabled", False)),
+                    enabled=enabled,
                     module=str(cfg.get("module", "")),
                     entry_point=str(cfg.get("entry_point", "")),
                     version=str(cfg.get("version", "")),

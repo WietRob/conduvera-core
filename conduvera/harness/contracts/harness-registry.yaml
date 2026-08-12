@@ -44,3 +44,14 @@ adapters:
     isolation: systemd-user-scope
     note: Pi Agent Harness CLI — DISABLED pending a separate enforceable
           sandbox goal. Installed but not routable; not used for production.
+  acceptance_fixture_cli:
+    enabled: false
+    acceptance_only: true
+    module: conduvera.harness.adapters
+    entry_point: acceptance_fixture_cli_adapter
+    version: conduitvera-scope-adapter.v1
+    contract: CONTROL-PLANE-V1
+    isolation: systemd-user-scope
+    note: deterministic acceptance-only fixture harness; enabled solely under
+          CONDUVERA_ACCEPTANCE_MODE=1 on the isolated acceptance service;
+          absent from normal doctor/default runtime. Fixed enum scenarios only.

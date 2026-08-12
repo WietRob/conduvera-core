@@ -25,10 +25,17 @@ def build_service(state_dir: str | None = None) -> ControlPlaneService:
         registry_path=Path(__file__).resolve().parent.parent / "harness" / "contracts" / "harness-registry.yaml",
         execution_mode="LIVE",
     )
+    # Acceptance-only fixture harness is enabled ONLY under
+    # CONDUVERA_ACCEPTANCE_MODE=1 on the isolated acceptance service. It is
+    # never part of the normal doctor/default runtime.
+    adapter_ids = ("hermes_scoped", "codex_cli", "opencode_cli", "hermes")
+    if os.environ.get("CONDUVERA_ACCEPTANCE_MODE") == "1":
+        adapter_ids = adapter_ids + ("acceptance_fixture_cli",)
     svc = ControlPlaneService(
         registry=registry,
         gateway_service=gateway,
         config=config,
+        adapter_ids=adapter_ids,
         global_concurrency=int(os.environ.get("CONDUVERA_GLOBAL_CONCURRENCY", "4")),
     )
     from conduvera.control_plane.outbox import EventOutbox

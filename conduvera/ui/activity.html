@@ -56,6 +56,20 @@
   nav.filter { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
   nav.filter button { font-size:12px; }
   nav.filter button.active { border-color:var(--accent); color:var(--accent); }
+  form.submit { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px;
+                background:#14181f; border:1px solid var(--line); border-radius:10px;
+                padding:16px; margin:0 0 16px; max-width:1200px; margin-left:auto; margin-right:auto; }
+  form.submit label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); }
+  form.submit input, form.submit select, form.submit textarea {
+    background:#0f1115; color:var(--text); border:1px solid var(--line);
+    border-radius:6px; padding:6px 8px; font-size:13px; font-family:inherit; }
+  form.submit textarea { min-height:64px; resize:vertical; }
+  form.submit .full { grid-column:1 / -1; }
+  form.submit .row2 { grid-column:1 / -1; display:flex; align-items:center; gap:12px; }
+  form.submit button[type=submit] { padding:8px 18px; font-size:13px; }
+  #stale { display:none; }
+  #stale.show { display:block; background:rgba(230,162,60,.12); border:1px solid var(--warn);
+    border-radius:8px; padding:8px 14px; margin-bottom:12px; color:var(--warn); font-size:13px; }
 </style>
 </head>
 <body>
@@ -75,6 +89,45 @@
   <button data-f="timed_out">Timeout</button>
 </nav>
 <main>
+  <form class="submit" id="submitForm">
+    <label>Repository
+      <select id="f_repo"><option value="conduit-fixture">conduit-fixture</option></select>
+    </label>
+    <label>Harness
+      <select id="f_harness">
+        <option value="opencode_cli">opencode_cli</option>
+        <option value="hermes_scoped">hermes_scoped</option>
+        <option value="acceptance_fixture_cli">acceptance_fixture_cli</option>
+      </select>
+    </label>
+    <label>Base-Commit
+      <input id="f_base" placeholder="(leer = HEAD)">
+    </label>
+    <label>Task-Klasse
+      <select id="f_tasktype"><option value="code_change">code_change</option></select>
+    </label>
+    <label>Timeout (s)
+      <input id="f_timeout" type="number" value="120">
+    </label>
+    <label>Scenario (acceptance_fixture_cli)
+      <select id="f_scenario">
+        <option value="">—</option>
+        <option>HOLD_UNTIL_CANCEL</option>
+        <option>HOLD_THEN_EXIT_0</option>
+        <option>EXIT_7</option>
+        <option>HOLD_UNTIL_TIMEOUT</option>
+        <option>EXIT_0_WITH_INVALID_EVIDENCE</option>
+      </select>
+    </label>
+    <label class="full">Anweisungen
+      <textarea id="f_prompt" placeholder="Task-Beschreibung"></textarea>
+    </label>
+    <div class="row2">
+      <button type="submit">Job einreichen</button>
+      <span class="detail" id="submitResult"></span>
+    </div>
+  </form>
+  <div id="stale"></div>
   <div id="sections"></div>
 </main>
 <div id="toast"></div>
@@ -119,6 +172,61 @@ function runAction(method, params){
   return fetch(API+"/action", {method:"POST", headers:{"Content-Type":"application/json"},
              body: JSON.stringify({method, params})}).then(r=>r.json());
 }
+
+// ---- WS-B: graphical submit workflow (same Control-Plane authority) ----
+const retryKeys = {};
+function doSubmit(ev){
+  ev.preventDefault();
+  const params = {
+    task_id: "ui_" + Date.now().toString(36),
+    attempt_id: "a1",
+    harness: $("#f_harness").value,
+    repo: $("#f_repo").value,
+    base_commit: $("#f_base").value || undefined,
+    task_type: $("#f_tasktype").value,
+    timeout_s: parseFloat($("#f_timeout").value) || 120,
+    prompt: $("#f_prompt").value,
+    scenario: $("#f_scenario").value || undefined,
+    hold_s: 60,
+    fixture_out: "fixture-status.json",
+  };
+  const btn = $("button[type=submit]", ev.target);
+  btn.disabled = true;
+  $("#submitResult").textContent = "…sende";
+  runAction("submit", params).then(r=>{
+    btn.disabled = false;
+    if (r && r.ok){
+      const res = r.result||{};
+      $("#submitResult").textContent =
+        "job " + res.job_id + " · attempt " + res.attempt_id +
+        " · payload " + (res.payload_ref||"").slice(0,12) +
+        " · hash " + String(res.content_sha256||"").slice(0,12);
+      $("#f_prompt").value = "";
+    } else {
+      $("#submitResult").textContent =
+        "abgelehnt: " + ((r && (r.error && r.error.message)) || (r && r.result && r.result.message) || "?");
+    }
+  }).catch(e=>{
+    btn.disabled = false;
+    $("#submitResult").textContent = "Fehler: " + e.message;
+  }).then(()=>refresh());
+}
+$("#submitForm").addEventListener("submit", doSubmit);
+
+// ---- WS-C/E: idempotent retry (same job, new attempt, stable key) ----
+function doRetry(job_id, btn){
+  btn.disabled = true;
+  if (!retryKeys[job_id]) retryKeys[job_id] = crypto.randomUUID();
+  const key = retryKeys[job_id];
+  return runAction("retry", {job_id, idempotency_key: key}).then(r=>{
+    if (r && r.ok){
+      const res = r.result||{};
+      toast("Retry: " + res.attempt_id + " (" + (res.duplicate?"idempotent":"neu") + ")", "ok");
+    } else {
+      toast(((r && r.error && r.error.message) || (r && r.result && r.result.message) || "abgelehnt"), "err");
+    }
+  }).finally(()=>{ refresh(); });
+}
 function toast(msg, kind){
   const el = document.createElement("div");
   el.className = "toast "+(kind||"");
@@ -155,7 +263,10 @@ function cardActions(item){
     el.appendChild(mk("Cleanup", "cleanup", {session_id: id}));
   }
   if (item.job_id && ["COMPLETED","FAILED","CANCELLED","TIMED_OUT"].includes(stateOf(item))){
-    el.appendChild(mk("Retry", "retry", {job_id: id}));
+    const b = document.createElement("button");
+    b.textContent = "Retry";
+    b.addEventListener("click", ()=>doRetry(id, b));
+    el.appendChild(b);
   }
   return el;
 }
@@ -248,12 +359,28 @@ function refresh(){
     return r.json();
   }).then(body=>{
     if(!body.ok) throw new Error(body.error && body.error.message || "api error");
+    $("body").classList.remove("stale");
+    $("#stale").className = "";
+    $("#stale").textContent = "";
     $("#conn").textContent = "live"; $("#conn").className="live";
     const c = body.result.counts||{};
     $("#counts").textContent = "queue "+c.queued+" · running "+c.running+" · terminal "+c.terminal;
+    lastData = body.result;
     render(body.result);
   }).catch(e=>{
     $("#conn").textContent = "getrennt"; $("#conn").className="stale";
+    // retain last good snapshot as visibly stale, never empty-as-none
+    if (lastData){
+      $("body").classList.add("stale");
+      $("#stale").className = "show";
+      $("#stale").textContent = "Verbindung getrennt — zeige letzten Stand (veraltet). Automatische Wiederverbindung läuft…";
+    } else {
+      const out = $("#sections");
+      out.innerHTML = "";
+      const e = document.createElement("div"); e.className="error";
+      e.textContent = "Keine Verbindung zur Control-Plane.";
+      out.appendChild(e);
+    }
   });
 }
 

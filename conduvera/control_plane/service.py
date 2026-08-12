@@ -231,6 +231,8 @@ class ControlPlaneService:
         config.worktree_base.mkdir(parents=True, exist_ok=True)
         config.evidence_dir.mkdir(parents=True, exist_ok=True)
         config.outbox_path.parent.mkdir(parents=True, exist_ok=True)
+        from conduvera.control_plane.evidence_store import EvidenceStore
+        self.evidence_store = EvidenceStore(config.evidence_dir)
         self.scheduler = Scheduler(
             store=SchedulerStore(config.state_dir / "scheduler" / "queue.json"),
             global_limit=global_concurrency,
@@ -355,6 +357,9 @@ class ControlPlaneService:
         task_type: str = "code_change",
         expected_artifacts: list[str] | None = None,
         test_plan: str = "",
+        scenario: str = "",
+        hold_s: float | None = None,
+        fixture_out: str = "",
     ) -> dict[str, Any]:
         """THE single public mutation entry point.
 
@@ -409,6 +414,7 @@ class ControlPlaneService:
             timeout_s=timeout_s, created_at=now, updated_at=now,
             payload_ref=payload_id, content_sha256=envelope.content_sha256,
             task_type=task_type,
+            scenario=scenario, hold_s=hold_s, fixture_out=fixture_out,
         )
         job.bind_prompt(prompt)
         job.attempts.append(attempt_id_safe)
@@ -552,6 +558,10 @@ class ControlPlaneService:
                 "repo_path": str(repo_path),
                 "base_commit": job.base_commit,
                 "attempt_id": attempt.attempt_id,
+                # acceptance-only fixture metadata (empty in normal runs)
+                "scenario": job.scenario,
+                "hold_s": job.hold_s,
+                "fixture_out": job.fixture_out,
             },
         )
         if not result.success:
@@ -657,17 +667,30 @@ class ControlPlaneService:
             prompt=prompt, timeout_s=timeout_s,
         )
 
-    def retry_job(self, job_id: str, attempt_id: str | None = None) -> dict[str, Any]:
-        """Retry a terminal job as a new attempt (same durable payload).
+    def retry_job(self, job_id: str, attempt_id: str | None = None,
+                  idempotency_key: str | None = None) -> dict[str, Any]:
+        """Retry a terminal job as a NEW Attempt of the SAME job.
 
-        Requires the original job to be terminal and its payload to still
-        exist and hash-verify. The exact original instructions are reloaded
-        from the TaskPayloadStore — never from caller input.
+        Domain model (immutable): Job 1:n Attempts. Retry keeps the SAME
+        job_id, creates a new attempt_id, reuses the same durable payload_ref
+        and content_sha256, leaves the previous Attempt unchanged, and retains
+        prior result_refs/EvidenceBundles. Creating a new Job with the same
+        task_id is NOT a valid retry.
         """
         job = self.scheduler.store.get_job(job_id)
         if job is None:
             return {"success": False, "message": f"unknown job {job_id}",
                     "code": "UNKNOWN_JOB"}
+        # idempotency: a duplicate retry with the same key creates no extra
+        # Attempt, even if the first retry has already reopened the job.
+        if idempotency_key:
+            existing = [a for a in job.attempts
+                        if self.scheduler.store.get_attempt(a) and
+                        self.scheduler.store.get_attempt(a).idem_key == idempotency_key]
+            if existing:
+                return {"success": True, "message": "idempotent retry (no new attempt)",
+                        "job_id": job_id, "attempt_id": existing[0],
+                        "duplicate": True}
         if job.state not in (JobState.COMPLETED, JobState.FAILED,
                              JobState.CANCELLED, JobState.TIMED_OUT):
             return {"success": False, "message": f"job {job_id} not terminal "
@@ -680,13 +703,41 @@ class ControlPlaneService:
         if envelope.content_sha256 != job.content_sha256:
             return {"success": False, "message": "payload hash mismatch",
                     "code": "PAYLOAD_HASH_MISMATCH"}
+
         if attempt_id is None:
-            attempt_id = f"{job.job_id.split('_')[-1][:8]}-retry"
-        return self.submit_job(
-            task_id=job.task_id, attempt_id=attempt_id, harness=job.harness,
-            repo=job.repo, base_commit=job.base_commit,
-            model_binding=job.model_binding, prompt=envelope.instructions,
-            timeout_s=job.timeout_s, task_type=job.task_type)
+            attempt_id = f"retry_{len(job.attempts)}"
+        _, attempt_id = _normalize_identifiers(job.task_id, attempt_id)
+        if attempt_id in job.attempts:
+            return {"success": False, "message": f"attempt {attempt_id} already "
+                    f"exists for job {job_id}", "code": "DUPLICATE_ATTEMPT"}
+
+        now = _utc_now()
+        # new Attempt under the SAME job_id
+        attempt = AttemptDescriptor(
+            attempt_id=attempt_id, job_id=job.job_id, task_id=job.task_id,
+            harness=job.harness, created_at=now, updated_at=now,
+            idem_key=idempotency_key or "",
+        )
+        self.scheduler.store.save_attempt(attempt)
+        job.attempts.append(attempt_id)
+        job.state = JobState.QUEUED
+        job.exit_code = None
+        job.terminal_reason = ""
+        job.updated_at = now
+        self.scheduler.store.save_job(job)
+
+        attempt.state = AttemptState.QUEUED
+        attempt.updated_at = now
+        self.scheduler.store.save_attempt(attempt)
+        self._pending_prompts[attempt_id] = envelope.instructions
+        self._emit("session.queued", {"job_id": job.job_id,
+                                      "attempt_id": attempt_id,
+                                      "task_id": job.task_id,
+                                      "harness": job.harness})
+        return {"success": True, "message": "retry queued (new attempt, same job)",
+                "job_id": job.job_id, "attempt_id": attempt_id,
+                "payload_ref": job.payload_ref,
+                "content_sha256": job.content_sha256, "queued": True}
 
     def status(self, session_id: str) -> dict[str, Any]:
         session = self.registry.get(session_id)
