@@ -106,3 +106,5 @@ class TestConsoleView:
         # WS-B: running-Eintrag muss ein eindeutiges state-Label tragen,
         # damit die grafische Workspace RUNNING statt UNKNOWN anzeigt.
         assert r["state"] == "RUNNING"
+        # DOD-13: running-Eintrag muss die job_id tragen (CLI/JSON/UI-Konsistenz)
+        assert r["job_id"] == svc.scheduler.store.get_attempt("A").job_id
