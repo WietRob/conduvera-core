@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conduvera — Activity</title>
+<style>
+  :root { --bg:#0f1115; --panel:#161a21; --line:#262c38; --text:#e6e9ef;
+          --muted:#8b93a3; --accent:#4f8cff; --ok:#2ecc71; --err:#e74c3c;
+          --warn:#f39c12; --run:#3498db; --que:#9b59b6; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+         background:var(--bg); color:var(--text); }
+  header { padding:14px 20px; background:var(--panel); border-bottom:1px solid var(--line);
+           display:flex; align-items:center; gap:16px; }
+  header h1 { font-size:18px; margin:0; }
+  #conn { font-size:12px; padding:4px 10px; border-radius:12px; }
+  #conn.live { background:#16241a; color:var(--ok); }
+  #conn.stale, #conn.error { background:#241a16; color:var(--warn); }
+  #counts { margin-left:auto; font-size:13px; color:var(--muted); }
+  main { padding:20px; max-width:1200px; margin:0 auto; }
+  .section-title { font-size:13px; text-transform:uppercase; letter-spacing:.06em;
+                   color:var(--muted); margin:24px 0 8px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .card.running { border-left:3px solid var(--run); }
+  .card.queued  { border-left:3px solid var(--que); }
+  .card.completed { border-left:3px solid var(--ok); }
+  .card.failed, .card.timed_out { border-left:3px solid var(--err); }
+  .card.cancelled { border-left:3px solid var(--warn); }
+  .card.needs_attention { border-left:3px solid var(--warn); }
+  .row { display:flex; justify-content:space-between; gap:8px; font-size:13px;
+         padding:2px 0; }
+  .row .k { color:var(--muted); flex:0 0 110px; }
+  .row .v { text-align:right; word-break:break-all; }
+  .state { font-weight:600; font-size:12px; padding:2px 8px; border-radius:10px; }
+  .state.RUNNING { color:var(--run); } .state.QUEUED,.state.ACCEPTED { color:var(--que); }
+  .state.COMPLETED { color:var(--ok); } .state.FAILED,.state.TIMED_OUT { color:var(--err); }
+  .state.CANCELLED { color:var(--warn); } .state.LOST { color:var(--muted); }
+  .actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  button { background:#232a36; color:var(--text); border:1px solid var(--line);
+           border-radius:8px; padding:6px 12px; font-size:12px; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button.danger:hover { border-color:var(--err); }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  .empty, .error { padding:40px; text-align:center; color:var(--muted); }
+  .error { color:var(--err); }
+  .detail { font-size:12px; color:var(--muted); }
+  .meta { font-size:11px; color:var(--muted); margin-top:8px; padding-top:6px;
+          border-top:1px solid var(--line); }
+  a { color:var(--accent); }
+  #toast { position:fixed; bottom:20px; right:20px; max-width:380px; z-index:99; }
+  .toast { background:#232a36; border:1px solid var(--line); border-left:3px solid var(--accent);
+           border-radius:8px; padding:10px 14px; margin-top:8px; font-size:13px; }
+  .toast.ok { border-left-color:var(--ok); } .toast.err { border-left-color:var(--err); }
+  nav.filter { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  nav.filter button { font-size:12px; }
+  nav.filter button.active { border-color:var(--accent); color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Conduvera · Activity</h1>
+  <span id="conn">verbinde…</span>
+  <span id="counts"></span>
+</header>
+<nav class="filter" id="filter" style="padding:12px 20px 0;max-width:1200px;margin:0 auto">
+  <button data-f="all" class="active">Alle</button>
+  <button data-f="queued">Queue</button>
+  <button data-f="running">Running</button>
+  <button data-f="attention">Aufmerksamkeit</button>
+  <button data-f="failed">Fehlgeschlagen</button>
+  <button data-f="completed">Abgeschlossen</button>
+  <button data-f="cancelled">Abgebrochen</button>
+  <button data-f="timed_out">Timeout</button>
+</nav>
+<main>
+  <div id="sections"></div>
+</main>
+<div id="toast"></div>
+<script>
+"use strict";
+const API = "/api";
+let filter = "all";
+let lastData = null;
+
+function $(s, r){ return (r||document).querySelector(s); }
+function $$(s, r){ return Array.from((r||document).querySelectorAll(s)); }
+
+function stateOf(item){
+  // item is a job (terminal) or a queued attempt or a running session
+  const s = (item.state||"").toUpperCase();
+  if (["COMPLETED","FAILED","CANCELLED","TIMED_OUT"].includes(s)) return s;
+  if (s === "RUNNING" || s === "STARTING") return "RUNNING";
+  if (["QUEUED","ACCEPTED","CLAIMED"].includes(s)) return "QUEUED";
+  return s || "UNKNOWN";
+}
+function sectionClass(st){
+  const map = {RUNNING:"running",QUEUED:"queued",COMPLETED:"completed",
+               FAILED:"failed",TIMED_OUT:"timed_out",CANCELLED:"cancelled",
+               LOST:"needs_attention"};
+  return map[st] || "needs_attention";
+}
+function groupOf(st){
+  if (["RUNNING","STARTING"].includes(st)) return "Running";
+  if (["QUEUED","ACCEPTED","CLAIMED"].includes(st)) return "Queued";
+  if (st === "COMPLETED") return "Completed";
+  if (st === "FAILED") return "Failed";
+  if (st === "CANCELLED") return "Cancelled";
+  if (st === "TIMED_OUT") return "Timed out";
+  return "Needs attention"; // LOST / UNKNOWN / other
+}
+
+function jobKey(d){
+  return (d.job_id||"") + "|" + (d.attempt_id||"") + "|" + (d.session_id||"");
+}
+
+function runAction(method, params){
+  return fetch(API+"/action", {method:"POST", headers:{"Content-Type":"application/json"},
+             body: JSON.stringify({method, params})}).then(r=>r.json());
+}
+function toast(msg, kind){
+  const el = document.createElement("div");
+  el.className = "toast "+(kind||"");
+  el.textContent = msg;
+  $("#toast").appendChild(el);
+  setTimeout(()=>el.remove(), 5000);
+}
+
+function cardActions(item){
+  const id = item.session_id || item.job_id;
+  const el = document.createElement("div");
+  el.className = "actions";
+  const mk = (label, method, params, cls)=>{
+    const b = document.createElement("button");
+    b.textContent = label; b.className = cls||"";
+    b.addEventListener("click", async ()=>{
+      b.disabled = true;
+      try {
+        const r = await runAction(method, params||{});
+        if (r && r.ok) toast((r.result && (r.result.message||r.result.state)) || "ok", "ok");
+        else toast((r && r.error && r.error.message) || "abgelehnt", "err");
+      } catch(e){ toast("Fehler: "+e.message, "err"); }
+      refresh();
+    });
+    return b;
+  };
+  if (item.session_id){
+    el.appendChild(mk("Inspect", "inspect", {session_id: id}));
+  }
+  if (item.session_id){
+    el.appendChild(mk("Cancel", "cancel", {session_id: id}, "danger"));
+  }
+  if (item.session_id){
+    el.appendChild(mk("Cleanup", "cleanup", {session_id: id}));
+  }
+  if (item.job_id && ["COMPLETED","FAILED","CANCELLED","TIMED_OUT"].includes(stateOf(item))){
+    el.appendChild(mk("Retry", "retry", {job_id: id}));
+  }
+  return el;
+}
+
+function renderItem(item, section, source){
+  const st = stateOf(item);
+  const card = document.createElement("div");
+  card.className = "card " + sectionClass(st);
+  card.dataset.state = st;
+
+  const head = document.createElement("div");
+  head.className = "row";
+  const t = document.createElement("span");
+  t.textContent = item.task_id || item.job_id || "?";
+  const s = document.createElement("span");
+  s.className = "state"; s.textContent = st;
+  head.appendChild(t); head.appendChild(s);
+  card.appendChild(head);
+
+  const add = (k,v)=>{ const r=document.createElement("div"); r.className="row";
+    const kk=document.createElement("span"); kk.className="k"; kk.textContent=k;
+    const vv=document.createElement("span"); vv.className="v"; vv.textContent=v||"—";
+    r.appendChild(kk); r.appendChild(vv); card.appendChild(r); };
+  add("Harness", item.harness);
+  add("Job", item.job_id);
+  add("Attempt", item.attempt_id);
+  if (item.session_id) add("Session", item.session_id);
+  add("Base", (item.base_commit||"").slice(0,10));
+  add("Payload", (item.payload_ref||"").slice(0,14));
+  if (item.hash || item.content_sha256) add("Hash", String(item.hash||item.content_sha256).slice(0,16));
+  if (item.elapsed_s != null) add("Elapsed", item.elapsed_s+"s");
+  if (item.deadline_utc) add("Deadline", item.deadline_utc.slice(11,19)+" UTC");
+  if (item.exit_code != null) add("Exit", item.exit_code);
+  if (item.terminal_reason) add("Reason", item.terminal_reason);
+  if (item.result_refs && item.result_refs.length){
+    const d=document.createElement("div"); d.className="row";
+    const kk=document.createElement("span"); kk.className="k"; kk.textContent="Evidence";
+    const links=document.createElement("span"); links.className="v";
+    item.result_refs.forEach(ref=>{
+      const a=document.createElement("a"); a.href="#"; a.textContent=ref.split("/").pop().slice(0,24);
+      a.addEventListener("click",(ev)=>{ ev.preventDefault(); toast("Evidence: "+ref); });
+      links.appendChild(a); links.appendChild(document.createTextNode(" "));
+    });
+    d.appendChild(kk); d.appendChild(links); card.appendChild(d);
+  }
+  if (item.worktree) add("Worktree", item.worktree.split("/").slice(-2).join("/"));
+
+  card.appendChild(cardActions(item));
+  return card;
+}
+
+function render(data){
+  lastData = data;
+  const out = $("#sections");
+  out.innerHTML = "";
+  const cards = []; // {group, el}
+  // queued
+  (data.queued||[]).forEach(q=>{ if(filter!=="all" && filter!=="queued") return;
+    cards.push({group:"Queued", el:renderItem(q,"queued","queued")}); });
+  // running
+  (data.running||[]).forEach(r=>{ if(filter!=="all" && filter!=="running") return;
+    cards.push({group:"Running", el:renderItem(r,"running","running")}); });
+  // terminal -> group
+  (data.terminal||[]).forEach(t=>{
+    if(filter!=="all" && filter!==groupOf(t.state).toLowerCase().replace(/ /g,"_")
+       && filter!==stateOf(t).toLowerCase()) return;
+    cards.push({group:groupOf(t.state), el:renderItem(t,"terminal","terminal")});
+  });
+  // grouped output
+  const order = ["Running","Queued","Needs attention","Failed","Timed out","Cancelled","Completed"];
+  order.forEach(g=>{
+    const items = cards.filter(c=>c.group===g);
+    if(!items.length) return;
+    const title = document.createElement("div"); title.className="section-title"; title.textContent=g;
+    out.appendChild(title);
+    const wrap = document.createElement("div"); wrap.className="cards";
+    items.forEach(i=>wrap.appendChild(i.el));
+    out.appendChild(wrap);
+  });
+  if(!cards.length){
+    const e = document.createElement("div"); e.className="empty";
+    e.textContent = "Keine Jobs im aktuellen Filter.";
+    out.appendChild(e);
+  }
+}
+
+function refresh(){
+  fetch(API+"/console").then(r=>{
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.json();
+  }).then(body=>{
+    if(!body.ok) throw new Error(body.error && body.error.message || "api error");
+    $("#conn").textContent = "live"; $("#conn").className="live";
+    const c = body.result.counts||{};
+    $("#counts").textContent = "queue "+c.queued+" · running "+c.running+" · terminal "+c.terminal;
+    render(body.result);
+  }).catch(e=>{
+    $("#conn").textContent = "getrennt"; $("#conn").className="stale";
+  });
+}
+
+// filter nav
+$$("#filter button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    filter = b.dataset.f;
+    $$("#filter button").forEach(x=>x.classList.toggle("active", x===b));
+    if(lastData) render(lastData);
+  });
+});
+
+refresh();
+setInterval(refresh, 2000);
+</script>
+</body>
+</html>

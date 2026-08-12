@@ -657,6 +657,37 @@ class ControlPlaneService:
             prompt=prompt, timeout_s=timeout_s,
         )
 
+    def retry_job(self, job_id: str, attempt_id: str | None = None) -> dict[str, Any]:
+        """Retry a terminal job as a new attempt (same durable payload).
+
+        Requires the original job to be terminal and its payload to still
+        exist and hash-verify. The exact original instructions are reloaded
+        from the TaskPayloadStore — never from caller input.
+        """
+        job = self.scheduler.store.get_job(job_id)
+        if job is None:
+            return {"success": False, "message": f"unknown job {job_id}",
+                    "code": "UNKNOWN_JOB"}
+        if job.state not in (JobState.COMPLETED, JobState.FAILED,
+                             JobState.CANCELLED, JobState.TIMED_OUT):
+            return {"success": False, "message": f"job {job_id} not terminal "
+                    f"({job.state.value})", "code": "NOT_TERMINAL"}
+        try:
+            envelope = self._payload_store.get(job.payload_ref)
+        except (PayloadMissingError, PayloadCorruptError, PayloadError) as exc:
+            return {"success": False, "message": f"payload: {exc}",
+                    "code": "PAYLOAD_ERROR"}
+        if envelope.content_sha256 != job.content_sha256:
+            return {"success": False, "message": "payload hash mismatch",
+                    "code": "PAYLOAD_HASH_MISMATCH"}
+        if attempt_id is None:
+            attempt_id = f"{job.job_id.split('_')[-1][:8]}-retry"
+        return self.submit_job(
+            task_id=job.task_id, attempt_id=attempt_id, harness=job.harness,
+            repo=job.repo, base_commit=job.base_commit,
+            model_binding=job.model_binding, prompt=envelope.instructions,
+            timeout_s=job.timeout_s, task_type=job.task_type)
+
     def status(self, session_id: str) -> dict[str, Any]:
         session = self.registry.get(session_id)
         if session is None:
@@ -796,7 +827,7 @@ class ControlPlaneService:
             jobs[key]["latest_state"] = s.state.value
         return list(jobs.values())
 
-    def console_view(self) -> dict[str, Any]:
+    def console_view(self, limit: int | None = None) -> dict[str, Any]:
         """Konsolidierte Operator-Console über die reale Control-Plane-API.
 
         Vereinigt Queue/Jobs + Sessions in einem zusammenhängenden View:
@@ -805,6 +836,7 @@ class ControlPlaneService:
         - terminal: abgeschlossene mit reason/exit/result_refs
         - evidence: Ergebnis-Referenzen je Job
         Nutzt nur persistierte/observierte Daten; reicht NIE raw Prompts durch.
+        `limit` kappt jede Sektion (newest-first, deterministisch).
         """
         import datetime as _dt
         now = _dt.datetime.now(_dt.timezone.utc)
@@ -894,11 +926,11 @@ class ControlPlaneService:
             "counts": {"queued": len(queued), "running": len(running),
                        "terminal": len(terminal)},
             "queued": sorted(queued, key=lambda x: x.get("created_at", ""),
-                             reverse=True),
+                             reverse=True)[:limit if limit else None],
             "running": sorted(running, key=lambda x: x.get("started_at", ""),
-                              reverse=True),
+                              reverse=True)[:limit if limit else None],
             "terminal": sorted(terminal, key=lambda x: x.get("updated_at", ""),
-                               reverse=True),
+                               reverse=True)[:limit if limit else None],
             "server_time_utc": now.isoformat(),
         }
 
