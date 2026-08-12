@@ -85,7 +85,10 @@ class _Handler(BaseHTTPRequestHandler):
         elif path == "/" or path == "/ui":
             self._send_static("activity.html")
         elif path.startswith("/ui/"):
-            self._send_static(path[len("/ui/"):])
+            rel = path[len("/ui/"):]
+            if not rel or rel.endswith("/"):
+                rel = "activity.html"
+            self._send_static(rel)
         else:
             self._send_json({"ok": False, "error": {"code": "NOT_FOUND",
                                                     "message": path}}, 404)

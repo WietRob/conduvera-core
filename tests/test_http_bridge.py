@@ -11,7 +11,6 @@ Proves the Activity-record contract:
 import json
 import subprocess
 import sys
-import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -135,11 +134,7 @@ class TestHttpBridge:
 
     def test_ui_static_served(self, http_bridge):
         svc, bridge, url = http_bridge
-        try:
-            with urllib.request.urlopen(f"{url}/ui/") as r:
-                assert r.status == 200
-                assert "text/html" in r.headers["Content-Type"]
-        except urllib.error.HTTPError as e:
-            # workspace asset not yet present is acceptable at WS-A; contract
-            # must route /ui/ (404 only if the file is genuinely missing)
-            assert e.code == 404
+        with urllib.request.urlopen(f"{url}/ui/") as r:
+            assert r.status == 200
+            assert "text/html" in r.headers["Content-Type"]
+            assert b"Conduvera" in r.read()
