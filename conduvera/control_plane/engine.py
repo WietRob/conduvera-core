@@ -30,8 +30,9 @@ import signal
 import subprocess
 import threading
 import time
-from datetime import datetime, timezone
+import json
 from pathlib import Path
+from datetime import datetime, timezone
 from typing import Any
 
 from conduvera.control_plane.scheduler import (
@@ -278,6 +279,7 @@ class ControlPlaneEngine:
         exit_code = None
         result_refs: list[str] = []
         evidence = None
+        evidence_invalid = False
         if session.adapter_session_id:
             try:
                 evidence = self.service.gateway.collect_evidence(
@@ -290,8 +292,22 @@ class ControlPlaneEngine:
                         if isinstance(art, dict) and art.get("path"):
                             result_refs.append(
                                 f"{art['path']}#{art.get('sha256','').split(':')[-1][:16]}")
+                    evidence_invalid = bool(evidence.get("evidence_invalid"))
             except Exception:  # noqa: BLE001
                 pass
+
+        # Restart recovery (DOD-04/WS-F): after a control-plane restart the
+        # adapter's in-memory session state is gone, so collect_evidence cannot
+        # report an exit code. Read the REAL exit code from the owned scope
+        # (systemd ExecMainStatus) and the fixture status file so a
+        # rediscovered session that terminated with exit 0 is classified
+        # COMPLETED, never EVIDENCE_INVALID.
+        if exit_code is None and getattr(session, "scope_id", ""):
+            exit_code = self._scope_exit_code(session.scope_id)
+        if exit_code is None and getattr(session, "worktree", ""):
+            exit_code = self._fixture_exit_code(session.worktree)
+        if not evidence_invalid and getattr(session, "worktree", ""):
+            evidence_invalid = self._fixture_invalid_marker(session.worktree)
 
         # Workstream D: persist a durable EvidenceBundle and validate fail-closed.
         from conduvera.control_plane.evidence_store import (
@@ -311,7 +327,7 @@ class ControlPlaneEngine:
             artifact_paths=[a.get("path") for a in (evidence.get("artifacts") or [])] if isinstance(evidence, dict) else [],
             terminal_reason="",
             created_at=_utc_now(),
-            evidence_invalid_marker=bool(isinstance(evidence, dict) and evidence.get("evidence_invalid")),
+            evidence_invalid_marker=evidence_invalid,
         )
         try:
             store = self.service.evidence_store
@@ -342,6 +358,45 @@ class ControlPlaneEngine:
             SessionState.COMPLETED, AttemptState.COMPLETED, JobState.COMPLETED,
             "process exited normally", exit_code, "session.completed",
             result_refs=result_refs)
+
+    def _scope_exit_code(self, scope_id: str) -> int | None:
+        """Real exit code from an owned systemd scope (ExecMainStatus)."""
+        if not scope_id or not scope_id.endswith(".scope"):
+            return None
+        try:
+            r = subprocess.run(
+                ["systemctl", "--user", "show", scope_id,
+                 "-p", "ExecMainStatus", "--value"],
+                capture_output=True, text=True, timeout=10)
+            raw = r.stdout.strip()
+            if raw.isdigit():
+                return int(raw)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        return None
+
+    def _fixture_exit_code(self, worktree: str) -> int | None:
+        """Exit code reported by the acceptance fixture status file."""
+        p = Path(worktree) / "fixture-status.json"
+        if not p.is_file():
+            return None
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            ec = data.get("exit_code")
+            return int(ec) if ec is not None else None
+        except (ValueError, OSError):
+            return None
+
+    def _fixture_invalid_marker(self, worktree: str) -> bool:
+        """True when the acceptance fixture wrote evidence_invalid=true."""
+        p = Path(worktree) / "fixture-status.json"
+        if not p.is_file():
+            return False
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            return bool(data.get("evidence_invalid"))
+        except (ValueError, OSError):
+            return False
 
     def _handle_timeout(self, session: Any, attempt: Any, sid: str) -> None:
         # session.timeout.requested -> SIGTERM -> grace -> SIGKILL

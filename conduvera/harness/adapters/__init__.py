@@ -323,6 +323,9 @@ class ScopedProcessAdapter:
             "timeout_s": timeout_s,
             "exit_code": None,
             "_popen": proc,
+            # acceptance fixture status path (for evidence_invalid detection)
+            "fixture_out": str((wt / str(config.get("fixture_out", "")))
+                               if config.get("fixture_out") else ""),
         }
         self._sessions[sid] = session
         # Watchdog thread: capture the real exit code when the owned process
@@ -488,7 +491,23 @@ class ScopedProcessAdapter:
             "harness": self._spec.binary,
             "status": session.get("status", ""),
             "exit_code": exit_code,
+            # acceptance fixture: real process exit 0 but evidence_invalid
+            # marker -> the engine fails closed (attempt/job FAILED,
+            # terminal_reason=EVIDENCE_INVALID).
+            "evidence_invalid": self._fixture_evidence_invalid(session),
         }
+
+    def _fixture_evidence_invalid(self, session: dict[str, Any]) -> bool:
+        """True when the acceptance fixture wrote evidence_invalid=true."""
+        out = session.get("fixture_out")
+        if not out or not Path(out).is_file():
+            return False
+        try:
+            import json as _json
+            data = _json.loads(Path(out).read_text(encoding="utf-8"))
+            return bool(data.get("evidence_invalid"))
+        except (ValueError, OSError):
+            return False
 
     def stop_session(self, agent_id: str, session_ref: str) -> AdapterResult:
         return self.cancel_session(session_ref)
@@ -632,6 +651,13 @@ def acceptance_fixture_cli_adapter() -> ScopedProcessAdapter:
     process through the normal Control-Plane scope/worktree path. Registered
     only on the isolated acceptance service; never in normal doctor/runtime.
     """
+    # The fixture runs via `python3 -m conduvera.harness.acceptance_fixture`
+    # inside a systemd-user scope; the scope does not inherit the service's
+    # PYTHONPATH, so we must pass it explicitly for the module to resolve.
+    core_root = str(Path(__file__).resolve().parent.parent.parent)
+    extra_env = {"PYTHONPATH": core_root}
+    if os.environ.get("PYTHONPATH"):
+        extra_env["PYTHONPATH"] = core_root + ":" + os.environ["PYTHONPATH"]
     return ScopedProcessAdapter(
         spec=HarnessSpec(
             binary=sys.executable,
@@ -641,6 +667,7 @@ def acceptance_fixture_cli_adapter() -> ScopedProcessAdapter:
             doctor_cmd=(sys.executable, "-m",
                         "conduvera.harness.acceptance_fixture",
                         "--scenario", "HOLD_THEN_EXIT_0"),
+            extra_env=extra_env,
         ),
         task_timeout_s=120.0,
     )
