@@ -203,14 +203,21 @@ class AcceptanceRunner:
             self._cancel_running(page, a_job.get("task_id") or a_job["job_id"])
             time.sleep(3)
             c = self._console()
-            self._record("3", "cancel A", counts=c["counts"],
+            # DOD-03: A must be CANCELLED (terminal) and its scope/process gone
+            a_term = [x for x in c["terminal"] if x.get("job_id") == a_job["job_id"]]
+            self._record("3", "cancel A",
+                         counts=c["counts"],
+                         a_terminal_state=(a_term[0].get("state") if a_term else "NOT_TERMINAL"),
+                         a_terminal_reason=(a_term[0].get("terminal_reason", "") if a_term else ""),
                          running=[x.get("job_id", "") for x in c["running"]],
                          queued=[x.get("job_id", "") for x in c["queued"]])
             self._shot(page, "step3_a_cancelled")
 
             # B should have auto-dispatched
             self._wait_running(b_job.get("task_id") or b_job["job_id"], page)
-            self._record("3b", "B auto-dispatched after cancel", **{})
+            c = self._console()
+            self._record("3b", "B auto-dispatched after cancel",
+                         b_running=[x.get("job_id", "") for x in c["running"]])
             self._shot(page, "step3b_b_running")
 
             # STEP 4: restart during B, verify B rediscovered exactly-once

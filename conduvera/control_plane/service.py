@@ -942,8 +942,15 @@ class ControlPlaneService:
             if s.get("state") in ("RUNNING", "STARTING"):
                 ed = _elapsed_deadline(s.get("started_at", ""),
                                        float(s.get("timeout_s", 180.0)))
+                # resolve job_id from the attempt (DOD-13 consistency)
+                s_job_id = ""
+                for _a in self.scheduler.store.all_attempts():
+                    if _a.attempt_id == s.get("attempt_id"):
+                        s_job_id = _a.job_id
+                        break
                 running.append({
                     "session_id": s.get("session_id"),
+                    "job_id": s_job_id,
                     "task_id": s.get("task_id"), "attempt_id": s.get("attempt_id"),
                     "scope_id": s.get("scope_id", ""),
                     "pid": s.get("pid"),
