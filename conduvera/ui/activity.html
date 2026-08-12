@@ -109,6 +109,9 @@
     <label>Timeout (s)
       <input id="f_timeout" type="number" value="120">
     </label>
+    <label>Hold (s) — acceptance_fixture_cli
+      <input id="f_hold" type="number" value="60">
+    </label>
     <label>Scenario (acceptance_fixture_cli)
       <select id="f_scenario">
         <option value="">—</option>
@@ -188,7 +191,7 @@ function doSubmit(ev){
     prompt: $("#f_prompt").value,
     model_binding: {},
     scenario: $("#f_scenario").value || undefined,
-    hold_s: 60,
+    hold_s: parseFloat($("#f_hold").value) || 60,
     fixture_out: "fixture-status.json",
   };
   const btn = $("button[type=submit]", ev.target);
