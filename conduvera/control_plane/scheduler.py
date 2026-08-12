@@ -75,6 +75,10 @@ class JobDescriptor:
     terminal_reason: str = ""
     result_refs: list[str] = field(default_factory=list)
     exit_code: int | None = None
+    # acceptance-only fixture metadata (CONDUVERA_ACCEPTANCE_MODE=1 only)
+    scenario: str = ""
+    hold_s: float | None = None
+    fixture_out: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {"job_id": self.job_id, "task_id": self.task_id, "repo": self.repo,
@@ -86,7 +90,9 @@ class JobDescriptor:
                 "attempts": list(self.attempts),
                 "state": self.state.value, "created_at": self.created_at,
                 "updated_at": self.updated_at, "terminal_reason": self.terminal_reason,
-                "result_refs": list(self.result_refs), "exit_code": self.exit_code}
+                "result_refs": list(self.result_refs), "exit_code": self.exit_code,
+                "scenario": self.scenario, "hold_s": self.hold_s,
+                "fixture_out": self.fixture_out}
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> "JobDescriptor":
@@ -106,6 +112,8 @@ class JobDescriptor:
             terminal_reason=d.get("terminal_reason", ""),
             result_refs=list(d.get("result_refs", [])),
             exit_code=d.get("exit_code"),
+            scenario=d.get("scenario", ""), hold_s=d.get("hold_s"),
+            fixture_out=d.get("fixture_out", ""),
         )
 
     def bind_prompt(self, prompt: str) -> None:
@@ -162,7 +170,8 @@ class AttemptDescriptor:
     exit_code: int | None = None
     terminal_reason: str = ""
     result_refs: list[str] = field(default_factory=list)
-
+    idem_key: str = ""
+    
     def to_dict(self) -> dict[str, Any]:
         return {"attempt_id": self.attempt_id, "job_id": self.job_id,
                 "task_id": self.task_id, "session_id": self.session_id,
@@ -173,7 +182,7 @@ class AttemptDescriptor:
                 "retained_at": self.retained_at, "claim_owner": self.claim_owner,
                 "claim_lease_until": self.claim_lease_until,
                 "exit_code": self.exit_code, "terminal_reason": self.terminal_reason,
-                "result_refs": list(self.result_refs)}
+                "result_refs": list(self.result_refs), "idem_key": self.idem_key}
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> "AttemptDescriptor":
@@ -191,6 +200,7 @@ class AttemptDescriptor:
             exit_code=d.get("exit_code"),
             terminal_reason=d.get("terminal_reason", ""),
             result_refs=list(d.get("result_refs", [])),
+            idem_key=d.get("idem_key", ""),
         )
 
 

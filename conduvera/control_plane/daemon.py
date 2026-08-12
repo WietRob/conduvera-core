@@ -136,7 +136,8 @@ class ControlPlaneDaemon:
                 return {"ok": r.get("success", False), "result": r}
             if method == "retry":
                 r = self.service.retry_job(params.get("job_id", ""),
-                                           params.get("attempt_id"))
+                                           params.get("attempt_id"),
+                                           idempotency_key=params.get("idempotency_key"))
                 return {"ok": r.get("success", False), "result": r}
             if method == "reconcile":
                 return {"ok": True, "result": self.service.reconcile()}

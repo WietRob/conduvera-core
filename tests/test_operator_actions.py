@@ -95,14 +95,21 @@ class TestRetry:
         job = _terminal_job(svc, "TASK-R", "a1")
         r = svc.retry_job(job.job_id, attempt_id="a2")
         assert r.get("success") is True
-        # new attempt queued; same task_id + same payload family
+        # DoD-05 domain model: SAME job_id, NEW attempt_id
+        assert r.get("job_id") == job.job_id
+        assert r.get("attempt_id") == "a2"
         a2 = svc.scheduler.store.get_attempt("a2")
         assert a2 is not None and a2.state.value in ("QUEUED", "ACCEPTED")
-        newjob = svc.scheduler.store.get_job(a2.job_id)
-        assert newjob is not None
-        assert newjob.task_id == job.task_id
-        assert newjob.harness == job.harness
-        assert newjob.base_commit == job.base_commit
+        assert a2.job_id == job.job_id  # new attempt belongs to the SAME job
+        # payload_ref + hash unchanged
+        assert r.get("payload_ref") == job.payload_ref
+        assert r.get("content_sha256") == job.content_sha256
+        # previous attempt immutable + retained
+        a1 = svc.scheduler.store.get_attempt("a1")
+        assert a1 is not None and a1.terminal is True
+        # attempt history retains both
+        job2 = svc.scheduler.store.get_job(job.job_id)
+        assert job2.attempts == [job.attempts[0], "a2"]
 
     def test_retry_non_terminal_rejected(self, tmp_path):
         repo, base = _make_repo(tmp_path)

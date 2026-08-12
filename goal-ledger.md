@@ -1,42 +1,36 @@
-# Goal Ledger — deliver-conduvera-operational-activity-workspace-v1
+# Goal Ledger — close-conduvera-operational-activity-workspace-v1
+ACCEPTANCE_CONTRACT_VERSION = 1.0
 
-## Arbeitsschritte (workstreams)
-- WS-A: Product Contract + Rebaseline
-- WS-B: Activity Workspace (graphical)
-- WS-C: Live Update + Consistency
-- WS-D: Operator Actions (cancel/retry/cleanup/inspect)
-- WS-E: Restart + Recovery
-- WS-F: Multi-Harness real work (Hermes + OpenCode)
-- WS-G: Failure + Safety Matrix
+## Rebaseline (2026-08-12)
+- core local==GH: ef4f5c0978dfff5aae89e85ab890d45f69d8e844
+- adapter d1cedd219478 · platform ed3b951701d4 (unverändert)
+- core branch main · porcelain 0 · fixture HEAD 8cb595f3 tree ec3f64c0 porcelain 0
+- service unit SHA256 8f3744abaf99bed640d87b3752d026a0c2603fae4588dd74c196c1a5a343e2ab
+- service: active, concurrency 2, HTTP 8791, WorkingDir ~/projects/matrix-os
+- doctor True · harnesses hermes_scoped/codex_cli/opencode_cli/hermes
+- canonical state ~/.local/state/conduvera (NIE von Acceptance genutzt)
+- tests 370 (Baseline) → jetzt 375+ durch Closure-Änderungen
 
-## Verifizierte Fakten (Rebaseline, 2026-08-12)
-- core head 537ddf3dd4c7 == GH; adapter d1cedd219478; platform ed3b951701d4
-- Service: conduvera-control-plane active, Capacity 2; Porcelain 0
-- Base-Tree ec3f64c0da2f7d0d721d49552f71623b8eb80b59 (fixture)
-- Control-Plane: Unix-socket JSON API (daemon.py), KEIN HTTP, KEINE UI-Foundation
-- console endpoint (JSON): queued/running/terminal + counts (PR #44/#46)
-- console_view sortiert newest-first; --limit deterministisch (PR #46)
-- exit_code: Adapter-Watchdog -> collect_evidence -> engine -> job -> console (PR #46)
-- cwd_exec registry-bound (git worktree porcelain + base + task/attempt) (PR #46)
-- opencode Prompt via STDIN (secret-safe argv) (PR #46)
-- task_command entfernt; kein bash -c (PR #40-43)
-- TaskPayloadStore persistent, Hash-verify (PR #40)
-- Harnesse: hermes_scoped, codex_cli, opencode_cli, hermes (pi_cli disabled)
+## Immutable DoD (19 Zeilen, evtl. Änderungen nur per Owner-Amendment)
+DOD-01..DOD-19 wie Vertrag §8. Keine Ersatzbeweise, keine Abschwächung.
 
-## Aktuelles Design (Entscheidungen)
-- D1: Kein neues schweres UI-Framework. conduvera-core hat keine UI-Foundation;
-  eigenständiges HTML/JS-Workspace (`conduvera/ui/activity.html`) + minimaler
-  HTTP-Bridge um den bestehenden Daemon = kleinste produktionsfähige Lösung
-  (Browser kann Unix-Socket nicht direkt ansprechen).
-- D2: HTTP `GET /api/console` + `POST /api/<action>` delegieren an den
-  bestehenden Service (gleiche Records, keine doppelte State-Authority).
-- D3: Unix-Socket-Daemon bleibt State-Authority; HTTP-Server ist reiner Adapter.
+## Workstreams
+- WS-A Rebaseline+Ledger: DONE
+- WS-B Graphical Submit: IN PROGRESS (Fixture-Harness + Registry-Gating fertig)
+- WS-C Retry same-job: DONE (retry_job neuer Attempt desselben Jobs, idempotent)
+- WS-D Evidence lifecycle: TODO (persistenter EvidenceStore + fail-closed)
+- WS-E Operator actions + UI resilience: TODO (Retry-UI + Disconnect)
+- WS-F Restart/reconcile exactly-once: EXISTS (zu verifizieren live)
+- WS-G Acceptance runner + Browser journey: TODO
+- Acceptance-only Harness: DONE (acceptance_fixture, env-gated)
 
-## Akzeptanz-Szenarien
-- (ausstehend, in WS-G abzuschließen)
-
-## Offene Fehler
-- (keine bekannt bei Start)
+## Deviations/Recovered
+- ruff --fix verursachte 40 Drive-bys -> revertet (nur geplante Dateien behalten),
+  ruff danach ohne --fix nur auf meinen Dateien.
 
 ## Nächste Aktion
-- WS-A: API/Event-Contract finalisieren; HTTP-Bridge bauen (PR #1)
+1. EvidenceStore (WS-D): persistent, EvidenceBundle schema, fail-closed invalid
+2. UI Submit-Formular + Retry/Actions (WS-B/E)
+3. Acceptance-Runner (WS-G)
+4. Live-Isolated-Service + Browser-Acceptance-Journey (Steps 0-13)
+5. Final Acceptance Bundle + Report

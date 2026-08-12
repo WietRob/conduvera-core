@@ -277,20 +277,59 @@ class ControlPlaneEngine:
     def _handle_process_gone(self, session: Any, attempt: Any, sid: str) -> None:
         exit_code = None
         result_refs: list[str] = []
+        evidence = None
         if session.adapter_session_id:
             try:
-                ev = self.service.gateway.collect_evidence(
+                evidence = self.service.gateway.collect_evidence(
                     adapter_id=session.harness_descriptor or "hermes",
                     session_id=session.adapter_session_id)
-                if isinstance(ev, dict) and ev.get("exit_code") is not None:
-                    exit_code = int(ev["exit_code"])
-                if isinstance(ev, dict):
-                    for art in (ev.get("artifacts") or []):
+                if isinstance(evidence, dict) and evidence.get("exit_code") is not None:
+                    exit_code = int(evidence["exit_code"])
+                if isinstance(evidence, dict):
+                    for art in (evidence.get("artifacts") or []):
                         if isinstance(art, dict) and art.get("path"):
                             result_refs.append(
                                 f"{art['path']}#{art.get('sha256','').split(':')[-1][:16]}")
             except Exception:  # noqa: BLE001
                 pass
+
+        # Workstream D: persist a durable EvidenceBundle and validate fail-closed.
+        from conduvera.control_plane.evidence_store import (
+            build_evidence_bundle, validate_evidence,
+        )
+        bundle = build_evidence_bundle(
+            job_id=attempt.job_id if attempt is not None else "",
+            attempt_id=attempt.attempt_id if attempt is not None else sid,
+            session_id=sid,
+            harness=session.harness_descriptor or "hermes",
+            base_commit=getattr(session, "base_commit", "") or "",
+            worktree=getattr(session, "worktree", "") or "",
+            scope_id=getattr(session, "scope_id", "") or "",
+            process_pid=session.fingerprint.pid if session.fingerprint else None,
+            exit_code=exit_code,
+            test_result=evidence.get("test_result", "") if isinstance(evidence, dict) else "",
+            artifact_paths=[a.get("path") for a in (evidence.get("artifacts") or [])] if isinstance(evidence, dict) else [],
+            terminal_reason="",
+            created_at=_utc_now(),
+            evidence_invalid_marker=bool(isinstance(evidence, dict) and evidence.get("evidence_invalid")),
+        )
+        try:
+            store = self.service.evidence_store
+            bundle_id = store.put(bundle)
+            result_refs = [f"evidence:{bundle_id}"] + result_refs
+            vstatus = validate_evidence(store.get(bundle_id) or bundle)
+            evidence_status = vstatus["status"]
+        except Exception:  # noqa: BLE001
+            evidence_status = "INVALID"
+            bundle_id = ""
+        if evidence_status != "VALID":
+            # fail-closed: real exit 0 with invalid evidence is still FAILED
+            self._finalize(
+                session, attempt, sid,
+                SessionState.FAILED, AttemptState.FAILED, JobState.FAILED,
+                "EVIDENCE_INVALID", exit_code,
+                "session.failed", result_refs=result_refs)
+            return
         if exit_code is not None and exit_code != 0:
             self._finalize(
                 session, attempt, sid,
