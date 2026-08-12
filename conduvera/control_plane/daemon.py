@@ -141,6 +141,12 @@ class ControlPlaneDaemon:
                 return {"ok": r.get("success", False), "result": r}
             if method == "reconcile":
                 return {"ok": True, "result": self.service.reconcile()}
+            if method == "observe_external":
+                r = self.service.observe_external(pid=params.get("pid", 0),
+                                                  label=params.get("label", ""),
+                                                  classification=params.get(
+                                                      "classification", "EXTERNAL_UNKNOWN"))
+                return {"ok": r.get("success", False), "result": r}
             if method == "capabilities":
                 return {"ok": True, "result": self.service.capabilities(
                     params.get("harness", "hermes"))}

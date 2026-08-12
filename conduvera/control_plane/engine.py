@@ -302,11 +302,34 @@ class ControlPlaneEngine:
         # (systemd ExecMainStatus) and the fixture status file so a
         # rediscovered session that terminated with exit 0 is classified
         # COMPLETED, never EVIDENCE_INVALID.
+        #
+        # TRUST BOUNDARY: the fixture-status.json file lives in the
+        # AGENT-WRITABLE worktree, so it may only ever be read as evidence
+        # authority for the acceptance-only fixture harness under the explicit
+        # acceptance mode. For every other harness the worktree is
+        # agent-controlled and must NEVER be treated as a control-plane-owned
+        # terminal authority.
+        # Preferred restart source: the Control-Plane-owned scheduler store
+        # (job/attempt exit_code, 0600, never agent-writable). This is the
+        # authoritative terminal receipt. Scope ExecMainStatus (systemd-owned)
+        # is also acceptable. The worktree fixture file is the LAST resort,
+        # gated to the acceptance fixture harness under acceptance mode.
+        is_acceptance_fixture = (
+            (session.harness_descriptor or "") == "acceptance_fixture_cli"
+            and os.environ.get("CONDUVERA_ACCEPTANCE_MODE") == "1"
+        )
+        if exit_code is None and attempt is not None:
+            # Control-Plane-owned scheduler store is authoritative.
+            stored = self.scheduler.store.get_attempt(attempt.attempt_id)
+            if stored is not None and stored.exit_code is not None:
+                exit_code = stored.exit_code
         if exit_code is None and getattr(session, "scope_id", ""):
             exit_code = self._scope_exit_code(session.scope_id)
-        if exit_code is None and getattr(session, "worktree", ""):
+        if (exit_code is None and is_acceptance_fixture
+                and getattr(session, "worktree", "")):
             exit_code = self._fixture_exit_code(session.worktree)
-        if not evidence_invalid and getattr(session, "worktree", ""):
+        if (not evidence_invalid and is_acceptance_fixture
+                and getattr(session, "worktree", "")):
             evidence_invalid = self._fixture_invalid_marker(session.worktree)
 
         # Workstream D: persist a durable EvidenceBundle and validate fail-closed.
