@@ -106,7 +106,13 @@ class _Handler(BaseHTTPRequestHandler):
         if not method:
             self._send_json({"ok": False, "error": {"code": "MISSING_METHOD"}}, 400)
             return
-        self._send_json(self._bridge.dispatch(method, params))
+        try:
+            resp = self._bridge.dispatch(method, params)
+        except Exception as exc:  # noqa: BLE001 - never drop the connection
+            self._send_json({"ok": False, "error": {"code": "DISPATCH_ERROR",
+                                                    "message": str(exc)}}, 500)
+            return
+        self._send_json(resp)
 
 
 class HttpBridge:

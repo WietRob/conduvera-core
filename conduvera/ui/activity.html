@@ -179,13 +179,14 @@ function doSubmit(ev){
   ev.preventDefault();
   const params = {
     task_id: "ui_" + Date.now().toString(36),
-    attempt_id: "a1",
+    attempt_id: "a" + Math.random().toString(36).slice(2, 8),
     harness: $("#f_harness").value,
     repo: $("#f_repo").value,
     base_commit: $("#f_base").value || undefined,
     task_type: $("#f_tasktype").value,
     timeout_s: parseFloat($("#f_timeout").value) || 120,
     prompt: $("#f_prompt").value,
+    model_binding: {},
     scenario: $("#f_scenario").value || undefined,
     hold_s: 60,
     fixture_out: "fixture-status.json",

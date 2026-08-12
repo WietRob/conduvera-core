@@ -59,6 +59,10 @@ def _main() -> int:
     if args.scenario == "EXIT_7":
         if args.hold_s and args.hold_s > 0:
             time.sleep(min(args.hold_s, 2.0))
+        if args.out:
+            Path(args.out).write_text(json.dumps({
+                "scenario": args.scenario, "pid": os.getpid(),
+                "status": "done", "exit_code": 7}))
         return 7
 
     if args.scenario == "EXIT_0_WITH_INVALID_EVIDENCE":
@@ -67,6 +71,7 @@ def _main() -> int:
                 "scenario": args.scenario,
                 "pid": os.getpid(),
                 "status": "done",
+                "exit_code": 0,
                 "evidence_invalid": True,
             }))
         return 0
@@ -80,7 +85,7 @@ def _main() -> int:
         if args.out:
             Path(args.out).write_text(json.dumps({
                 "scenario": args.scenario, "pid": os.getpid(),
-                "status": "done", "evidence_invalid": False,
+                "status": "done", "exit_code": 0, "evidence_invalid": False,
             }))
         return 0
     return 0
