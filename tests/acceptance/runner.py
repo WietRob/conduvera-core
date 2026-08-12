@@ -278,11 +278,17 @@ class AcceptanceRunner:
             attempts_before = self._job_attempts(b_job["job_id"])
             # click the visible Retry button on the B terminal card
             self._click_ui_retry(page, b_job["job_id"])
-            time.sleep(1)
-            # read the UI-generated idempotency key from the new attempt record
-            attempts_after_click = self._job_attempts(b_job["job_id"])
-            new_attempt = next((a for a in attempts_after_click
-                                if a not in attempts_before), "")
+            # wait until the UI-generated retry attempt is persisted
+            new_attempt = ""
+            attempts_after_click = attempts_before
+            deadline = time.time() + 20
+            while time.time() < deadline:
+                attempts_after_click = self._job_attempts(b_job["job_id"])
+                new_attempt = next((a for a in attempts_after_click
+                                    if a not in attempts_before), "")
+                if new_attempt:
+                    break
+                time.sleep(0.5)
             key1 = self._attempt_idem_key(b_job["job_id"], new_attempt)
             self._record("5a", "retry B via UI button",
                          ui_button_clicked=True,
