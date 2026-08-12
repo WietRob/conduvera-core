@@ -230,8 +230,11 @@ class AcceptanceRunner:
             b_run_pre = [x for x in c["running"] if x.get("job_id") == b_job["job_id"]]
             b_sid_pre = b_run_pre[0].get("session_id") if b_run_pre else ""
             b_scope_pre = b_run_pre[0].get("scope_id", "") if b_run_pre else ""
+            b_pid_pre = b_run_pre[0].get("pid") if b_run_pre else None
+            fp_pre = self._session_fingerprint(b_sid_pre)
             self._record("4pre", "B before restart",
                          session_id=b_sid_pre, scope_id=b_scope_pre,
+                         pid=b_pid_pre, fingerprint=fp_pre,
                          running_count=len(c["running"]))
             self.stop_service()
             self._shot(page, "step4_disconnected")
@@ -243,10 +246,15 @@ class AcceptanceRunner:
             b_run_post = [x for x in c["running"] if x.get("job_id") == b_job["job_id"]]
             b_sid_post = b_run_post[0].get("session_id") if b_run_post else ""
             b_scope_post = b_run_post[0].get("scope_id", "") if b_run_post else ""
+            b_pid_post = b_run_post[0].get("pid") if b_run_post else None
+            fp_post = self._session_fingerprint(b_sid_post)
             self._record("4", "restart during B",
                          session_id_before=b_sid_pre, session_id_after=b_sid_post,
                          scope_id_before=b_scope_pre, scope_id_after=b_scope_post,
                          same_session=(b_sid_pre == b_sid_post),
+                         pid_before=b_pid_pre, pid_after=b_pid_post,
+                         same_pid=(b_pid_pre == b_pid_post),
+                         fingerprint_before=fp_pre, fingerprint_after=fp_post,
                          b_still_running=len(b_run_post),
                          total_running=len(c["running"]),
                          counts=c["counts"])
@@ -259,18 +267,22 @@ class AcceptanceRunner:
             b_term = self._wait_terminal(b_job["job_id"], timeout_s=60)
             self._record("4c", "B terminal", **b_term)
 
-            # STEP 5: retry B from UI (same job, new attempt).
-            # DOD-05: trigger retry twice with the SAME idempotency key via
-            # the API and verify exactly ONE new attempt (no third attempt).
+            # STEP 5: retry B — DOD-05.
+            # First retry is triggered by clicking the REAL UI Retry button on
+            # the B terminal card. The idempotency key the UI uses is read back
+            # from the page (retryKeys[job_id]); only the SECOND request is
+            # repeated directly with that SAME key to prove idempotency.
             attempts_before = self._job_attempts(b_job["job_id"])
-            # first retry (UI click generates a key); capture it
-            key1 = "acceptance-retry-" + self.run_id[-6:]
-            res1 = self._post("retry", {"job_id": b_job["job_id"],
-                                        "idempotency_key": key1})
-            self._record("5a", "retry B first (key)",
-                         key=key1, ok=res1.get("ok"),
-                         attempt_id=(res1.get("result", {}) or {}).get("attempt_id"))
-            # duplicate retry with the SAME key -> no new attempt
+            # click the visible Retry button on the B terminal card
+            self._click_ui_retry(page, b_job["job_id"])
+            time.sleep(1)
+            # read the UI-generated idempotency key for this job
+            key1 = page.evaluate(f"retryKeys['{b_job['job_id']}'] || ''")
+            self._record("5a", "retry B via UI button",
+                         ui_button_clicked=True,
+                         key=key1,
+                         attempts_after_click=self._job_attempts(b_job["job_id"]))
+            # duplicate retry with the SAME key (direct) -> no new attempt
             res2 = self._post("retry", {"job_id": b_job["job_id"],
                                         "idempotency_key": key1})
             self._record("5b", "retry B duplicate (same key)",
@@ -362,6 +374,19 @@ class AcceptanceRunner:
         return {"job_id": job, "attempt_id": att, "payload_ref": pl,
                 "task_id": task_id, "ui_result": txt}
 
+    def _session_fingerprint(self, sid: str) -> dict:
+        if not sid:
+            return {}
+        try:
+            d = json.loads((self.state_dir / "registry" / "sessions.json")
+                           .read_text(encoding="utf-8"))
+            s = d.get("sessions", {}).get(sid, {})
+            fp = s.get("fingerprint") or {}
+            return {"pid": fp.get("pid"), "start_time": fp.get("start_time"),
+                    "boot_id": fp.get("boot_id")}
+        except (OSError, json.JSONDecodeError):
+            return {}
+
     def _job_attempts(self, job_id: str) -> list[str]:
         try:
             d = json.loads((self.state_dir / "scheduler" / "queue.json")
@@ -403,14 +428,15 @@ class AcceptanceRunner:
         """)
         time.sleep(1)
 
-    def _retry_job(self, page, job_id):
-        # click the terminal card's Retry button (for the job)
+    def _click_ui_retry(self, page, job_id):
+        """Click the visible Retry button on the terminal card for job_id."""
         page.wait_for_function(
             f"Array.from(document.querySelectorAll('.card')).some(c=>c.textContent.includes('{job_id}') && c.textContent.includes('Retry'))",
-            timeout=15000)
+            timeout=20000)
         page.evaluate(f"""
-            Array.from(document.querySelectorAll('.card')).find(c=>c.textContent.includes('{job_id}'))
-              .querySelector('button').click();
+            Array.from(document.querySelectorAll('.card'))
+              .find(c=>c.textContent.includes('{job_id}'))
+              .querySelectorAll('button').forEach(b=>{{ if(b.textContent==='Retry') b.click(); }});
         """)
         time.sleep(1)
 
@@ -447,6 +473,13 @@ class AcceptanceRunner:
             self.external_results["cleanup_rejected"] = {
                 "ok": cleanup.get("ok"),
                 "code": (cleanup.get("result", {}) or {}).get("code")}
+            # retry fail-closed: an EXTERNAL session has no MANAGED job authority
+            retry_res = self._post("retry", {"job_id": "ext-has-no-managed-job",
+                                             "idempotency_key": "ext-k"})
+            self.external_results["retry_rejected"] = {
+                "ok": retry_res.get("ok"),
+                "code": (retry_res.get("result", {}) or {}).get("code"),
+                "message": (retry_res.get("result", {}) or {}).get("message", "")[:50]}
             # process still alive after all rejected actions
             alive_after_reject = self._pid_alive(p.pid)
             # UI shows the external session with control actions disabled
@@ -460,8 +493,10 @@ class AcceptanceRunner:
             """)
             self.external_results["ui"] = {
                 "visible": bool(ext_card),
+                "has_inspect_button": "Inspect" in ext_card,
                 "has_cancel_button": "Cancel" in ext_card,
-                "has_inspect_button": "Inspect" in ext_card}
+                "has_cleanup_button": "Cleanup" in ext_card,
+                "has_retry_button": "Retry" in ext_card}
             self._record("8", "external session",
                          alive_after_observe=alive_after_observe,
                          alive_after_reject=alive_after_reject,
@@ -500,15 +535,68 @@ class AcceptanceRunner:
                 sid = x.get("session_id")
                 break
         inspect = self._post("inspect", {"session_id": sid}) if sid else {"ok": False}
+        # resource evidence (DOD-09): worktree/scope/bundle before cleanup
+        wt_path = ""
+        scope = ""
+        bundle_ids = []
+        if sid:
+            try:
+                d = json.loads((self.state_dir / "registry" / "sessions.json")
+                               .read_text(encoding="utf-8"))
+                s = d.get("sessions", {}).get(sid, {})
+                wt_path = s.get("worktree", "")
+                scope = s.get("scope_id", "")
+                for r in (s.get("result_refs") or []):
+                    if isinstance(r, str) and r.startswith("evidence:"):
+                        bundle_ids.append(r.split(":", 1)[1])
+            except (OSError, json.JSONDecodeError):
+                pass
+        # fall back to scanning the evidence store for this job's bundles
+        if not bundle_ids:
+            try:
+                for ev in (self.state_dir / "evidence").glob("ev_*.json"):
+                    try:
+                        data = json.loads(ev.read_text(encoding="utf-8"))
+                        if data.get("job_id") == job_id:
+                            bundle_ids.append(ev.stem)
+                    except (OSError, json.JSONDecodeError):
+                        pass
+            except OSError:
+                pass
+        bundle_ids = list(dict.fromkeys(bundle_ids))
+        wt_before = bool(wt_path) and Path(wt_path).exists()
+        scope_before = bool(scope) and self._scope_exists(scope)
+        bundle_before = {b: (self.state_dir / "evidence" / f"{b}.json").is_file()
+                         for b in bundle_ids}
         cleanup1 = self._post("cleanup", {"session_id": sid}) if sid else {"ok": False}
         cleanup2 = self._post("cleanup", {"session_id": sid}) if sid else {"ok": False}
+        wt_after = bool(wt_path) and Path(wt_path).exists()
+        scope_after = bool(scope) and self._scope_exists(scope)
+        bundle_after = {b: (self.state_dir / "evidence" / f"{b}.json").is_file()
+                        for b in bundle_ids}
         self._record("10", "inspect+cleanup D",
                      inspect_ok=inspect.get("ok"),
+                     worktree_path=wt_path,
+                     worktree_exists_before=wt_before,
+                     worktree_exists_after=wt_after,
+                     scope_exists_before=scope_before,
+                     scope_exists_after=scope_after,
                      cleanup1_ok=(cleanup1.get("result", {}) or {}).get("success"),
+                     cleanup1_removed=(cleanup1.get("result", {}) or {}).get("removed"),
                      cleanup2_ok=(cleanup2.get("result", {}) or {}).get("success"),
+                     cleanup2_removed=(cleanup2.get("result", {}) or {}).get("removed"),
                      cleanup2_idempotent=((cleanup2.get("result", {}) or {}).get("success") is True),
+                     evidence_bundle_before=bundle_before,
+                     evidence_bundle_after=bundle_after,
                      base_porcelain=_git_porcelain(FIXTURE_DIR))
         self._shot(page, "step10_inspect_cleanup")
+
+    def _scope_exists(self, scope_id: str) -> bool:
+        if not scope_id:
+            return False
+        r = subprocess.run(["systemctl", "--user", "list-units", "--type=scope",
+                            "--no-legend"], capture_output=True, text=True)
+        return scope_id in r.stdout
 
     def _build_receipt(self) -> dict:
         receipt = {
