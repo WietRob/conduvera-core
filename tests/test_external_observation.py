@@ -87,3 +87,26 @@ class TestExternalObservation:
         # a PID that cannot be alive (outside the normal PID range)
         r = svc.observe_external(pid=9999999)
         assert r.get("success") is False
+
+    def test_external_never_gains_managed_job_authority(self, tmp_path):
+        """An EXTERNAL session has no MANAGED job: retry fails closed and the
+        session never transitions to MANAGED (no adoption)."""
+        repo, base = _make_repo(tmp_path)
+        svc = _svc(tmp_path, repo, base)
+        child = subprocess.Popen(["sleep", "60"])
+        try:
+            r = svc.observe_external(pid=child.pid, classification="EXTERNAL_UNKNOWN")
+            sid = r["session_id"]
+            # retry on an external-owned identity is fail-closed (no managed job)
+            retry = svc.retry_job("job_of_external_session", attempt_id="x")
+            assert retry.get("success") is False
+            assert retry.get("code") == "UNKNOWN_JOB"
+            # session is still EXTERNAL after all attempts (never adopted)
+            sess = svc.registry.get(sid)
+            assert sess.ownership_class.value == "EXTERNAL_UNKNOWN"
+            assert sess.managed is False
+            # no MANAGED session was created
+            assert not any(s.ownership_class.value == "MANAGED"
+                           for s in svc.registry.all())
+        finally:
+            child.kill()
