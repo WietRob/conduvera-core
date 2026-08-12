@@ -120,7 +120,8 @@ class ControlPlaneDaemon:
                              for j in self.service.scheduler.store.all_jobs()],
                 }}
             if method == "console":
-                return {"ok": True, "result": self.service.console_view()}
+                return {"ok": True, "result": self.service.console_view(
+                    limit=params.get("limit"))}
             if method == "list":
                 return {"ok": True, "result": {"sessions": self.service.list_sessions(),
                                                "jobs": self.service.list_jobs()}}
@@ -132,6 +133,10 @@ class ControlPlaneDaemon:
                 return {"ok": r.get("success", False), "result": r}
             if method == "cleanup":
                 r = self.service.cleanup(params.get("session_id", ""))
+                return {"ok": r.get("success", False), "result": r}
+            if method == "retry":
+                r = self.service.retry_job(params.get("job_id", ""),
+                                           params.get("attempt_id"))
                 return {"ok": r.get("success", False), "result": r}
             if method == "reconcile":
                 return {"ok": True, "result": self.service.reconcile()}
