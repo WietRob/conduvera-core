@@ -196,14 +196,19 @@ class TestRegressionAndOnce:
     """Argument-Builder-Regression + exactly-once."""
 
     def test_argument_builders_receive_exact_prompt(self):
-        """opencode/codex/hermes Argument-Builder reichen den Prompt exakt durch."""
+        """codex/hermes Argument-Builder reichen den Prompt exakt durch;
+        opencode liefert ihn über STDIN (Work A, nicht im argv)."""
         from conduvera.harness.adapters import (
             _opencode_args, _codex_args, _hermes_args,
         )
         prompt = "Fix calc.py so add returns a+b"
-        for builder in (_opencode_args, _codex_args, _hermes_args):
+        # codex/hermes: prompt im argv
+        for builder in (_codex_args, _hermes_args):
             args = builder(prompt, {})
             assert prompt in args, f"{builder.__name__} verliert den Prompt"
+        # opencode: prompt NICHT im argv (stdin-Transport), aber Builder läuft
+        args_oc = _opencode_args(prompt, {"worktree": "/wt"})
+        assert prompt not in args_oc
 
     def test_one_attempt_one_helper_and_harness(self, tmp_path):
         """Ein Attempt startet genau einen cwd_exec-Helper + einen Harness."""

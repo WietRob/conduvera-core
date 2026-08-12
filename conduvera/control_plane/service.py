@@ -547,6 +547,11 @@ class ControlPlaneService:
                 "content_sha256": envelope.content_sha256,
                 "prompt_hash": job.prompt_hash,
                 "timeout_s": job.timeout_s,
+                # registry/worktree binding for cwd_exec validation
+                "repo": job.repo,
+                "repo_path": str(repo_path),
+                "base_commit": job.base_commit,
+                "attempt_id": attempt.attempt_id,
             },
         )
         if not result.success:
@@ -862,6 +867,7 @@ class ControlPlaneService:
                     "harness": s.get("harness_descriptor", ""),
                     "worktree": s.get("worktree", ""),
                     "base_commit": s.get("base_commit", ""),
+                    "started_at": s.get("started_at", ""),
                     **ed,
                 })
 
@@ -880,12 +886,19 @@ class ControlPlaneService:
                     "harness": j.get("harness", ""),
                     "payload_ref": j.get("payload_ref", ""),
                     "content_sha256": j.get("content_sha256", ""),
+                    "created_at": j.get("created_at", ""),
+                    "updated_at": j.get("updated_at", ""),
                 })
 
         return {
             "counts": {"queued": len(queued), "running": len(running),
                        "terminal": len(terminal)},
-            "queued": queued, "running": running, "terminal": terminal,
+            "queued": sorted(queued, key=lambda x: x.get("created_at", ""),
+                             reverse=True),
+            "running": sorted(running, key=lambda x: x.get("started_at", ""),
+                              reverse=True),
+            "terminal": sorted(terminal, key=lambda x: x.get("updated_at", ""),
+                               reverse=True),
             "server_time_utc": now.isoformat(),
         }
 

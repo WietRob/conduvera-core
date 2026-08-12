@@ -57,6 +57,10 @@ class HarnessSpec:
     extra_env: dict[str, str] | None = None
     allowlist_extra: tuple[str, ...] = ()
     npx_package: str | None = None
+    # When True the harness reads its task prompt from STDIN (verified for
+    # opencode: `opencode run` with no message arg consumes stdin), so the raw
+    # prompt never appears in the process argv / systemd scope description.
+    stdin_prompt: bool = False
 
     def resolve_binary(self) -> str | None:
         """Resolve the executable, optionally through npx."""
@@ -224,6 +228,15 @@ class ScopedProcessAdapter:
         cmd += args
 
         use_scope = _use_scope()
+        # registry/worktree binding (Work B): pass through for cwd_exec
+        # validation so it never trusts an arbitrary path below the root.
+        bind_repo = str(config.get("repo_path", ""))
+        bind_base = str(config.get("base_commit", ""))
+        bind_attempt = str(config.get("attempt_id", ""))
+        bind_args = ["--task-id", task,
+                     "--attempt-id", bind_attempt,
+                     "--repo", bind_repo,
+                     "--base", bind_base]
         if use_scope:
             # Shell-free cwd executor: systemd-run's --working-directory sets
             # opencode's instance-directory but NOT the grandchild process cwd
@@ -236,13 +249,13 @@ class ScopedProcessAdapter:
             spawn = ["systemd-run", "--user", "--scope", "--unit", scope,
                      "--collect", "--quiet",
                      sys.executable, "-m", "conduvera.harness.cwd_exec",
-                     "--cwd", str(wt), "--"] + cmd
+                     "--cwd", str(wt)] + bind_args + ["--"] + cmd
         else:
             # process-group fallback (only when scopes demonstrably unavailable):
             # still use the shell-free cwd executor so the worktree boundary and
             # injection protection hold regardless of scope availability.
             spawn = [sys.executable, "-m", "conduvera.harness.cwd_exec",
-                     "--cwd", str(wt), "--"] + cmd
+                     "--cwd", str(wt)] + bind_args + ["--"] + cmd
 
         env = dict(os.environ)
         for k, v in (self._spec.extra_env or {}).items():
@@ -251,12 +264,29 @@ class ScopedProcessAdapter:
         try:
             with open(stdout_path, "w", encoding="utf-8") as out, \
                  open(stderr_path, "w", encoding="utf-8") as err:
-                proc = subprocess.Popen(
-                    spawn,
-                    stdout=out, stderr=err, stdin=subprocess.DEVNULL,
-                    env=env, cwd=str(wt),
-                    start_new_session=not use_scope,
-                )
+                # Secret-safe: when the harness consumes its prompt from STDIN
+                # (opencode), pipe it through instead of DEVNULL. systemd-run
+                # and cwd_exec both forward stdin, so the prompt reaches the
+                # harness without ever appearing in argv / scope description.
+                if self._spec.stdin_prompt:
+                    proc = subprocess.Popen(
+                        spawn,
+                        stdout=out, stderr=err, stdin=subprocess.PIPE,
+                        env=env, cwd=str(wt),
+                        start_new_session=not use_scope,
+                    )
+                    try:
+                        proc.stdin.write(prompt.encode("utf-8"))
+                        proc.stdin.close()
+                    except (BrokenPipeError, OSError):
+                        pass
+                else:
+                    proc = subprocess.Popen(
+                        spawn,
+                        stdout=out, stderr=err, stdin=subprocess.DEVNULL,
+                        env=env, cwd=str(wt),
+                        start_new_session=not use_scope,
+                    )
         except OSError as exc:
             return AdapterResult(
                 success=False, message=f"spawn failed: {exc}",
@@ -497,11 +527,13 @@ def _opencode_args(prompt: str, config: dict[str, Any]) -> list[str]:
     # (opencode.json); no ODS/LiteLLM/route change. --dir pins the worktree
     # because OpenCode otherwise inherits the caller's PWD (the cwd_exec
     # os.chdir does not propagate to OpenCode's server instance).
+    # Secret-safe: NO prompt message argument — OpenCode consumes the task
+    # prompt from STDIN (verified: `opencode run` with no message arg reads
+    # stdin), so the raw prompt never appears in argv / scope output.
     args = ["run", "--format", "json"]
     wt = config.get("worktree")
     if wt:
         args += ["--dir", str(wt)]
-    args.append(prompt)
     return args
 
 
@@ -561,6 +593,7 @@ def opencode_cli_adapter() -> ScopedProcessAdapter:
             version_args=("--version",),
             start_args_builder=_opencode_args,
             doctor_cmd=("opencode", "--version"),
+            stdin_prompt=True,
         ),
         task_timeout_s=300.0,
     )
