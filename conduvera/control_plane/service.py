@@ -739,6 +739,48 @@ class ControlPlaneService:
                 "payload_ref": job.payload_ref,
                 "content_sha256": job.content_sha256, "queued": True}
 
+    def observe_external(self, *, pid: int, label: str = "",
+                         classification: str = "EXTERNAL_UNKNOWN") -> dict[str, Any]:
+        """Read-only registration of a pre-existing EXTERNAL process.
+
+        The session is observed (visible in UI/console) but NEVER adopted:
+        control_rights stays none, it can never transition to MANAGED, and all
+        control actions (cancel/retry/cleanup) are rejected fail-closed.
+        """
+        if classification not in ("EXTERNAL_UNKNOWN", "EXTERNAL_MANUAL_OBSERVED"):
+            return {"success": False, "message": f"invalid classification "
+                    f"{classification}", "code": "INVALID_CLASSIFICATION"}
+        from conduvera.harness.managed_session import (
+            ManagedSession, OwnershipClass, _boot_id, _process_cmd,
+            _process_start_time,
+        )
+        try:
+            start_time = _process_start_time(pid)
+            command = _process_cmd(pid)
+            if not start_time or not command:
+                return {"success": False, "message": f"process {pid} not alive",
+                        "code": "PROCESS_NOT_ALIVE"}
+            fp = ProcessFingerprint(pid=pid, start_time=start_time,
+                                    boot_id=_boot_id(), command=command)
+        except (OSError, ProcessLookupError):
+            return {"success": False, "message": f"process {pid} not alive",
+                    "code": "PROCESS_NOT_ALIVE"}
+        sid = f"ext_{uuid.uuid4().hex[:16]}"
+        session = ManagedSession(
+            session_id=sid, task_id="", attempt_id="",
+            ownership_class=OwnershipClass(classification),
+            managed=False, instance_id=f"ext-{uuid.uuid4().hex[:8]}",
+            fingerprint=fp,
+            harness_descriptor="external",
+            state=SessionState.RUNNING,
+            created_at=_utc_now(),
+        )
+        self.registry.register(session)
+        return {"success": True, "message": "external session observed (read-only)",
+                "session_id": sid, "pid": pid,
+                "ownership_class": classification,
+                "control_rights": "none"}
+
     def status(self, session_id: str) -> dict[str, Any]:
         session = self.registry.get(session_id)
         if session is None:
@@ -955,6 +997,8 @@ class ControlPlaneService:
                     "scope_id": s.get("scope_id", ""),
                     "pid": s.get("pid"),
                     "harness": s.get("harness_descriptor", ""),
+                    "ownership_class": (s.get("ownership_class") or
+                                        OwnershipClass.MANAGED.value),
                     "worktree": s.get("worktree", ""),
                     "base_commit": s.get("base_commit", ""),
                     "state": "RUNNING",
@@ -979,6 +1023,7 @@ class ControlPlaneService:
                     "content_sha256": j.get("content_sha256", ""),
                     "created_at": j.get("created_at", ""),
                     "updated_at": j.get("updated_at", ""),
+                    "session_id": self._session_id_for_attempt((j.get("attempts") or [None])[0]),
                 })
 
         return {
@@ -992,6 +1037,14 @@ class ControlPlaneService:
                                reverse=True)[:limit if limit else None],
             "server_time_utc": now.isoformat(),
         }
+
+    def _session_id_for_attempt(self, attempt_id: str) -> str:
+        if not attempt_id:
+            return ""
+        for s in self.registry.all():
+            if s.attempt_id == attempt_id and s.ownership_class is OwnershipClass.MANAGED:
+                return s.session_id
+        return ""
 
     # -- capability declarations -------------------------------------------
 

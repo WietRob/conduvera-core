@@ -257,16 +257,18 @@ function cardActions(item){
     });
     return b;
   };
+  // DOD-08: EXTERNAL sessions are read-only — only Inspect, never control.
+  const isExternal = String(item.ownership_class||"").startsWith("EXTERNAL");
   if (item.session_id){
     el.appendChild(mk("Inspect", "inspect", {session_id: id}));
   }
-  if (item.session_id){
+  if (item.session_id && !isExternal){
     el.appendChild(mk("Cancel", "cancel", {session_id: id}, "danger"));
   }
-  if (item.session_id){
+  if (item.session_id && !isExternal){
     el.appendChild(mk("Cleanup", "cleanup", {session_id: id}));
   }
-  if (item.job_id && ["COMPLETED","FAILED","CANCELLED","TIMED_OUT"].includes(stateOf(item))){
+  if (item.job_id && !isExternal && ["COMPLETED","FAILED","CANCELLED","TIMED_OUT"].includes(stateOf(item))){
     const b = document.createElement("button");
     b.textContent = "Retry";
     b.addEventListener("click", ()=>doRetry(id, b));

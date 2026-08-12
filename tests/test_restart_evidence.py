@@ -7,9 +7,12 @@ restart when the adapter in-memory session state is gone:
 """
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -58,6 +61,55 @@ def _svc(tmp_path, repo, base):
 
 
 class TestRestartEvidenceFallback:
+    @pytest.fixture(autouse=True)
+    def _acceptance_mode(self, monkeypatch):
+        # the worktree fixture-status reconstruction is gated to the
+        # acceptance fixture harness under CONDUVERA_ACCEPTANCE_MODE=1
+        monkeypatch.setenv("CONDUVERA_ACCEPTANCE_MODE", "1")
+
+    def test_non_acceptance_harness_ignores_worktree_file(self, tmp_path):
+        """Trust boundary: a normal harness never reads agent-writable
+        fixture-status.json from the worktree as evidence authority."""
+        from conduvera.control_plane.engine import ControlPlaneEngine
+        repo, base = _make_repo(tmp_path)
+        svc, gw = _svc(tmp_path, repo, base)
+        # ensure acceptance mode OFF for this test
+        os.environ.pop("CONDUVERA_ACCEPTANCE_MODE", None)
+        eng = ControlPlaneEngine(service=svc, scheduler=svc.scheduler,
+                                 registry=svc.registry)
+        wt = tmp_path / "wt"
+        wt.mkdir()
+        # a malicious agent-writable file claiming exit 0
+        (wt / "fixture-status.json").write_text(json.dumps(
+            {"scenario": "HOLD_THEN_EXIT_0", "exit_code": 0,
+             "evidence_invalid": False}))
+        from conduvera.harness.managed_session import ManagedSession, OwnershipClass, SessionState
+        sess = ManagedSession(session_id="mxs_x", task_id="X", attempt_id="x1",
+                              harness_descriptor="opencode_cli",  # NOT fixture
+                              ownership_class=OwnershipClass.MANAGED,
+                              state=SessionState.RUNNING,
+                              adapter_session_id="mxs_x", worktree=str(wt),
+                              scope_id="", base_commit=base)
+        svc.registry.register(sess)
+        from conduvera.control_plane.scheduler import AttemptDescriptor, JobDescriptor
+        from conduvera.control_plane.service import _utc_now
+        now = _utc_now()
+        job = JobDescriptor(job_id="job_x2", task_id="X", repo="fixture",
+                            base_commit=base, harness="opencode_cli",
+                            model_binding={}, prompt="", created_at=now,
+                            updated_at=now)
+        svc.scheduler.store.save_job(job)
+        attempt = AttemptDescriptor(attempt_id="x1", job_id="job_x2",
+                                    task_id="X", created_at=now, updated_at=now)
+        svc.scheduler.store.save_attempt(attempt)
+        # collect_evidence returns no exit (adapter state gone)
+        gw.collect_evidence = lambda *a, **k: {"ok": False, "exit_code": None}
+        eng._handle_process_gone(sess, attempt, sess.session_id)
+        job_after = svc.scheduler.store.get_job("job_x2")
+        # worktree file must NOT be trusted -> fail closed (EVIDENCE_INVALID)
+        assert job_after.state.value == "FAILED"
+        assert job_after.terminal_reason == "EVIDENCE_INVALID"
+
     def test_fixture_status_reconstructs_exit0(self, tmp_path):
         """Rediscovered session with fixture-status exit 0 -> COMPLETED."""
         from conduvera.control_plane.engine import ControlPlaneEngine

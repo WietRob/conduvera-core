@@ -186,9 +186,11 @@ class AcceptanceRunner:
             self._wait_running(a_job.get("task_id") or a_job["job_id"], page)
             self._shot(page, "step1_a_running")
 
-            # STEP 2: submit B (HOLD_THEN_EXIT_0) -> B queued (capacity 1)
+            # STEP 2: submit B (HOLD_THEN_EXIT_0) -> B queued (capacity 1).
+            # B-hold (30s) must be much longer than the restart time so B is
+            # still RUNNING after reconnect (DOD-04 evidence).
             b_res = self._submit(page, scenario="HOLD_THEN_EXIT_0",
-                                 prompt="acceptance B", hold_s=8)
+                                 prompt="acceptance B", hold_s=30)
             b_job = self._parse_submit(b_res)
             self.jobs["B"] = b_job
             self._record("2", "submit B", **b_job)
@@ -221,7 +223,16 @@ class AcceptanceRunner:
                          b_running=[x.get("job_id", "") for x in c["running"]])
             self._shot(page, "step3b_b_running")
 
-            # STEP 4: restart during B, verify B rediscovered exactly-once
+            # STEP 4: restart during B, verify B rediscovered exactly-once.
+            # Capture B's session/scope before restart, then confirm the SAME
+            # session and exactly one process/scope survive (DOD-04).
+            c = self._console()
+            b_run_pre = [x for x in c["running"] if x.get("job_id") == b_job["job_id"]]
+            b_sid_pre = b_run_pre[0].get("session_id") if b_run_pre else ""
+            b_scope_pre = b_run_pre[0].get("scope_id", "") if b_run_pre else ""
+            self._record("4pre", "B before restart",
+                         session_id=b_sid_pre, scope_id=b_scope_pre,
+                         running_count=len(c["running"]))
             self.stop_service()
             self._shot(page, "step4_disconnected")
             self.start_service()
@@ -229,23 +240,51 @@ class AcceptanceRunner:
             time.sleep(6)
             self._shot(page, "step4_reconnected")
             c = self._console()
-            b_sessions = len([x for x in c["running"] if x.get("job_id") == b_job["job_id"]])
+            b_run_post = [x for x in c["running"] if x.get("job_id") == b_job["job_id"]]
+            b_sid_post = b_run_post[0].get("session_id") if b_run_post else ""
+            b_scope_post = b_run_post[0].get("scope_id", "") if b_run_post else ""
             self._record("4", "restart during B",
-                         b_running_after_restart=b_sessions,
+                         session_id_before=b_sid_pre, session_id_after=b_sid_post,
+                         scope_id_before=b_scope_pre, scope_id_after=b_scope_post,
+                         same_session=(b_sid_pre == b_sid_post),
+                         b_still_running=len(b_run_post),
+                         total_running=len(c["running"]),
                          counts=c["counts"])
-            # let B finish (HOLD_THEN_EXIT_0 hold 8s already elapsed)
-            b_term = self._wait_terminal(b_job["job_id"])
-            self._record("4b", "B terminal", **b_term)
+            # exactly one B session/scope after restart
+            self._record("4b", "B exactly-once after restart",
+                         b_sessions=len(b_run_post),
+                         distinct_sessions=len({x.get("session_id") for x in b_run_post}),
+                         distinct_scopes=len({x.get("scope_id") for x in b_run_post}))
+            # let B finish (HOLD_THEN_EXIT_0, hold 30s)
+            b_term = self._wait_terminal(b_job["job_id"], timeout_s=60)
+            self._record("4c", "B terminal", **b_term)
 
-            # STEP 5: retry B from UI (same job, new attempt)
-            self._retry_job(page, b_job["job_id"])
-            time.sleep(2)
-            # DOD-05: wait for the retry attempt to reach a terminal state
-            rjob = self._wait_job_terminal(b_job["job_id"], timeout_s=120)
+            # STEP 5: retry B from UI (same job, new attempt).
+            # DOD-05: trigger retry twice with the SAME idempotency key via
+            # the API and verify exactly ONE new attempt (no third attempt).
+            attempts_before = self._job_attempts(b_job["job_id"])
+            # first retry (UI click generates a key); capture it
+            key1 = "acceptance-retry-" + self.run_id[-6:]
+            res1 = self._post("retry", {"job_id": b_job["job_id"],
+                                        "idempotency_key": key1})
+            self._record("5a", "retry B first (key)",
+                         key=key1, ok=res1.get("ok"),
+                         attempt_id=(res1.get("result", {}) or {}).get("attempt_id"))
+            # duplicate retry with the SAME key -> no new attempt
+            res2 = self._post("retry", {"job_id": b_job["job_id"],
+                                        "idempotency_key": key1})
+            self._record("5b", "retry B duplicate (same key)",
+                         ok=res2.get("ok"),
+                         duplicate=(res2.get("result", {}) or {}).get("duplicate"),
+                         attempt_id=(res2.get("result", {}) or {}).get("attempt_id"))
+            # wait for the retry attempt to complete
+            rjob = self._wait_job_terminal(b_job["job_id"], timeout_s=90)
+            attempts_after = self._job_attempts(b_job["job_id"])
             self._record("5", "retry B", **{k: rjob.get(k) for k in
-                         ("job_id", "attempts", "state", "exit_code", "terminal_reason")})
-            c = self._console()
-            self._record("5b", "retry B console", counts=c["counts"])
+                         ("job_id", "attempts", "state", "exit_code", "terminal_reason")},
+                         attempts_before=attempts_before,
+                         attempts_after=attempts_after,
+                         new_attempt_count=len(attempts_after) - len(attempts_before))
             self._shot(page, "step5_retry")
 
             # STEP 6: submit C EXIT_7 from UI
@@ -323,6 +362,14 @@ class AcceptanceRunner:
         return {"job_id": job, "attempt_id": att, "payload_ref": pl,
                 "task_id": task_id, "ui_result": txt}
 
+    def _job_attempts(self, job_id: str) -> list[str]:
+        try:
+            d = json.loads((self.state_dir / "scheduler" / "queue.json")
+                           .read_text(encoding="utf-8"))
+            return list(d.get("jobs", {}).get(job_id, {}).get("attempts", []))
+        except (OSError, json.JSONDecodeError):
+            return []
+
     def _wait_job_terminal(self, job_id, timeout_s=120) -> dict:
         """Wait for a job (any attempt) to reach a terminal state."""
         deadline = time.time() + timeout_s
@@ -368,31 +415,100 @@ class AcceptanceRunner:
         time.sleep(1)
 
     def _external(self, page):
-        # start a real fixture process outside the control plane
+        # DOD-08: a real process started OUTSIDE the control plane.
         import subprocess as sp
         p = sp.Popen([sys.executable, "-m", "conduvera.harness.acceptance_fixture",
                       "--scenario", "HOLD_UNTIL_CANCEL", "--hold-s", "60"],
                      cwd=str(CORE_DIR), env=dict(os.environ, PYTHONPATH=str(CORE_DIR)),
                      stdout=sp.DEVNULL, stderr=sp.DEVNULL)
-        time.sleep(3)
-        # check external action rejection
-        # (external sessions are discovered by reconcile/scan; here we record the
-        #  negative via the API on an unknown/external-style session)
-        res = self._post("cancel", {"session_id": "mxs_external_dummy"})
-        self.external_results["external_cancel_rejected"] = {
-            "ok": res.get("ok"), "message": res.get("result", {}).get("message", "")}
-        # terminate only via runner (external cleanup)
-        p.terminate()
         try:
-            p.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            p.kill()
-        self._record("8", "external session", result=self.external_results)
+            time.sleep(2)
+            # register the external process read-only via the control plane
+            obs = self._post("observe_external", {"pid": p.pid,
+                                                  "classification": "EXTERNAL_UNKNOWN"})
+            ext_sid = (obs.get("result", {}) or {}).get("session_id")
+            self._record("8a", "external observed", ok=obs.get("ok"),
+                         session_id=ext_sid,
+                         ownership=(obs.get("result", {}) or {}).get("ownership_class"),
+                         control_rights=(obs.get("result", {}) or {}).get("control_rights"))
+            self.external_results["observed"] = {
+                "ok": obs.get("ok"), "session_id": ext_sid,
+                "control_rights": (obs.get("result", {}) or {}).get("control_rights")}
+            # process alive after observation
+            alive_after_observe = self._pid_alive(p.pid)
+            # cancel fail-closed
+            cancel = self._post("cancel", {"session_id": ext_sid})
+            self.external_results["cancel_rejected"] = {
+                "ok": cancel.get("ok"),
+                "code": (cancel.get("result", {}) or {}).get("code"),
+                "message": (cancel.get("result", {}) or {}).get("message", "")[:60]}
+            # cleanup fail-closed
+            cleanup = self._post("cleanup", {"session_id": ext_sid})
+            self.external_results["cleanup_rejected"] = {
+                "ok": cleanup.get("ok"),
+                "code": (cleanup.get("result", {}) or {}).get("code")}
+            # process still alive after all rejected actions
+            alive_after_reject = self._pid_alive(p.pid)
+            # UI shows the external session with control actions disabled
+            page.wait_for_function(
+                f"Array.from(document.querySelectorAll('.card')).some(c=>c.textContent.includes('{ext_sid[:8]}'))",
+                timeout=15000)
+            ext_card = page.evaluate(f"""
+                (() => {{ const c = Array.from(document.querySelectorAll('.card'))
+                    .find(x=>x.textContent.includes('{ext_sid[:8]}'));
+                  return c ? c.textContent : ''; }})()
+            """)
+            self.external_results["ui"] = {
+                "visible": bool(ext_card),
+                "has_cancel_button": "Cancel" in ext_card,
+                "has_inspect_button": "Inspect" in ext_card}
+            self._record("8", "external session",
+                         alive_after_observe=alive_after_observe,
+                         alive_after_reject=alive_after_reject,
+                         result=self.external_results)
+            self._shot(page, "step8_external")
+        finally:
+            # terminate only via the runner (external cleanup, not control-plane)
+            p.terminate()
+            try:
+                p.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                p.kill()
+
+    def _pid_alive(self, pid) -> bool:
+        try:
+            import os as _os
+            _os.kill(pid, 0)
+            return True
+        except OSError:
+            return False
 
     def _inspect_cleanup(self, page, job):
-        # cleanup is idempotent; verify no base checkout change
+        # DOD-09: Inspect D via UI (evidence + hashes visible), then two
+        # Cleanup calls (first removes disposable resources, second idempotent).
+        job_id = job.get("job_id")
+        # Inspect: open the D terminal card detail
+        page.wait_for_function(
+            f"Array.from(document.querySelectorAll('.card')).some(c=>c.textContent.includes('{job_id}'))",
+            timeout=15000)
+        # run Inspect via API (read-only status) and Cleanup twice
+        # find the session id for job D
+        c = self._console()
+        sid = ""
+        for x in c["terminal"]:
+            if x.get("job_id") == job_id and x.get("session_id"):
+                sid = x.get("session_id")
+                break
+        inspect = self._post("inspect", {"session_id": sid}) if sid else {"ok": False}
+        cleanup1 = self._post("cleanup", {"session_id": sid}) if sid else {"ok": False}
+        cleanup2 = self._post("cleanup", {"session_id": sid}) if sid else {"ok": False}
         self._record("10", "inspect+cleanup D",
+                     inspect_ok=inspect.get("ok"),
+                     cleanup1_ok=(cleanup1.get("result", {}) or {}).get("success"),
+                     cleanup2_ok=(cleanup2.get("result", {}) or {}).get("success"),
+                     cleanup2_idempotent=((cleanup2.get("result", {}) or {}).get("success") is True),
                      base_porcelain=_git_porcelain(FIXTURE_DIR))
+        self._shot(page, "step10_inspect_cleanup")
 
     def _build_receipt(self) -> dict:
         receipt = {
