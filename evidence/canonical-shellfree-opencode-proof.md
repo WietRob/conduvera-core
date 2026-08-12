@@ -9,6 +9,30 @@
 - OPENCODE-FIX-006: **SUPERSEDED** (bash-Wrapper, durch shell-freien cwd_exec
   abgelöst)
 - OPENCODE-SHELLFREE-2/osf2: **CANONICAL** (merged-main, shell-frei)
+- OPENCODE-CANONICAL-2/oc2: **CANONICAL_BESTAETIGUNG** (aktuellerer main
+  inkl. operator-console, PR #44)
+
+## Bestätigungslauf (OPENCODE-CANONICAL-2) — main 121fea94
+
+```
+core commit: 121fea94af90 (nach PR #42+#43+#44)
+task_id:     OPENCODE-CANONICAL-2
+job_id:      job_4ddd2f3c863a
+attempt_id:  oc2
+session_id:  mxs_19cfcc775fdf4f62
+scope:       conduvera-mxs_19cfcc775fdf4f62.scope
+harness:     opencode_cli (native Auth, opencode.json default model)
+base_commit: 8cb595f3cabd1c5f54ed123b391673b3740ef51b
+worktree:    ~/.local/state/conduvera/worktrees/OPENCODE-CANONICAL-2-oc2
+lifecycle:   COMPLETED · exit 0
+Spawn:       systemd-run --scope ... python3 -m cwd_exec --cwd <wt> -- \
+             opencode run --format json --dir <wt> "<instructions>"
+             (cwd_exec: True, bash/sh: False, raw prompt: False, redacted: True)
+Ergebnis:    Worktree calc.py "a - b" → "a + b"; relativePath "calc.py"
+             pytest 1 passed; BASE calc.py "a - b" unverändert;
+             BASE tree ec3f64c0da2f7d0d721d49552f71623b8eb80b59 == vor;
+             BASE porcelain 0 vor und nach.
+```
 
 ## Canonical Run (OPENCODE-SHELLFREE-2)
 
