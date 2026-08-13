@@ -639,13 +639,17 @@ class DeliveryService:
     def _push(self, wt: Path, github_repo: str, branch: str) -> None:
         from conduvera.control_plane.github_provider import _git
         remote = f"https://github.com/{github_repo}.git"
+        # the owned worktree's origin is the local conduvera-core clone path;
+        # force the delivery remote to the canonical https URL so we push to
+        # the real GitHub repo, not a local ref.
         try:
-            _git("remote", "get-url", "origin", cwd=wt)
-            remote = _git("remote", "get-url", "origin", cwd=wt)
+            cur = _git("remote", "get-url", "origin", cwd=wt)
         except GitHubDeliveryError:
-            _git("remote", "add", "origin", remote, cwd=wt)
-        # push without force (idempotent)
-        _git("push", "origin", f"HEAD:{branch}", cwd=wt)
+            cur = ""
+        if cur != remote:
+            _git("remote", "set-url", "origin", remote, cwd=wt)
+        # push without force (idempotent); use a full ref target
+        _git("push", "origin", f"HEAD:refs/heads/{branch}", cwd=wt)
 
     def _safe_rebase(self, record: dict, wt: Path) -> None:
         from conduvera.control_plane.github_provider import _git

@@ -14,6 +14,7 @@ import os
 import subprocess
 import sys
 import time
+import urllib.error
 import uuid
 from pathlib import Path
 
@@ -58,13 +59,31 @@ class DeliveryAcceptanceRunner:
         env["CONDUVERA_STATE_DIR"] = str(self.state_dir)
         env["CONDUVERA_GH_ENABLED"] = "1"
         env["PYTHONPATH"] = str(CORE_DIR)
+        # prune stale acceptance worktrees + free orphaned servers on our port
+        for repo in (Path.home() / "projects" / "matrix-os",
+                     Path.home() / "projects" / "conduit-fixture"):
+            subprocess.run(["git", "-C", str(repo), "worktree", "prune"],
+                           capture_output=True)
+        try:
+            out = subprocess.run(["ss", "-ltnp"], capture_output=True,
+                                 text=True).stdout
+            import re as _re
+            for line in out.splitlines():
+                if f":{self.port} " in line and "python3" in line:
+                    m = _re.search(r"pid=(\d+)", line)
+                    if m:
+                        subprocess.run(["kill", m.group(1)], capture_output=True)
+                        time.sleep(1)
+        except Exception:
+            pass
+        logf = open(self.state_dir / "server.log", "w")
         self.proc = subprocess.Popen(
             [sys.executable, "-m", "conduvera.control_plane.server",
              "--state-dir", str(self.state_dir),
              "--socket", str(self.state_dir / "cp.sock"),
              "--http-port", str(self.port)],
             env=env, cwd=str(CORE_DIR),
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            stdout=logf, stderr=logf)
         import urllib.request
         import json as _j
         for _ in range(90):
@@ -93,8 +112,12 @@ class DeliveryAcceptanceRunner:
             f"http://127.0.0.1:{self.port}/api/action",
             data=_j.dumps({"method": method, "params": params}).encode(),
             headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=180) as r:
-            return _j.loads(r.read())
+        try:
+            with urllib.request.urlopen(req, timeout=180) as r:
+                return _j.loads(r.read())
+        except urllib.error.HTTPError as e:
+            body = e.read().decode()
+            raise RuntimeError(f"{method} HTTP {e.code}: {body[:500]}")
 
     def _submit(self, *, task_id, attempt_id, scenario, hold_s,
                 timeout_s=120, repo="conduvera-core", base_commit=None):
@@ -114,9 +137,13 @@ class DeliveryAcceptanceRunner:
 
     def _job_completed(self, job_id, timeout_s=60):
         import json as _j
+        qf = self.state_dir / "scheduler" / "queue.json"
         deadline = time.time() + timeout_s
         while time.time() < deadline:
-            d = _j.loads((self.state_dir / "scheduler" / "queue.json").read_text())
+            if not qf.is_file():
+                time.sleep(1)
+                continue
+            d = _j.loads(qf.read_text())
             j = d["jobs"].get(job_id, {})
             if j.get("state") in ("COMPLETED", "FAILED", "TIMED_OUT", "CANCELLED"):
                 return j
@@ -152,9 +179,17 @@ class DeliveryAcceptanceRunner:
             browser = p.chromium.launch()
             page = browser.new_page()
             try:
-                # STEP 1-2: submit + complete
-                res = self._submit(task_id="DLV-A", attempt_id="a1",
-                                   scenario="HOLD_THEN_EXIT_0", hold_s=2)
+                # STEP 1-2: submit + complete (retry with unique attempt id)
+                res = None
+                for _try in range(5):
+                    attempt_id = f"a1_{_try}" if _try else "a1"
+                    res = self._submit(task_id="DLV-A", attempt_id=attempt_id,
+                                       scenario="HOLD_THEN_EXIT_0", hold_s=2)
+                    if res.get("result", {}).get("job_id"):
+                        break
+                    time.sleep(3)
+                if not res or not res.get("result", {}).get("job_id"):
+                    raise RuntimeError(f"submit A failed: {res}")
                 job_a = res["result"]["job_id"]
                 self.jobs["A"] = {"job_id": job_a,
                                   "attempt_id": res["result"]["attempt_id"]}
