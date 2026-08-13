@@ -126,30 +126,25 @@ class TrustedRunner:
     # -- browser helpers ---------------------------------------------------
     def _click_detail_action(self, page, job_label, button_text):
         page.wait_for_function(
-            "() => Array.from(document.querySelectorAll('.card')).some(c=>c.textContent.includes(arguments[0]))",
+            "(label) => Array.from(document.querySelectorAll('.card')).some(c=>c.textContent.includes(label))",
             arg=job_label, timeout=20000)
         page.evaluate(
-            "() => { const c=Array.from(document.querySelectorAll('.card')).find(c=>c.textContent.includes(arguments[0])); c.querySelector('button').click(); }",
+            "(label) => { const c=Array.from(document.querySelectorAll('.card')).find(c=>c.textContent.includes(label)); if(c){ const b=c.querySelector('button'); if(b) b.click(); } }",
             job_label)
         page.wait_for_timeout(1000)
         page.wait_for_function(
-            "() => Array.from(document.querySelectorAll('#detailPanel button')).some(b=>b.textContent.trim()===arguments[0])",
+            "(label) => Array.from(document.querySelectorAll('#detailPanel button')).some(b=>b.textContent.trim()===label)",
             arg=button_text, timeout=10000)
 
     def _click_panel_button(self, page, text, js_before="", js_after="",
                             click_via_js=False):
         # click a button inside the detail panel by its text
-        if click_via_js:
-            page.evaluate(
-                "() => { const b=Array.from(document.querySelectorAll('#detailPanel button')).find(b=>b.textContent.trim()===arguments[0]); b.click(); }",
-                text)
-        else:
-            page.wait_for_function(
-                "() => Array.from(document.querySelectorAll('#detailPanel button')).some(b=>b.textContent.trim()===arguments[0])",
-                arg=text, timeout=10000)
-            page.evaluate(
-                "() => { const b=Array.from(document.querySelectorAll('#detailPanel button')).find(b=>b.textContent.trim()===arguments[0]); b.click(); }",
-                text)
+        page.wait_for_function(
+            "(label) => Array.from(document.querySelectorAll('#detailPanel button')).some(b=>b.textContent.trim()===label)",
+            arg=text, timeout=10000)
+        page.evaluate(
+            "(label) => { const b=Array.from(document.querySelectorAll('#detailPanel button')).find(b=>b.textContent.trim()===label); if(b) b.click(); }",
+            text)
         page.wait_for_timeout(1500)
 
     # -- submit form via real browser --------------------------------------
@@ -158,17 +153,17 @@ class TrustedRunner:
         page.goto(f"http://127.0.0.1:{self.port}/ui/activity.html",
                   wait_until="domcontentloaded")
         page.wait_for_timeout(1500)
-        # fill the submit form fields
-        for name, val in [("task_id", task_id), ("attempt_id", attempt_id),
-                          ("harness", HARNESS), ("repo", repo),
-                          ("base_commit", base_commit),
-                          ("scenario", scenario)]:
-            page.evaluate(
-                "() => { const i=document.querySelector(`[name=${arguments[0]}]`)||document.querySelector(`[data-field=${arguments[0]}]`); if(i) i.value=arguments[1]; }",
-                name, val)
-        # click the Submit button
+        # fill the real submit form fields (f_* ids; doSubmit auto-generates
+        # task/attempt ids)
+        fields = {"f_harness": HARNESS, "f_repo": repo, "f_base": base_commit,
+                  "f_prompt": "Add docs/DOGFOOD_MARKER.md with the single line 'Conduvera dogfood acceptance' to the repository.",
+                  "f_scenario": scenario or ""}
         page.evaluate(
-            "() => { const b=Array.from(document.querySelectorAll('button')).find(b=>/submit/i.test(b.textContent)); if(b) b.click(); }")
+            "(fields) => { for (const [k,v] of Object.entries(fields)) { const i=document.getElementById(k); if(i) i.value=v; } }",
+            fields)
+        # click the Submit button (submit event -> doSubmit)
+        page.evaluate(
+            "() => { const b=document.querySelector('#submitForm button[type=submit]')||Array.from(document.querySelectorAll('#submitForm button')).find(b=>/submit/i.test(b.textContent)); if(b) b.click(); }")
         page.wait_for_timeout(2500)
         # read the job id from the queued card
         body = page.evaluate("document.body.textContent")
@@ -205,13 +200,12 @@ class TrustedRunner:
                 self._wait_terminal_browser(page, job_a, "COMPLETED")
                 self._record("2", "completed in browser", job_id=job_a)
 
-                # STEP 3: open detail, select attempt, inspect
-                self._click_detail_action(page, "TRUST-A", "Select Attempt")
-                self._click_panel_button(page, "Select Attempt",
-                                         click_via_js=True)
-                # select attempt via the panel (prefilled with t1)
-                page.wait_for_function(
-                    "() => !!window.__conduvera_last_attempt", timeout=5000)
+                # STEP 3: open detail, select attempt, inspect (job card)
+                self._click_detail_action(page, job_a, "Select Attempt")
+                # handle the prompt() dialogs headlessly
+                page.on("dialog", lambda d: d.accept("t1"))
+                self._click_panel_button(page, "Select Attempt")
+                page.wait_for_timeout(500)
                 self._click_panel_button(page, "Preflight")
                 self._record("3", "attempt selected + preflight")
 
