@@ -87,6 +87,35 @@ class TestCandidateBuild:
         except CandidateError as e:
             assert e.code == "FORBIDDEN_PATH"
 
+    def test_untracked_metadata_excluded_not_published(self, tmp_path):
+        """A real harness leaves the feature change untracked; repo metadata
+        (dot-dirs/.ai/.curaops) must be excluded, only the feature file taken."""
+        store, ev, svc = _mk(tmp_path)
+        wt = tmp_path / "wts" / "w1"
+        base = _git_init(wt)
+        (wt / "docs").mkdir(exist_ok=True)
+        (wt / "docs" / "FEATURE.md").write_text("# feature\n")
+        (wt / ".ai").mkdir(exist_ok=True)
+        (wt / ".ai" / "state.json").write_text("{}")  # untracked metadata
+        (wt / ".curaops" / "control").mkdir(parents=True, exist_ok=True)
+        (wt / ".curaops" / "control" / "registry.json").write_text("{}")
+        (wt / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
+        (wt / ".github" / "workflows" / "x.yml").write_text("name: x\n")
+        (wt / "mxs_abc.stdout.txt").write_text("log\n")
+        c = svc.build_candidate(
+            job_id="job_1", attempt_id="a1", session_id="s1",
+            delivery_id="dlv_1", repo_id="r", github_repository="R/r",
+            base_branch="main", base_commit=base, worktree=str(wt),
+            evidence_refs=[], named_tests=[], named_gates=[])
+        files = [f["path"] for f in c["files"]]
+        assert "docs/FEATURE.md" in files
+        assert ".ai/state.json" not in files
+        assert ".curaops/control/registry.json" not in files
+        assert ".github/workflows/x.yml" not in files
+        assert "mxs_abc.stdout.txt" not in files
+        # only the real feature file is deliverable
+        assert files == ["docs/FEATURE.md"]
+
 
 class TestApprovalNoToctou:
     def test_approval_freezes_and_stale_blocks(self, tmp_path):
