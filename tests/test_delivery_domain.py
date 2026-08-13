@@ -428,3 +428,48 @@ class TestDrift:
         rec["base_commit"] = c1
         assert dlv.classify_drift(rec) == "UNAVAILABLE"
 
+
+class TestCheckDetails:
+    """WS H dogfood feature: operator-visible check/review/mergeability detail."""
+
+    def _svc_check(self, tmp_path, checks, reviews, pr):
+        store, ev = DeliveryStore(tmp_path / "d"), EvidenceStore(tmp_path / "e")
+        scheduler = _FakeScheduler(
+            jobs={"job_1": _FakeJob("job_1", "fixture", "abc1234")},
+            attempts={"a1": _FakeAttempt("a1", "job_1")})
+        registry = _FakeRegistry()
+        svc = _FakeService(scheduler, registry)
+        dlv = DeliveryService(store=store, evidence_store=ev,
+                              provider=GitHubDeliveryProvider(dry_run=True),
+                              service=svc,
+                              repo_allowlist={"fixture": tmp_path / "repo"},
+                              worktree_root=tmp_path / "worktrees")
+        dlv.provider.pr_view = lambda repo, num: pr
+        dlv.provider.list_checks = lambda repo, sha: checks
+        dlv.provider.list_reviews = lambda repo, num: reviews
+        return dlv
+
+    def test_check_details_has_checks_reviews_timeline(self, tmp_path):
+        dlv = self._svc_check(
+            tmp_path,
+            checks=[{"name": "delivery-tests", "status": "completed",
+                     "conclusion": "success", "started_at": "2026-01-01T00:00:00Z",
+                     "completed_at": "2026-01-01T00:01:00Z",
+                     "details_url": "https://github.com/r/r/runs/1", "app": "GitHub",
+                     "required": True}],
+            reviews=[{"state": "APPROVED", "user": {"login": "w"}, "submitted_at": "2026-01-01T00:00:00Z"}],
+            pr={"state": "OPEN", "headRefOid": "h" * 40, "baseRefOid": "b" * 40,
+                "mergeable": "MERGEABLE", "mergeStateStatus": "CLEAN"})
+        # persist a delivery record with github identity so sync resolves
+        rec = dlv._new_record("job_1", "a1")
+        rec["github_repository"] = "R/r"
+        rec["pull_request_number"] = 1
+        dlv.store.save(rec)
+        r = dlv.check_details("job_1")
+        assert r["ok"] is True
+        assert r["checks"][0]["name"] == "delivery-tests"
+        assert r["checks"][0]["required"] is True
+        assert r["checks"][0]["conclusion"] == "success"
+        assert r["reviews"][0]["state"] == "APPROVED"
+        assert "timeline" in r
+
