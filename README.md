@@ -33,7 +33,18 @@ Current merged scope:
 | Non-Live Route-Plan Artifact Picker UI State | Merged | Display selected artifact id, label, scenario, and read-only picker boundaries in the non-live panel path |
 | Non-Live Route-Plan Artifact Picker List Widget | Current | Add a visible read-only picker/list widget with selected marker over canonical artifacts |
 
-This repository is not yet a production-ready platform. UI/MCP/editor scaffolding is discovery-only, the evidence backbone plus thin external adapters are local harness-side contracts, and broad external adapter work remains future scope. The current `main` branch governance is documented in `docs/MATRIX_OS_GOVERNANCE_POLICY.md`: the evidence/report quality gate is enforced as a strict required status check, while required GitHub pull-request approvals and conversation resolution are not currently enforced.
+This repository contains the Conduvera operational harness control plane with a
+live Delivery Workspace. The activity browser workspace turns completed managed
+code-change jobs into reviewable GitHub pull requests through a restart-safe
+delivery pipeline (fail-closed pre-publish gate, deterministic task branch, one
+PR, GitHub status synchronization, cleanup retention). Merge remains an explicit
+human action in v1.
+
+Historical note: earlier UI/MCP/editor work was discovery-only scaffolding (see
+PR #33 and the non-live picker rows below); the current Delivery Workspace is a
+real operator surface backed by the Control-Plane authority, not scaffolding.
+
+The current `main` branch governance is documented in `docs/MATRIX_OS_GOVERNANCE_POLICY.md`: the evidence/report quality gate is enforced as a strict required status check, while required GitHub pull-request approvals and conversation resolution are not currently enforced.
 
 ## Current CLI
 

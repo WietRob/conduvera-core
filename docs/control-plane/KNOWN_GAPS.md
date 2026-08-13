@@ -2,7 +2,22 @@
 
 ## Uebersicht
 
-Dieses Dokument listet die bekannten Luecken und noch nicht implementierten Features der CuraOps-Control v0. Der Status quo: 124 Tests gruen, Kern-Infrastruktur steht, aber wesentliche Erweiterungen fehlen.
+Dieses Dokument listet die bekannten Luecken und noch nicht implementierten
+Features der Conduvera-Control-Plane. Der Status quo: 397+ Tests gruen, die
+Delivery Workspace v1 (GitHub-PR-Delivery fuer abgeschlossene Jobs) ist
+implementiert und live. Die unten genannten ae lteren Punkte (v0/124-tests,
+fehlende Backends) sind historisch oder weiterhin offen.
+
+> Hinweis: Die Delivery Workspace v1 ist das aktuelle Produkt; die
+> nachfolgenden Punkte unter "Aktuelle Luecken" betreffen den Delivery-Stack.
+
+## Aktuelle Luecken (Delivery Workspace v1)
+
+- Kein automatischer Merge in v1 — Merge ist explizit eine menschliche Aktion.
+- Keine Webhook-/Inbound-Notifikation von GitHub in v1; Status-Sync ist
+  manuell ausloesbar + periodisch.
+- Kein PR-Planning/Boards — generalisierte GitHub-Orchestrierung bleibt out of scope.
+- EXTERNAL-Sessions sind read-only und bekommen keine Delivery-/Publish-Rechte.
 
 ---
 
