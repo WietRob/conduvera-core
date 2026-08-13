@@ -141,7 +141,9 @@ Jeder Backend-Typ wird ueber den `AgentLauncher` gestartet und erhaelt seine Env
 
 ## Testabdeckung
 
-124 Tests gruen, aufgeteilt in:
+Die aktuelle Suite umfasst 397+ Tests (Delivery-Domain, Event-Stream, Evidence,
+Operator-Actions, cwd_exec-Security, Pi, Console) und laeuft gruen. Die
+nachfolgende Tabelle ist historisch (v0).
 
 | Suite | Anzahl |
 |---|---|
@@ -149,3 +151,25 @@ Jeder Backend-Typ wird ueber den `AgentLauncher` gestartet und erhaelt seine Env
 | Stream State | 27 |
 | Gateway | 29 |
 | Runtime Enforcement | 30 |
+
+---
+
+## Delivery Workspace v1
+
+Die Control-Plane erweitert den Execution-Layer um einen Delivery-Domain:
+
+```
+ControlPlaneService
+  -> DeliveryService (DeliveryRecord-Zustandsmaschine)
+       -> DeliveryStore (Control-Plane-owned, 0600, append-only History)
+       -> PrePublishGate (fail-closed, strukturierte Negativ-Codes)
+       -> GitHubDeliveryProvider (shell-frei, task-branch + ein PR)
+       -> BaseDrift (MATCH/BEHIND/AHEAD/DIVERGED/UNAVAILABLE)
+       -> StatusSync (checks/reviews/mergeability -> Delivery-States)
+       -> Cleanup (disposable vs durable)
+  -> EventStreamBus (WS-F) + HTTP /events SSE-Endpoint
+  -> Activity UI (Detail-Panel, Diff, Evidence, Attention, Actions)
+```
+
+Siehe [docs/control-plane/DELIVERY_WORKSPACE.md](DELIVERY_WORKSPACE.md) fuer den
+vollstaendigen Delivery-/GitHub-Bridge-Contract und Operator-Workflow.
