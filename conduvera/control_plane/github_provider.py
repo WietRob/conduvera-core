@@ -141,12 +141,20 @@ class GitHubDeliveryProvider:
                     "headRefOid": "0" * 40, "baseRefOid": base,
                     "headRefName": head, "baseRefName": base, "state": "OPEN",
                     "mergeable": "UNKNOWN", "mergeStateStatus": "UNKNOWN"}
-        out = self._gh_json(["pr", "create", "--repo", repository,
+        # gh pr create prints the PR URL (no --json flag on create); then
+        # re-derive the structured PR data via pr view.
+        url = self._gh_text(["pr", "create", "--repo", repository,
                              "--head", head, "--base", base,
-                             "--title", title, "--body", body,
-                             "--json",
-                             "number,url,headRefName,headRefOid,baseRefName,baseRefOid,state,mergeable,mergeStateStatus,title"])
-        return out
+                             "--title", title, "--body", body])
+        number = 0
+        import re as _re
+        m = _re.search(r"/pull/(\d+)", url)
+        if m:
+            number = int(m.group(1))
+        if number:
+            return self.pr_view(repository, number)
+        return {"number": number, "url": url, "headRefName": head,
+                "baseRefName": base, "state": "OPEN"}
 
     def pr_view(self, repository: str, number: int) -> dict:
         if self._dry_run:

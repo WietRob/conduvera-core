@@ -10,7 +10,6 @@ Control-Plane-owned DeliveryStore; the GitHub provider is shell-free.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 import time
@@ -284,8 +283,8 @@ class DeliveryService:
                 self._repo_allowlist:
             reasons.append({"code": "BASE_COMMIT_INVALID",
                             "message": "repo not allowlisted"})
-        # 6. non-empty tracked change set
-        changes = self._changeset(wt_path)
+        # 6. non-empty tracked change set (diff against the owned base commit)
+        changes = self._changeset(wt_path, base_commit)
         if changes is None:
             reasons.append({"code": "WORKTREE_NOT_OWNED",
                             "message": "cannot compute changeset"})
@@ -314,18 +313,24 @@ class DeliveryService:
         return reasons
 
     # -- gate helpers ------------------------------------------------------
-    def _changeset(self, wt: Path) -> list[str] | None:
+    def _changeset(self, wt: Path, base_commit: str = "") -> list[str] | None:
+        """Return the tracked change set of the owned worktree.
+
+        When base_commit is known (an owned base), diff against it so the
+        committed job changes are the changeset. Otherwise fall back to the
+        working-tree diff (HEAD) / porcelain for fresh worktrees.
+        """
         try:
             from conduvera.control_plane.github_provider import _git
+            if base_commit and len(base_commit) >= 7:
+                out = _git("diff", "--name-only", base_commit, cwd=wt)
+                return [f for f in out.splitlines() if f.strip()]
             try:
                 out = _git("diff", "--name-only", "HEAD", cwd=wt)
                 staged = _git("diff", "--cached", "--name-only", cwd=wt)
                 return [f for f in (out.splitlines() + staged.splitlines())
                         if f.strip()]
             except Exception:
-                # no HEAD yet (fresh worktree): fall back to porcelain which
-                # also captures untracked files so forbidden/empty detection
-                # still applies
                 porcelain = _git("status", "--porcelain", cwd=wt)
                 return [line.split()[-1] for line in porcelain.splitlines()
                         if line.strip()]
@@ -348,6 +353,7 @@ class DeliveryService:
         return found
 
     def _evidence_ok(self, job_id: str, attempt_id: str) -> dict:
+        from conduvera.control_plane.evidence_store import validate_evidence
         refs = self._evidence_refs(job_id, attempt_id)
         if not refs:
             return {"missing": "no EvidenceBundle for attempt"}
@@ -355,11 +361,10 @@ class DeliveryService:
             bundle = self.evidence_store.get(ref)
             if bundle is None:
                 return {"missing": f"evidence bundle {ref} not found"}
-            if bundle.get("evidence_status") == "INVALID":
-                return {"invalid": f"evidence bundle {ref} INVALID"}
-            # hash validation: recompute artifact hashes vs stored
-            if not self._bundle_hash_ok(bundle):
-                return {"invalid": f"evidence bundle {ref} hash mismatch"}
+            # authoritative fail-closed validation (schema + exit + artifacts)
+            vstatus = validate_evidence(bundle)
+            if vstatus["status"] != "VALID":
+                return {"invalid": f"evidence bundle {ref}: {vstatus.get('reason','INVALID')}"}
         return {}
 
     def _evidence_refs(self, job_id: str, attempt_id: str) -> list[str]:
@@ -374,17 +379,6 @@ class DeliveryService:
             if b.get("job_id") == job_id and b.get("attempt_id") == attempt_id:
                 refs.append(ev.stem)
         return refs
-
-    def _bundle_hash_ok(self, bundle: dict) -> bool:
-        # canonical content hash: re-hash the JSON (sort_keys) vs bundle hash
-        try:
-            content = json.dumps({k: v for k, v in bundle.items()
-                                  if k not in ("bundle_id", "content_sha256")},
-                                 sort_keys=True)
-            return hashlib.sha256(content.encode()).hexdigest() == \
-                bundle.get("content_sha256", "")
-        except Exception:
-            return False
 
     def _tree_hash(self, wt: Path) -> str | None:
         try:
@@ -478,6 +472,15 @@ class DeliveryService:
         session = self.service.registry.get(record.get("session_id") or "")
         wt = Path(session.worktree if session else record.get("worktree") or "")
 
+        # resolve repo/github/base BEFORE drift classification (the remote
+        # base SHA depends on github_repository being known)
+        record["repo_id"] = record.get("repo_id") or self._job_repo(job_id)
+        github_repo = self._github_repo(record["repo_id"])
+        record["github_repository"] = github_repo
+        record["base_commit"] = self._job_base(job_id) or record.get("base_commit")
+        record["worktree"] = str(wt)
+        record["session_id"] = session.session_id if session else ""
+
         # base drift must be MATCH or BEHIND (clean rebase possible) — never
         # publish over a diverged/unavailable base.
         drift = self.classify_drift(record)
@@ -498,13 +501,6 @@ class DeliveryService:
         record = self._transition(record, PUBLISHING, event="publish_start")
         branch = self._branch_name(record)
         record["branch_name"] = branch
-        # re-read the exact owned worktree + selected attempt
-        record["repo_id"] = record.get("repo_id") or self._job_repo(job_id)
-        github_repo = self._github_repo(record["repo_id"])
-        record["github_repository"] = github_repo
-        record["base_commit"] = self._job_base(job_id) or record.get("base_commit")
-        record["worktree"] = str(wt)
-        record["session_id"] = session.session_id if session else ""
         record["evidence_refs"] = self._evidence_refs(job_id, attempt_id)
 
         # idempotent: existing PR on same branch/base -> return it
