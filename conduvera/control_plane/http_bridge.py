@@ -65,11 +65,56 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _stream_events(self, qs: str) -> None:
+        """SSE event stream with Last-Event-ID resume and heartbeat."""
+        last_id = 0
+        for kv in qs.split("&"):
+            if kv.startswith("last_event_id="):
+                try:
+                    last_id = int(kv.split("=", 1)[1])
+                except ValueError:
+                    last_id = 0
+        bus = getattr(self._bridge, "event_bus", None)
+        if bus is None:
+            self._send_json({"ok": False, "error": {"code": "NO_EVENT_BUS"}}, 500)
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Connection", "keep-alive")
+        self.end_headers()
+        try:
+            self.wfile.write(b"retry: 2000\n\n")
+            self.wfile.flush()
+            while True:
+                events = bus.events_since(last_id)
+                for e in events:
+                    self.wfile.write(self._sse_line(e))
+                    last_id = e["id"]
+                self.wfile.flush()
+                if not events:
+                    events = bus.wait_for_events(last_id, timeout=10.0)
+                    if not events:
+                        self.wfile.write(b": ping\n\n")
+                        self.wfile.flush()
+        except (BrokenPipeError, ConnectionResetError):
+            return
+        except Exception:  # noqa: BLE001 - close stream on error
+            return
+
+    def _sse_line(self, event: dict) -> bytes:
+        import json as _json
+        lines = [f"id: {event['id']}", f"event: {event['event']}"]
+        lines.append(f"data: {_json.dumps(event.get('data') or {}, sort_keys=True)}")
+        return ("\n".join(lines) + "\n\n").encode("utf-8")
+
     def do_GET(self) -> None:  # noqa: N802
         path = self.path.split("?")[0]
         qs = self.path.split("?")[1] if "?" in self.path else ""
         if path == "/api/health":
             self._send_json({"ok": True, "status": "ok"})
+        elif path == "/api/events":
+            self._stream_events(qs)
         elif path == "/api/console":
             limit = None
             if qs:
@@ -125,6 +170,14 @@ class HttpBridge:
         self.bind = bind
         self._server: ThreadingHTTPServer | None = None
         self._thread: threading.Thread | None = None
+
+    @property
+    def event_bus(self):
+        """Expose the control-plane event stream bus for SSE (WS-F)."""
+        svc = getattr(self.daemon, "service", None)
+        if svc is None:
+            return None
+        return getattr(svc, "event_bus", None)
 
     def dispatch(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
         req: dict[str, Any] = {"method": method, "params": params}

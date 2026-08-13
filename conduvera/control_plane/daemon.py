@@ -160,7 +160,13 @@ class ControlPlaneDaemon:
                     "success": True, "record": rec,
                     "history": self.service.delivery.history(rec["delivery_id"])}}
             if method == "delivery_preflight":
-                r = self.service.delivery.preflight(params.get("job_or_delivery", ""))
+                try:
+                    r = self.service.delivery.preflight(params.get("job_or_delivery", ""))
+                except Exception as exc:  # noqa: BLE001 - surface structured error
+                    import traceback
+                    traceback.print_exc()
+                    return {"ok": False, "result": {"ok": False,
+                            "reasons": [{"code": "DELIVERY_ERROR", "message": str(exc)}]}}
                 return {"ok": r["ok"], "result": r}
             if method == "delivery_publish":
                 r = self.service.delivery.publish(

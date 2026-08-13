@@ -74,8 +74,8 @@ class _FakeScheduler:
     def get_attempt(self, attempt_id):
         return self._attempts.get(attempt_id)
 
-    def get_attempts_for_job(self, job_id):
-        return [a for a in self._attempts.values() if a.job_id == job_id]
+    def all_attempts(self):
+        return list(self._attempts.values())
 
 
 class _FakeService:
