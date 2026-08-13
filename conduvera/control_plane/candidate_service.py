@@ -184,11 +184,17 @@ class PublishCandidateService:
 
         files = []
         denied = []
+        excluded = []
         for rel, info in sorted(inv.items()):
             path = wt / rel
             decision = self._decide(rel, info["status"])
             if not decision["allow"]:
-                denied.append({"path": rel, "reason": decision["reason"]})
+                if decision.get("exclude"):
+                    # session-log runtime artefact (mxs_*.stdout/stderr.txt):
+                    # excluded, never published, does not block the real change
+                    excluded.append({"path": rel, "reason": decision["reason"]})
+                else:
+                    denied.append({"path": rel, "reason": decision["reason"]})
                 continue
             blob_sha = _blob_sha(path) if path.is_file() else ""
             st = path.stat() if path.is_file() else None
@@ -204,7 +210,8 @@ class PublishCandidateService:
                 "deletions": 0,
             })
 
-        # if any forbidden path is in the deliverable set -> fail closed
+        # a forbidden path in the deliverable set fails closed; session logs
+        # are excluded (recorded in evidence) and never enter the manifest
         if denied:
             raise CandidateError("FORBIDDEN_PATH",
                                  "forbidden path(s): " + ", ".join(d["path"] for d in denied))
@@ -242,6 +249,7 @@ class PublishCandidateService:
             "index_tree_sha": index_tree,
             "diff_sha256": diff_sha,
             "files": files,
+            "excluded_paths": excluded,
             "evidence_refs": evidence_refs or [],
             "evidence_hashes": evidence_hashes,
             "named_test_results": named_tests or [],
@@ -257,6 +265,13 @@ class PublishCandidateService:
         return candidate
 
     def _decide(self, rel: str, status: str) -> dict:
+        low = rel.lower()
+        # session-log runtime artefacts are EXCLUDED (never published, recorded
+        # in the EvidenceBundle) — they do not block the real feature change
+        if low.startswith("mxs_") and (low.endswith(".stdout.txt")
+                                       or low.endswith(".stderr.txt")):
+            return {"allow": False, "exclude": True,
+                    "reason": "session log excluded"}
         if _is_forbidden(rel):
             return {"allow": False, "reason": "FORBIDDEN_PATH"}
         if status == "untracked" and not rel.startswith("."):

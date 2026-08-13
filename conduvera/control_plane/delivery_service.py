@@ -449,24 +449,51 @@ class DeliveryService:
     def _changeset(self, wt: Path, base_commit: str = "") -> list[str] | None:
         """Return the tracked change set of the owned worktree.
 
-        When base_commit is known (an owned base), diff against it so the
-        committed job changes are the changeset. Otherwise fall back to the
-        working-tree diff (HEAD) / porcelain for fresh worktrees.
+        Includes committed changes (base->HEAD), staged, unstaged AND
+        untracked paths (real harnesses leave the feature change untracked in
+        the owned worktree), so forbidden/empty detection sees every path.
         """
         try:
             from conduvera.control_plane.github_provider import _git
+            changes: list[str] = []
             if base_commit and len(base_commit) >= 7:
-                out = _git("diff", "--name-only", base_commit, cwd=wt)
-                return [f for f in out.splitlines() if f.strip()]
+                try:
+                    out = _git("diff", "--name-only", base_commit, "HEAD", cwd=wt)
+                    changes += [f for f in out.splitlines() if f.strip()]
+                except GitHubDeliveryError:
+                    pass
+            # staged + unstaged
             try:
-                out = _git("diff", "--name-only", "HEAD", cwd=wt)
-                staged = _git("diff", "--cached", "--name-only", cwd=wt)
-                return [f for f in (out.splitlines() + staged.splitlines())
-                        if f.strip()]
-            except Exception:
-                porcelain = _git("status", "--porcelain", cwd=wt)
-                return [line.split()[-1] for line in porcelain.splitlines()
-                        if line.strip()]
+                changes += [f for f in
+                            _git("diff", "--name-only", "HEAD", cwd=wt).splitlines()
+                            if f.strip()]
+            except GitHubDeliveryError:
+                pass
+            try:
+                changes += [f for f in
+                            _git("diff", "--cached", "--name-only", cwd=wt).splitlines()
+                            if f.strip()]
+            except GitHubDeliveryError:
+                pass
+            # untracked (real harness leaves the change untracked)
+            try:
+                porcelain = _git("status", "--porcelain", "--untracked-files=all",
+                                 cwd=wt)
+                for line in porcelain.splitlines():
+                    if line.startswith("??"):
+                        changes.append(line[3:].strip())
+                    elif line[:2] in ("A ", " M", "M ", "R ", "D ", "T "):
+                        changes.append(line[3:].strip())
+            except GitHubDeliveryError:
+                pass
+            # dedupe preserving order
+            seen = set()
+            out = []
+            for f in changes:
+                if f and f not in seen:
+                    seen.add(f)
+                    out.append(f)
+            return out
         except Exception:
             return None
 
@@ -474,6 +501,12 @@ class DeliveryService:
         found = []
         for f in changes:
             low = f.lower()
+            # session-log runtime artefacts (mxs_*.stdout/stderr.txt) are
+            # excluded, not blocked — they never enter the commit (candidate
+            # manifest) and remain recorded in the EvidenceBundle
+            if low.startswith("mxs_") and (low.endswith(".stdout.txt")
+                                           or low.endswith(".stderr.txt")):
+                continue
             if any(part in low for part in FORBIDDEN_PATH_PARTS):
                 found.append({"code": "FORBIDDEN_PATH",
                               "message": f"forbidden path {f}"})
