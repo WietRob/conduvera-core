@@ -128,10 +128,11 @@ class TestPreflightGate:
         state = tmp_path / "state"
         store = DeliveryStore(state / "delivery")
         ev = EvidenceStore(state / "evidence")
-        # write a valid evidence bundle
+        # write a valid evidence bundle (exit + artifacts -> validate_evidence VALID)
         ev.put({"bundle_id": "ev_job_1_a1", "job_id": "job_1", "attempt_id": "a1",
-                "evidence_status": "VALID", "content_sha256": "",
-                "schema_version": "CONDUVERA-EVIDENCE"})
+                "evidence_status": "VALID", "schema_version": "CONDUVERA-EVIDENCE",
+                "exit_code": 0,
+                "artifacts": [{"path": "/tmp/ev_art", "sha256": "sha256:" + "0" * 64}]})
         return store, ev
 
     def test_gate_blocks_unsupported_nonterminal(self, tmp_path):
@@ -181,9 +182,11 @@ class TestPreflightGate:
         (wt / "f").write_text("x\n")
         subprocess.run(["git", "-C", str(wt), "add", "-A"], check=True)
         subprocess.run(["git", "-C", str(wt), "commit", "-qm", "c"], check=True)
+        head = subprocess.run(["git", "-C", str(wt), "rev-parse", "HEAD"],
+                              capture_output=True, text=True).stdout.strip()
         # no new changes -> empty changeset
         scheduler = _FakeScheduler(
-            jobs={"job_1": _FakeJob("job_1", "fixture", "abc1234")},
+            jobs={"job_1": _FakeJob("job_1", "fixture", head)},
             attempts={"a1": _FakeAttempt("a1", "job_1")})
         registry = _FakeRegistry()
         registry._s["mxs_1"] = _FakeSession("mxs_1", str(wt))
@@ -210,8 +213,12 @@ class TestPreflightGate:
         # add a forbidden path (untracked .env)
         (wt / ".env").write_text("API_KEY=secret12345\n")
         (wt / "change.txt").write_text("ok\n")
+        (wt / "x2.txt").write_text("change\n")
+        subprocess.run(["git", "-C", str(wt), "add", "-A"], check=True)
+        head = subprocess.run(["git", "-C", str(wt), "rev-parse", "HEAD"],
+                              capture_output=True, text=True).stdout.strip()
         scheduler = _FakeScheduler(
-            jobs={"job_1": _FakeJob("job_1", "fixture", "abc1234")},
+            jobs={"job_1": _FakeJob("job_1", "fixture", head)},
             attempts={"a1": _FakeAttempt("a1", "job_1")})
         registry = _FakeRegistry()
         registry._s["mxs_1"] = _FakeSession("mxs_1", str(wt))
@@ -221,10 +228,6 @@ class TestPreflightGate:
                               service=svc,
                               repo_allowlist={"fixture": tmp_path / "repo"},
                               worktree_root=tmp_path / "worktrees")
-        # the changeset from HEAD would be empty (no commits after); .env is untracked
-        # so force staging to include it for the test
-        (wt / "x2.txt").write_text("change\n")
-        subprocess.run(["git", "-C", str(wt), "add", "-A"], check=True)
         res = dlv.preflight("job_1")
         codes = [r["code"] for r in res["reasons"]]
         assert "FORBIDDEN_PATH" in codes or "SECRET_PATTERN_DETECTED" in codes
