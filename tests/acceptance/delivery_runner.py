@@ -132,9 +132,10 @@ class DeliveryAcceptanceRunner:
         m.parent.mkdir(parents=True, exist_ok=True)
         m.write_text(f"# Acceptance Delivery Marker\n\nrun: {self.run_id}\n"
                      f"attempt: {attempt_id}\ncreated: {_utc()}\n")
+        # NOTE: do NOT commit here — the DeliveryService _create_commit stages
+        # and commits the approved changeset during publish. We only stage so
+        # the gate's base-commit diff sees the change.
         subprocess.run(["git", "-C", str(wt), "add", "-A"], check=True)
-        subprocess.run(["git", "-C", str(wt), "commit", "-qm",
-                        f"acceptance delivery marker {attempt_id}"], check=True)
         return wt
 
     # -- steps -------------------------------------------------------------
