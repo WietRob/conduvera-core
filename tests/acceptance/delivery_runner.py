@@ -14,7 +14,6 @@ import os
 import subprocess
 import sys
 import time
-import urllib.error
 import uuid
 from pathlib import Path
 
@@ -107,6 +106,7 @@ class DeliveryAcceptanceRunner:
 
     def _post(self, method: str, params: dict) -> dict:
         import urllib.request
+        import urllib.error
         import json as _j
         req = urllib.request.Request(
             f"http://127.0.0.1:{self.port}/api/action",
@@ -300,6 +300,29 @@ class DeliveryAcceptanceRunner:
                 self._job_completed(e["result"]["job_id"])
                 r = self._post("delivery_preflight", {"job_or_delivery": e["result"]["job_id"]})
                 neg["empty"] = [x["code"] for x in (r.get("result") or {}).get("reasons", [])]
+                # forbidden runtime artefact in the change set
+                fb = self._submit(task_id="DLV-FORBID", attempt_id="f2",
+                                  scenario="HOLD_THEN_EXIT_0", hold_s=2)
+                self._job_completed(fb["result"]["job_id"])
+                fwts = list((self.state_dir / "worktrees").glob("*f2*"))
+                if fwts:
+                    (fwts[0] / "fixture-status.json").write_text(
+                        '{"status":"ok"}\n')
+                    subprocess.run(["git", "-C", str(fwts[0]), "add", "-A"],
+                                   check=True)
+                r = self._post("delivery_preflight", {"job_or_delivery": fb["result"]["job_id"]})
+                neg["forbidden"] = [x["code"] for x in (r.get("result") or {}).get("reasons", [])]
+                # secret-like material in the change set
+                sc = self._submit(task_id="DLV-SECRET", attempt_id="s1",
+                                  scenario="HOLD_THEN_EXIT_0", hold_s=2)
+                self._job_completed(sc["result"]["job_id"])
+                swts = list((self.state_dir / "worktrees").glob("*s1*"))
+                if swts:
+                    (swts[0] / "leak.txt").write_text("API_KEY=super_secret_123456789\n")
+                    subprocess.run(["git", "-C", str(swts[0]), "add", "-A"],
+                                   check=True)
+                r = self._post("delivery_preflight", {"job_or_delivery": sc["result"]["job_id"]})
+                neg["secret"] = [x["code"] for x in (r.get("result") or {}).get("reasons", [])]
                 self._record("10", "negative matrix", **neg)
 
                 # STEP 11: cleanup

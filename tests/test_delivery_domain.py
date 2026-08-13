@@ -232,6 +232,40 @@ class TestPreflightGate:
         codes = [r["code"] for r in res["reasons"]]
         assert "FORBIDDEN_PATH" in codes or "SECRET_PATTERN_DETECTED" in codes
 
+    def test_gate_forbidden_runtime_artefacts(self, tmp_path):
+        """WS-B: generated runtime/session artefacts (fixture-status.json,
+        mxs_*.stdout.txt) are forbidden in a deliverable change set."""
+        store, ev = self._svc(tmp_path)
+        wt = tmp_path / "worktrees" / "w1"
+        wt.mkdir(parents=True)
+        subprocess.run(["git", "init", "-q", str(wt)], check=True)
+        subprocess.run(["git", "-C", str(wt), "config", "user.email", "t@t"], check=True)
+        subprocess.run(["git", "-C", str(wt), "config", "user.name", "t"], check=True)
+        (wt / "f").write_text("x\n")
+        subprocess.run(["git", "-C", str(wt), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(wt), "commit", "-qm", "c"], check=True)
+        head = subprocess.run(["git", "-C", str(wt), "rev-parse", "HEAD"],
+                              capture_output=True, text=True).stdout.strip()
+        # runtime artefacts + a real change
+        (wt / "fixture-status.json").write_text("{\"status\":\"ok\"}\n")
+        (wt / "mxs_abc.stdout.txt").write_text("log line\n")
+        (wt / "real.txt").write_text("real\n")
+        subprocess.run(["git", "-C", str(wt), "add", "-A"], check=True)
+        scheduler = _FakeScheduler(
+            jobs={"job_1": _FakeJob("job_1", "fixture", head)},
+            attempts={"a1": _FakeAttempt("a1", "job_1")})
+        registry = _FakeRegistry()
+        registry._s["mxs_1"] = _FakeSession("mxs_1", str(wt))
+        svc = _FakeService(scheduler, registry)
+        dlv = DeliveryService(store=store, evidence_store=ev,
+                              provider=GitHubDeliveryProvider(dry_run=True),
+                              service=svc,
+                              repo_allowlist={"fixture": tmp_path / "repo"},
+                              worktree_root=tmp_path / "worktrees")
+        res = dlv.preflight("job_1")
+        codes = [r["code"] for r in res["reasons"]]
+        assert "FORBIDDEN_PATH" in codes
+
 
 class TestCleanupRetention:
     def test_resolve_target_reuses_existing_delivery(self, tmp_path):

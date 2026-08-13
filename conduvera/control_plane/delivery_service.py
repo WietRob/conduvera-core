@@ -65,6 +65,11 @@ FORBIDDEN_PATH_PARTS = (
     "node_modules/", ".pytest_cache/", ".mypy_cache/", ".ruff_cache/",
     "*.pyc", "*.log", ".local/", "*.secret", "credentials", ".ssh/",
     ".config/", "coverage/", "dist/", "build/", ".hermes/",
+    # generated runtime / session artefacts (WS-B: no generated runtime
+    # state or repository metadata in a deliverable change set)
+    "fixture-status.json", "fixture_out", "*.stdout.txt", "*.stderr.txt",
+    "mxs_", ".ai/worktrees/", ".ai/state/", ".worktrees/", ".sisyphus/",
+    "control-plane.sock", "outbox.jsonl",
 )
 
 SECRET_PATTERNS = (
