@@ -262,13 +262,22 @@ class DeliveryAcceptanceRunner:
                              pr_head=(prs_json[0].get("headRefOid") if prs_json else None),
                              pr_base=(prs_json[0].get("baseRefOid") if prs_json else None))
 
-                # STEP 7: idempotency
+                # STEP 7: idempotency — repeated publish must return the same
+                # delivery and PR and create NO duplicate commit/branch/PR.
                 pub2 = self._post("delivery_publish", {"job_or_delivery": job_a,
                                                        "base_branch": "main"})
                 rec2 = (pub2.get("result") or {}).get("record") or {}
+                # authoritative GitHub proof: still exactly one open PR on the branch
+                prs2 = subprocess.run(["gh", "pr", "list", "--repo", repo,
+                                       "--head", branch, "--state", "open",
+                                       "--json", "number"],
+                                      capture_output=True, text=True)
+                prs2_json = _j.loads(prs2.stdout) if prs2.returncode == 0 else []
                 self._record("7", "idempotency",
                              same_delivery=(rec2.get("delivery_id") == record.get("delivery_id")),
-                             same_pr=(rec2.get("pull_request_number") == record.get("pull_request_number")))
+                             same_pr=(rec2.get("pull_request_number") == record.get("pull_request_number")),
+                             gh_pr_count=len(prs2_json),
+                             gh_single_pr=(len(prs2_json) == 1))
 
                 # STEP 8: restart
                 self.stop_service()
