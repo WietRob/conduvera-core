@@ -193,6 +193,12 @@ class DeliveryService:
             raise DeliveryError("JOB_NOT_COMPLETED",
                                 "no completed attempt to deliver")
         selected = completed[-1]
+        # DOD-08 idempotency: reuse an existing DeliveryRecord bound to this
+        # exact (job, attempt) so a repeated Publish returns the same record,
+        # branch and PR instead of a new delivery.
+        existing = self.find_by_job_attempt(job.job_id, selected.attempt_id)
+        if existing is not None:
+            return existing, job.job_id, selected.attempt_id
         return (self._new_record(job.job_id, selected.attempt_id),
                 job.job_id, selected.attempt_id)
 
@@ -469,8 +475,17 @@ class DeliveryService:
         record = pre["record"]
         job_id = record["job_id"]
         attempt_id = record["attempt_id"]
-        session = self.service.registry.get(record.get("session_id") or "")
-        wt = Path(session.worktree if session else record.get("worktree") or "")
+        # resolve the MANAGED session for this attempt (never fall back to the
+        # core checkout / CWD — that would commit into the wrong repository)
+        session = self._find_session(attempt_id)
+        wt = Path(session.worktree) if session and session.worktree else (
+            Path(record.get("worktree") or ""))
+        if not wt or str(wt) in ("", "."):
+            return self._transition(record, DELIVERY_FAILED,
+                                    event="publish_no_worktree",
+                                    reason="no owned worktree for attempt",
+                                    attention=["remote publication failure"],
+                                    branch_name="", pull_request_url="")
 
         # resolve repo/github/base BEFORE drift classification (the remote
         # base SHA depends on github_repository being known)
