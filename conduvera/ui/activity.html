@@ -517,6 +517,39 @@ function openDetail(jobId, attemptId, deliveryId){
   const ch = document.createElement("div"); ch.className="detail-block";
   ch.innerHTML = "<h4>Änderungen (Diff)</h4><div id=\"diffBox\">—</div>";
   panel.appendChild(ch);
+  // WS H dogfood: Check + Review Details surface
+  const cd = document.createElement("div"); cd.className="detail-block";
+  cd.innerHTML = "<h4>Check + Review Details</h4><div id=\"checkDetailBox\">lädt…</div>";
+  panel.appendChild(cd);
+  if(jobId){
+    runAction("delivery_check_details",{job_or_delivery:jobId}).then(r=>{
+      const box = panel.querySelector("#checkDetailBox");
+      if(!box) return;
+      const res = r&&r.result||{};
+      let html = "";
+      html += "<b>Mergeability:</b> "+esc(res.mergeable||"—")+" · <b>Merge state:</b> "+esc(res.merge_state||"—")+"<br/>";
+      html += "<b>Attention:</b> "+esc((res.attention||[]).join(", ")||"—")+"<br/><br/>";
+      html += "<b>Checks:</b><ul>";
+      (res.checks||[]).forEach(c=>{
+        html += "<li>"+esc(c.name)+": <b>"+esc(c.conclusion||c.status||"?")+"</b>"+
+          (c.started_at?(" · "+esc(String(c.started_at).slice(0,19)).replace("T"," ")):"")+
+          (c.details_url?(" · <a href=\""+esc(c.details_url)+"\" target=\"_blank\" rel=\"noopener\">details</a>"):"")+
+          (c.required?" · required":" · optional")+"</li>";
+      });
+      html += "</ul>";
+      html += "<b>Reviews:</b><ul>";
+      (res.reviews||[]).forEach(rv=>{
+        html += "<li>"+esc(rv.state)+" by "+esc(rv.author||"—")+"</li>";
+      });
+      html += "</ul>";
+      html += "<b>Delivery timeline:</b><ol>";
+      (res.timeline||[]).forEach(ev=>{
+        html += "<li>"+esc(ev.event||ev.state||"?")+" @ "+esc(ev.at||ev.time||"—")+"</li>";
+      });
+      html += "</ol>";
+      box.innerHTML = html || "keine Details";
+    }).catch(()=>{ const box=panel.querySelector("#checkDetailBox"); if(box) box.textContent="Details nicht verfügbar"; });
+  }
 }
 
 function viewEvidence(refs){

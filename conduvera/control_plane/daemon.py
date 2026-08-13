@@ -200,6 +200,9 @@ class ControlPlaneDaemon:
             if method == "delivery_sync":
                 r = self.service.delivery.sync(params.get("job_or_delivery", ""))
                 return {"ok": r.get("ok", False), "result": r}
+            if method == "delivery_check_details":
+                r = self.service.delivery.check_details(params.get("job_or_delivery", ""))
+                return {"ok": r.get("ok", False), "result": r}
             if method == "delivery_cleanup":
                 r = self.service.delivery.cleanup(
                     params.get("job_or_delivery", ""),

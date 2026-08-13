@@ -172,8 +172,11 @@ class GitHubDeliveryProvider:
         try:
             out = self._gh_json(["api",
                                  f"repos/{repository}/commits/{head_sha}/check-runs",
-                                 "--json", "check_runs"])
-            return out.get("check_runs", []) or []
+                                 "--jq",
+                                 ".check_runs[] | {name: .name, status: .status, conclusion: .conclusion, started_at: .started_at, completed_at: .completed_at, details_url: .details_url, app: .app.name, check_suite_id: .check_suite.id}"])
+            if isinstance(out, dict):
+                out = [out]
+            return out if isinstance(out, list) else []
         except GitHubDeliveryError:
             return []
 

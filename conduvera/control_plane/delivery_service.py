@@ -976,6 +976,7 @@ class DeliveryService:
     def _checks_summary(self, checks: list[dict]) -> dict:
         by = {"pending": 0, "success": 0, "failure": 0, "other": 0}
         names = []
+        details = []
         for c in checks:
             conc = (c.get("conclusion") or "").lower()
             status = (c.get("status") or "").lower()
@@ -988,17 +989,61 @@ class DeliveryService:
                 by["pending"] += 1
             else:
                 by["other"] += 1
+            # operator-visible per-check detail (WS H dogfood feature)
+            details.append({
+                "name": c.get("name", ""),
+                "status": status,
+                "conclusion": conc,
+                "started_at": c.get("started_at"),
+                "completed_at": c.get("completed_at"),
+                "details_url": c.get("details_url"),
+                "app": c.get("app"),
+                "required": bool(c.get("required")),
+            })
         return {"by_status": by, "names": names[:20],
+                "details": details,
                 "failed": by["failure"] > 0, "pending": by["pending"] > 0}
 
     def _reviews_summary(self, reviews: list[dict]) -> dict:
         states = {}
+        details = []
         for r in reviews:
             s = (r.get("state") or "").upper()
             states[s] = states.get(s, 0) + 1
+            details.append({
+                "state": s,
+                "author": r.get("user", {}).get("login") if isinstance(r.get("user"), dict) else "",
+                "submitted_at": r.get("submitted_at"),
+                "commit_id": r.get("commit_id"),
+                "body_excerpt": (r.get("body") or "")[:120],
+            })
         return {"by_state": states,
                 "approved": states.get("APPROVED", 0),
-                "changes_requested": states.get("CHANGES_REQUESTED", 0)}
+                "changes_requested": states.get("CHANGES_REQUESTED", 0),
+                "details": details}
+
+    def check_details(self, job_or_delivery: str) -> dict:
+        """WS H: expose the full check/review/mergeability detail surface."""
+        try:
+            record, job_id, attempt_id = self._resolve_target(job_or_delivery)
+        except DeliveryError as e:
+            return {"ok": False, "code": e.code, "message": str(e)}
+        synced = self._sync_record(record)
+        record.update({k: v for k, v in synced.items()
+                       if k in ("checks_summary", "reviews_summary",
+                                "mergeable", "merge_state", "state",
+                                "head_sha", "base_sha", "attention_reasons")})
+        # ordered delivery event timeline
+        timeline = self.history(record.get("delivery_id", "")) \
+            if record.get("delivery_id") else []
+        return {"ok": True, "record": record,
+                "checks": synced.get("checks_summary", {}).get("details", []),
+                "reviews": synced.get("reviews_summary", {}).get("details", []),
+                "mergeable": synced.get("mergeable"),
+                "merge_state": synced.get("merge_state"),
+                "attention": synced.get("attention_reasons", []),
+                "timeline": timeline}
+
 
     def _state_from_sync(self, synced: dict) -> str:
         pr_state = synced.get("state", "").upper()

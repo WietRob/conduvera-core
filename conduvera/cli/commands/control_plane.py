@@ -304,6 +304,10 @@ def delivery(
     if subcommand == "sync":
         _emit(_call("delivery_sync", {"job_or_delivery": target}), json_output)
         return
+    if subcommand == "check-details":
+        _emit(_call("delivery_check_details", {"job_or_delivery": target}),
+              json_output)
+        return
     if subcommand == "cleanup":
         _emit(_call("delivery_cleanup", {"job_or_delivery": target,
                                          "safe_only": safe_only}), json_output)
