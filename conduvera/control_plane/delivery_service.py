@@ -17,6 +17,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Callable
 
+from conduvera.control_plane.candidate_service import CandidateError
 from conduvera.control_plane.delivery_store import DeliveryStore
 from conduvera.control_plane.evidence_store import EvidenceStore
 from conduvera.control_plane.github_provider import (
@@ -119,6 +120,18 @@ class DeliveryService:
         self._repo_allowlist = repo_allowlist or {}
         self._worktree_root = Path(worktree_root) if worktree_root else None
         self._time_fn = time_fn
+        self.candidate_service: Any = None
+        if delivery_store_dir is not None:
+            self._bind_candidate_service(delivery_store_dir)
+
+    def _bind_candidate_service(self, delivery_store_dir) -> None:
+        from conduvera.control_plane.candidate_store import PublishCandidateStore
+        from conduvera.control_plane.candidate_service import PublishCandidateService
+        croot = Path(delivery_store_dir) / "candidates"
+        self.candidate_store = PublishCandidateStore(croot)
+        self.candidate_service = PublishCandidateService(
+            self.candidate_store, self.evidence_store,
+            worktree_root=self._worktree_root or Path.cwd())
 
     # -- record helpers ----------------------------------------------------
     def _new_record(self, job_id: str, attempt_id: str) -> dict:
@@ -174,17 +187,20 @@ class DeliveryService:
         return self.store.history(delivery_id)
 
     # -- resolve job/attempt/session from a delivery or job id -------------
-    def _resolve_target(self, job_or_delivery: str) -> tuple[dict, str, str]:
+    def _resolve_target(self, job_or_delivery: str,
+                        attempt_id: str | None = None) -> tuple[dict, str, str]:
         """Return (record, job_id, attempt_id) for a delivery_id OR job_id.
 
-        A delivery_id resolves its own record. A job_id resolves the selected
-        terminal COMPLETED attempt (the active delivery source). Raises
-        DeliveryError when ambiguous or non-terminal.
+        A delivery_id resolves its own record. A job_id resolves an explicitly
+        selected COMPLETED attempt (WS A): if `attempt_id` is given it must be
+        a COMPLETED attempt of the job; otherwise the persisted selection is
+        used; otherwise ATTEMPT_NOT_SELECTED fails closed when the job has
+        multiple COMPLETED attempts.
         """
         rec = self.store.get(job_or_delivery)
         if rec is not None:
             return rec, rec["job_id"], rec["attempt_id"]
-        # job_id path: pick the selected COMPLETED attempt
+        # job_id path
         if self.service is None:
             raise DeliveryError("NO_SERVICE", "service not bound")
         job = self.service.scheduler.store.get_job(job_or_delivery)
@@ -197,7 +213,23 @@ class DeliveryService:
         if not completed:
             raise DeliveryError("JOB_NOT_COMPLETED",
                                 "no completed attempt to deliver")
-        selected = completed[-1]
+        if attempt_id:
+            if attempt_id not in {a.attempt_id for a in completed}:
+                raise DeliveryError("ATTEMPT_NOT_SELECTED",
+                                    f"attempt {attempt_id} not a COMPLETED attempt")
+            selected = next(a for a in completed if a.attempt_id == attempt_id)
+        else:
+            # persisted selection
+            persisted = self._persisted_selection(job.job_id)
+            if persisted and persisted in {a.attempt_id for a in completed}:
+                selected = next(a for a in completed
+                                if a.attempt_id == persisted)
+            elif len(completed) == 1:
+                selected = completed[0]
+            else:
+                raise DeliveryError(
+                    "ATTEMPT_NOT_SELECTED",
+                    "job has multiple completed attempts; select one explicitly")
         # DOD-08 idempotency: reuse an existing DeliveryRecord bound to this
         # exact (job, attempt) so a repeated Publish returns the same record,
         # branch and PR instead of a new delivery.
@@ -206,6 +238,49 @@ class DeliveryService:
             return existing, job.job_id, selected.attempt_id
         return (self._new_record(job.job_id, selected.attempt_id),
                 job.job_id, selected.attempt_id)
+
+    def _persisted_selection(self, job_id: str) -> str | None:
+        """Return the persisted selected attempt_id for a job, if any."""
+        sel = self.store.dir / "selection.json"
+        if sel.is_file():
+            try:
+                return json.loads(sel.read_text()).get(job_id)
+            except (json.JSONDecodeError, OSError):
+                return None
+        return None
+
+    def select_attempt(self, job_id: str, attempt_id: str) -> dict:
+        """Persist the explicit delivery-source Attempt selection (WS A)."""
+        # validate the attempt is a COMPLETED attempt of the job
+        self._resolve_target(job_id, attempt_id=attempt_id)
+        sel = self.store.dir / "selection.json"
+        data = {}
+        if sel.is_file():
+            try:
+                data = json.loads(sel.read_text())
+            except (json.JSONDecodeError, OSError):
+                data = {}
+        data[job_id] = attempt_id
+        sel.write_text(json.dumps(data, sort_keys=True))
+        return {"ok": True, "job_id": job_id, "selected_attempt_id": attempt_id}
+
+    def candidate_approve(self, candidate_id: str, approved_by: str = "operator") -> dict:
+        if self.candidate_service is None:
+            raise DeliveryError("NO_CANDIDATE_SERVICE", "candidate service not bound")
+        c = self.candidate_service.approve(candidate_id, approved_by=approved_by)
+        return {"ok": True, "candidate_id": c["candidate_id"],
+                "approved_at": c.get("approved_at"), "approved_by": approved_by}
+
+    def candidate_list(self) -> list[dict]:
+        if self.candidate_service is None:
+            return []
+        return self.candidate_store.list_summary()
+
+    def candidate_get(self, candidate_id: str) -> dict | None:
+        if self.candidate_service is None:
+            return None
+        return self.candidate_store.get(candidate_id)
+
 
     # -- state machine helpers --------------------------------------------
     def _transition(self, record: dict, new_state: str, *,
@@ -225,22 +300,69 @@ class DeliveryService:
     # ======================================================================
     # WORKSTREAM B — FAIL-CLOSED PRE-PUBLISH GATE
     # ======================================================================
-    def preflight(self, job_or_delivery: str) -> dict:
-        """Run the pre-publish gate; return {ok, reasons[], state, record}."""
+    def preflight(self, job_or_delivery: str,
+                  attempt_id: str | None = None) -> dict:
+        """Run the pre-publish gate; return {ok, reasons[], state, record,
+        candidate?}. Creates the immutable PublishCandidate (WS B) when the
+        gate is clean."""
         try:
-            record, job_id, attempt_id = self._resolve_target(job_or_delivery)
+            record, job_id, attempt_id_r = self._resolve_target(
+                job_or_delivery, attempt_id)
+            attempt_id = attempt_id_r
         except DeliveryError as e:
             return {"ok": False, "reasons": [{"code": e.code, "message": str(e)}],
                     "state": NOT_READY, "record": None}
         reasons = self._gate(record, job_id, attempt_id)
         ok = not reasons
         state = READY_TO_PUBLISH if ok else NOT_READY
+        candidate = None
+        if ok and self.candidate_service is not None:
+            candidate = self._build_candidate(record, job_id, attempt_id)
+            record["candidate_id"] = candidate.get("candidate_id")
         record = self._persist(dict(record), "preflight",
                                gate_result={"ok": ok, "reasons": reasons})
         record["delivery_state"] = state
         record["gate_result"] = {"ok": ok, "reasons": reasons}
         self.store.save(record)
-        return {"ok": ok, "reasons": reasons, "state": state, "record": record}
+        return {"ok": ok, "reasons": reasons, "state": state,
+                "record": record, "candidate": candidate}
+
+    def _build_candidate(self, record: dict, job_id: str, attempt_id: str) -> dict:
+        """Build the immutable PublishCandidate from the exact Attempt (WS B)."""
+        # gather named test/gate results from the EvidenceBundle
+        named_tests, named_gates = self._named_results(job_id, attempt_id)
+        return self.candidate_service.build_candidate(
+            job_id=job_id, attempt_id=attempt_id,
+            session_id=record.get("session_id", ""),
+            delivery_id=record.get("delivery_id", ""),
+            repo_id=record.get("repo_id", ""),
+            github_repository=record.get("github_repository", ""),
+            base_branch=record.get("base_branch", "main"),
+            base_commit=record.get("base_commit", ""),
+            worktree=record.get("worktree", ""),
+            evidence_refs=record.get("evidence_refs", []) or [],
+            named_tests=named_tests, named_gates=named_gates,
+        )
+
+    def _named_results(self, job_id: str, attempt_id: str) -> tuple[list, list]:
+        """Extract named test/gate results from the selected Attempt's evidence."""
+        tests, gates = [], []
+        for ref in self._evidence_refs(job_id, attempt_id):
+            ev = self.evidence_store.get(ref)
+            if not isinstance(ev, dict):
+                continue
+            test_result = ev.get("test_result")
+            if isinstance(test_result, dict) and test_result.get("name"):
+                tests.append({
+                    "name": test_result.get("name"),
+                    "result": test_result.get("result", "UNKNOWN"),
+                    "duration_s": test_result.get("duration_s"),
+                })
+            elif isinstance(test_result, str) and test_result:
+                tests.append({"name": "job-tests", "result": test_result,
+                              "duration_s": None})
+        return tests, gates
+
 
     def _gate(self, record: dict, job_id: str, attempt_id: str) -> list[dict]:
         reasons: list[dict] = []
@@ -429,11 +551,16 @@ class DeliveryService:
             return DRIFT_UNAVAILABLE
         if remote_base == recorded_base:
             return DRIFT_MATCH
-        # local ancestry: is recorded base an ancestor of remote base?
+        # local ancestry: is recorded base an ancestor of remote base (BEHIND)
+        # or is the remote base an ancestor of the recorded base (AHEAD)?
         anc = self._is_ancestor(recorded_base, remote_base, record)
         if anc is True:
             return DRIFT_BEHIND
         if anc is False:
+            # try the reverse: remote base ancestor of recorded base -> AHEAD
+            rev = self._is_ancestor(remote_base, recorded_base, record)
+            if rev is True:
+                return DRIFT_AHEAD
             return DRIFT_DIVERGED
         return DRIFT_UNAVAILABLE
 
@@ -452,8 +579,8 @@ class DeliveryService:
             return None
         try:
             from conduvera.control_plane.github_provider import _git
-            _git("cat-file", "-e", f"{ancestor}^" + "commit", cwd=wt)
-            _git("cat-file", "-e", f"{descendant}^" + "commit", cwd=wt)
+            _git("cat-file", "-e", f"{ancestor}^{{commit}}", cwd=wt)
+            _git("cat-file", "-e", f"{descendant}^{{commit}}", cwd=wt)
             _git("merge-base", "--is-ancestor", ancestor, descendant, cwd=wt)
             return True
         except Exception:
@@ -470,9 +597,23 @@ class DeliveryService:
     # WORKSTREAM C — PUBLISH
     # ======================================================================
     def publish(self, job_or_delivery: str, *, base_branch: str = "main",
-                force: bool = False) -> dict:
+                force: bool = False, attempt_id: str | None = None,
+                candidate_id: str | None = None) -> dict:
         """Run the gate, create exactly one task branch + PR, persist record."""
-        pre = self.preflight(job_or_delivery)
+        if candidate_id:
+            cand = self.candidate_store.get(candidate_id)
+            if cand is None:
+                return {"ok": False, "state": NOT_READY,
+                        "reasons": [{"code": "UNKNOWN_CANDIDATE",
+                                     "message": f"unknown candidate {candidate_id}"}],
+                        "message": "unknown candidate"}
+            if not cand.get("approved_at"):
+                return {"ok": False, "state": NOT_READY,
+                        "reasons": [{"code": "CANDIDATE_NOT_APPROVED",
+                                     "message": "candidate not approved"}],
+                        "message": "candidate not approved"}
+            attempt_id = cand.get("attempt_id")
+        pre = self.preflight(job_or_delivery, attempt_id=attempt_id)
         if not pre["ok"]:
             return {"ok": False, "state": NOT_READY,
                     "reasons": pre["reasons"],
@@ -536,24 +677,59 @@ class DeliveryService:
                                     reason="remote branch unexpected SHA",
                                     attention=["remote publication failure"])
 
-        # create commit containing only the approved changeset
-        try:
-            self._create_commit(wt, record)
-        except DeliveryError as e:
-            return self._transition(record, DELIVERY_FAILED,
-                                    event="publish_commit_failed",
-                                    reason=str(e), attention=["remote publication failure"])
-        head_sha = self._head_sha(wt)
+        # create commit containing ONLY the approved candidate manifest (atomic,
+        # never `git add -A`). If no candidate exists yet, build+approve it now.
+        if self.candidate_service is not None:
+            candidate = self._candidate_for(record, job_id, attempt_id)
+            if candidate is None:
+                return self._transition(record, DELIVERY_FAILED,
+                                        event="publish_no_candidate",
+                                        reason="no approved candidate for attempt",
+                                        attention=["remote publication failure"])
+            try:
+                msg = (f"conduvera: delivery {record['delivery_id']} "
+                       f"candidate {candidate['candidate_id']} "
+                       f"attempt {attempt_id}")
+                commit = self.candidate_service.commit_candidate(candidate, message=msg)
+                head_sha = commit["commit_sha"]
+            except CandidateError as e:
+                return self._transition(record, DELIVERY_FAILED,
+                                        event="publish_candidate_failed",
+                                        reason=f"{e.code}: {e.message}",
+                                        attention=["remote publication failure"])
+        else:
+            # fallback legacy path (no candidate service bound) — not used in prod
+            try:
+                self._create_commit(wt, record)
+            except DeliveryError as e:
+                return self._transition(record, DELIVERY_FAILED,
+                                        event="publish_commit_failed",
+                                        reason=str(e),
+                                        attention=["remote publication failure"])
+            head_sha = self._head_sha(wt)
         record["branch_head_sha"] = head_sha
 
         # push without force (idempotent: no force)
-        self._push(wt, github_repo, branch)
-        record["branch_head_sha"] = self._head_sha(wt)
+        self._push(wt, github_repo, branch, head_sha=head_sha)
+        record["branch_head_sha"] = head_sha
 
-        body = self._build_body(record, wt)
+        body = self._build_body(record, wt, candidate=candidate)
         pr = self.provider.create_pr(github_repo, branch, base_branch,
                                      self._pr_title(record), body)
         return self._record_pr(record, pr, job_id, attempt_id, wt)
+
+    def _candidate_for(self, record: dict, job_id: str, attempt_id: str):
+        """Return the approved PublishCandidate for this attempt (build if none)."""
+        cand = self.candidate_store.find_by_job_attempt(job_id, attempt_id)
+        if cand is not None and cand.get("approved_at"):
+            return cand
+        if cand is not None:
+            raise CandidateError("CANDIDATE_NOT_APPROVED",
+                                 f"candidate {cand['candidate_id']} not approved")
+        # build + approve (operator approved via preflight path normally)
+        c = self._build_candidate(record, job_id, attempt_id)
+        return self.candidate_service.approve(c["candidate_id"], approved_by="conduvera")
+
 
     def _record_pr(self, record: dict, pr: dict, job_id: str,
                    attempt_id: str, wt: Path) -> dict:
@@ -641,20 +817,26 @@ class DeliveryService:
         from conduvera.control_plane.github_provider import _git
         return _git("rev-parse", "HEAD", cwd=wt)
 
-    def _push(self, wt: Path, github_repo: str, branch: str) -> None:
+    def _push(self, wt: Path, github_repo: str, branch: str,
+              head_sha: str | None = None) -> None:
         from conduvera.control_plane.github_provider import _git
         remote = f"https://github.com/{github_repo}.git"
-        # the owned worktree's origin is the local conduvera-core clone path;
-        # force the delivery remote to the canonical https URL so we push to
-        # the real GitHub repo, not a local ref.
+        # use an explicit delivery remote so we never mutate the owned
+        # worktree's canonical origin as a persistent side effect
         try:
-            cur = _git("remote", "get-url", "origin", cwd=wt)
+            orig_url = _git("remote", "get-url", "delivery", cwd=wt)
         except GitHubDeliveryError:
-            cur = ""
-        if cur != remote:
-            _git("remote", "set-url", "origin", remote, cwd=wt)
-        # push without force (idempotent); use a full ref target
-        _git("push", "origin", f"HEAD:refs/heads/{branch}", cwd=wt)
+            orig_url = ""
+        if orig_url != remote:
+            try:
+                _git("remote", "remove", "delivery", cwd=wt)
+            except GitHubDeliveryError:
+                pass
+            _git("remote", "add", "delivery", remote, cwd=wt)
+        # push the exact candidate commit SHA (never a moving HEAD) to the task
+        # branch; no force.
+        src = head_sha if head_sha else "HEAD"
+        _git("push", "delivery", f"{src}:refs/heads/{branch}", cwd=wt)
 
     def _safe_rebase(self, record: dict, wt: Path) -> None:
         from conduvera.control_plane.github_provider import _git
@@ -664,34 +846,58 @@ class DeliveryService:
         except GitHubDeliveryError as e:
             raise DeliveryError("REBASE_FAILED", str(e))
 
-    def _build_body(self, record: dict, wt: Path) -> str:
-        # redacted evidence-rich PR body (no raw prompt, no secrets, no abs paths)
+    def _build_body(self, record: dict, wt: Path,
+                    candidate: dict | None = None) -> str:
+        """PR body from the immutable candidate + publication receipt only
+        (WS D). No recomputed diff, no generic statement."""
         lines = []
         lines.append(f"## Conduvera Delivery `{record['delivery_id']}`")
         lines.append("")
         lines.append(f"- Job: `{record['job_id']}`")
         lines.append(f"- Attempt: `{record['attempt_id']}`")
         lines.append(f"- Session: `{record.get('session_id') or '—'}`")
+        lines.append(f"- Delivery: `{record['delivery_id']}`")
+        lines.append(f"- Candidate: `{(candidate or {}).get('candidate_id') or '—'}`")
         lines.append(f"- Repository: `{record.get('repo_id') or '—'}`")
         lines.append(f"- Base commit: `{record.get('base_commit') or '—'}`")
         lines.append(f"- Branch head: `{record.get('branch_head_sha') or '—'}`")
+        lines.append(f"- Diff SHA-256: `{(candidate or {}).get('diff_sha256') or '—'}`")
         lines.append(f"- Harness: `{self._job_harness(record['job_id'])}`")
         lines.append("")
-        changes = self._changeset(wt) or []
+        # changed files from the candidate manifest (exact, with stats)
+        files = (candidate or {}).get("files") or []
         lines.append("## Changed files")
         lines.append("")
-        for f in changes[:50]:
-            lines.append(f"- `{f}`")
-        if len(changes) > 50:
-            lines.append(f"- … ({len(changes) - 50} more)")
+        for f in files[:100]:
+            lines.append(f"- `{f.get('status')}` `{f.get('path')}` "
+                         f"(+{f.get('additions', 0)}/-{f.get('deletions', 0)}, "
+                         f"size {f.get('size', 0)})")
+        if not files:
+            lines.append("- (no changed files in candidate)")
         lines.append("")
+        # named tests/gates from the candidate
+        tests = (candidate or {}).get("named_test_results") or []
+        gates = (candidate or {}).get("named_gate_results") or []
+        lines.append("## Tests")
+        lines.append("")
+        for t in tests:
+            dur = f" ({t.get('duration_s')}s)" if t.get("duration_s") else ""
+            lines.append(f"- `{t.get('name')}`: **{t.get('result', 'UNKNOWN')}**{dur}")
+        if not tests:
+            lines.append("- No named tests recorded in EvidenceBundle.")
+        lines.append("")
+        lines.append("## Gates")
+        lines.append("")
+        lines.append(f"- Gate contract: `{(candidate or {}).get('gate_contract_version') or '—'}`")
+        for g in gates:
+            lines.append(f"- `{g.get('name')}`: **{g.get('result', 'UNKNOWN')}**")
+        lines.append("")
+        # evidence
         lines.append("## Evidence")
         lines.append("")
-        for ref in record.get("evidence_refs", []):
-            lines.append(f"- EvidenceBundle: `{ref}`")
-        lines.append("")
-        lines.append("## Tests / gates")
-        lines.append("- Reported by the job's EvidenceBundle (see above).")
+        for ref in (candidate or {}).get("evidence_refs") or []:
+            h = ((candidate or {}).get("evidence_hashes") or {}).get(ref, "—")
+            lines.append(f"- EvidenceBundle: `{ref}` (sha256 `{h}`)")
         lines.append("")
         lines.append("## Notes")
         lines.append("- Merge is an explicit **human action** in v1.")

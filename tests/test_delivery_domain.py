@@ -349,3 +349,82 @@ class TestCleanupRetention:
         r = dlv.cleanup(rec["delivery_id"], safe_only=True)
         assert r["ok"] is False
         assert wt.exists()
+
+
+class TestDrift:
+    """DOD-08: MATCH / BEHIND / AHEAD / DIVERGED / UNAVAILABLE (defect 9)."""
+
+    def _drift_svc(self, tmp_path, base_sha, remote_sha, repo=None):
+        store, ev = DeliveryStore(tmp_path / "d"), EvidenceStore(tmp_path / "e")
+        scheduler = _FakeScheduler(
+            jobs={"job_1": _FakeJob("job_1", "fixture", base_sha)},
+            attempts={"a1": _FakeAttempt("a1", "job_1")})
+        registry = _FakeRegistry()
+        # the worktree must be a git repo containing the recorded commits so
+        # ancestry checks resolve
+        wt = repo if repo is not None else tmp_path / "worktrees" / "w1"
+        svc = _FakeService(scheduler, registry)
+        dlv = DeliveryService(store=store, evidence_store=ev,
+                              provider=GitHubDeliveryProvider(dry_run=True),
+                              service=svc,
+                              repo_allowlist={"fixture": tmp_path / "repo"},
+                              worktree_root=tmp_path / "worktrees")
+        # wire provider remote_base_sha to the recorded remote
+        dlv.provider.remote_base_sha = lambda repository, base_branch: remote_sha
+        return dlv, wt
+
+    def _make_repo_wt(self, tmp_path):
+        repo = tmp_path / "repo"
+        subprocess.run(["git", "init", "-q", str(repo)], check=True)
+        subprocess.run(["git", "-C", str(repo), "config", "user.email", "t@t"], check=True)
+        subprocess.run(["git", "-C", str(repo), "config", "user.name", "t"], check=True)
+        (repo / "a.txt").write_text("v1\n")
+        subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(repo), "commit", "-qm", "c1"], check=True)
+        c1 = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
+                            capture_output=True, text=True).stdout.strip()
+        (repo / "a.txt").write_text("v2\n")
+        subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(repo), "commit", "-qm", "c2"], check=True)
+        c2 = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
+                            capture_output=True, text=True).stdout.strip()
+        return c1, c2, repo
+
+    def test_drift_match(self, tmp_path):
+        c1, _, repo = self._make_repo_wt(tmp_path)
+        dlv, wt = self._drift_svc(tmp_path, c1, c1, repo)
+        rec = dlv._new_record("job_1", "a1")
+        rec["worktree"] = str(wt)
+        rec["github_repository"] = "R/r"
+        rec["base_commit"] = c1
+        assert dlv.classify_drift(rec) == "MATCH"
+
+    def test_drift_behind(self, tmp_path):
+        c1, c2, repo = self._make_repo_wt(tmp_path)
+        dlv, wt = self._drift_svc(tmp_path, c1, c2, repo)
+        rec = dlv._new_record("job_1", "a1")
+        rec["worktree"] = str(wt)
+        rec["github_repository"] = "R/r"
+        rec["base_commit"] = c1
+        # recorded base c1 is ancestor of remote c2 -> BEHIND
+        assert dlv.classify_drift(rec) == "BEHIND"
+
+    def test_drift_ahead(self, tmp_path):
+        c1, c2, repo = self._make_repo_wt(tmp_path)
+        dlv, wt = self._drift_svc(tmp_path, c2, c1, repo)
+        rec = dlv._new_record("job_1", "a1")
+        rec["worktree"] = str(wt)
+        rec["github_repository"] = "R/r"
+        rec["base_commit"] = c2
+        # recorded base c2 is AHEAD of remote c1 -> AHEAD
+        assert dlv.classify_drift(rec) == "AHEAD"
+
+    def test_drift_unavailable(self, tmp_path):
+        c1, _, repo = self._make_repo_wt(tmp_path)
+        dlv, wt = self._drift_svc(tmp_path, c1, None, repo)
+        rec = dlv._new_record("job_1", "a1")
+        rec["worktree"] = str(wt)
+        rec["github_repository"] = "R/r"
+        rec["base_commit"] = c1
+        assert dlv.classify_drift(rec) == "UNAVAILABLE"
+
