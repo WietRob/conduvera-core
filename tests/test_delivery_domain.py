@@ -234,6 +234,29 @@ class TestPreflightGate:
 
 
 class TestCleanupRetention:
+    def test_resolve_target_reuses_existing_delivery(self, tmp_path):
+        """DOD-08 idempotency: resolving a job with an existing bound delivery
+        returns the SAME record, not a new one."""
+        store, ev = DeliveryStore(tmp_path / "d"), EvidenceStore(tmp_path / "e")
+        scheduler = _FakeScheduler(
+            jobs={"job_1": _FakeJob("job_1", "fixture", "abc1234")},
+            attempts={"a1": _FakeAttempt("a1", "job_1")})
+        registry = _FakeRegistry()
+        svc = _FakeService(scheduler, registry)
+        dlv = DeliveryService(store=store, evidence_store=ev,
+                              provider=GitHubDeliveryProvider(dry_run=True),
+                              service=svc,
+                              repo_allowlist={"fixture": tmp_path / "repo"},
+                              worktree_root=tmp_path / "worktrees")
+        rec = dlv._new_record("job_1", "a1")
+        rec["delivery_state"] = "PR_OPEN"
+        rec["pull_request_number"] = 42
+        store.save(rec)
+        got, jid, aid = dlv._resolve_target("job_1")
+        assert got["delivery_id"] == rec["delivery_id"]
+        assert got["pull_request_number"] == 42
+        assert jid == "job_1" and aid == "a1"
+
     def test_cleanup_keeps_durable(self, tmp_path):
         store, ev = DeliveryStore(tmp_path / "d"), EvidenceStore(tmp_path / "e")
         scheduler = _FakeScheduler(
