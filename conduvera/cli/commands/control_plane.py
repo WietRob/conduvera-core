@@ -260,8 +260,11 @@ def logs(
 
 @control_app.command("delivery")
 def delivery(
-    subcommand: str = typer.Argument(..., help="inspect|preflight|publish|sync|list|cleanup"),
+    subcommand: str = typer.Argument(..., help="inspect|preflight|publish|sync|list|cleanup|select-attempt|candidate-approve|candidate-list"),
     target: str = typer.Argument("", help="job-or-delivery identifier"),
+    attempt_id: str = typer.Option("", "--attempt-id", help="explicit delivery-source Attempt"),
+    candidate_id: str = typer.Option("", "--candidate-id", help="approved PublishCandidate id"),
+    approved_by: str = typer.Option("operator", "--approved-by", help="candidate approver"),
     base_branch: str = typer.Option("main", "--base-branch", help="PR base branch"),
     safe_only: bool = typer.Option(True, "--safe-only/--no-safe-only",
                                    help="preserve worktree on unsafe delivery"),
@@ -270,12 +273,15 @@ def delivery(
     """Delivery workspace: turn a completed job into a GitHub PR.
 
     Subcommands:
-      inspect  <job-or-delivery>  show the DeliveryRecord + transition history
-      preflight <job-or-delivery> run the fail-closed pre-publish gate
-      publish  <job-or-delivery>  create the task branch + one GitHub PR
-      sync     <job-or-delivery>  refresh PR checks/reviews/mergeability
-      list                         list all DeliveryRecords
-      cleanup  <job-or-delivery>   remove disposable resources (durable kept)
+      inspect          <job-or-delivery>  show the DeliveryRecord + history
+      preflight        <job-or-delivery>  run the fail-closed gate (+ candidate)
+      publish          <job-or-delivery>  create task branch + one GitHub PR
+      sync             <job-or-delivery>  refresh PR checks/reviews/mergeability
+      list                                list all DeliveryRecords
+      cleanup          <job-or-delivery>  remove disposable resources
+      select-attempt   <job> <attempt-id> persist the delivery-source Attempt
+      candidate-approve <candidate-id>    approve an immutable PublishCandidate
+      candidate-list                       list PublishCandidates
     """
     if subcommand == "list":
         _emit(_call("delivery_list"), json_output)
@@ -284,11 +290,16 @@ def delivery(
         _emit(_call("delivery_inspect", {"delivery_id": target}), json_output)
         return
     if subcommand == "preflight":
-        _emit(_call("delivery_preflight", {"job_or_delivery": target}), json_output)
+        _emit(_call("delivery_preflight", {"job_or_delivery": target,
+                                           "attempt_id": attempt_id or None}),
+              json_output)
         return
     if subcommand == "publish":
         _emit(_call("delivery_publish", {"job_or_delivery": target,
-                                         "base_branch": base_branch}), json_output)
+                                         "base_branch": base_branch,
+                                         "attempt_id": attempt_id or None,
+                                         "candidate_id": candidate_id or None}),
+              json_output)
         return
     if subcommand == "sync":
         _emit(_call("delivery_sync", {"job_or_delivery": target}), json_output)
@@ -296,5 +307,24 @@ def delivery(
     if subcommand == "cleanup":
         _emit(_call("delivery_cleanup", {"job_or_delivery": target,
                                          "safe_only": safe_only}), json_output)
+        return
+    if subcommand == "select-attempt":
+        if not target or not attempt_id:
+            typer.echo("select-attempt requires <job> and --attempt-id", err=True)
+            raise typer.Exit(2)
+        _emit(_call("delivery_select_attempt", {"job_id": target,
+                                                "attempt_id": attempt_id}),
+              json_output)
+        return
+    if subcommand == "candidate-approve":
+        if not candidate_id:
+            typer.echo("candidate-approve requires --candidate-id", err=True)
+            raise typer.Exit(2)
+        _emit(_call("delivery_candidate_approve", {"candidate_id": candidate_id,
+                                                   "approved_by": approved_by}),
+              json_output)
+        return
+    if subcommand == "candidate-list":
+        _emit(_call("delivery_candidate_list"), json_output)
         return
     typer.echo(f"unknown delivery subcommand: {subcommand}", err=True)
