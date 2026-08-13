@@ -31,14 +31,34 @@ Current merged scope:
 | Non-Live Matrix UI Route-Plan Panel Attachment | Merged | Add a discoverable Matrix UI route-plan panel view over the stable snapshot contract without runtime/dashboard behavior |
 | Non-Live Route-Plan Artifact Selector | Merged | Select among canonical route-plan artifacts for the non-live panel without filesystem browsing or execution |
 | Non-Live Route-Plan Artifact Picker UI State | Merged | Display selected artifact id, label, scenario, and read-only picker boundaries in the non-live panel path |
-| Non-Live Route-Plan Artifact Picker List Widget | Current | Add a visible read-only picker/list widget with selected marker over canonical artifacts |
+| Non-Live Route-Plan Artifact Picker List Widget | Merged | Historical (non-live) picker widget; superseded by the Delivery Workspace |
 
 This repository contains the Conduvera operational harness control plane with a
-live Delivery Workspace. The activity browser workspace turns completed managed
-code-change jobs into reviewable GitHub pull requests through a restart-safe
-delivery pipeline (fail-closed pre-publish gate, deterministic task branch, one
-PR, GitHub status synchronization, cleanup retention). Merge remains an explicit
-human action in v1.
+live **trusted Delivery Workspace** (v1). The activity browser workspace turns
+a completed, explicitly-selected managed code-change Attempt into an immutable
+operator-approved PublishCandidate and publishes exactly that candidate to one
+GitHub branch and one PR — with no automatic merge and no raw prompt / secret /
+local path in public artefacts.
+
+Alpha vs trusted v1: the earlier alpha published an unconstrained live worktree
+diff (TOCTOU, empty PR body). trusted v1 requires explicit Attempt selection,
+an immutable approved PublishCandidate (exact file/diff/tree/evidence/gate
+hashes), atomic exact-changeset commits, and a complete PR contract. The former
+final acceptance run is a superseded diagnostic, not binding.
+
+### Delivery CLI
+
+```bash
+conduvera control-plane delivery list
+conduvera control-plane delivery inspect <job-or-delivery>
+conduvera control-plane delivery preflight <job-or-delivery> [--attempt-id X]
+conduvera control-plane delivery select-attempt <job> --attempt-id X
+conduvera control-plane delivery candidate-list
+conduvera control-plane delivery candidate-approve --candidate-id cand_...
+conduvera control-plane delivery publish <job-or-delivery> [--candidate-id cand_...]
+conduvera control-plane delivery sync <job-or-delivery>
+conduvera control-plane delivery cleanup <job-or-delivery>
+```
 
 Historical note: earlier UI/MCP/editor work was discovery-only scaffolding (see
 PR #33 and the non-live picker rows below); the current Delivery Workspace is a
@@ -183,9 +203,14 @@ Merged:
 
 - PR #32 Non-Live Route-Plan Artifact Picker UI State
 
-Current:
+Current release train (Delivery Workspace trusted v1):
 
-- PR #33 Non-Live Route-Plan Artifact Picker List Widget: visible read-only picker/list widget with selected marker over canonical artifacts
+- PR #59–#74 Delivery Workspace backend + UI + SSE + corrective gates
+- PR #76 Trusted PublishCandidate domain + atomic exact-changeset publication
+
+Historical (non-live scaffolding, superseded):
+
+- PR #33 Non-Live Route-Plan Artifact Picker List Widget (historical, replaced by the Delivery Workspace)
 
 Planned:
 
