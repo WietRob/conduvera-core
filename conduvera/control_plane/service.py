@@ -131,6 +131,7 @@ class ControlPlaneConfig:
     socket_path: Path
     worktree_base: Path
     evidence_dir: Path
+    delivery_dir: Path
     outbox_path: Path
 
     @classmethod
@@ -145,6 +146,7 @@ class ControlPlaneConfig:
             socket_path=base / "control-plane.sock",
             worktree_base=base / "worktrees",
             evidence_dir=base / "evidence",
+            delivery_dir=base / "delivery",
             outbox_path=base / "outbox" / "events.jsonl",
         )
 
@@ -230,9 +232,24 @@ class ControlPlaneService:
         config.state_dir.mkdir(parents=True, exist_ok=True)
         config.worktree_base.mkdir(parents=True, exist_ok=True)
         config.evidence_dir.mkdir(parents=True, exist_ok=True)
+        config.delivery_dir.mkdir(parents=True, exist_ok=True)
         config.outbox_path.parent.mkdir(parents=True, exist_ok=True)
         from conduvera.control_plane.evidence_store import EvidenceStore
         self.evidence_store = EvidenceStore(config.evidence_dir)
+        # Delivery domain (SHIP-CONDUVERA-DELIVERY)
+        from conduvera.control_plane.delivery_store import DeliveryStore
+        from conduvera.control_plane.delivery_service import DeliveryService
+        from conduvera.control_plane.github_provider import GitHubDeliveryProvider
+        self.delivery_store = DeliveryStore(config.delivery_dir)
+        gh_enabled = os.environ.get("CONDUVERA_GH_ENABLED", "").lower() in ("1", "true", "yes")
+        self.delivery = DeliveryService(
+            store=self.delivery_store,
+            evidence_store=self.evidence_store,
+            provider=GitHubDeliveryProvider(dry_run=not gh_enabled),
+            service=self,
+            repo_allowlist=self._repo_allowlist,
+            worktree_root=config.worktree_base,
+        )
         self.scheduler = Scheduler(
             store=SchedulerStore(config.state_dir / "scheduler" / "queue.json"),
             global_limit=global_concurrency,

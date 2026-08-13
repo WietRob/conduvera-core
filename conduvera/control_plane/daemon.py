@@ -147,6 +147,35 @@ class ControlPlaneDaemon:
                                                   classification=params.get(
                                                       "classification", "EXTERNAL_UNKNOWN"))
                 return {"ok": r.get("success", False), "result": r}
+            # ---- Delivery domain (SHIP-CONDUVERA-DELIVERY) ----
+            if method == "delivery_list":
+                return {"ok": True, "result": {"deliveries": self.service.delivery.list()}}
+            if method == "delivery_inspect":
+                rec = self.service.delivery.get(params.get("delivery_id", ""))
+                if rec is None:
+                    return {"ok": False, "result": {
+                        "success": False, "code": "UNKNOWN_DELIVERY",
+                        "message": "unknown delivery"}}
+                return {"ok": True, "result": {
+                    "success": True, "record": rec,
+                    "history": self.service.delivery.history(rec["delivery_id"])}}
+            if method == "delivery_preflight":
+                r = self.service.delivery.preflight(params.get("job_or_delivery", ""))
+                return {"ok": r["ok"], "result": r}
+            if method == "delivery_publish":
+                r = self.service.delivery.publish(
+                    params.get("job_or_delivery", ""),
+                    base_branch=params.get("base_branch", "main"),
+                    force=bool(params.get("force", False)))
+                return {"ok": r.get("ok", False), "result": r}
+            if method == "delivery_sync":
+                r = self.service.delivery.sync(params.get("job_or_delivery", ""))
+                return {"ok": r.get("ok", False), "result": r}
+            if method == "delivery_cleanup":
+                r = self.service.delivery.cleanup(
+                    params.get("job_or_delivery", ""),
+                    safe_only=params.get("safe_only", True))
+                return {"ok": r.get("ok", False), "result": r}
             if method == "capabilities":
                 return {"ok": True, "result": self.service.capabilities(
                     params.get("harness", "hermes"))}
