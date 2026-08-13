@@ -252,6 +252,7 @@ class ControlPlaneService:
             service=self,
             repo_allowlist=self._repo_allowlist,
             worktree_root=config.worktree_base,
+            delivery_store_dir=str(self.delivery_store.dir),
         )
         self.scheduler = Scheduler(
             store=SchedulerStore(config.state_dir / "scheduler" / "queue.json"),

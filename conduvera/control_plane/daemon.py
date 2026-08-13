@@ -161,18 +161,41 @@ class ControlPlaneDaemon:
                     "history": self.service.delivery.history(rec["delivery_id"])}}
             if method == "delivery_preflight":
                 try:
-                    r = self.service.delivery.preflight(params.get("job_or_delivery", ""))
+                    r = self.service.delivery.preflight(
+                        params.get("job_or_delivery", ""),
+                        attempt_id=params.get("attempt_id"))
                 except Exception as exc:  # noqa: BLE001 - surface structured error
                     import traceback
                     traceback.print_exc()
                     return {"ok": False, "result": {"ok": False,
                             "reasons": [{"code": "DELIVERY_ERROR", "message": str(exc)}]}}
                 return {"ok": r["ok"], "result": r}
+            if method == "delivery_select_attempt":
+                try:
+                    r = self.service.delivery.select_attempt(
+                        params.get("job_id", ""), params.get("attempt_id", ""))
+                except Exception as exc:  # noqa: BLE001
+                    return {"ok": False, "result": {"ok": False,
+                            "code": "ATTEMPT_SELECT_FAILED", "message": str(exc)}}
+                return {"ok": True, "result": r}
+            if method == "delivery_candidate_approve":
+                try:
+                    r = self.service.delivery.candidate_approve(
+                        params.get("candidate_id", ""), params.get("approved_by", "operator"))
+                except Exception as exc:  # noqa: BLE001
+                    return {"ok": False, "result": {"ok": False,
+                            "code": "CANDIDATE_APPROVE_FAILED", "message": str(exc)}}
+                return {"ok": True, "result": r}
+            if method == "delivery_candidate_list":
+                cands = self.service.delivery.candidate_list()
+                return {"ok": True, "result": {"candidates": cands}}
             if method == "delivery_publish":
                 r = self.service.delivery.publish(
                     params.get("job_or_delivery", ""),
                     base_branch=params.get("base_branch", "main"),
-                    force=bool(params.get("force", False)))
+                    force=bool(params.get("force", False)),
+                    attempt_id=params.get("attempt_id"),
+                    candidate_id=params.get("candidate_id"))
                 return {"ok": r.get("ok", False), "result": r}
             if method == "delivery_sync":
                 r = self.service.delivery.sync(params.get("job_or_delivery", ""))
