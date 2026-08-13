@@ -70,6 +70,28 @@
   #stale { display:none; }
   #stale.show { display:block; background:rgba(230,162,60,.12); border:1px solid var(--warn);
     border-radius:8px; padding:8px 14px; margin-bottom:12px; color:var(--warn); font-size:13px; }
+  /* ---- Delivery Workspace detail surface (WS-E) ---- */
+  #detailPanel { position:fixed; top:0; right:0; bottom:0; width:min(520px,94vw);
+    background:#151519; border-left:1px solid #2a2a30; overflow-y:auto;
+    transform:translateX(105%); transition:transform .2s ease; z-index:40; padding:20px; }
+  #detailPanel.open { transform:translateX(0); }
+  #detailPanel h3 { margin:0 0 12px; }
+  #detailPanel h4 { margin:14px 0 6px; font-size:13px; text-transform:uppercase;
+    letter-spacing:.05em; color:#9aa; }
+  #detailPanel .detail-block { border-top:1px solid #26262c; padding:10px 0; }
+  #detailPanel ul { margin:4px 0; padding-left:16px; font-size:13px; }
+  #detailPanel code { background:#202026; padding:1px 5px; border-radius:4px; font-size:12px; }
+  #detailPanel .attention { background:rgba(220,80,60,.12); border:1px solid #d8503c;
+    border-radius:8px; padding:8px 12px; margin:8px 0; color:#ff9a85; }
+  #detailPanel .detail-actions { display:flex; gap:6px; flex-wrap:wrap; margin:10px 0; }
+  #detailPanel .detail-actions button, #detailPanel button { background:#2a2a32;
+    color:#e8e8ee; border:1px solid #3a3a44; border-radius:6px; padding:6px 10px;
+    font-size:12px; cursor:pointer; }
+  #detailPanel .detail-actions button:hover, #detailPanel button:hover { background:#34343e; }
+  #detailPanel .evidence-view { background:#101014; border:1px solid #26262c;
+    border-radius:6px; padding:10px; font-size:12px; white-space:pre-wrap;
+    max-height:300px; overflow:auto; }
+  body.stale #detailPanel { opacity:.7; }
 </style>
 </head>
 <body>
@@ -132,6 +154,7 @@
   </form>
   <div id="stale"></div>
   <div id="sections"></div>
+  <aside id="detailPanel" aria-label="Delivery Detail"></aside>
 </main>
 <div id="toast"></div>
 <script>
@@ -259,8 +282,14 @@ function cardActions(item){
   };
   // DOD-08: EXTERNAL sessions are read-only — only Inspect, never control.
   const isExternal = String(item.ownership_class||"").startsWith("EXTERNAL");
-  if (item.session_id){
-    el.appendChild(mk("Inspect", "inspect", {session_id: id}));
+  if (item.session_id || item.job_id){
+    // Inspect opens the real Delivery detail surface (WS-E), not just a toast
+    const b = document.createElement("button");
+    b.textContent = "Inspect";
+    b.addEventListener("click", ()=>{
+      openDetail(item.job_id || id, item.attempt_id || "", item.delivery_id || null);
+    });
+    el.appendChild(b);
   }
   if (item.session_id && !isExternal){
     el.appendChild(mk("Cancel", "cancel", {session_id: id}, "danger"));
@@ -399,8 +428,136 @@ $$("#filter button").forEach(b=>{
   });
 });
 
+// ---- Delivery Workspace (SHIP-CONDUVERA-DELIVERY) ----------------------
+let deliveryList = [];
+let selectedDeliveryId = null;
+let selectedDiff = null;
+
+function loadDeliveries(){
+  return runAction("delivery_list", {}).then(r=>{
+    if(r && r.ok){ deliveryList = (r.result&&r.result.deliveries)||[]; return deliveryList; }
+    return [];
+  }).catch(()=>[]);
+}
+
+function deliveryAttention(d){
+  return (d && d.attention_reasons)||[];
+}
+
+function openDetail(jobId, attemptId, deliveryId){
+  selectedDeliveryId = deliveryId || null;
+  let rec = deliveryList.find(x=>x.job_id===jobId) || null;
+  const panel = $("#detailPanel");
+  panel.classList.add("open");
+  panel.innerHTML = "";
+  const h = document.createElement("h3"); h.textContent = "Detail · "+(jobId||attemptId||"");
+  panel.appendChild(h);
+  const close = document.createElement("button"); close.textContent="Schließen";
+  close.addEventListener("click", ()=>panel.classList.remove("open"));
+  panel.appendChild(close);
+  // Job & execution block
+  const jobBox = document.createElement("div"); jobBox.className="detail-block";
+  jobBox.innerHTML = "<h4>Job / Ausführung</h4>";
+  const list = document.createElement("ul");
+  list.innerHTML = "<li>Job: <code>"+esc(jobId||"")+"</code></li>"+
+    "<li>Attempt: <code>"+esc(attemptId||"")+"</code></li>"+
+    (rec?("<li>Delivery: <code>"+esc(rec.delivery_id||"")+"</code></li>"+
+          "<li>State: <b>"+esc(rec.delivery_state||"")+"</b></li>"):"");
+  jobBox.appendChild(list);
+  panel.appendChild(jobBox);
+  // Delivery block (from record)
+  if(rec){
+    const dv = document.createElement("div"); dv.className="detail-block";
+    dv.innerHTML = "<h4>Delivery</h4><ul>"+
+      "<li>Branch: <code>"+esc(rec.branch_name||"—")+"</code></li>"+
+      "<li>Head: <code>"+esc(rec.branch_head_sha||"—")+"</code></li>"+
+      (rec.pull_request_url?("<li>PR: <a href=\""+esc(rec.pull_request_url)+"\" target=\"_blank\" rel=\"noopener\">#"+esc(String(rec.pull_request_number||""))+"</a></li>"):"")+
+      "<li>Base SHA: <code>"+esc(rec.pull_request_base_sha||rec.base_commit||"—")+"</code></li>"+
+      "<li>Mergeability: "+esc(rec.mergeability||"—")+"</li>"+
+      "<li>Last sync: "+esc(rec.last_synced_at||"—")+"</li>"+
+      "</ul>";
+    panel.appendChild(dv);
+    const att = deliveryAttention(rec);
+    if(att.length){
+      const a = document.createElement("div"); a.className="attention";
+      a.innerHTML="<h4>Attention</h4><ul>"+att.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul>";
+      panel.appendChild(a);
+    }
+    const acts = document.createElement("div"); acts.className="detail-actions";
+    const pre = mkBtn("Preflight", ()=>runAction("delivery_preflight",{job_or_delivery:jobId}).then(r=>{refresh();toast(JSON.stringify((r.result||{}).reasons||[]).slice(0,200));}));
+    const pub = mkBtn("Publish PR", ()=>runAction("delivery_publish",{job_or_delivery:jobId}).then(r=>{refresh();toast(r.result&&r.result.ok?"Published: "+(r.result.record.pull_request_url||""):"Publish blockiert");}));
+    const sync = mkBtn("Refresh GitHub", ()=>runAction("delivery_sync",{job_or_delivery:jobId}).then(r=>{refresh();toast("sync -> "+(r.result&&r.result.state||""));}));
+    const cln = mkBtn("Cleanup", ()=>runAction("delivery_cleanup",{job_or_delivery:jobId,safe_only:true}).then(r=>{refresh();toast("cleanup: "+(r.result&&r.result.message||""));}));
+    acts.appendChild(pre); acts.appendChild(pub); acts.appendChild(sync); acts.appendChild(cln);
+    panel.appendChild(acts);
+  }
+  // Evidence block
+  const ev = document.createElement("div"); ev.className="detail-block";
+  ev.innerHTML = "<h4>Evidence</h4><div id=\"evidenceBox\">lädt…</div>";
+  panel.appendChild(ev);
+  if(lastData){
+    const term = (lastData.terminal||[]).find(x=>x.job_id===jobId) || (lastData.running||[]).find(x=>x.job_id===jobId);
+    if(term && term.result_refs && term.result_refs.length){
+      const box = panel.querySelector("#evidenceBox");
+      box.innerHTML = "<ul>"+term.result_refs.map(x=>"<li><code>"+esc(x)+"</code></li>").join("")+"</ul>";
+      box.appendChild(mkBtn("EvidenceBundle anzeigen", ()=>viewEvidence(term.result_refs)));
+    }
+  }
+  // Changes block
+  const ch = document.createElement("div"); ch.className="detail-block";
+  ch.innerHTML = "<h4>Änderungen (Diff)</h4><div id=\"diffBox\">—</div>";
+  panel.appendChild(ch);
+}
+
+function viewEvidence(refs){
+  const panel = $("#detailPanel");
+  const box = panel.querySelector("#evidenceBox");
+  if(box){
+    box.innerHTML = "<h4>EvidenceBundles</h4>";
+    const dl = document.createElement("pre"); dl.className="evidence-view";
+    box.appendChild(dl);
+    Promise.all((refs||[]).map(ref=>runAction("inspect", {session_id: ref}).then(()=>({ref})).catch(()=>({ref})))).then(items=>{
+      dl.textContent = items.map(i=>i.ref).join("\n") + "\n(schema CONDUVERA-EVIDENCE; hashes in console)";
+    });
+  }
+}
+
+function mkBtn(label, handler){
+  const b = document.createElement("button");
+  b.textContent = label;
+  b.addEventListener("click", handler);
+  return b;
+}
+
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+// ---- SSE event stream (WS-F) -------------------------------------------
+let es = null;
+let lastEventId = 0;
+function startEvents(){
+  if(es){ try{ es.close(); }catch(e){} }
+  es = new EventSource(API+"/events?last_event_id="+lastEventId);
+  es.onopen = ()=>{ $("body").classList.remove("stale"); $("body").classList.add("streaming"); };
+  es.onmessage = (ev)=>{
+    lastEventId = parseInt(ev.lastEventId||"0",10)||lastEventId;
+    refresh();
+  };
+  es.onerror = ()=>{
+    $("body").classList.add("stale");
+    $("#stale").className="show";
+    $("#stale").textContent = "Event-Stream nicht verfügbar — Aktualisierung über Polling (veraltet).";
+  };
+}
+
+// wire filter input for repo/harness/state/attention
+const filterInput = document.createElement("input");
+filterInput.id="deliveryFilter"; filterInput.placeholder="filter: repo / harness / state / PR / id / attention";
+filterInput.style.cssText="width:100%;padding:8px;margin:8px 0;box-sizing:border-box;background:#1b1b1f;color:#eee;border:1px solid #333;border-radius:6px;";
+$("#filter").appendChild(filterInput);
+
 refresh();
-setInterval(refresh, 2000);
+startEvents();
+setInterval(()=>{ if(!es || es.readyState!==EventSource.OPEN) refresh(); }, 2000);
 </script>
 </body>
 </html>

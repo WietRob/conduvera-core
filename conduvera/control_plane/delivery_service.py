@@ -140,6 +140,17 @@ class DeliveryService:
             "seq": None, "event": event, "state": record.get("delivery_state"),
             "at": self._time_fn(), **payload,
         })
+        # publish to the live event stream for UI updates (WS-F)
+        try:
+            if self.service is not None and hasattr(self.service, "event_bus"):
+                self.service.event_bus.publish(
+                    "delivery." + event,
+                    {"delivery_id": record.get("delivery_id"),
+                     "job_id": record.get("job_id"),
+                     "attempt_id": record.get("attempt_id"),
+                     "delivery_state": record.get("delivery_state")})
+        except Exception:  # noqa: BLE001 - never break the control path
+            pass
         return record
 
     # -- lookup ------------------------------------------------------------
@@ -175,7 +186,8 @@ class DeliveryService:
         job = self.service.scheduler.store.get_job(job_or_delivery)
         if job is None:
             raise DeliveryError("UNKNOWN_JOB", f"unknown job {job_or_delivery}")
-        attempts = self.service.scheduler.store.get_attempts_for_job(job_id=job.job_id)
+        attempts = [a for a in self.service.scheduler.store.all_attempts()
+                    if a.job_id == job.job_id]
         completed = [a for a in attempts
                      if getattr(a, "state", None) and a.state.value == "COMPLETED"]
         if not completed:

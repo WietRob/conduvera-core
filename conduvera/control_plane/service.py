@@ -227,6 +227,9 @@ class ControlPlaneService:
         self.registry = registry
         self.gateway = gateway_service
         self.config = config
+        # restart-safe event stream bus (WS-F)
+        from conduvera.control_plane.event_stream import EventStreamBus
+        self.event_bus = EventStreamBus()
         self.adapter_ids = adapter_ids
         self._repo_allowlist = dict(repo_allowlist) if repo_allowlist else dict(REPO_ALLOWLIST)
         config.state_dir.mkdir(parents=True, exist_ok=True)
@@ -283,6 +286,11 @@ class ControlPlaneService:
         )
         if self._outbox is not None:
             self._outbox.append(envelope.to_dict())
+        # publish to the live event stream (WS-F); payload already redacted
+        try:
+            self.event_bus.publish(event_type, payload)
+        except Exception:  # noqa: BLE001 - never break the control path
+            pass
 
     # -- reconciliation ----------------------------------------------------
 
