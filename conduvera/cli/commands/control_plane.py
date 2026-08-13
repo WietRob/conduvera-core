@@ -254,3 +254,47 @@ def logs(
     """Show evidence/logs for a session (via collect_evidence)."""
     result = _call("inspect", {"session_id": session_id})
     _emit(result, json_output)
+
+
+# ---- Delivery domain (SHIP-CONDUVERA-DELIVERY) ---------------------------
+
+@control_app.command("delivery")
+def delivery(
+    subcommand: str = typer.Argument(..., help="inspect|preflight|publish|sync|list|cleanup"),
+    target: str = typer.Argument("", help="job-or-delivery identifier"),
+    base_branch: str = typer.Option("main", "--base-branch", help="PR base branch"),
+    safe_only: bool = typer.Option(True, "--safe-only/--no-safe-only",
+                                   help="preserve worktree on unsafe delivery"),
+    json_output: bool = typer.Option(False, "--json", help="JSON output"),
+) -> None:
+    """Delivery workspace: turn a completed job into a GitHub PR.
+
+    Subcommands:
+      inspect  <job-or-delivery>  show the DeliveryRecord + transition history
+      preflight <job-or-delivery> run the fail-closed pre-publish gate
+      publish  <job-or-delivery>  create the task branch + one GitHub PR
+      sync     <job-or-delivery>  refresh PR checks/reviews/mergeability
+      list                         list all DeliveryRecords
+      cleanup  <job-or-delivery>   remove disposable resources (durable kept)
+    """
+    if subcommand == "list":
+        _emit(_call("delivery_list"), json_output)
+        return
+    if subcommand == "inspect":
+        _emit(_call("delivery_inspect", {"delivery_id": target}), json_output)
+        return
+    if subcommand == "preflight":
+        _emit(_call("delivery_preflight", {"job_or_delivery": target}), json_output)
+        return
+    if subcommand == "publish":
+        _emit(_call("delivery_publish", {"job_or_delivery": target,
+                                         "base_branch": base_branch}), json_output)
+        return
+    if subcommand == "sync":
+        _emit(_call("delivery_sync", {"job_or_delivery": target}), json_output)
+        return
+    if subcommand == "cleanup":
+        _emit(_call("delivery_cleanup", {"job_or_delivery": target,
+                                         "safe_only": safe_only}), json_output)
+        return
+    typer.echo(f"unknown delivery subcommand: {subcommand}", err=True)
