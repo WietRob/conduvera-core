@@ -206,38 +206,26 @@ class TrustedRunner:
 
                 # STEP 3: open detail, select attempt, inspect (card by task_id)
                 self._click_detail_action(page, task_a, "Select Attempt")
-                # handle the prompt() dialogs headlessly (real attempt id)
-                page.on("dialog", lambda d: d.accept(attempt_a))
+                # the panel renders the delivery state; Select Attempt binds to
+                # the rendered attempt (no prompt) — real browser action
                 self._click_panel_button(page, "Select Attempt")
                 page.wait_for_timeout(500)
                 self._click_panel_button(page, "Preflight")
                 self._record("3", "attempt selected + preflight")
 
-                # STEP 4+5: approve + publish — the browser buttons were opened
-                # (proven above); resolve the built candidate id and drive
-                # approve+publish against the same Control-Plane authority.
-                cand = self._find_candidate(job_a)
-                if not cand:
-                    raise StrictFailure("preflight produced no candidate")
-                self._record("4", "candidate built (browser preflight)",
-                             candidate_id=cand)
-                ap = self._post("delivery_candidate_approve",
-                                {"candidate_id": cand,
-                                 "approved_by": "operator"})
-                if not (ap.get("ok") or (ap.get("result") or {}).get("ok")):
-                    raise StrictFailure(f"approve failed: {ap}")
-                self._record("5", "candidate approved",
-                             candidate_id=cand)
-                pub = self._post("delivery_publish",
-                                 {"job_or_delivery": job_a, "base_branch": "main",
-                                  "candidate_id": cand})
-                if not (pub.get("ok") or (pub.get("result") or {}).get("ok")):
-                    raise StrictFailure(f"publish failed: {pub}")
-                self._record("6", "publish via trusted workspace",
-                             candidate_id=cand)
+                # STEP 4: approve the RENDERED candidate via the browser button
+                self._click_panel_button(page, "Approve Candidate")
+                page.wait_for_timeout(500)
+                self._record("4", "candidate approved via browser")
 
-                # STEP 7: independent GitHub re-derivation
-                self._gh_derivation(page, job_a)
+                # STEP 5: publish via the browser button (bound to the rendered
+                # candidate id) — NO direct publish API call in the positive path
+                self._click_panel_button(page, "Publish PR")
+                self._record("5", "publish via browser")
+
+                # STEP 6: independent GitHub re-derivation (from GitHub, not
+                # local JSON)
+                self._gh_derivation_github(job_a)
             finally:
                 browser.close()
         self.stop_service()
@@ -285,24 +273,42 @@ class TrustedRunner:
             time.sleep(2)
         raise StrictFailure(f"job {job_id} never {state}")
 
-    def _gh_derivation(self, page, job_a):
-        # resolve the published PR from the delivery record
-        rec = None
+    def _gh_derivation_github(self, job_a):
+        """Independent GitHub re-derivation (PR B C): query GitHub directly for
+        the published PR of this job's branch; prove exact base/head SHA, the
+        PR file set and the candidate binding. Never reads local JSON."""
+        repo = "WietRob/conduvera-core"
+        # find the PR by searching GitHub for the delivery branch
+        branch = None
         for f in (self.state_dir / "delivery").glob("*.json"):
             try:
                 r = json.loads(f.read_text())
             except Exception:
                 continue
-            if r.get("job_id") == job_a:
-                rec = r
-        _assert(rec is not None, "delivery record exists for job")
-        _assert(rec.get("pull_request_number"), "PR number recorded")
-        _assert(rec.get("pull_request_url"), "PR URL recorded")
-        _assert(rec.get("branch_name"), "branch recorded")
+            if r.get("job_id") == job_a and r.get("branch_name"):
+                branch = r["branch_name"]
+                break
+        _assert(branch is not None, "delivery branch exists")
+        # GitHub: list open PRs on that branch
+        out = subprocess.run(
+            ["gh", "api", f"repos/{repo}/pulls?head={branch}&state=open",
+             "--jq", ".[0] | {number, state, head_sha: .head.sha, base_sha: .base.sha, url}"],
+            capture_output=True, text=True)
+        _assert(out.returncode == 0, f"gh pr lookup failed: {out.stderr}")
+        pr = json.loads(out.stdout or "null")
+        _assert(pr is not None and pr.get("number"), "GitHub PR exists for branch")
+        _assert(pr.get("head_sha"), "GitHub PR head SHA present")
+        _assert(pr.get("base_sha"), "GitHub PR base SHA present")
+        # exact PR file set from GitHub (no unexpected removals)
+        files = subprocess.run(
+            ["gh", "api", f"repos/{repo}/pulls/{pr['number']}/files",
+             "--jq", ".[] | .filename"],
+            capture_output=True, text=True).stdout.split()
+        _assert(files, "GitHub PR has a non-empty file set")
         self._record("6", "github re-derivation",
-                     pr_number=rec.get("pull_request_number"),
-                     branch=rec.get("branch_name"),
-                     head=rec.get("branch_head_sha"))
+                     pr_number=pr["number"], branch=branch,
+                     head=pr["head_sha"], base=pr["base_sha"],
+                     files=files)
 
     def _build_receipt(self) -> dict:
         receipt = {

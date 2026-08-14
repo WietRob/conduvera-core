@@ -435,6 +435,8 @@ $$("#filter button").forEach(b=>{
 // ---- Delivery Workspace (SHIP-CONDUVERA-DELIVERY) ----------------------
 let deliveryList = [];
 let selectedDeliveryId = null;
+// PR B: the rendered authoritative Candidate id that Approve/Publish bind to
+let currentCandidateId = null;
 let selectedDiff = null;
 
 function loadDeliveries(){
@@ -492,23 +494,34 @@ function openDetail(jobId, attemptId, deliveryId){
       panel.appendChild(a);
     }
   }
-  // WS actions: available even before a delivery record exists (fresh job),
-  // so an operator can select the attempt and build the first candidate
+  // PR B UI contract: explicit rendered authority state (no prompt()-based
+  // authority). The selected Attempt and the exact Candidate id/manifest are
+  // rendered; Approve and Publish bind to that exact candidate.
   const acts = document.createElement("div"); acts.className="detail-actions";
+  const st = document.createElement("div"); st.className="detail-state";
+  st.innerHTML = "<h4>Delivery-State</h4><div id=\"deliveryStateBox\">lädt…</div>";
+  acts.appendChild(st);
   const sel = mkBtn("Select Attempt", ()=>{
-    const aid = prompt("Attempt ID (delivery source):", attemptId||"");
-    if(aid) runAction("delivery_select_attempt",{job_id:jobId, attempt_id:aid}).then(r=>{refresh();toast("selected: "+(r.result&&r.result.selected_attempt_id||"?"));});
+    runAction("delivery_select_attempt",{job_id:jobId, attempt_id:attemptId||""}).then(r=>{refresh();toast("selected: "+(r.result&&r.result.selected_attempt_id||"?"));});
   });
   const pre = mkBtn("Preflight", ()=>runAction("delivery_preflight",{job_or_delivery:jobId, attempt_id:attemptId||null}).then(r=>{refresh();toast(JSON.stringify((r.result||{}).reasons||[]).slice(0,200));}));
+  // Approve + Publish are bound to the RENDERED candidate id, never prompted
   const app = mkBtn("Approve Candidate", ()=>{
-    const cid = prompt("Candidate ID:", (rec&&rec.candidate_id||""));
+    const cid = currentCandidateId;
     if(cid) runAction("delivery_candidate_approve",{candidate_id:cid, approved_by:"operator"}).then(r=>{refresh();toast("approved: "+(r.result&&r.result.candidate_id||"?"));});
+    else toast("kein Candidate gebaut — bitte Preflight zuerst");
   });
-  const pub = mkBtn("Publish PR", ()=>runAction("delivery_publish",{job_or_delivery:jobId, attempt_id:attemptId||null, candidate_id:(rec&&rec.candidate_id)||null}).then(r=>{refresh();toast(r.result&&r.result.ok?"Published: "+(r.result.record.pull_request_url||""):"Publish blockiert");}));
+  const pub = mkBtn("Publish PR", ()=>{
+    const cid = currentCandidateId;
+    runAction("delivery_publish",{job_or_delivery:jobId, candidate_id:cid}).then(r=>{refresh();toast(r.result&&r.result.ok?"Published: "+(r.result.record.pull_request_url||""):"Publish blockiert: "+JSON.stringify((r.result||{}).reasons||[]).slice(0,120));});
+  });
   const sync = mkBtn("Refresh GitHub", ()=>runAction("delivery_sync",{job_or_delivery:jobId}).then(r=>{refresh();toast("sync -> "+(r.result&&r.result.state||""));}));
   const cln = mkBtn("Cleanup", ()=>runAction("delivery_cleanup",{job_or_delivery:jobId,safe_only:true}).then(r=>{refresh();toast("cleanup: "+(r.result&&r.result.message||""));}));
   acts.appendChild(sel); acts.appendChild(pre); acts.appendChild(app); acts.appendChild(pub); acts.appendChild(sync); acts.appendChild(cln);
   panel.appendChild(acts);
+  // render the authoritative delivery state (selected attempt + candidate id
+  // + manifest summary) into the panel
+  renderDeliveryState(panel.querySelector("#deliveryStateBox"), jobId, attemptId, rec);
   // Evidence block
   const ev = document.createElement("div"); ev.className="detail-block";
   ev.innerHTML = "<h4>Evidence</h4><div id=\"evidenceBox\">lädt…</div>";
@@ -578,6 +591,34 @@ function mkBtn(label, handler){
   b.textContent = label;
   b.addEventListener("click", handler);
   return b;
+}
+
+// PR B UI contract: render the authoritative delivery state — the selected
+// Attempt, the Candidate id and a manifest summary — into the panel.
+function renderDeliveryState(box, jobId, attemptId, rec){
+  if(!box) return;
+  let html = "";
+  html += "<b>Job:</b> "+esc(jobId||"—")+" · <b>Attempt:</b> "+esc(attemptId||"—")+"<br/>";
+  html += "<b>Delivery:</b> "+esc((rec&&rec.delivery_id)||"—")+" · <b>State:</b> "+esc((rec&&rec.delivery_state)||"—")+"<br/>";
+  const cid = (rec&&rec.candidate_id)||currentCandidateId||null;
+  currentCandidateId = cid;
+  html += "<b>Candidate:</b> "+(cid?"<code>"+esc(cid)+"</code>":"—")+"<br/>";
+  box.innerHTML = html;
+  if(cid){
+    runAction("delivery_preflight",{job_or_delivery:jobId, attempt_id:attemptId||null}).then(r=>{
+      const res = r&&r.result||{};
+      const cand = res.candidate||null;
+      if(cand&&cand.candidate_id){ currentCandidateId = cand.candidate_id; }
+      const b2 = document.querySelector("#deliveryStateBox");
+      if(b2 && cand){
+        let m = "<b>Manifest:</b> "+(cand.files||[]).length+" ops · "+
+          "sha256=<code>"+esc(String(cand.canonical_patch_sha256||"").slice(0,16))+"…</code><br/>"+
+          "<ul>"+(cand.files||[]).slice(0,8).map(f=>"<li>"+esc(f.operation)+" "+esc(f.path)+"</li>").join("")+"</ul>"+
+          (cand.approved_at?"<b>✓ approved</b>":"<b>nicht approved</b>");
+        b2.innerHTML = m;
+      }
+    }).catch(()=>{});
+  }
 }
 
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
