@@ -336,10 +336,15 @@ class GitHubDeliveryProvider:
             name = r.get("name")
             status = r.get("status")
             conclusion = r.get("conclusion")
-            if not isinstance(name, str) or not isinstance(status, str) \
-                    or not isinstance(conclusion, str):
+            if not isinstance(name, str) or not isinstance(status, str):
                 raise GitHubDeliveryError(
-                    "GH_BAD_JSON", "malformed check-run row (non-string scalar)")
+                    "GH_BAD_JSON", "malformed check-run row (non-string name/status)")
+            # GitHub check runs carry conclusion == null while queued /
+            # in_progress; that is a VALID nonterminal run, not a schema error.
+            # It fails closed (pending) in the summary, never merged.
+            if conclusion is not None and not isinstance(conclusion, str):
+                raise GitHubDeliveryError(
+                    "GH_BAD_JSON", "malformed check-run row (non-string conclusion)")
             app_obj = r.get("app")
             app_name = ""
             app_id = None
@@ -515,10 +520,13 @@ class GitHubDeliveryProvider:
             return []
         pages = self._gh_paginated_pages(
             f"repos/{repository}/pulls/{number}/reviews?per_page=100")
-        # --slurp on an array endpoint yields a list of page arrays
-        if pages and isinstance(pages[0], dict):
-            # tolerate a single object page
-            pages = [pages]
+        # --slurp on an array endpoint yields either [] (no pages -> no
+        # reviews, a valid empty result) or a list of page arrays. A top-level
+        # list of review objects is NOT the slurped shape and is rejected.
+        if pages and not isinstance(pages[0], list):
+            raise GitHubDeliveryError(
+                "GH_BAD_JSON", "unexpected reviews shape (not a list of pages)",
+                {"path": f"repos/{repository}/pulls/{number}/reviews"})
         flat = []
         for page in pages:
             if not isinstance(page, list):
@@ -530,6 +538,17 @@ class GitHubDeliveryProvider:
             raise GitHubDeliveryError(
                 "GH_BAD_JSON", "malformed review row (not an object)",
                 {"path": f"repos/{repository}/pulls/{number}/reviews"})
+        for r in flat:
+            # a structurally valid review must carry a decision state and an
+            # author login; empty/malformed rows are schema failures
+            if not isinstance(r.get("state"), str) or not r.get("state"):
+                raise GitHubDeliveryError(
+                    "GH_BAD_JSON", "malformed review row (missing state)")
+            u = r.get("user")
+            if not isinstance(u, dict) or not isinstance(u.get("login"), str) \
+                    or not u.get("login"):
+                raise GitHubDeliveryError(
+                    "GH_BAD_JSON", "malformed review row (missing author)")
         return flat
 
     def pull_files(self, repository: str, number: int) -> list[dict]:
