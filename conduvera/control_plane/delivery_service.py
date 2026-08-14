@@ -1013,10 +1013,28 @@ class DeliveryService:
         base_sha = pr.get("baseRefOid")
         mergeable = pr.get("mergeable", "")
         merge_state = pr.get("mergeStateStatus", "")
-        checks = self.provider.list_checks(repo, head_sha) if head_sha else []
-        reviews = self.provider.list_reviews(repo, int(num))
+        checks = []
+        reviews = []
+        checks_ok = reviews_ok = False
+        if head_sha:
+            try:
+                checks = self.provider.list_checks(repo, head_sha)
+                checks_ok = True
+            except GitHubDeliveryError:
+                checks = []
+        try:
+            reviews = self.provider.list_reviews(repo, int(num))
+            reviews_ok = True
+        except GitHubDeliveryError:
+            reviews = []
         checks_summary = self._checks_summary(checks)
         reviews_summary = self._reviews_summary(reviews)
+        # Befund 11: a provider failure is reported as stale/unavailable, never
+        # as a clean empty result
+        availability = {
+            "checks": "available" if checks_ok else "stale",
+            "reviews": "available" if reviews_ok else "stale",
+        }
         attention = []
         if state == "MERGED":
             pass
@@ -1036,6 +1054,7 @@ class DeliveryService:
             "checks_summary": checks_summary,
             "reviews_summary": reviews_summary,
             "attention_reasons": attention,
+            "availability": availability,
         }
 
     def _checks_summary(self, checks: list[dict]) -> dict:
@@ -1119,8 +1138,8 @@ class DeliveryService:
         timeline = self.history(record.get("delivery_id", "")) \
             if record.get("delivery_id") else []
         # availability: a provider fetch failure is NEVER rendered as an empty
-        # success (DOD-13 review1) — surface it as stale/unavailable
-        availability = self._detail_availability(record)
+        # success — the sync-record per-source availability is authoritative
+        availability = synced.get("availability") or self._detail_availability(record)
         return {"ok": True, "record": record,
                 "checks": synced.get("checks_summary", {}).get("details", []),
                 "reviews": synced.get("reviews_summary", {}).get("details", []),

@@ -499,22 +499,27 @@ class TestCheckDetails:
         assert summary["changes_requested"] == 0
 
     def test_provider_failure_is_unavailable_not_success(self, tmp_path):
-        """DOD-13 review1: a provider fetch failure must not render as an empty
-        clean result — it is surfaced as unavailable/stale."""
+        """Befund 11: a provider fetch failure must render as stale, never as
+        a clean empty success result."""
         dlv = self._svc_check(tmp_path, checks=[], reviews=[],
                               pr={"state": "OPEN", "headRefOid": "h" * 40,
                                   "baseRefOid": "b" * 40, "mergeable": "UNKNOWN",
                                   "mergeStateStatus": "UNKNOWN"})
-        dlv.provider.list_checks = lambda repo, sha: []
-        dlv.provider.list_reviews = lambda repo, num: []
+        # provider raises -> sync marks the detail surface stale
+        from conduvera.control_plane.github_provider import GitHubDeliveryError
+        def _raise(*a, **k):
+            raise GitHubDeliveryError("PROVIDER_FAILURE", "provider failure")
+        dlv.provider.list_checks = _raise
+        dlv.provider.list_reviews = _raise
         rec = dlv._new_record("job_1", "a1")
         rec["github_repository"] = "R/r"
         rec["pull_request_number"] = 1
         dlv.store.save(rec)
         r = dlv.check_details("job_1")
-        # availability is reported; not fabricated as success
         assert r["ok"] is True
-        assert "availability" in r
+        # the per-source availability is stale (provider failed), not available
+        assert r["availability"]["checks"] == "stale"
+        assert r["availability"]["reviews"] == "stale"
 
 
 class TestPublishAuthority:

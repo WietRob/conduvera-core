@@ -169,27 +169,23 @@ class GitHubDeliveryProvider:
     def list_checks(self, repository: str, head_sha: str) -> list[dict]:
         if self._dry_run:
             return []
-        try:
-            out = self._gh_json(["api",
-                                 f"repos/{repository}/commits/{head_sha}/check-runs",
-                                 "--jq",
-                                 ".check_runs[] | {name: .name, status: .status, conclusion: .conclusion, started_at: .started_at, completed_at: .completed_at, details_url: .details_url, app: .app.name, check_suite_id: .check_suite.id}"])
-            if isinstance(out, dict):
-                out = [out]
-            return out if isinstance(out, list) else []
-        except GitHubDeliveryError:
-            return []
+        # Provider failures are NOT swallowed: _sync_record marks the detail
+        # surface stale/unavailable instead of a clean empty result (Befund 11).
+        out = self._gh_json(["api",
+                             f"repos/{repository}/commits/{head_sha}/check-runs",
+                             "--jq",
+                             ".check_runs[] | {name: .name, status: .status, conclusion: .conclusion, started_at: .started_at, completed_at: .completed_at, details_url: .details_url, app: .app.name, check_suite_id: .check_suite.id}"])
+        if isinstance(out, dict):
+            out = [out]
+        return out if isinstance(out, list) else []
 
     def list_reviews(self, repository: str, number: int) -> list[dict]:
         if self._dry_run:
             return []
-        try:
-            raw = self._gh_text(["api",
-                                 f"repos/{repository}/pulls/{number}/reviews"])
-            out = json.loads(raw) if raw.strip() else []
-            return out if isinstance(out, list) else []
-        except (GitHubDeliveryError, json.JSONDecodeError):
-            return []
+        raw = self._gh_text(["api",
+                             f"repos/{repository}/pulls/{number}/reviews"])
+        out = json.loads(raw) if raw.strip() else []
+        return out if isinstance(out, list) else []
 
     def pull_files(self, repository: str, number: int) -> list[dict]:
         if self._dry_run:
