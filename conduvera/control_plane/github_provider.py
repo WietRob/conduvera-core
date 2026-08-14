@@ -117,11 +117,23 @@ class GitHubDeliveryProvider:
             raise GitHubDeliveryError(code, err, {"argv": argv})
         try:
             out = proc.stdout.strip()
-            return json.loads(out) if out else []
+            if not out:
+                raise GitHubDeliveryError(
+                    "GH_BAD_JSON", "gh returned empty --paginate --slurp output",
+                    {"argv": argv})
+            data = json.loads(out)
         except json.JSONDecodeError as e:
             raise GitHubDeliveryError(
                 "GH_BAD_JSON", f"gh returned non-JSON: {proc.stdout[:200]}",
                 {"argv": argv}) from e
+        # --paginate --slurp always yields a top-level JSON array; anything
+        # else is a schema anomaly (review finding 2)
+        if not isinstance(data, list):
+            raise GitHubDeliveryError(
+                "GH_BAD_JSON",
+                f"unexpected --paginate --slurp shape: {type(data).__name__}",
+                {"argv": argv})
+        return data
 
     def _gh_text(self, args: list[str], *, timeout: int = 60) -> str:
         argv = [self._gh] + args
@@ -223,6 +235,9 @@ class GitHubDeliveryProvider:
         checks = self._check_runs(repository, head_sha)
         checks += self._commit_statuses(repository, head_sha)
         requirements, known = self.required_status_checks(repository, base_branch)
+        # requirements is a list of (lower_context, binding) where binding is
+        # "legacy-ok" | "any-app" | <int app id>. A row satisfies a requirement
+        # by matching context AND the binding's producer rules.
         observed = set()
         for c in checks:
             name_v = c.get("name")
@@ -230,22 +245,27 @@ class GitHubDeliveryProvider:
                 raise GitHubDeliveryError(
                     "GH_BAD_JSON", "malformed check-run row (non-string name)")
             name = name_v.lower()
-            req_app = requirements.get(name)
             app_id = c.get("app_id")
-            if name not in requirements:
-                c["required"] = False
-            elif req_app is None:
-                c["required"] = True  # context-only (unbound) requirement
-            elif c.get("app") == "commit-status":
-                # a legacy status satisfies only unbound requirements
-                c["required"] = False
-            else:
-                # app-bound: require the run's numeric app id to match
-                c["required"] = bool(app_id is not None and app_id == req_app)
+            is_legacy = c.get("app") == "commit-status"
+            satisfied = []
+            for (req_ctx, binding) in requirements:
+                if req_ctx != name:
+                    continue
+                if binding == "legacy-ok":
+                    satisfied.append((req_ctx, binding))
+                elif binding == "any-app":
+                    # any real check run (not a legacy commit status)
+                    if not is_legacy:
+                        satisfied.append((req_ctx, binding))
+                else:
+                    # app-bound: require the run's numeric app id to match
+                    if not is_legacy and app_id is not None and app_id == binding:
+                        satisfied.append((req_ctx, binding))
+            c["required"] = bool(satisfied)
             c["required_known"] = known
-            if c["required"]:
-                observed.add(name)
-        missing = sorted(set(requirements) - observed) if known else []
+            for s in satisfied:
+                observed.add(s)
+        missing = sorted({ctx for (ctx, _b) in requirements} - {ctx for (ctx, _b) in observed}) if known else []
         for c in checks:
             c["required_missing"] = missing
         # a policy with configured requirements but no observed runs must fail
@@ -280,11 +300,11 @@ class GitHubDeliveryProvider:
             if not isinstance(page, dict):
                 raise GitHubDeliveryError(
                     "GH_BAD_JSON", "malformed check-runs page (not an object)")
-            pruns = page.get("check_runs", [])
-            if not isinstance(pruns, list):
+            if "check_runs" not in page or not isinstance(page.get("check_runs"), list):
+                # a valid check-runs page must carry a check_runs list
                 raise GitHubDeliveryError(
-                    "GH_BAD_JSON", "malformed check-runs page (check_runs not a list)")
-            runs.extend(pruns)
+                    "GH_BAD_JSON", "malformed check-runs page (missing/empty check_runs)")
+            runs.extend(page["check_runs"])
         if not all(isinstance(r, dict) for r in runs):
             raise GitHubDeliveryError(
                 "GH_BAD_JSON", "malformed check-run row (not an object)")
@@ -315,11 +335,10 @@ class GitHubDeliveryProvider:
             if not isinstance(page, dict):
                 raise GitHubDeliveryError(
                     "GH_BAD_JSON", "malformed commit-status page (not an object)")
-            ps = page.get("statuses", [])
-            if not isinstance(ps, list):
+            if "statuses" not in page or not isinstance(page.get("statuses"), list):
                 raise GitHubDeliveryError(
-                    "GH_BAD_JSON", "malformed commit-status page (statuses not a list)")
-            statuses.extend(ps)
+                    "GH_BAD_JSON", "malformed commit-status page (missing/empty statuses)")
+            statuses.extend(page["statuses"])
         if not all(isinstance(s, dict) for s in statuses):
             raise GitHubDeliveryError(
                 "GH_BAD_JSON", "malformed commit-status row (not an object)")
@@ -373,7 +392,7 @@ class GitHubDeliveryProvider:
         except GitHubDeliveryError as e:
             if getattr(e, "code", "") == "GH_HTTP_404":
                 # branch exists + no protection -> authoritative known empty
-                return {}, True
+                return [], True
             raise
         if not pages:
             # an empty slurp on a known-existing branch is a schema/provider
@@ -405,9 +424,12 @@ class GitHubDeliveryProvider:
                 isinstance(chk, dict) for chk in checks_entries):
             raise GitHubDeliveryError(
                 "GH_BAD_JSON", "malformed protection checks (not an object list)")
-        requirements: dict = {}
+        requirements = []  # list of (lower_context, binding)
+        # binding: "legacy-ok" (context-only, a legacy status may satisfy it),
+        #          "any-app"  (checks[].app_id == -1, only a real check run),
+        #          <int>      (app-bound, only a check run from that app)
         for c in contexts:
-            requirements[c.lower()] = None
+            requirements.append((c.lower(), "legacy-ok"))
         for chk in checks_entries:
             # review finding 2: a checks[] entry must have a string context and a
             # numeric app_id; malformed data propagates, never weakens policy
@@ -418,9 +440,10 @@ class GitHubDeliveryProvider:
             if req_app is None or not isinstance(req_app, int):
                 raise GitHubDeliveryError(
                     "GH_BAD_JSON", "malformed protection check (missing/non-int app_id)")
-            # app_id == -1 = any app may provide this status (unbound)
-            requirements[chk["context"].lower()] = (
-                None if req_app == -1 else req_app)
+            # app_id == -1 = any app may provide this status (but still a real
+            # check run, NOT a legacy commit status) — review finding 1
+            binding = "any-app" if req_app == -1 else req_app
+            requirements.append((chk["context"].lower(), binding))
         return requirements, True
 
     def list_reviews(self, repository: str, number: int) -> list[dict]:

@@ -107,7 +107,7 @@ def test_t04_protection_404_known_empty(monkeypatch):
         "gh api --paginate --slurp repos/r/branches/main/protection": err,
     }, monkeypatch)
     requirements, known = prov.required_status_checks("r", "main")
-    assert requirements == {}
+    assert requirements == []
     assert known is True
 
 
@@ -381,3 +381,22 @@ def test_t19_fresh_pr_green_check_not_merge_ready(tmp_path):
     wt.mkdir()
     res = dlv._record_pr(rec, pr, "job_1", "a1", wt)
     assert res["record"]["delivery_state"] == "PR_OPEN"  # never MERGE_READY
+
+
+# ---- T20: app_id==-1 (any-app) is NOT satisfied by a legacy status ---------
+def test_t20_any_app_not_legacy(monkeypatch):
+    """Review finding 1: app_id == -1 means any GitHub App, NOT a legacy
+    commit status. A legacy status with the same context must NOT satisfy it."""
+    p = {"statuses": [{"context": "build", "state": "success",
+                       "updated_at": "2026-01-01T00:00:00Z"}]}
+    prov = _provider_with_argv({
+        "gh api --paginate --slurp repos/r/commits/h/check-runs?per_page=100": [{"check_runs": []}],
+        "gh api --paginate --slurp repos/r/commits/h/status?per_page=100": [p],
+        "gh api repos/r/branches/main --jq .name": "main",
+        "gh api --paginate --slurp repos/r/branches/main/protection": [
+            {"required_status_checks": {"checks": [{"context": "build", "app_id": -1}]}}],
+    }, monkeypatch)
+    checks = prov.list_checks("r", "h", base_branch="main")
+    status = next(c for c in checks if c["app"] == "commit-status")
+    assert status["required"] is False  # any-app is NOT legacy-ok
+    assert "build" in status["required_missing"]
