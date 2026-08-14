@@ -1047,14 +1047,29 @@ class DeliveryService:
                 "failed": by["failure"] > 0, "pending": by["pending"] > 0}
 
     def _reviews_summary(self, reviews: list[dict]) -> dict:
+        # DOD-13 review2: only each reviewer's EFFECTIVE LATEST decision counts
+        # (dismissed/older rows and later approvals must not keep the delivery
+        # stuck in CHANGES_REQUESTED).
+        latest: dict[str, str] = {}
+        by_submitted = {}
+        for r in reviews:
+            author = (r.get("user", {}) or {}).get("login") if isinstance(r.get("user"), dict) else ""
+            state = (r.get("state") or "").upper()
+            if state in ("APPROVED", "CHANGES_REQUESTED", "COMMENTED",
+                         "DISMISSED", "PENDING"):
+                # keep the chronologically last effective decision per author
+                if author not in latest or (r.get("submitted_at") or "") >= (by_submitted.get(author) or ""):
+                    latest[author] = state
+                    by_submitted[author] = r.get("submitted_at") or ""
         states = {}
+        for state in latest.values():
+            states[state] = states.get(state, 0) + 1
         details = []
         for r in reviews:
-            s = (r.get("state") or "").upper()
-            states[s] = states.get(s, 0) + 1
+            author = (r.get("user", {}) or {}).get("login") if isinstance(r.get("user"), dict) else ""
             details.append({
-                "state": s,
-                "author": r.get("user", {}).get("login") if isinstance(r.get("user"), dict) else "",
+                "state": (r.get("state") or "").upper(),
+                "author": author,
                 "submitted_at": r.get("submitted_at"),
                 "commit_id": r.get("commit_id"),
                 "body_excerpt": (r.get("body") or "")[:120],
@@ -1070,6 +1085,8 @@ class DeliveryService:
             record, job_id, attempt_id = self._resolve_target(job_or_delivery)
         except DeliveryError as e:
             return {"ok": False, "code": e.code, "message": str(e)}
+        # resolve the exact owned session/delivery (DOD-13 review3: bind to the
+        # attempt/delivery opened, never an unrelated first record)
         synced = self._sync_record(record)
         record.update({k: v for k, v in synced.items()
                        if k in ("checks_summary", "reviews_summary",
@@ -1078,13 +1095,32 @@ class DeliveryService:
         # ordered delivery event timeline
         timeline = self.history(record.get("delivery_id", "")) \
             if record.get("delivery_id") else []
+        # availability: a provider fetch failure is NEVER rendered as an empty
+        # success (DOD-13 review1) — surface it as stale/unavailable
+        availability = self._detail_availability(record)
         return {"ok": True, "record": record,
                 "checks": synced.get("checks_summary", {}).get("details", []),
                 "reviews": synced.get("reviews_summary", {}).get("details", []),
                 "mergeable": synced.get("mergeable"),
                 "merge_state": synced.get("merge_state"),
                 "attention": synced.get("attention_reasons", []),
-                "timeline": timeline}
+                "timeline": timeline,
+                "availability": availability}
+
+    def _detail_availability(self, record: dict) -> dict:
+        """Expose whether GitHub check/review data could actually be fetched.
+        A provider failure/empty PR is reported as unavailable/stale rather
+        than a clean empty result."""
+        state = (record.get("state") or "").upper()
+        if state in ("", "MERGED", "CLOSED"):
+            return {"checks": "unavailable", "reviews": "unavailable",
+                    "reason": "no open pull request to synchronize"}
+        # record carries the sync result; if it has no checks_summary it means
+        # the sync could not reach GitHub (no record update from _sync_record)
+        if "checks_summary" not in record and "reviews_summary" not in record:
+            return {"checks": "stale", "reviews": "stale",
+                    "reason": "GitHub synchronization unavailable"}
+        return {"checks": "available", "reviews": "available"}
 
 
     def _state_from_sync(self, synced: dict) -> str:

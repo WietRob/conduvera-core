@@ -450,7 +450,11 @@ function deliveryAttention(d){
 
 function openDetail(jobId, attemptId, deliveryId){
   selectedDeliveryId = deliveryId || null;
-  let rec = deliveryList.find(x=>x.job_id===jobId) || null;
+  // DOD-13 review3: bind to the EXACT delivery/attempt opened — never the
+  // first delivery with the same job id (jobs may have several deliveries)
+  let rec = null;
+  if(deliveryId){ rec = deliveryList.find(x=>x.delivery_id===deliveryId) || null; }
+  if(!rec){ rec = deliveryList.find(x=>x.job_id===jobId && (x.attempt_id===attemptId || !attemptId)) || deliveryList.find(x=>x.job_id===jobId) || null; }
   const panel = $("#detailPanel");
   panel.classList.add("open");
   panel.innerHTML = "";

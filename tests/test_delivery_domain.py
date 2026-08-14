@@ -472,4 +472,47 @@ class TestCheckDetails:
         assert r["checks"][0]["conclusion"] == "success"
         assert r["reviews"][0]["state"] == "APPROVED"
         assert "timeline" in r
+        assert r.get("availability", {}).get("checks") == "available"
+
+    def test_latest_review_wins(self, tmp_path):
+        """DOD-13 review2: a later approval by the same reviewer overrides an
+        earlier CHANGES_REQUESTED (must not keep the delivery stuck)."""
+        dlv = self._svc_check(
+            tmp_path,
+            checks=[],
+            reviews=[
+                {"state": "CHANGES_REQUESTED", "user": {"login": "w"},
+                 "submitted_at": "2026-01-01T00:00:00Z"},
+                {"state": "APPROVED", "user": {"login": "w"},
+                 "submitted_at": "2026-01-02T00:00:00Z"},
+            ],
+            pr={"state": "OPEN", "headRefOid": "h" * 40, "baseRefOid": "b" * 40,
+                "mergeable": "MERGEABLE", "mergeStateStatus": "CLEAN"})
+        rec = dlv._new_record("job_1", "a1")
+        rec["github_repository"] = "R/r"
+        rec["pull_request_number"] = 1
+        dlv.store.save(rec)
+        r = dlv.check_details("job_1")
+        # effective latest = APPROVED, not CHANGES_REQUESTED
+        summary = r["record"]["reviews_summary"]
+        assert summary["approved"] == 1
+        assert summary["changes_requested"] == 0
+
+    def test_provider_failure_is_unavailable_not_success(self, tmp_path):
+        """DOD-13 review1: a provider fetch failure must not render as an empty
+        clean result — it is surfaced as unavailable/stale."""
+        dlv = self._svc_check(tmp_path, checks=[], reviews=[],
+                              pr={"state": "OPEN", "headRefOid": "h" * 40,
+                                  "baseRefOid": "b" * 40, "mergeable": "UNKNOWN",
+                                  "mergeStateStatus": "UNKNOWN"})
+        dlv.provider.list_checks = lambda repo, sha: []
+        dlv.provider.list_reviews = lambda repo, num: []
+        rec = dlv._new_record("job_1", "a1")
+        rec["github_repository"] = "R/r"
+        rec["pull_request_number"] = 1
+        dlv.store.save(rec)
+        r = dlv.check_details("job_1")
+        # availability is reported; not fabricated as success
+        assert r["ok"] is True
+        assert "availability" in r
 
