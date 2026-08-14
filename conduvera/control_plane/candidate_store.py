@@ -97,10 +97,19 @@ class PublishCandidateStore:
         return [dict(v) for v in self._index.values()]
 
     def find_by_job_attempt(self, job_id: str, attempt_id: str) -> dict | None:
+        """Return the most recent VALID candidate for (job, attempt), or None.
+
+        Never returns an invalidated/obsolete candidate; with multiple
+        versions the latest created_at wins. Callers that require authoritative
+        binding must use get(candidate_id) directly.
+        """
+        best = None
         for c in self.all():
-            if c.get("job_id") == job_id and c.get("attempt_id") == attempt_id:
-                return c
-        return None
+            if c.get("job_id") == job_id and c.get("attempt_id") == attempt_id \
+                    and not c.get("invalidated_at"):
+                if best is None or (c.get("created_at") or "") > (best.get("created_at") or ""):
+                    best = c
+        return best
 
     def invalidate(self, candidate_id: str, reason: str) -> dict | None:
         with self._lock:

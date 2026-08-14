@@ -516,3 +516,94 @@ class TestCheckDetails:
         assert r["ok"] is True
         assert "availability" in r
 
+
+class TestPublishAuthority:
+    """PR A: publish REQUIRES the authoritative candidate_id; no auto-approval."""
+
+    def _dlv(self, tmp_path):
+        store, ev = DeliveryStore(tmp_path / "d"), EvidenceStore(tmp_path / "e")
+        scheduler = _FakeScheduler(
+            jobs={"job_1": _FakeJob("job_1", "fixture", "abc1234")},
+            attempts={"a1": _FakeAttempt("a1", "job_1")})
+        registry = _FakeRegistry()
+        svc = _FakeService(scheduler, registry)
+        dlv = DeliveryService(store=store, evidence_store=ev,
+                              provider=GitHubDeliveryProvider(dry_run=True),
+                              service=svc,
+                              repo_allowlist={"fixture": tmp_path / "repo"},
+                              worktree_root=tmp_path / "worktrees",
+                              delivery_store_dir=str(store.dir))
+        return dlv
+
+    def test_publish_requires_candidate_id(self, tmp_path):
+        dlv = self._dlv(tmp_path)
+        r = dlv.publish("job_1")
+        # publish without a candidate_id is rejected
+        assert r["ok"] is False
+        assert r["reasons"][0]["code"] == "CANDIDATE_REQUIRED"
+
+    def test_publish_rejects_unknown_candidate(self, tmp_path):
+        dlv = self._dlv(tmp_path)
+        r = dlv.publish("job_1", candidate_id="cand_nonexistent")
+        assert r["ok"] is False
+        assert r["reasons"][0]["code"] == "UNKNOWN_CANDIDATE"
+
+    def test_publish_rejects_unapproved_candidate(self, tmp_path):
+        dlv = self._dlv(tmp_path)
+        repo, base = _make_repo(tmp_path / "x")
+        wt = tmp_path / "wts" / "w1"
+        subprocess.run(["git", "clone", "-q", str(repo), str(wt)], check=True)
+        (wt / "a.txt").write_text("v2\n")
+        subprocess.run(["git", "-C", str(wt), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(wt), "commit", "-qm", "c"], check=True)
+        c = dlv.candidate_service.build_candidate(
+            job_id="job_1", attempt_id="a1", session_id="s", delivery_id="d",
+            repo_id="fixture", github_repository="R/r", base_branch="main",
+            base_commit=base, worktree=str(wt), evidence_refs=[],
+            named_tests=[], named_gates=[])
+        # not approved -> publish fails; no auto-approval by "conduvera"
+        r = dlv.publish("job_1", candidate_id=c["candidate_id"])
+        assert r["ok"] is False
+        assert r["reasons"][0]["code"] == "CANDIDATE_NOT_APPROVED"
+        # the candidate was NOT auto-approved
+        stored = dlv.candidate_store.get(c["candidate_id"])
+        assert not stored["approved_at"]
+
+    def test_publish_idempotent_same_candidate(self, tmp_path):
+        dlv = self._dlv(tmp_path)
+        repo, base = _make_repo(tmp_path / "x")
+        wt = tmp_path / "wts" / "w1"
+        subprocess.run(["git", "clone", "-q", str(repo), str(wt)], check=True)
+        (wt / "a.txt").write_text("v2\n")
+        subprocess.run(["git", "-C", str(wt), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(wt), "commit", "-qm", "c"], check=True)
+        # register the MANAGED session bound to the worktree
+        dlv.service.registry._s["mxs_s"] = type("S", (), {
+            "session_id": "mxs_s", "attempt_id": "a1",
+            "worktree": str(wt), "ownership_class": "MANAGED"})()
+        c = dlv.candidate_service.build_candidate(
+            job_id="job_1", attempt_id="a1", session_id="mxs_s", delivery_id="d",
+            repo_id="fixture", github_repository="R/r", base_branch="main",
+            base_commit=base, worktree=str(wt), evidence_refs=[],
+            named_tests=[], named_gates=[])
+        dlv.candidate_service.approve(c["candidate_id"], approved_by="operator")
+        # monkeypatch provider to a fake publish that returns a PR
+        dlv.provider.find_pr = lambda repo, branch, base: None
+        dlv.provider.remote_branch_sha = lambda repo, branch: None
+        dlv.provider.remote_base_sha = lambda repo, branch: base
+        dlv.provider.create_pr = lambda repo, branch, base, title, body: {
+            "number": 7, "url": "https://github.com/R/r/pull/7",
+            "headRefOid": "h" * 40, "baseRefOid": base, "mergeable": "MERGEABLE",
+            "mergeStateStatus": "CLEAN"}
+        dlv._push = lambda wt, repo, branch, head_sha=None: None
+        r1 = dlv.publish("job_1", candidate_id=c["candidate_id"])
+        assert r1["ok"] is True
+        # repeat publish with the same candidate returns the same identity
+        r2 = dlv.publish("job_1", candidate_id=c["candidate_id"])
+        assert r2.get("ok") is True
+        assert r1.get("record", {}).get("delivery_id") == \
+            r2.get("record", {}).get("delivery_id")
+        assert r1.get("record", {}).get("candidate_id") == \
+            r2.get("record", {}).get("candidate_id")
+
+

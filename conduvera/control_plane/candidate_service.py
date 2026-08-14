@@ -49,11 +49,15 @@ def _git(*args: str, cwd: str | Path) -> str:
     return r.stdout
 
 
-def _git_env(args: list[str], env: dict, cwd: str | Path) -> str:
+def _git_env(args: list[str], env: dict, cwd: str | Path,
+             stdin: bytes | None = None) -> str:
     r = subprocess.run(["git", *args], cwd=str(cwd), env=env,
-                       capture_output=True, text=True)
+                       capture_output=True, input=stdin,
+                       text=(stdin is None))
     if r.returncode != 0:
         raise CandidateError("GIT_FAILED", f"git {' '.join(args)}: {r.stderr.strip()}")
+    if stdin is not None:
+        return r.stdout.decode() if isinstance(r.stdout, bytes) else r.stdout
     return r.stdout
 
 
@@ -81,12 +85,6 @@ def _is_forbidden(path: str) -> bool:
     return any(part in low for part in _FORBIDDEN)
 
 
-def _blob_sha(path: str | Path) -> str:
-    # git blob hash = sha1("blob <len>\0" + content)
-    data = Path(path).read_bytes()
-    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
-
-
 class PublishCandidateService:
     def __init__(self, store, evidence_store, *, worktree_root: str | Path):
         self.store = store
@@ -107,14 +105,15 @@ class PublishCandidateService:
                 self._parse_diff(entries, diff)
             except CandidateError:
                 pass
-        # uncommitted changes incl. untracked
-        status = _git("status", "--porcelain", "-z", "--untracked-files=all",
+        # uncommitted changes incl. untracked (standard porcelain lines:
+        # "XY path", "R  a.txt -> b.txt", "?? untracked")
+        status = _git("status", "--porcelain", "--untracked-files=all",
                       cwd=wt)
-        for rec in status.split("\0"):
-            if not rec:
+        for line in status.splitlines():
+            if not line:
                 continue
-            xy = rec[:2]
-            rest = rec[3:]
+            xy = line[:2]
+            rest = line[3:]
             if " -> " in rest:
                 src, dst = rest.split(" -> ", 1)
             else:
@@ -127,30 +126,34 @@ class PublishCandidateService:
         return entries
 
     def _parse_diff(self, entries: dict, raw: str) -> None:
-        # `git diff --name-status -z` yields NUL-separated tokens; the status
-        # letter(s) and the path are separate tokens: "M", "a.txt", "A",
-        # "b.py", ... (rename/copy emit "R100", "old", "new").
+        # `git diff --name-status -z` yields NUL-separated tokens: the status
+        # ("M","A","D","R100","C100","T") and the path are separate tokens;
+        # rename/copy emit status, old, new.
         status_map = {"A": "added", "M": "modified", "D": "deleted",
                       "R": "renamed", "C": "copied", "T": "typechange"}
         parts = [p for p in raw.split("\0") if p]
         i = 0
         while i < len(parts):
             tok = parts[i]
-            # a status token is a short alpha/num string (e.g. M, A, R100)
-            if (tok[0].isalpha() and len(tok) <= 4) and (
-                    tok[0] in "MADRCUT"):
+            if tok and tok[0].isalpha() and tok[0] in "MADRCUT" \
+                    and len(tok) <= 4:
                 xy = tok
-                # next token(s) are the path(s)
                 path = parts[i + 1] if i + 1 < len(parts) else ""
                 i += 2
-                # rename/copy: skip the extra "score" is in xy; second path
                 if xy[0] in "RC" and i < len(parts):
+                    # rename/copy: old path then new path
+                    old = path
+                    path = parts[i]
                     i += 1
-                entries[path] = {
-                    "xy": xy,
-                    "src": path,
-                    "status": status_map.get(xy[0], "modified"),
-                }
+                    entries[path] = {
+                        "xy": xy, "src": old,
+                        "status": status_map.get(xy[0], "modified"),
+                    }
+                else:
+                    entries[path] = {
+                        "xy": xy, "src": path,
+                        "status": status_map.get(xy[0], "modified"),
+                    }
             else:
                 i += 1
 
@@ -168,10 +171,73 @@ class PublishCandidateService:
 
     def _mode_of(self, wt: Path, rel: str) -> str:
         try:
-            return _git("ls-files", "-s", "--", rel, cwd=wt).split()[0].split(":")[0] \
-                if _git("ls-files", "-s", "--", rel, cwd=wt).strip() else "100644"
+            out = _git("ls-files", "-s", "--", rel, cwd=wt)
+            if out.strip():
+                return out.split()[0].split(":")[0]
         except CandidateError:
-            return "100644"
+            pass
+        # untracked/new file: derive mode from the actual filesystem mode
+        p = wt / rel
+        try:
+            st = p.stat()
+            if st.st_mode & 0o111:
+                return "100755"
+            if p.is_symlink():
+                return "120000"
+        except OSError:
+            pass
+        return "100644"
+
+    def _operation_of(self, info: dict) -> str:
+        status = info.get("status", "")
+        xy = info.get("xy", "")
+        if status == "untracked":
+            return "add"
+        if xy and xy[0] == "R":
+            return "rename"
+        if xy and xy[0] == "C":
+            return "copy"
+        if xy and xy[0] == "T":
+            return "type_change"
+        # deletion (staged "D " or unstaged " D")
+        if status == "deleted" or (len(xy) >= 2 and xy[1] == "D") \
+                or (xy and xy[0] == "D"):
+            return "delete"
+        if status in ("added", "staged") and len(xy) >= 2 and xy[1] == "A":
+            return "add"
+        return "modify"
+
+    @staticmethod
+    def _manifest_hash(files: list, excluded: list) -> str:
+        """Deterministic SHA-256 over the complete ordered operation set."""
+        canonical = {
+            "operations": sorted(files, key=lambda f: f["path"]),
+            "excluded": sorted(excluded, key=lambda e: e["path"]),
+        }
+        return hashlib.sha256(
+            json.dumps(canonical, sort_keys=True).encode()).hexdigest()
+
+    def _canonical_patch(self, files: list, wt: Path) -> bytes:
+        """Deterministic canonical patch binding the complete candidate,
+        including originally-untracked content, so a non-empty candidate can
+        never carry the empty hash e3b0c442..."""
+        out = []
+        for f in sorted(files, key=lambda f: f["path"]):
+            rel = f["path"]
+            op = f["operation"]
+            target = f.get("symlink_target") or ""
+            content = target.encode() if f.get("symlink_target") else ""
+            if not f.get("symlink_target") and op != "delete":
+                p = wt / rel
+                try:
+                    content = p.read_bytes()
+                except OSError:
+                    content = b""
+            out.append(f"{op}\t{rel}\t{f.get('old_path','')}\t"
+                       f"{f.get('mode_before','')}\t{f.get('mode_after','')}\t")
+            out.append(content)
+        return b"\n".join(x if isinstance(x, bytes) else x.encode()
+                          for x in out)
 
     def build_candidate(self, *, job_id, attempt_id, session_id, delivery_id,
                         repo_id, github_repository, base_branch, base_commit,
@@ -190,39 +256,59 @@ class PublishCandidateService:
             decision = self._decide(rel, info["status"])
             if not decision["allow"]:
                 if decision.get("exclude"):
-                    # session-log runtime artefact (mxs_*.stdout/stderr.txt):
-                    # excluded, never published, does not block the real change
                     excluded.append({"path": rel, "reason": decision["reason"]})
                 else:
                     denied.append({"path": rel, "reason": decision["reason"]})
                 continue
-            blob_sha = _blob_sha(path) if path.is_file() else ""
-            st = path.stat() if path.is_file() else None
+            op = self._operation_of(info)
+            is_file = path.is_file()
+            is_symlink = path.is_symlink()
+            # content_sha256 is a REAL SHA-256 over the approved bytes; for a
+            # symlink we hash the link-target bytes WITHOUT dereferencing.
+            content = b""
+            if is_symlink:
+                try:
+                    content = os.readlink(path).encode()
+                except OSError:
+                    content = b""
+            elif is_file:
+                content = path.read_bytes()
+            content_sha256 = hashlib.sha256(content).hexdigest()
+            git_blob_oid = ""
+            if is_file and not is_symlink:
+                git_blob_oid = _git("hash-object", str(path), cwd=wt).strip()
+            st = path.stat() if (is_file or is_symlink) else None
             files.append({
+                "operation": op,
                 "path": rel,
-                "status": info["status"],
                 "old_path": info["src"] if info["src"] != rel else "",
-                "mode": info["status"] == "untracked" and "100644" or self._mode_of(wt, rel),
-                "blob_sha256": blob_sha,
+                "mode_before": "",
+                "mode_after": self._mode_of(wt, rel) if (is_file or is_symlink) else "100644",
+                "content_sha256": content_sha256,
+                "git_blob_oid": git_blob_oid,
+                "symlink_target": os.readlink(path) if is_symlink else "",
                 "size": st.st_size if st else 0,
                 "binary": self._is_binary(path),
                 "additions": 0,
                 "deletions": 0,
             })
 
-        # a forbidden path in the deliverable set fails closed; session logs
-        # are excluded (recorded in evidence) and never enter the manifest
+        # a forbidden path in the deliverable set fails closed
         if denied:
             raise CandidateError("FORBIDDEN_PATH",
                                  "forbidden path(s): " + ", ".join(d["path"] for d in denied))
 
-        # exact hashes
+        # exact hashes (DOD canonical manifest)
         index_tree = _git("write-tree", cwd=wt)
         worktree_tree = _git("rev-parse", "HEAD^{tree}", cwd=wt)
-        diff = _git("diff", "--binary", base_commit, "HEAD", cwd=wt) \
-            if base_commit else ""
-        diff_sha = _sha256_bytes(diff.encode())
         head_sha = _git("rev-parse", "HEAD", cwd=wt)
+        # canonical_manifest_sha256 binds ALL operations deterministically
+        canonical_manifest_sha256 = self._manifest_hash(files, excluded)
+        # canonical_patch_sha256 binds the COMPLETE candidate including
+        # originally-untracked content (never base..HEAD, never empty when
+        # the candidate is non-empty)
+        patch_blob = self._canonical_patch(files, wt)
+        canonical_patch_sha256 = hashlib.sha256(patch_blob).hexdigest()
 
         # evidence hashes
         evidence_hashes = {}
@@ -247,7 +333,8 @@ class PublishCandidateService:
             "worktree_head_sha": head_sha,
             "worktree_tree_sha": worktree_tree,
             "index_tree_sha": index_tree,
-            "diff_sha256": diff_sha,
+            "canonical_manifest_sha256": canonical_manifest_sha256,
+            "canonical_patch_sha256": canonical_patch_sha256,
             "files": files,
             "excluded_paths": excluded,
             "evidence_refs": evidence_refs or [],
@@ -264,26 +351,38 @@ class PublishCandidateService:
         self.store.put(candidate)
         return candidate
 
+    # -- path policy (DOD path policy) ------------------------------------
+    # runtime exclusions remain explicit and path-specific; legitimate approved
+    # paths (.github/workflows/*, .github/curaops-allowlist.yaml, .gitignore)
+    # are NEVER excluded as untracked metadata.
+    RUNTIME_EXCLUDE_PARTS = (
+        "mxs_",  # session stdout/stderr logs (checked below)
+        "fixture-status.json",
+        ".ai/worktrees/",
+        ".curaops/control/",
+        "outbox.jsonl",
+        "control-plane.sock",
+    )
+
     def _decide(self, rel: str, status: str) -> dict:
         low = rel.lower()
-        # session-log runtime artefacts are EXCLUDED (never published, recorded
-        # in the EvidenceBundle) — they do not block the real feature change
+        # 1) session-log runtime artefacts are EXCLUDED (never published,
+        #    recorded in the EvidenceBundle) — they do not block the change
         if low.startswith("mxs_") and (low.endswith(".stdout.txt")
                                        or low.endswith(".stderr.txt")):
             return {"allow": False, "exclude": True,
                     "reason": "session log excluded"}
+        # 2) explicit runtime-path exclusions (never published)
+        for part in self.RUNTIME_EXCLUDE_PARTS:
+            if part.lower() in low:
+                return {"allow": False, "exclude": True,
+                        "reason": f"runtime path excluded ({part})"}
+        # 3) forbidden secrets/large-binary patterns fail closed
         if _is_forbidden(rel):
             return {"allow": False, "reason": "FORBIDDEN_PATH"}
-        if status == "untracked":
-            # dot-dirs + repo/runtime metadata are never delivered as changes;
-            # only non-dot feature files (e.g. a real harness output) are taken
-            first = rel.split("/", 1)[0]
-            if first.startswith(".") or first in (
-                    ".ai", ".curaops", ".github", ".worktrees", ".sisyphus",
-                    "control-plane.sock", "outbox.jsonl"):
-                return {"allow": False, "exclude": True,
-                        "reason": "untracked repo metadata excluded"}
-            return {"allow": True, "reason": "untracked"}
+        # 4) everything else — including legitimate untracked additions such
+        #    as .github/workflows/*, .github/curaops-allowlist.yaml, .gitignore,
+        #    and real feature files — is ALLOWED
         return {"allow": True, "reason": ""}
 
     def _is_binary(self, path: Path) -> bool:
@@ -319,26 +418,44 @@ class PublishCandidateService:
             return "worktree head changed"
         if tree != candidate.get("worktree_tree_sha"):
             return "worktree tree changed"
-        # re-hash every candidate file
+        # re-hash every candidate file (content_sha256 is real SHA-256)
         for f in candidate.get("files", []):
-            p = wt / f["path"]
+            rel = f["path"]
+            op = f.get("operation", "modify")
+            p = wt / rel
+            # delete: the file is intentionally absent in the worktree
+            if op == "delete":
+                if p.exists():
+                    return f"file not deleted: {rel}"
+                continue
+            if f.get("symlink_target") is not None and f.get("symlink_target") != "":
+                # symlink: hash link-target bytes without dereferencing
+                try:
+                    cur = os.readlink(p).encode()
+                except OSError:
+                    return f"file missing: {rel}"
+                if hashlib.sha256(cur).hexdigest() != f.get("content_sha256"):
+                    return f"file modified: {rel}"
+                continue
             if not p.is_file():
-                return f"file missing: {f['path']}"
-            if _blob_sha(p) != f.get("blob_sha256"):
-                return f"file modified: {f['path']}"
+                return f"file missing: {rel}"
+            if hashlib.sha256(p.read_bytes()).hexdigest() != f.get("content_sha256"):
+                return f"file modified: {rel}"
         # evidence re-hash
         for ref, h in (candidate.get("evidence_hashes") or {}).items():
             ev = self.evidence_store.get(ref)
             if ev is None or _sha256_bytes(json.dumps(ev, sort_keys=True).encode()) != h:
                 return f"evidence changed: {ref}"
-        # a new forbidden untracked artefact must not silently enter; session
-        # logs (mxs_*.stdout/stderr.txt) are excluded, not stale
+        # a new forbidden/secret untracked artefact must not silently enter;
+        # runtime paths (mxs_*, fixture-status, .ai/worktrees, .curaops/control)
+        # are EXCLUDED, not stale — they never enter the commit
         for rel, info in self._pathspec_inventory(wt, "").items():
-            low = rel.lower()
-            if info["status"] == "untracked" and _is_forbidden(rel):
-                if low.startswith("mxs_") and (low.endswith(".stdout.txt")
-                                               or low.endswith(".stderr.txt")):
-                    continue
+            if info["status"] != "untracked":
+                continue
+            if self._decide(rel, "untracked")["allow"] is False \
+                    and self._decide(rel, "untracked").get("exclude") is True:
+                continue  # excluded runtime path, not stale
+            if _is_forbidden(rel):
                 return f"forbidden untracked artefact: {rel}"
         return ""
 
@@ -362,8 +479,8 @@ class PublishCandidateService:
             base = _git("rev-parse", "HEAD", cwd=wt).strip()
 
         # build a temporary index that starts from the base tree (so existing
-        # repository content is preserved) and adds/updates EXACTLY the
-        # candidate files (never `git add -A`)
+        # repository content is preserved) and applies EXACTLY the candidate
+        # operations (never `git add -A`)
         with tempfile.TemporaryDirectory(prefix="cand-idx-") as tmp:
             idx = str(Path(tmp) / "index")
             env = dict(os.environ, GIT_INDEX_FILE=idx)
@@ -371,17 +488,37 @@ class PublishCandidateService:
             _git_env(["read-tree", f"{base}^{{tree}}"], env, wt)
             for f in candidate.get("files", []):
                 rel = f["path"]
+                op = f.get("operation", "modify")
                 p = wt / rel
+                mode = f.get("mode_after") or "100644"
+                # delete: remove from the index
+                if op == "delete":
+                    _git_env(["update-index", "--remove", "--", rel], env, wt)
+                    continue
+                # symlink: hash the link-target bytes WITHOUT dereferencing
+                if f.get("symlink_target") not in (None, ""):
+                    if not p.is_symlink():
+                        raise CandidateError("CANDIDATE_STALE",
+                                             f"expected symlink: {rel}")
+                    target = os.readlink(p)
+                    blob = _git_env(
+                        ["hash-object", "-w", "--stdin"], env, wt,
+                        stdin=f"link\0{target}".encode()).strip()
+                    mode = "120000"
+                    _git_env(["update-index", "--add", "--cacheinfo",
+                              f"{mode},{blob},{rel}"], env, wt)
+                    continue
                 if not p.is_file():
                     raise CandidateError("CANDIDATE_STALE", f"file missing: {rel}")
-                # hash-object -w writes the blob into the object db and returns
-                # its exact git sha; use that (not a re-derived sha) so the
-                # index references an object that actually exists.
+                # rename/copy: remove the old path first
+                old = f.get("old_path") or ""
+                if op in ("rename", "copy") and old and old != rel:
+                    _git_env(["update-index", "--remove", "--", old], env, wt)
+                # exact blob + mode
                 blob = _git_env(["hash-object", "-w", "--path", rel, str(p)],
                                 env, wt).strip()
                 _git_env(["update-index", "--add", "--cacheinfo",
-                          f"{f.get('mode') or '100644'},{blob},{rel}"],
-                         env, wt)
+                          f"{mode},{blob},{rel}"], env, wt)
             tree = _git_env(["write-tree"], env, wt).strip()
         # create the commit on top of base with the manifest tree
         commit = _git("commit-tree", tree, "-p", base, "-m", message, cwd=wt)
