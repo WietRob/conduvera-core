@@ -254,8 +254,9 @@ class GitHubDeliveryProvider:
                 if binding == "legacy-ok":
                     satisfied.append((req_ctx, binding))
                 elif binding == "any-app":
-                    # any real check run (not a legacy commit status)
-                    if not is_legacy:
+                    # any real check run from a valid GitHub App (app_id=-1
+                    # means any app, but the run must still carry an app id)
+                    if not is_legacy and app_id is not None:
                         satisfied.append((req_ctx, binding))
                 else:
                     # app-bound: require the run's numeric app id to match
@@ -265,7 +266,15 @@ class GitHubDeliveryProvider:
             c["required_known"] = known
             for s in satisfied:
                 observed.add(s)
-        missing = sorted({ctx for (ctx, _b) in requirements} - {ctx for (ctx, _b) in observed}) if known else []
+        # review finding 1: missing must represent the unsatisfied bindings at
+        # the (context, app_id) identity level — one matching run for a shared
+        # context must not hide an unsatisfied binding of the same context.
+        if known:
+            missing = sorted(
+                f"{ctx}@{binding}" for (ctx, binding) in requirements
+                if (ctx, binding) not in observed)
+        else:
+            missing = []
         for c in checks:
             c["required_missing"] = missing
         # a policy with configured requirements but no observed runs must fail
@@ -414,8 +423,14 @@ class GitHubDeliveryProvider:
             raise GitHubDeliveryError(
                 "GH_BAD_JSON",
                 f"malformed required_status_checks (not an object): {type(rsc).__name__}")
-        contexts = rsc.get("contexts") or []
-        checks_entries = rsc.get("checks") or []
+        contexts = rsc.get("contexts")
+        checks_entries = rsc.get("checks")
+        # review finding 2: a present-but-wrong-typed member is a schema
+        # failure; only an ABSENT member is treated as empty
+        if contexts is None:
+            contexts = []
+        if checks_entries is None:
+            checks_entries = []
         if not isinstance(contexts, list) or not all(
                 isinstance(c, str) for c in contexts):
             raise GitHubDeliveryError(

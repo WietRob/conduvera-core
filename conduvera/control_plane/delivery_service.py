@@ -1343,6 +1343,11 @@ class DeliveryService:
                   "BLOCKED_BY_MERGE_TRAIN",
                   "BLOCKED_BY_PENDING_STATE"):
             return REVIEW_CHANGES_REQUESTED
+        # review finding 3: readiness is positively limited to terminal-ready
+        # merge metadata. Any nonterminal merge state that is not CLEAN (e.g.
+        # DRAFT, HAS_HOOKS, UNSTABLE) fails closed, never MERGE_READY.
+        if ms.upper() != "CLEAN":
+            return CI_PENDING
         # freshly created / no required checks -> PR_OPEN (never a fabricated
         # immediate MERGE_READY)
         if not req.get("success"):

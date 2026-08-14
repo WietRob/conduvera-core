@@ -136,7 +136,7 @@ def test_t06_app_bound_required_check(monkeypatch):
     checks = prov.list_checks("r", "h", base_branch="main")
     build = next(c for c in checks if c["name"] == "build")
     assert build["required"] is False  # wrong app must NOT satisfy
-    assert build["required_missing"] == ["build"]
+    assert "build@123" in build["required_missing"]
 
 
 # ---- T07: app_id == -1 means any app --------------------------------------
@@ -204,7 +204,7 @@ def test_t10_legacy_status_not_app_bound(monkeypatch):
     checks = prov.list_checks("r", "h", base_branch="main")
     status = next(c for c in checks if c["app"] == "commit-status")
     assert status["required"] is False
-    assert "build" in status["required_missing"]
+    assert "build@123" in status["required_missing"]
 
 
 # ---- T11: unknown status state never defaults to success ------------------
@@ -399,4 +399,4 @@ def test_t20_any_app_not_legacy(monkeypatch):
     checks = prov.list_checks("r", "h", base_branch="main")
     status = next(c for c in checks if c["app"] == "commit-status")
     assert status["required"] is False  # any-app is NOT legacy-ok
-    assert "build" in status["required_missing"]
+    assert "build@any-app" in status["required_missing"]
