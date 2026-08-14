@@ -445,8 +445,8 @@ class TestCheckDetails:
                               repo_allowlist={"fixture": tmp_path / "repo"},
                               worktree_root=tmp_path / "worktrees")
         dlv.provider.pr_view = lambda repo, num: pr
-        dlv.provider.list_checks = lambda repo, sha: checks
-        dlv.provider.list_reviews = lambda repo, num: reviews
+        dlv.provider.list_checks = lambda repo, sha, **kw: checks
+        dlv.provider.list_reviews = lambda repo, num, **kw: reviews
         return dlv
 
     def test_check_details_has_checks_reviews_timeline(self, tmp_path):

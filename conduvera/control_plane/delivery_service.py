@@ -806,11 +806,21 @@ class DeliveryService:
         record["github_repository"] = record.get("github_repository", "")
         record["mergeability"] = pr.get("mergeable", "")
         record["published_at"] = self._time_fn()
-        # sync once to get checks/reviews
+        # sync once to gather checks/reviews, but a freshly created PR is
+        # PR_OPEN (or CI_PENDING if required checks are still pending) — never
+        # immediately MERGE_READY, even if a check run already exists on the
+        # head SHA (review finding 5). A later explicit sync proves readiness.
         synced = self._sync_record(record)
-        rec = self._transition(record, self._state_from_sync(synced),
+        fresh_state = PR_OPEN
+        if synced.get("sync_error") or synced.get("no_pr"):
+            fresh_state = PR_OPEN
+        elif synced.get("availability", {}).get("checks") == "stale":
+            fresh_state = CI_PENDING
+        rec = self._transition(record, fresh_state,
                                event="published",
                                attention=synced.get("attention_reasons", []),
+                               checks_summary=synced.get("checks_summary", {}),
+                               reviews_summary=synced.get("reviews_summary", {}),
                                branch_name=record["branch_name"],
                                pull_request_number=record["pull_request_number"],
                                pull_request_url=record["pull_request_url"],
@@ -987,7 +997,23 @@ class DeliveryService:
         if not record.get("pull_request_number"):
             return {"ok": False, "message": "no PR to sync", "record": record}
         synced = self._sync_record(record)
+        # a metadata failure must not reset durable state NOR retain merge
+        # readiness; derive through the stale-aware path but preserve a
+        # terminal truth (MERGED / PR_CLOSED).
+        if synced.get("sync_error"):
+            prior = (record.get("delivery_state") or "").upper()
+            state = prior if prior in (MERGED, PR_CLOSED) \
+                else self._state_from_sync(synced)
+            record["delivery_state"] = state
+            record["sync_error"] = synced["sync_error"]
+            self.store.save(record)
+            return {"ok": False, "message": synced["sync_error"],
+                    "state": state, "record": record, "sync": synced}
+        if synced.get("no_pr"):
+            return {"ok": False, "message": "no PR to sync", "record": record}
         state = self._state_from_sync(synced)
+        # recovery: clear any prior metadata-failure marker on success
+        record.pop("sync_error", None)
         self._transition(record, state, event="sync",
                          attention=synced.get("attention_reasons", []),
                          checks_summary=synced.get("checks_summary", {}),
@@ -1003,34 +1029,54 @@ class DeliveryService:
         repo = record.get("github_repository")
         num = record.get("pull_request_number")
         if not repo or not num:
-            return {"attention_reasons": ["lost GitHub synchronization"]}
+            # no PR identity -> nothing to synchronize (non-mutating read)
+            return {"no_pr": True,
+                    "attention_reasons": ["not published to a pull request"]}
         try:
             pr = self.provider.pr_view(repo, int(num))
         except GitHubDeliveryError:
-            return {"attention_reasons": ["lost GitHub synchronization"]}
+            # PR-metadata failure must NOT reset durable state NOR hide durable
+            # check/review evidence; it returns an explicit error marker + the
+            # durable summaries (stale).
+            return {"sync_error": "PR metadata unavailable",
+                    "attention_reasons": ["lost GitHub synchronization"],
+                    "checks_summary": record.get("checks_summary", {}),
+                    "reviews_summary": record.get("reviews_summary", {}),
+                    "availability": {"checks": "stale", "reviews": "stale"}}
         state = pr.get("state", "").upper()
         head_sha = pr.get("headRefOid")
         base_sha = pr.get("baseRefOid")
         mergeable = pr.get("mergeable", "")
         merge_state = pr.get("mergeStateStatus", "")
+        base_for_checks = pr.get("baseRefName") or "main"
         checks = []
         reviews = []
         checks_ok = reviews_ok = False
         if head_sha:
             try:
-                checks = self.provider.list_checks(repo, head_sha)
+                checks = self.provider.list_checks(
+                    repo, head_sha, base_branch=base_for_checks)
                 checks_ok = True
             except GitHubDeliveryError:
                 checks = []
+                checks_ok = False
         try:
             reviews = self.provider.list_reviews(repo, int(num))
             reviews_ok = True
         except GitHubDeliveryError:
             reviews = []
-        checks_summary = self._checks_summary(checks)
-        reviews_summary = self._reviews_summary(reviews)
-        # Befund 11: a provider failure is reported as stale/unavailable, never
-        # as a clean empty result
+            reviews_ok = False
+        # a failed source preserves the LAST durable summary so a prior
+        # negative fact (CI_FAILED / CHANGES_REQUESTED) is not erased by an
+        # outage; availability stays stale.
+        if not checks_ok and record.get("checks_summary"):
+            checks_summary = record["checks_summary"]
+        else:
+            checks_summary = self._checks_summary(checks)
+        if not reviews_ok and record.get("reviews_summary"):
+            reviews_summary = record["reviews_summary"]
+        else:
+            reviews_summary = self._reviews_summary(reviews)
         availability = {
             "checks": "available" if checks_ok else "stale",
             "reviews": "available" if reviews_ok else "stale",
@@ -1042,15 +1088,24 @@ class DeliveryService:
             pass
         elif merge_state in ("DIRTY",) or mergeable == "CONFLICTING":
             attention.append("rebase/merge conflict")
-        elif merge_state in ("BEHIND", "BEHIND_BY_COMMITS", "BLOCKED"):
+        elif merge_state in ("BEHIND", "BEHIND_BY_COMMITS"):
             attention.append("base drift")
-        if checks_summary.get("failed"):
+        if checks_summary.get("required_failed"):
+            attention.append("required CI/check failure")
+        elif checks_summary.get("classification_unknown"):
+            attention.append("required-check classification unknown")
+        elif checks_summary.get("failed"):
             attention.append("CI/check failure")
+        if not checks_ok:
+            attention.append("GitHub checks unavailable; showing stale data")
+        if not reviews_ok:
+            attention.append("GitHub reviews unavailable; showing stale data")
         if reviews_summary.get("changes_requested"):
             attention.append("review changes requested")
         return {
             "state": state, "head_sha": head_sha, "base_sha": base_sha,
-            "mergeable": mergeable, "merge_state": merge_state,
+            "mergeable": mergeable, "mergeability": mergeable,
+            "merge_state": merge_state,
             "checks_summary": checks_summary,
             "reviews_summary": reviews_summary,
             "attention_reasons": attention,
@@ -1059,21 +1114,62 @@ class DeliveryService:
 
     def _checks_summary(self, checks: list[dict]) -> dict:
         by = {"pending": 0, "success": 0, "failure": 0, "other": 0}
+        req_by = {"pending": 0, "success": 0, "failure": 0, "other": 0}
         names = []
         details = []
+        # reduce duplicate attempts to the effective LATEST run per
+        # (normalized name, app_id). A queued/in-progress/nonterminal run has
+        # recency unknown (started_at may be null), so it is conservatively
+        # preferred over a completed run — a rerun in flight must not be
+        # masked by an older success.
+        def _active(c):
+            # EVERY non-completed GitHub status is active/nonterminal
+            return (c.get("status") or "").lower() != "completed"
+        latest = {}
         for c in checks:
+            key = ((c.get("name") or "").lower(), c.get("app_id"))
+            cur = latest.get(key)
+            if cur is None:
+                latest[key] = c
+                continue
+            ca, na = _active(cur), _active(c)
+            if ca != na:
+                if na:
+                    latest[key] = c
+                continue
+            t = c.get("started_at") or ""
+            tid = str(c.get("check_suite_id") or c.get("id") or "")
+            ct = cur.get("started_at") or ""
+            cid = str(cur.get("check_suite_id") or cur.get("id") or "")
+            if (t, tid) > (ct, cid):
+                latest[key] = c
+        for c in latest.values():
             conc = (c.get("conclusion") or "").lower()
             status = (c.get("status") or "").lower()
             names.append(c.get("name", ""))
-            if status == "completed" and conc == "success":
+            required = bool(c.get("required"))
+            required_known = bool(c.get("required_known", True))
+            if status == "completed" and conc in ("success", "neutral", "skipped"):
+                # GitHub treats success/neutral/skipped as successful
                 by["success"] += 1
-            elif status == "completed" and conc in ("failure", "timed_out", "cancelled", "action_required"):
+                if required:
+                    req_by["success"] += 1
+            elif status == "completed" and conc in ("failure", "timed_out", "cancelled", "action_required", "stale", "startup_failure"):
                 by["failure"] += 1
-            elif status in ("queued", "in_progress"):
+                if required:
+                    req_by["failure"] += 1
+            elif status in ("queued", "in_progress", "waiting", "requested", "pending"):
                 by["pending"] += 1
+                if required:
+                    req_by["pending"] += 1
             else:
                 by["other"] += 1
-            # operator-visible per-check detail (WS H dogfood feature)
+                if required:
+                    req_by["other"] += 1
+            if not required_known:
+                classification = "unknown"
+            else:
+                classification = "required" if required else "optional"
             details.append({
                 "name": c.get("name", ""),
                 "status": status,
@@ -1082,11 +1178,26 @@ class DeliveryService:
                 "completed_at": c.get("completed_at"),
                 "details_url": c.get("details_url"),
                 "app": c.get("app"),
-                "required": bool(c.get("required")),
+                "app_id": c.get("app_id"),
+                "required": required,
+                "required_known": required_known,
+                "classification": classification,
             })
+        unknown = any(not c.get("required_known", True) for c in latest.values())
+        missing = []
+        for c in latest.values():
+            for m in (c.get("required_missing") or []):
+                if m not in missing:
+                    missing.append(m)
         return {"by_status": by, "names": names[:20],
+                "required_by_status": req_by,
+                "classification_unknown": unknown,
+                "required_missing": missing,
                 "details": details,
-                "failed": by["failure"] > 0, "pending": by["pending"] > 0}
+                "failed": by["failure"] > 0,
+                "required_failed": req_by["failure"] > 0,
+                "pending": by["pending"] > 0,
+                "required_pending": req_by["pending"] > 0}
 
     def _reviews_summary(self, reviews: list[dict]) -> dict:
         # DOD-13 review2: only each reviewer's EFFECTIVE LATEST decision counts
@@ -1132,8 +1243,29 @@ class DeliveryService:
         synced = self._sync_record(record)
         record.update({k: v for k, v in synced.items()
                        if k in ("checks_summary", "reviews_summary",
-                                "mergeable", "merge_state", "state",
-                                "head_sha", "base_sha", "attention_reasons")})
+                                "mergeable", "mergeability", "merge_state",
+                                "state", "head_sha", "base_sha",
+                                "attention_reasons")})
+        # an unpublished delivery is a non-mutating read (never fabricate a
+        # PR_OPEN state just by opening the panel)
+        if synced.get("no_pr"):
+            return {"ok": False, "code": "NO_PUBLISHED_PR",
+                    "message": "delivery is not published to a pull request",
+                    "record": record}
+        # persist refreshed summaries AND the derived state so there is no
+        # durable contradiction between state and evidence. On a sync_error use
+        # the same stale-aware derivation as sync (preserves durable negative
+        # facts and terminal states).
+        if synced.get("sync_error"):
+            prior = (record.get("delivery_state") or "").upper()
+            derived = prior if prior in (MERGED, PR_CLOSED) \
+                else self._state_from_sync(synced)
+            record["delivery_state"] = derived
+            record["sync_error"] = synced["sync_error"]
+        else:
+            record.pop("sync_error", None)
+            record["delivery_state"] = self._state_from_sync(synced)
+        self.store.save(record)
         # ordered delivery event timeline
         timeline = self.history(record.get("delivery_id", "")) \
             if record.get("delivery_id") else []
@@ -1176,15 +1308,50 @@ class DeliveryService:
         if synced.get("merge_state") in ("DIRTY",) or \
                 synced.get("mergeable") == "CONFLICTING":
             return MERGE_CONFLICT
+        # a behind-base PR is not merge-ready even when checks are green
+        if synced.get("merge_state") in ("BEHIND", "BEHIND_BY_COMMITS"):
+            return NEEDS_REBASE
         if reviews.get("changes_requested"):
             return REVIEW_CHANGES_REQUESTED
-        if checks.get("failed"):
+        req = checks.get("required_by_status", {})
+        # preserve a stronger negative fact (required failure) BEFORE the
+        # stale-source fallback (accept the count map, the new boolean flag,
+        # AND the pre-v3 durable `failed` flag)
+        if req.get("failure") or checks.get("required_failed") \
+                or checks.get("failed"):
             return CI_FAILED
-        if checks.get("pending"):
+        # a nonterminal/unknown/missing required run fails closed (never green)
+        if req.get("pending") or req.get("other") \
+                or checks.get("classification_unknown") \
+                or checks.get("required_missing"):
             return CI_PENDING
-        # all available conditions green (or no checks configured)
-        if not checks.get("names") and not checks.get("by_status", {}).get("pending"):
-            return PR_OPEN  # NO_REQUIRED_CHECKS surfaced as attention, not green
+        # a stale checks OR reviews source must never establish merge readiness
+        avail = synced.get("availability") or {}
+        if avail.get("checks") == "stale" or avail.get("reviews") == "stale":
+            return CI_PENDING
+        # review finding 4: missing/UNKNOWN merge metadata must not yield
+        # MERGE_READY from a green required check alone
+        ms = synced.get("merge_state") or ""
+        mb = synced.get("mergeable") or ""
+        if not ms or ms.upper() in ("UNKNOWN", "UNKNOWN_REMOTE"):
+            return CI_PENDING
+        if not mb or mb.upper() in ("UNKNOWN", "UNKNOWN_REMOTE"):
+            return CI_PENDING
+        # generic BLOCKED* is a fallback once concrete evidence is exhausted
+        if ms in ("BLOCKED", "BLOCKED_BY_MAX_REVIEWS",
+                  "BLOCKED_BY_LIFECYCLE_RULE",
+                  "BLOCKED_BY_MERGE_TRAIN",
+                  "BLOCKED_BY_PENDING_STATE"):
+            return REVIEW_CHANGES_REQUESTED
+        # review finding 3: readiness is positively limited to terminal-ready
+        # merge metadata. Any nonterminal merge state that is not CLEAN (e.g.
+        # DRAFT, HAS_HOOKS, UNSTABLE) fails closed, never MERGE_READY.
+        if ms.upper() != "CLEAN":
+            return CI_PENDING
+        # freshly created / no required checks -> PR_OPEN (never a fabricated
+        # immediate MERGE_READY)
+        if not req.get("success"):
+            return PR_OPEN
         return MERGE_READY
 
     # ======================================================================
