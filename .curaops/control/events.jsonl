@@ -1,3 +1,0 @@
-{"timestamp": "2026-05-04T18:35:32.000498+00:00", "event_type": "boot", "agent_id": "Batman", "detail": "Booted with tool=manual task=TASK-I198 profile=frontend_ui", "metadata": {}}
-{"timestamp": "2026-05-04T18:35:43.443264+00:00", "event_type": "tick", "agent_id": "captain", "detail": "Tick: 1 agents, 1 actions", "metadata": {}}
-{"timestamp": "2026-05-04T18:36:00.437681+00:00", "event_type": "stopped", "agent_id": "Batman", "detail": "Gracefully stopped", "metadata": {}}
