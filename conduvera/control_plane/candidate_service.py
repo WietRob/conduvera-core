@@ -331,9 +331,14 @@ class PublishCandidateService:
             ev = self.evidence_store.get(ref)
             if ev is None or _sha256_bytes(json.dumps(ev, sort_keys=True).encode()) != h:
                 return f"evidence changed: {ref}"
-        # a new forbidden untracked artefact must not silently enter
+        # a new forbidden untracked artefact must not silently enter; session
+        # logs (mxs_*.stdout/stderr.txt) are excluded, not stale
         for rel, info in self._pathspec_inventory(wt, "").items():
+            low = rel.lower()
             if info["status"] == "untracked" and _is_forbidden(rel):
+                if low.startswith("mxs_") and (low.endswith(".stdout.txt")
+                                               or low.endswith(".stderr.txt")):
+                    continue
                 return f"forbidden untracked artefact: {rel}"
         return ""
 
@@ -356,10 +361,14 @@ class PublishCandidateService:
         else:
             base = _git("rev-parse", "HEAD", cwd=wt).strip()
 
-        # build a temporary index that contains EXACTLY the candidate files
+        # build a temporary index that starts from the base tree (so existing
+        # repository content is preserved) and adds/updates EXACTLY the
+        # candidate files (never `git add -A`)
         with tempfile.TemporaryDirectory(prefix="cand-idx-") as tmp:
             idx = str(Path(tmp) / "index")
             env = dict(os.environ, GIT_INDEX_FILE=idx)
+            # seed the index from the recorded base tree (preserve existing files)
+            _git_env(["read-tree", f"{base}^{{tree}}"], env, wt)
             for f in candidate.get("files", []):
                 rel = f["path"]
                 p = wt / rel

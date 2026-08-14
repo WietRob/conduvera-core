@@ -329,6 +329,15 @@ class DeliveryService:
 
     def _build_candidate(self, record: dict, job_id: str, attempt_id: str) -> dict:
         """Build the immutable PublishCandidate from the exact Attempt (WS B)."""
+        # resolve the owned session worktree — NEVER "." (the CORE checkout)
+        worktree = record.get("worktree", "")
+        if not worktree:
+            session = self._find_session(attempt_id)
+            if session is not None:
+                worktree = getattr(session, "worktree", "") or ""
+        if not worktree or Path(worktree) == Path("."):
+            raise DeliveryError("WORKTREE_NOT_OWNED",
+                                "no owned worktree for candidate")
         # gather named test/gate results from the EvidenceBundle
         named_tests, named_gates = self._named_results(job_id, attempt_id)
         return self.candidate_service.build_candidate(
@@ -339,7 +348,7 @@ class DeliveryService:
             github_repository=record.get("github_repository", ""),
             base_branch=record.get("base_branch", "main"),
             base_commit=record.get("base_commit", ""),
-            worktree=record.get("worktree", ""),
+            worktree=worktree,
             evidence_refs=record.get("evidence_refs", []) or [],
             named_tests=named_tests, named_gates=named_gates,
         )
