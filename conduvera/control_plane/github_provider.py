@@ -143,10 +143,19 @@ class GitHubDeliveryProvider:
         except subprocess.TimeoutExpired as e:
             raise GitHubDeliveryError("GH_TIMEOUT", "gh call timed out",
                                       {"argv": argv}) from e
-        if proc.returncode != 0:
+        except OSError as e:
+            # B1: a launch failure must reach the per-source stale path
             raise GitHubDeliveryError(
-                "GH_ERROR", (proc.stderr or proc.stdout or "").strip()[:400],
-                {"argv": argv})
+                "GH_LAUNCH", f"gh not launchable: {e}",
+                {"argv": argv}) from e
+        if proc.returncode != 0:
+            err = (proc.stderr or proc.stdout or "").strip()[:400]
+            code = "GH_ERROR"
+            import re as _re
+            m = _re.search(r"(?:HTTP|graphql)[^\d]*(\d{3})", err, _re.IGNORECASE)
+            if m:
+                code = f"GH_HTTP_{m.group(1)}"
+            raise GitHubDeliveryError(code, err, {"argv": argv})
         return proc.stdout.strip()
 
     # -- repository / branch primitives -----------------------------------
@@ -246,7 +255,10 @@ class GitHubDeliveryProvider:
                     "GH_BAD_JSON", "malformed check-run row (non-string name)")
             name = name_v.lower()
             app_id = c.get("app_id")
-            is_legacy = c.get("app") == "commit-status"
+            # B4: producer kind comes from a structural marker, never the
+            # mutable/display app name (a real App named 'commit-status' is
+            # still a check run)
+            is_legacy = bool(c.get("is_legacy"))
             satisfied = []
             for (req_ctx, binding) in requirements:
                 if req_ctx != name:
@@ -319,16 +331,47 @@ class GitHubDeliveryProvider:
                 "GH_BAD_JSON", "malformed check-run row (not an object)")
         out = []
         for r in runs:
+            # B3: validate scalar fields; a present-but-wrong-typed value is a
+            # schema failure, not normalized into usable evidence
+            name = r.get("name")
+            status = r.get("status")
+            conclusion = r.get("conclusion")
+            if not isinstance(name, str) or not isinstance(status, str) \
+                    or not isinstance(conclusion, str):
+                raise GitHubDeliveryError(
+                    "GH_BAD_JSON", "malformed check-run row (non-string scalar)")
+            app_obj = r.get("app")
+            app_name = ""
+            app_id = None
+            if app_obj is not None:
+                if not isinstance(app_obj, dict):
+                    raise GitHubDeliveryError(
+                        "GH_BAD_JSON", "malformed check-run app (not an object)")
+                if not isinstance(app_obj.get("id"), int) \
+                        or isinstance(app_obj.get("id"), bool):
+                    raise GitHubDeliveryError(
+                        "GH_BAD_JSON", "malformed check-run app id (not an int)")
+                app_id = app_obj.get("id")
+                app_name = app_obj.get("name") if isinstance(app_obj.get("name"), str) else ""
+            suite = r.get("check_suite")
+            suite_id = None
+            if suite is not None:
+                if not isinstance(suite, dict) or not isinstance(suite.get("id"), int) \
+                        or isinstance(suite.get("id"), bool):
+                    raise GitHubDeliveryError(
+                        "GH_BAD_JSON", "malformed check-run suite id")
+                suite_id = suite.get("id")
             out.append({
-                "name": r.get("name") or "",
-                "status": r.get("status") or "",
-                "conclusion": r.get("conclusion") or "",
+                "name": name,
+                "status": status,
+                "conclusion": conclusion,
                 "started_at": r.get("started_at"),
                 "completed_at": r.get("completed_at"),
                 "details_url": r.get("details_url"),
-                "app": (r.get("app") or {}).get("name") if isinstance(r.get("app"), dict) else "",
-                "app_id": (r.get("app") or {}).get("id") if isinstance(r.get("app"), dict) else None,
-                "check_suite_id": (r.get("check_suite") or {}).get("id") if isinstance(r.get("check_suite"), dict) else None,
+                "app": app_name,
+                "app_id": app_id,
+                "is_legacy": False,
+                "check_suite_id": suite_id,
             })
         return out
 
@@ -375,6 +418,7 @@ class GitHubDeliveryProvider:
                 "details_url": "",
                 "app": "commit-status",
                 "app_id": None,
+                "is_legacy": True,
                 "check_suite_id": "",
             })
         return rows
@@ -389,12 +433,16 @@ class GitHubDeliveryProvider:
         checks source becomes stale. app_id == -1 means any app (unbound)."""
         from urllib.parse import quote
         branch = quote(base_branch, safe="")
-        # confirm the base branch exists
+        # confirm the base branch exists; an EMPTY or malformed successful
+        # branch response is a schema failure (B2), not proof of existence
         try:
-            self._gh_text(["api", f"repos/{repository}/branches/{branch}",
-                           "--jq", ".name"])
+            branch_name = self._gh_text(
+                ["api", f"repos/{repository}/branches/{branch}", "--jq", ".name"])
         except GitHubDeliveryError:
             raise
+        if not branch_name:
+            raise GitHubDeliveryError(
+                "GH_BAD_JSON", "empty branch-existence probe response")
         try:
             pages = self._gh_paginated_pages(
                 f"repos/{repository}/branches/{branch}/protection")
@@ -452,7 +500,8 @@ class GitHubDeliveryProvider:
                 raise GitHubDeliveryError(
                     "GH_BAD_JSON", "malformed protection check (non-string context)")
             req_app = chk.get("app_id")
-            if req_app is None or not isinstance(req_app, int):
+            if req_app is None or not isinstance(req_app, int) \
+                    or isinstance(req_app, bool):
                 raise GitHubDeliveryError(
                     "GH_BAD_JSON", "malformed protection check (missing/non-int app_id)")
             # app_id == -1 = any app may provide this status (but still a real
