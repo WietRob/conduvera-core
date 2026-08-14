@@ -142,9 +142,20 @@ class TestApprovalNoToctou:
     def test_forbidden_untracked_after_approval_invalidates(self, tmp_path):
         store, ev, svc, wt, c = _build_candidate(tmp_path)
         c = svc.approve(c["candidate_id"], approved_by="operator")
-        (wt / "mxs_xyz.stdout.txt").write_text("log\n")
+        # a real forbidden artefact (not a session log) after approval makes
+        # the candidate stale (DOD-03): it must never enter the commit
+        (wt / "fixture-status.json").write_text('{"status":"ok"}\n')
         reason = svc.check_stale(c)
         assert "forbidden" in reason
+
+    def test_session_log_after_approval_excluded(self, tmp_path):
+        store, ev, svc, wt, c = _build_candidate(tmp_path)
+        c = svc.approve(c["candidate_id"], approved_by="operator")
+        # session-log runtime artefacts (mxs_*.stdout/stderr.txt) are excluded
+        # — they are recorded in the EvidenceBundle and never block the change
+        (wt / "mxs_xyz.stdout.txt").write_text("log\n")
+        (wt / "mxs_xyz.stderr.txt").write_text("err\n")
+        assert svc.check_stale(c) == ""
 
     def test_commit_builds_exact_tree(self, tmp_path):
         store, ev, svc, wt, c = _build_candidate(tmp_path)

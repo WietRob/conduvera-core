@@ -487,24 +487,24 @@ function openDetail(jobId, attemptId, deliveryId){
       a.innerHTML="<h4>Attention</h4><ul>"+att.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul>";
       panel.appendChild(a);
     }
-    const acts = document.createElement("div"); acts.className="detail-actions";
-    // WS A: explicitly select the delivery-source Attempt (browser action)
-    const sel = mkBtn("Select Attempt", ()=>{
-      const aid = prompt("Attempt ID (delivery source):", attemptId||"");
-      if(aid) runAction("delivery_select_attempt",{job_id:jobId, attempt_id:aid}).then(r=>{refresh();toast("selected: "+(r.result&&r.result.selected_attempt_id||"?"));});
-    });
-    const pre = mkBtn("Preflight", ()=>runAction("delivery_preflight",{job_or_delivery:jobId, attempt_id:attemptId||null}).then(r=>{refresh();toast(JSON.stringify((r.result||{}).reasons||[]).slice(0,200));}));
-    // WS B: approve the immutable candidate in the browser
-    const app = mkBtn("Approve Candidate", ()=>{
-      const cid = prompt("Candidate ID:", (rec.candidate_id||""));
-      if(cid) runAction("delivery_candidate_approve",{candidate_id:cid, approved_by:"operator"}).then(r=>{refresh();toast("approved: "+(r.result&&r.result.candidate_id||"?"));});
-    });
-    const pub = mkBtn("Publish PR", ()=>runAction("delivery_publish",{job_or_delivery:jobId, attempt_id:attemptId||null, candidate_id:rec.candidate_id||null}).then(r=>{refresh();toast(r.result&&r.result.ok?"Published: "+(r.result.record.pull_request_url||""):"Publish blockiert");}));
-    const sync = mkBtn("Refresh GitHub", ()=>runAction("delivery_sync",{job_or_delivery:jobId}).then(r=>{refresh();toast("sync -> "+(r.result&&r.result.state||""));}));
-    const cln = mkBtn("Cleanup", ()=>runAction("delivery_cleanup",{job_or_delivery:jobId,safe_only:true}).then(r=>{refresh();toast("cleanup: "+(r.result&&r.result.message||""));}));
-    acts.appendChild(sel); acts.appendChild(pre); acts.appendChild(app); acts.appendChild(pub); acts.appendChild(sync); acts.appendChild(cln);
-    panel.appendChild(acts);
   }
+  // WS actions: available even before a delivery record exists (fresh job),
+  // so an operator can select the attempt and build the first candidate
+  const acts = document.createElement("div"); acts.className="detail-actions";
+  const sel = mkBtn("Select Attempt", ()=>{
+    const aid = prompt("Attempt ID (delivery source):", attemptId||"");
+    if(aid) runAction("delivery_select_attempt",{job_id:jobId, attempt_id:aid}).then(r=>{refresh();toast("selected: "+(r.result&&r.result.selected_attempt_id||"?"));});
+  });
+  const pre = mkBtn("Preflight", ()=>runAction("delivery_preflight",{job_or_delivery:jobId, attempt_id:attemptId||null}).then(r=>{refresh();toast(JSON.stringify((r.result||{}).reasons||[]).slice(0,200));}));
+  const app = mkBtn("Approve Candidate", ()=>{
+    const cid = prompt("Candidate ID:", (rec&&rec.candidate_id||""));
+    if(cid) runAction("delivery_candidate_approve",{candidate_id:cid, approved_by:"operator"}).then(r=>{refresh();toast("approved: "+(r.result&&r.result.candidate_id||"?"));});
+  });
+  const pub = mkBtn("Publish PR", ()=>runAction("delivery_publish",{job_or_delivery:jobId, attempt_id:attemptId||null, candidate_id:(rec&&rec.candidate_id)||null}).then(r=>{refresh();toast(r.result&&r.result.ok?"Published: "+(r.result.record.pull_request_url||""):"Publish blockiert");}));
+  const sync = mkBtn("Refresh GitHub", ()=>runAction("delivery_sync",{job_or_delivery:jobId}).then(r=>{refresh();toast("sync -> "+(r.result&&r.result.state||""));}));
+  const cln = mkBtn("Cleanup", ()=>runAction("delivery_cleanup",{job_or_delivery:jobId,safe_only:true}).then(r=>{refresh();toast("cleanup: "+(r.result&&r.result.message||""));}));
+  acts.appendChild(sel); acts.appendChild(pre); acts.appendChild(app); acts.appendChild(pub); acts.appendChild(sync); acts.appendChild(cln);
+  panel.appendChild(acts);
   // Evidence block
   const ev = document.createElement("div"); ev.className="detail-block";
   ev.innerHTML = "<h4>Evidence</h4><div id=\"evidenceBox\">lädt…</div>";
