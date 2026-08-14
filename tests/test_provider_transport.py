@@ -71,7 +71,7 @@ def test_t01_paginated_check_runs_multiple_pages(monkeypatch):
         "gh api --paginate --slurp repos/r/commits/h/check-runs?per_page=100": [p1, p2],
         "gh api --paginate --slurp repos/r/commits/h/status?per_page=100": [{"statuses": []}],
         "gh api repos/r/branches/main --jq .name": "main",
-        "gh api --paginate --slurp repos/r/branches/main/protection": [{}],
+        "gh api --paginate --slurp repos/r/branches/main/protection": [{"required_status_checks": {}}],
     }, monkeypatch)
     checks = prov.list_checks("r", "h", base_branch="main")
     runs = [c for c in checks if c["app"] != "commit-status"]
@@ -214,7 +214,7 @@ def test_t11_unknown_status_non_green(monkeypatch):
         "gh api --paginate --slurp repos/r/commits/h/check-runs?per_page=100": [{"check_runs": []}],
         "gh api --paginate --slurp repos/r/commits/h/status?per_page=100": [p],
         "gh api repos/r/branches/main --jq .name": "main",
-        "gh api --paginate --slurp repos/r/branches/main/protection": [{}],
+        "gh api --paginate --slurp repos/r/branches/main/protection": [{"required_status_checks": {}}],
     }, monkeypatch)
     checks = prov.list_checks("r", "h", base_branch="main")
     status = next(c for c in checks if c["app"] == "commit-status")
@@ -307,7 +307,8 @@ def test_t16_fresh_pr_not_immediately_merge_ready(tmp_path):
     store.save(rec)
     dlv.provider.pr_view = lambda repo, num: {"state": "OPEN", "headRefOid": "h" * 40,
                                               "baseRefOid": "b" * 40,
-                                              "mergeStateStatus": "UNKNOWN"}
+                                              "mergeStateStatus": "CLEAN",
+                                              "mergeable": "MERGEABLE"}
     dlv.provider.list_checks = lambda repo, sha, **k: []
     dlv.provider.list_reviews = lambda repo, num, **k: []
     synced = dlv._sync_record(rec)
@@ -324,3 +325,59 @@ def test_t17_real_gh_cli_smoke():
     assert r.returncode == 0, r.stderr
     data = json.loads(r.stdout)
     assert isinstance(data, list)  # --paginate --slurp returns a list
+
+
+# ---- T18: missing/UNKNOWN merge metadata never yields MERGE_READY ----------
+def test_t18_unknown_merge_metadata_not_merge_ready(tmp_path):
+    from conduvera.control_plane.delivery_store import DeliveryStore
+    from conduvera.control_plane.evidence_store import EvidenceStore
+    from conduvera.control_plane.delivery_service import DeliveryService
+    store = DeliveryStore(tmp_path / "d")
+    ev = EvidenceStore(tmp_path / "e")
+    dlv = DeliveryService(store=store, evidence_store=ev,
+                          provider=GitHubDeliveryProvider(dry_run=True))
+    rec = dlv._new_record("job_1", "a1")
+    rec["github_repository"] = "r"
+    rec["pull_request_number"] = 1
+    store.save(rec)
+    # green required check but UNKNOWN merge metadata
+    dlv.provider.pr_view = lambda repo, num: {"state": "OPEN",
+                                              "headRefOid": "h" * 40,
+                                              "baseRefOid": "b" * 40,
+                                              "mergeStateStatus": "UNKNOWN",
+                                              "mergeable": "UNKNOWN"}
+    dlv.provider.list_checks = lambda repo, sha, **k: [
+        {"name": "build", "status": "completed", "conclusion": "success",
+         "required": True, "required_known": True, "app": "a", "app_id": 1}]
+    dlv.provider.list_reviews = lambda repo, num, **k: []
+    synced = dlv._sync_record(rec)
+    assert synced["checks_summary"]["required_by_status"]["success"] >= 1
+    assert dlv._state_from_sync(synced) == "CI_PENDING"  # fail-closed
+
+
+# ---- T19: fresh PR with pre-attached green check is NOT MERGE_READY --------
+def test_t19_fresh_pr_green_check_not_merge_ready(tmp_path):
+    from conduvera.control_plane.delivery_store import DeliveryStore
+    from conduvera.control_plane.evidence_store import EvidenceStore
+    from conduvera.control_plane.delivery_service import DeliveryService
+    store = DeliveryStore(tmp_path / "d")
+    ev = EvidenceStore(tmp_path / "e")
+    dlv = DeliveryService(store=store, evidence_store=ev,
+                          provider=GitHubDeliveryProvider(dry_run=True))
+    rec = dlv._new_record("job_1", "a1")
+    rec["github_repository"] = "r"
+    rec["branch_name"] = "conduvera/job_1/a1"
+    store.save(rec)
+    pr = {"number": 1, "url": "http://x/pull/1", "headRefOid": "h" * 40,
+          "baseRefOid": "b" * 40, "state": "OPEN", "mergeable": "MERGEABLE",
+          "mergeStateStatus": "CLEAN"}
+    # a green required check already exists on the head SHA
+    dlv.provider.pr_view = lambda repo, num: pr
+    dlv.provider.list_checks = lambda repo, sha, **k: [
+        {"name": "build", "status": "completed", "conclusion": "success",
+         "required": True, "required_known": True, "app": "a", "app_id": 1}]
+    dlv.provider.list_reviews = lambda repo, num, **k: []
+    wt = tmp_path / "wt"
+    wt.mkdir()
+    res = dlv._record_pr(rec, pr, "job_1", "a1", wt)
+    assert res["record"]["delivery_state"] == "PR_OPEN"  # never MERGE_READY

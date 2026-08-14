@@ -376,19 +376,27 @@ class GitHubDeliveryProvider:
                 return {}, True
             raise
         if not pages:
-            return {}, True
+            # an empty slurp on a known-existing branch is a schema/provider
+            # anomaly, not authoritative known-empty (review finding 1)
+            raise GitHubDeliveryError(
+                "GH_BAD_JSON", "empty branch-protection response")
         out = pages[0]
         if not isinstance(out, dict):
             raise GitHubDeliveryError(
                 "GH_BAD_JSON",
                 f"unexpected protection response shape: {type(out).__name__}")
-        rsc = out.get("required_status_checks") or {}
-        contexts = rsc.get("contexts") if isinstance(rsc, dict) else []
-        checks_entries = rsc.get("checks") if isinstance(rsc, dict) else []
-        if not contexts:
-            contexts = []
-        if not checks_entries:
-            checks_entries = []
+        rsc = out.get("required_status_checks")
+        if rsc is None:
+            # a successful protection response must carry required_status_checks;
+            # its absence is structurally incomplete (review finding 1)
+            raise GitHubDeliveryError(
+                "GH_BAD_JSON", "missing required_status_checks in protection response")
+        if not isinstance(rsc, dict):
+            raise GitHubDeliveryError(
+                "GH_BAD_JSON",
+                f"malformed required_status_checks (not an object): {type(rsc).__name__}")
+        contexts = rsc.get("contexts") or []
+        checks_entries = rsc.get("checks") or []
         if not isinstance(contexts, list) or not all(
                 isinstance(c, str) for c in contexts):
             raise GitHubDeliveryError(
@@ -401,11 +409,18 @@ class GitHubDeliveryProvider:
         for c in contexts:
             requirements[c.lower()] = None
         for chk in checks_entries:
-            if chk.get("context"):
-                req_app = chk.get("app_id")
-                # app_id == -1 = any app may provide this status (unbound)
-                requirements[str(chk["context"]).lower()] = (
-                    None if req_app == -1 else req_app)
+            # review finding 2: a checks[] entry must have a string context and a
+            # numeric app_id; malformed data propagates, never weakens policy
+            if not isinstance(chk.get("context"), str):
+                raise GitHubDeliveryError(
+                    "GH_BAD_JSON", "malformed protection check (non-string context)")
+            req_app = chk.get("app_id")
+            if req_app is None or not isinstance(req_app, int):
+                raise GitHubDeliveryError(
+                    "GH_BAD_JSON", "malformed protection check (missing/non-int app_id)")
+            # app_id == -1 = any app may provide this status (unbound)
+            requirements[chk["context"].lower()] = (
+                None if req_app == -1 else req_app)
         return requirements, True
 
     def list_reviews(self, repository: str, number: int) -> list[dict]:

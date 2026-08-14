@@ -806,11 +806,21 @@ class DeliveryService:
         record["github_repository"] = record.get("github_repository", "")
         record["mergeability"] = pr.get("mergeable", "")
         record["published_at"] = self._time_fn()
-        # sync once to get checks/reviews
+        # sync once to gather checks/reviews, but a freshly created PR is
+        # PR_OPEN (or CI_PENDING if required checks are still pending) — never
+        # immediately MERGE_READY, even if a check run already exists on the
+        # head SHA (review finding 5). A later explicit sync proves readiness.
         synced = self._sync_record(record)
-        rec = self._transition(record, self._state_from_sync(synced),
+        fresh_state = PR_OPEN
+        if synced.get("sync_error") or synced.get("no_pr"):
+            fresh_state = PR_OPEN
+        elif synced.get("availability", {}).get("checks") == "stale":
+            fresh_state = CI_PENDING
+        rec = self._transition(record, fresh_state,
                                event="published",
                                attention=synced.get("attention_reasons", []),
+                               checks_summary=synced.get("checks_summary", {}),
+                               reviews_summary=synced.get("reviews_summary", {}),
                                branch_name=record["branch_name"],
                                pull_request_number=record["pull_request_number"],
                                pull_request_url=record["pull_request_url"],
@@ -1305,9 +1315,10 @@ class DeliveryService:
             return REVIEW_CHANGES_REQUESTED
         req = checks.get("required_by_status", {})
         # preserve a stronger negative fact (required failure) BEFORE the
-        # stale-source fallback (accept both the count map and the preserved
-        # boolean flag from a durable summary)
-        if req.get("failure") or checks.get("required_failed"):
+        # stale-source fallback (accept the count map, the new boolean flag,
+        # AND the pre-v3 durable `failed` flag)
+        if req.get("failure") or checks.get("required_failed") \
+                or checks.get("failed"):
             return CI_FAILED
         # a nonterminal/unknown/missing required run fails closed (never green)
         if req.get("pending") or req.get("other") \
@@ -1318,11 +1329,19 @@ class DeliveryService:
         avail = synced.get("availability") or {}
         if avail.get("checks") == "stale" or avail.get("reviews") == "stale":
             return CI_PENDING
+        # review finding 4: missing/UNKNOWN merge metadata must not yield
+        # MERGE_READY from a green required check alone
+        ms = synced.get("merge_state") or ""
+        mb = synced.get("mergeable") or ""
+        if not ms or ms.upper() in ("UNKNOWN", "UNKNOWN_REMOTE"):
+            return CI_PENDING
+        if not mb or mb.upper() in ("UNKNOWN", "UNKNOWN_REMOTE"):
+            return CI_PENDING
         # generic BLOCKED* is a fallback once concrete evidence is exhausted
-        if synced.get("merge_state") in ("BLOCKED", "BLOCKED_BY_MAX_REVIEWS",
-                                         "BLOCKED_BY_LIFECYCLE_RULE",
-                                         "BLOCKED_BY_MERGE_TRAIN",
-                                         "BLOCKED_BY_PENDING_STATE"):
+        if ms in ("BLOCKED", "BLOCKED_BY_MAX_REVIEWS",
+                  "BLOCKED_BY_LIFECYCLE_RULE",
+                  "BLOCKED_BY_MERGE_TRAIN",
+                  "BLOCKED_BY_PENDING_STATE"):
             return REVIEW_CHANGES_REQUESTED
         # freshly created / no required checks -> PR_OPEN (never a fabricated
         # immediate MERGE_READY)
