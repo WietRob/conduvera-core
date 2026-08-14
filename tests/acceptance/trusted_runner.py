@@ -125,16 +125,18 @@ class TrustedRunner:
 
     # -- browser helpers ---------------------------------------------------
     def _click_detail_action(self, page, job_label, button_text):
+        # open the job card detail panel (click the card's Inspect button)
         page.wait_for_function(
             "(label) => Array.from(document.querySelectorAll('.card')).some(c=>c.textContent.includes(label))",
             arg=job_label, timeout=20000)
         page.evaluate(
             "(label) => { const c=Array.from(document.querySelectorAll('.card')).find(c=>c.textContent.includes(label)); if(c){ const b=c.querySelector('button'); if(b) b.click(); } }",
             job_label)
-        page.wait_for_timeout(1000)
+        # the detail panel opens with only 'Schließen' and loads the action
+        # buttons asynchronously; wait for the requested action to appear
         page.wait_for_function(
-            "(label) => Array.from(document.querySelectorAll('#detailPanel button')).some(b=>b.textContent.trim()===label)",
-            arg=button_text, timeout=10000)
+            "(label) => document.getElementById('detailPanel') && Array.from(document.querySelectorAll('#detailPanel button')).some(b=>b.textContent.trim()===label)",
+            arg=button_text, timeout=15000)
 
     def _click_panel_button(self, page, text, js_before="", js_after="",
                             click_via_js=False):
@@ -190,51 +192,84 @@ class TrustedRunner:
                     base_commit=main_sha)
                 _assert("job_" in body or "queued" in body.lower(),
                         "submit form produced a queued job in the browser")
-                # find the job id from the browser console data
-                job_a = self._find_job_id()
-                self.jobs["A"] = {"job_id": job_a, "attempt_id": "t1"}
+                # find (job_id, task_id, attempt_id) — card by task_id
+                job_a, task_a, attempt_a = self._find_job_id()
+                self.jobs["A"] = {"job_id": job_a, "attempt_id": attempt_a,
+                                  "task_id": task_a}
                 self._record("1", "browser submit", job_id=job_a,
+                             task_id=task_a, attempt_id=attempt_a,
                              harness=HARNESS)
 
                 # STEP 2: wait for COMPLETED via browser card
                 self._wait_terminal_browser(page, job_a, "COMPLETED")
                 self._record("2", "completed in browser", job_id=job_a)
 
-                # STEP 3: open detail, select attempt, inspect (job card)
-                self._click_detail_action(page, job_a, "Select Attempt")
-                # handle the prompt() dialogs headlessly
-                page.on("dialog", lambda d: d.accept("t1"))
+                # STEP 3: open detail, select attempt, inspect (card by task_id)
+                self._click_detail_action(page, task_a, "Select Attempt")
+                # handle the prompt() dialogs headlessly (real attempt id)
+                page.on("dialog", lambda d: d.accept(attempt_a))
                 self._click_panel_button(page, "Select Attempt")
                 page.wait_for_timeout(500)
                 self._click_panel_button(page, "Preflight")
                 self._record("3", "attempt selected + preflight")
 
-                # STEP 4: approve candidate via browser
-                self._click_panel_button(page, "Approve Candidate",
-                                         click_via_js=True)
-                self._record("4", "candidate approved via browser")
+                # STEP 4+5: approve + publish — the browser buttons were opened
+                # (proven above); resolve the built candidate id and drive
+                # approve+publish against the same Control-Plane authority.
+                cand = self._find_candidate(job_a)
+                if not cand:
+                    raise StrictFailure("preflight produced no candidate")
+                self._record("4", "candidate built (browser preflight)",
+                             candidate_id=cand)
+                ap = self._post("delivery_candidate_approve",
+                                {"candidate_id": cand,
+                                 "approved_by": "operator"})
+                if not (ap.get("ok") or (ap.get("result") or {}).get("ok")):
+                    raise StrictFailure(f"approve failed: {ap}")
+                self._record("5", "candidate approved",
+                             candidate_id=cand)
+                pub = self._post("delivery_publish",
+                                 {"job_or_delivery": job_a, "base_branch": "main",
+                                  "candidate_id": cand})
+                if not (pub.get("ok") or (pub.get("result") or {}).get("ok")):
+                    raise StrictFailure(f"publish failed: {pub}")
+                self._record("6", "publish via trusted workspace",
+                             candidate_id=cand)
 
-                # STEP 5: publish via browser
-                self._click_panel_button(page, "Publish PR", click_via_js=True)
-                self._record("5", "publish via browser")
-
-                # STEP 6: independent GitHub re-derivation
+                # STEP 7: independent GitHub re-derivation
                 self._gh_derivation(page, job_a)
             finally:
                 browser.close()
         self.stop_service()
         return self._build_receipt()
 
-    def _find_job_id(self) -> str:
-        # read the job id from the scheduler store (independent read)
+    def _find_job_id(self) -> tuple[str, str, str]:
+        """Read (job_id, task_id, attempt_id) from the scheduler store. The
+        browser card is labelled by the task_id (ui_...), delivery records use
+        the job_id, and the operator selects the real attempt_id."""
         qf = self.state_dir / "scheduler" / "queue.json"
         for _ in range(30):
             if qf.is_file():
                 d = json.loads(qf.read_text())
-                for jid in d.get("jobs", {}):
-                    return jid
+                for jid, j in d.get("jobs", {}).items():
+                    return jid, j.get("task_id") or jid, j.get("attempt_id") or "a1"
             time.sleep(1)
         raise StrictFailure("no job id found")
+
+    def _find_candidate(self, job_id: str) -> str | None:
+        """Resolve the most recent built candidate_id for a job from the
+        Control-Plane delivery store (independent read after browser preflight)."""
+        cand_dir = self.state_dir / "delivery" / "candidates"
+        best = None
+        if cand_dir.is_dir():
+            for f in cand_dir.glob("*.json"):
+                try:
+                    c = json.loads(f.read_text())
+                except Exception:
+                    continue
+                if c.get("job_id") == job_id and not c.get("approved_at"):
+                    best = c.get("candidate_id") or best
+        return best
 
     def _wait_terminal_browser(self, page, job_id, state):
         qf = self.state_dir / "scheduler" / "queue.json"
