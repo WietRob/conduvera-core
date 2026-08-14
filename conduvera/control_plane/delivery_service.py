@@ -638,31 +638,65 @@ class DeliveryService:
     # ======================================================================
     # WORKSTREAM C — PUBLISH
     # ======================================================================
+    def _safe_candidate_get(self, candidate_id: str) -> dict | None:
+        """Fetch a candidate, treating malformed IDs as unknown."""
+        if self.candidate_store is None:
+            return None
+        try:
+            return self.candidate_store.get(candidate_id)
+        except (ValueError, OSError, KeyError):
+            return None
+
     def publish(self, job_or_delivery: str, *, base_branch: str = "main",
                 force: bool = False, attempt_id: str | None = None,
                 candidate_id: str | None = None) -> dict:
-        """Run the gate, create exactly one task branch + PR, persist record."""
-        if candidate_id:
-            cand = self.candidate_store.get(candidate_id)
-            if cand is None:
-                return {"ok": False, "state": NOT_READY,
-                        "reasons": [{"code": "UNKNOWN_CANDIDATE",
-                                     "message": f"unknown candidate {candidate_id}"}],
-                        "message": "unknown candidate"}
-            if not cand.get("approved_at"):
-                return {"ok": False, "state": NOT_READY,
-                        "reasons": [{"code": "CANDIDATE_NOT_APPROVED",
-                                     "message": "candidate not approved"}],
-                        "message": "candidate not approved"}
-            attempt_id = cand.get("attempt_id")
-        pre = self.preflight(job_or_delivery, attempt_id=attempt_id)
-        if not pre["ok"]:
+        """Publish EXACTLY the approved, authoritatively-bound Candidate.
+
+        PR A authority: candidate_id is REQUIRED; publish consumes exactly that
+        object; NO preflight inside publish; NO _candidate_for fallback; NO
+        lookup by job/attempt only; NO automatic approval.
+        """
+        if not candidate_id:
             return {"ok": False, "state": NOT_READY,
-                    "reasons": pre["reasons"],
-                    "message": "pre-publish gate failed"}
-        record = pre["record"]
-        job_id = record["job_id"]
-        attempt_id = record["attempt_id"]
+                    "reasons": [{"code": "CANDIDATE_REQUIRED",
+                                 "message": "publish requires an approved candidate_id"}],
+                    "message": "candidate_id required"}
+        cand = self._safe_candidate_get(candidate_id)
+        if cand is None:
+            return {"ok": False, "state": NOT_READY,
+                    "reasons": [{"code": "UNKNOWN_CANDIDATE",
+                                 "message": f"unknown candidate {candidate_id}"}],
+                    "message": "unknown candidate"}
+        if not cand.get("approved_at"):
+            return {"ok": False, "state": NOT_READY,
+                    "reasons": [{"code": "CANDIDATE_NOT_APPROVED",
+                                 "message": "candidate not approved"}],
+                    "message": "candidate not approved"}
+        if cand.get("invalidated_at"):
+            return {"ok": False, "state": NOT_READY,
+                    "reasons": [{"code": "CANDIDATE_INVALID",
+                                 "message": cand.get("invalidation_reason", "invalid")}],
+                    "message": "candidate invalid"}
+        # authoritative binding: the candidate must own its identity fields
+        job_id = cand.get("job_id") or ""
+        attempt_id = cand.get("attempt_id") or ""
+        delivery_id = cand.get("delivery_id") or ""
+        if not job_id or not attempt_id:
+            return {"ok": False, "state": NOT_READY,
+                    "reasons": [{"code": "CANDIDATE_INVALID",
+                                 "message": "candidate lacks job/attempt binding"}],
+                    "message": "candidate binding incomplete"}
+        # load or create the delivery record for THIS exact candidate binding
+        record = self.find_by_job_attempt(job_id, attempt_id)
+        if record is None:
+            record = self._new_record(job_id, attempt_id)
+        if delivery_id and record.get("delivery_id") != delivery_id:
+            record["delivery_id"] = delivery_id
+        record["candidate_id"] = candidate_id
+        record["base_branch"] = base_branch
+        record["github_repository"] = cand.get("github_repository") or record.get("github_repository", "")
+        record["repo_id"] = cand.get("repo_id") or record.get("repo_id", "")
+        record["base_commit"] = cand.get("base_commit") or record.get("base_commit", "")
         # resolve the MANAGED session for this attempt (never fall back to the
         # core checkout / CWD — that would commit into the wrong repository)
         session = self._find_session(attempt_id)
@@ -674,13 +708,24 @@ class DeliveryService:
                                     reason="no owned worktree for attempt",
                                     attention=["remote publication failure"],
                                     branch_name="", pull_request_url="")
+        # the candidate worktree must match the bound session worktree
+        cand_wt = cand.get("worktree") or ""
+        if cand_wt and str(Path(cand_wt)) != str(wt):
+            return self._transition(record, DELIVERY_FAILED,
+                                    event="publish_worktree_mismatch",
+                                    reason="candidate worktree differs from session",
+                                    attention=["remote publication failure"],
+                                    branch_name="", pull_request_url="")
 
         # resolve repo/github/base BEFORE drift classification (the remote
         # base SHA depends on github_repository being known)
         record["repo_id"] = record.get("repo_id") or self._job_repo(job_id)
         github_repo = self._github_repo(record["repo_id"])
         record["github_repository"] = github_repo
-        record["base_commit"] = self._job_base(job_id) or record.get("base_commit")
+        # PR A: the Candidate is the authority — its base_commit wins over the
+        # job-derived base when both are present
+        if not record.get("base_commit"):
+            record["base_commit"] = self._job_base(job_id) or ""
         record["worktree"] = str(wt)
         record["session_id"] = session.session_id if session else ""
 
@@ -719,15 +764,10 @@ class DeliveryService:
                                     reason="remote branch unexpected SHA",
                                     attention=["remote publication failure"])
 
-        # create commit containing ONLY the approved candidate manifest (atomic,
-        # never `git add -A`). If no candidate exists yet, build+approve it now.
+        # commit EXACTLY the authoritative approved candidate (never `git add -A`,
+        # never a rebuilt/auto-approved candidate)
         if self.candidate_service is not None:
-            candidate = self._candidate_for(record, job_id, attempt_id)
-            if candidate is None:
-                return self._transition(record, DELIVERY_FAILED,
-                                        event="publish_no_candidate",
-                                        reason="no approved candidate for attempt",
-                                        attention=["remote publication failure"])
+            candidate = cand  # the authoritative, binding-validated object
             try:
                 msg = (f"conduvera: delivery {record['delivery_id']} "
                        f"candidate {candidate['candidate_id']} "
@@ -740,15 +780,10 @@ class DeliveryService:
                                         reason=f"{e.code}: {e.message}",
                                         attention=["remote publication failure"])
         else:
-            # fallback legacy path (no candidate service bound) — not used in prod
-            try:
-                self._create_commit(wt, record)
-            except DeliveryError as e:
-                return self._transition(record, DELIVERY_FAILED,
-                                        event="publish_commit_failed",
-                                        reason=str(e),
-                                        attention=["remote publication failure"])
-            head_sha = self._head_sha(wt)
+            return self._transition(record, DELIVERY_FAILED,
+                                    event="publish_no_candidate_service",
+                                    reason="candidate service not bound",
+                                    attention=["remote publication failure"])
         record["branch_head_sha"] = head_sha
 
         # push without force (idempotent: no force)
@@ -759,18 +794,6 @@ class DeliveryService:
         pr = self.provider.create_pr(github_repo, branch, base_branch,
                                      self._pr_title(record), body)
         return self._record_pr(record, pr, job_id, attempt_id, wt)
-
-    def _candidate_for(self, record: dict, job_id: str, attempt_id: str):
-        """Return the approved PublishCandidate for this attempt (build if none)."""
-        cand = self.candidate_store.find_by_job_attempt(job_id, attempt_id)
-        if cand is not None and cand.get("approved_at"):
-            return cand
-        if cand is not None:
-            raise CandidateError("CANDIDATE_NOT_APPROVED",
-                                 f"candidate {cand['candidate_id']} not approved")
-        # build + approve (operator approved via preflight path normally)
-        c = self._build_candidate(record, job_id, attempt_id)
-        return self.candidate_service.approve(c["candidate_id"], approved_by="conduvera")
 
 
     def _record_pr(self, record: dict, pr: dict, job_id: str,
