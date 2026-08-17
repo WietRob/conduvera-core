@@ -333,14 +333,26 @@ class ControlPlaneService:
                         else SessionState.COMPLETED)
                     session.ended_at = _utc_now()
                     self.registry.update(session)
-                self._mark_attempt_terminal(session, AttemptState.COMPLETED)
+                # Owner invariant: Session and Attempt must use their
+                # corresponding terminal states (COMPLETED<->COMPLETED,
+                # FAILED<->FAILED, CANCELLED<->CANCELLED). Never FAILED
+                # Session with COMPLETED Attempt.
+                attempt_state = {
+                    SessionState.COMPLETED: AttemptState.COMPLETED,
+                    SessionState.FAILED: AttemptState.FAILED,
+                    SessionState.CANCELLED: AttemptState.CANCELLED,
+                    SessionState.LOST: AttemptState.FAILED,  # fail-closed
+                }.get(session.state, AttemptState.FAILED)
+                self._mark_attempt_terminal(session, attempt_state)
                 results[session.session_id] = {"state": session.state.value,
                                                "transitioned": "process_gone",
-                                               "exit_code": session.exit_code}
+                                               "exit_code": session.exit_code,
+                                               "attempt_state": attempt_state.value}
                 self._emit("session.reconciled", {"session_id": session.session_id,
                                                   "state": session.state.value,
                                                   "transitioned": "process_gone",
-                                                  "exit_code": session.exit_code})
+                                                  "exit_code": session.exit_code,
+                                                  "attempt_state": attempt_state.value})
             elif live.matches(fp):
                 if session.state is not SessionState.RUNNING:
                     session.state = SessionState.RUNNING

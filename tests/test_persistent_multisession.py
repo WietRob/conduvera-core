@@ -353,3 +353,111 @@ def test_t18_repeated_reconcile_no_new_session_or_attempt(tmp_path):
             assert len(getattr(svc2, "_events", [])) == ev_before
     finally:
         a.kill()
+
+
+# --------------------------------------------------------------------------
+# Terminal-state consistency regression (Owner invariant)
+# --------------------------------------------------------------------------
+def _mk_attempt(svc, attempt_id, job_id, task_id, session_id, *, state="RUNNING"):
+    from conduvera.control_plane.scheduler import AttemptDescriptor, AttemptState
+    att = AttemptDescriptor(
+        attempt_id=attempt_id, job_id=job_id, task_id=task_id,
+        session_id=session_id, state=AttemptState(state),
+        created_at=time.strftime("%Y-%m-%dT%H:%M:%S+00:00", time.gmtime()))
+    svc.scheduler.store.save_attempt(att)
+    return att
+
+
+def test_r0_reconcile_exit0_session_and_attempt_completed(tmp_path):
+    """Owner invariant: restart reconciliation with exit_code 0 produces
+    consistent SUCCESSFUL terminal Session AND Attempt states."""
+    repo = _make_repo(tmp_path)
+    state = tmp_path / "state"
+    gw = _FakeGateway()
+    svc1, _ = _svc(state, repo, gw)
+    child = subprocess.Popen(["sleep", "0.1"]); child.wait()
+    wt = tmp_path / "wt0"; wt.mkdir(exist_ok=True)
+    (wt / "fixture-status.json").write_text(
+        json.dumps({"scenario": "HOLD_THEN_EXIT_0", "exit_code": 0}), encoding="utf-8")
+    _mk_session(svc1, "mxs_0", "T-0", "r0", child.pid, str(wt), "conduvera-r0.scope")
+    _mk_attempt(svc1, "r0", "job_r0", "T-0", "mxs_0")
+    svc2, reg2 = _svc(state, repo, gw)
+    res = svc2.reconcile()
+    assert res["mxs_0"]["exit_code"] == 0
+    assert res["mxs_0"]["attempt_state"] == "COMPLETED"
+    assert reg2.get("mxs_0").state.value == "COMPLETED"
+    att = svc2.scheduler.store.get_attempt("r0")
+    assert att.state.value == "COMPLETED" and att.terminal is True
+
+
+def test_r1_reconcile_nonzero_session_and_attempt_failed(tmp_path):
+    """Owner invariant: nonzero exit -> consistent FAILED Session AND Attempt,
+    exact exit code preserved."""
+    repo = _make_repo(tmp_path)
+    state = tmp_path / "state"
+    gw = _FakeGateway()
+    svc1, _ = _svc(state, repo, gw)
+    child = subprocess.Popen(["sleep", "0.1"]); child.wait()
+    wt = tmp_path / "wt7"; wt.mkdir(exist_ok=True)
+    (wt / "fixture-status.json").write_text(
+        json.dumps({"scenario": "EXIT_7", "exit_code": 7}), encoding="utf-8")
+    _mk_session(svc1, "mxs_7", "T-7", "r1", child.pid, str(wt), "conduvera-r1.scope")
+    _mk_attempt(svc1, "r1", "job_r1", "T-7", "mxs_7")
+    svc2, reg2 = _svc(state, repo, gw)
+    res = svc2.reconcile()
+    assert res["mxs_7"]["exit_code"] == 7
+    assert res["mxs_7"]["attempt_state"] == "FAILED"
+    assert reg2.get("mxs_7").state.value == "FAILED"
+    assert reg2.get("mxs_7").exit_code == 7
+    att = svc2.scheduler.store.get_attempt("r1")
+    assert att.state.value == "FAILED" and att.terminal is True
+
+
+def test_r2_reconcile_unknown_exit_follows_existing_contract(tmp_path):
+    """Owner invariant: an unavailable exit code is classified per the existing
+    fail-closed contract (process-gone -> truthful terminal, never silently
+    asserted as success); Session and Attempt stay CONSISTENT."""
+    repo = _make_repo(tmp_path)
+    state = tmp_path / "state"
+    gw = _FakeGateway()
+    svc1, _ = _svc(state, repo, gw)
+    child = subprocess.Popen(["sleep", "0.1"]); child.wait()
+    wt = tmp_path / "wtU"; wt.mkdir(exist_ok=True)  # no fixture-status.json
+    _mk_session(svc1, "mxs_U", "T-U", "r2", child.pid, str(wt), "")
+    _mk_attempt(svc1, "r2", "job_r2", "T-U", "mxs_U")
+    svc2, reg2 = _svc(state, repo, gw)
+    res = svc2.reconcile()
+    # no scope + no fixture -> exit None -> the existing dead->COMPLETED
+    # contract applies; Session and Attempt must be the SAME terminal state
+    assert res["mxs_U"]["state"] in ("COMPLETED", "FAILED")
+    session_state = reg2.get("mxs_U").state.value
+    att = svc2.scheduler.store.get_attempt("r2")
+    assert att.state.value == session_state  # consistent, never mixed
+    assert att.terminal is True
+
+
+def test_r3_repeated_reconcile_terminal_not_reverted_to_running(tmp_path):
+    """Owner invariant: repeated reconciliation cannot change a terminal Session
+    or Attempt back to RUNNING and creates no duplicate dispatch."""
+    repo = _make_repo(tmp_path)
+    state = tmp_path / "state"
+    gw = _FakeGateway()
+    svc1, _ = _svc(state, repo, gw)
+    child = subprocess.Popen(["sleep", "0.1"]); child.wait()
+    wt = tmp_path / "wtT"; wt.mkdir(exist_ok=True)
+    (wt / "fixture-status.json").write_text(
+        json.dumps({"scenario": "EXIT_7", "exit_code": 7}), encoding="utf-8")
+    _mk_session(svc1, "mxs_T", "T-T", "r3", child.pid, str(wt), "conduvera-r3.scope")
+    _mk_attempt(svc1, "r3", "job_r3", "T-T", "mxs_T")
+    svc2, reg2 = _svc(state, repo, gw)
+    svc2.reconcile()
+    assert reg2.get("mxs_T").state.value == "FAILED"
+    att1 = svc2.scheduler.store.get_attempt("r3")
+    # repeated reconcile: terminal Session/Attempt must stay terminal (FAILED)
+    for _ in range(3):
+        svc2.reconcile()
+    assert reg2.get("mxs_T").state.value == "FAILED"
+    att2 = svc2.scheduler.store.get_attempt("r3")
+    assert att2.state.value == "FAILED" and att2.terminal is True
+    # no duplicate session/attempt created
+    assert len(reg2.all()) == 1
