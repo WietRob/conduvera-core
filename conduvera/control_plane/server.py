@@ -37,6 +37,14 @@ def build_service(state_dir: str | None = None) -> ControlPlaneService:
         config=config,
         adapter_ids=adapter_ids,
         global_concurrency=int(os.environ.get("CONDUVERA_GLOBAL_CONCURRENCY", "4")),
+        # B5/multi-session: under the isolated acceptance service let the
+        # fixture harness run up to the global concurrency so two controlled
+        # MANAGED sessions can coexist simultaneously (never changes the
+        # normal per-harness default of 1).
+        per_harness_limits=(
+            {"acceptance_fixture_cli": int(os.environ.get(
+                "CONDUVERA_GLOBAL_CONCURRENCY", "4"))}
+            if os.environ.get("CONDUVERA_ACCEPTANCE_MODE") == "1" else None),
     )
     from conduvera.control_plane.outbox import EventOutbox
     svc.set_outbox(EventOutbox(config.outbox_path, webhook_url=None))
