@@ -138,6 +138,7 @@ class ManagedSession:
     created_at: str = ""
     started_at: str = ""
     ended_at: str = ""
+    exit_code: int | None = None
     worktree: str = ""
     base_commit: str = ""
     adapter_session_id: str = ""
@@ -182,6 +183,7 @@ class ManagedSession:
             "created_at": self.created_at,
             "started_at": self.started_at,
             "ended_at": self.ended_at,
+            "exit_code": self.exit_code,
             "worktree": self.worktree,
             "base_commit": self.base_commit,
             "adapter_session_id": self.adapter_session_id,
@@ -208,6 +210,7 @@ class ManagedSession:
             created_at=data.get("created_at", ""),
             started_at=data.get("started_at", ""),
             ended_at=data.get("ended_at", ""),
+            exit_code=data.get("exit_code"),
             worktree=data.get("worktree", ""),
             base_commit=data.get("base_commit", ""),
             adapter_session_id=data.get("adapter_session_id", ""),
@@ -221,6 +224,15 @@ class ManagedSession:
 
 class ExternalSessionError(Exception):
     """Raised when an operation targets a non-MANAGED session."""
+
+
+class RegistryCorruptError(Exception):
+    """Raised when the persistent session registry is invalid or truncated.
+
+    Fail-closed: a corrupt registry is NEVER silently replaced with an empty
+    one. The structured error lets the control plane refuse to continue rather
+    than lose session/ownership/scope/evidence identity.
+    """
 
 
 class ManagedSessionRegistry:
@@ -245,10 +257,20 @@ class ManagedSessionRegistry:
     def _read(self) -> dict[str, Any]:
         if not self.path.is_file():
             return {"sessions": {}}
+        raw = self.path.read_text(encoding="utf-8")
         try:
-            return json.loads(self.path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            return {"sessions": {}}
+            data = json.loads(raw)
+        except json.JSONDecodeError as e:
+            # T03 / B2: a truncated or invalid registry is a structured error,
+            # NEVER a silent empty success (would lose session/scope/evidence).
+            raise RegistryCorruptError(
+                f"session registry corrupt: {self.path} "
+                f"(JSON error at line {e.lineno} col {e.colno})"
+            ) from e
+        if not isinstance(data, dict) or not isinstance(data.get("sessions"), dict):
+            raise RegistryCorruptError(
+                f"session registry invalid schema: {self.path}")
+        return data
 
     def _write(self, data: dict[str, Any]) -> None:
         tmp = self.path.with_suffix(self.path.suffix + ".tmp")

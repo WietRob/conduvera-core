@@ -20,8 +20,10 @@ All registry writes are atomic (tmp file + rename) and mode 0600.
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
+import subprocess
 import uuid
 from dataclasses import dataclass
 from enum import Enum
@@ -320,15 +322,25 @@ class ControlPlaneService:
                 if session.state not in (SessionState.CANCELLED,
                                          SessionState.COMPLETED,
                                          SessionState.FAILED, SessionState.LOST):
-                    session.state = SessionState.COMPLETED
+                    # T10: before marking terminal, recover the real exit code
+                    # from the owned scope (or acceptance fixture) so an exact
+                    # nonzero exit survives a restart and reaches evidence.
+                    exit_code = self._reconcile_exit_code(session)
+                    session.exit_code = exit_code
+                    # a nonzero exit is FAILED, not COMPLETED
+                    session.state = (
+                        SessionState.FAILED if exit_code not in (None, 0)
+                        else SessionState.COMPLETED)
                     session.ended_at = _utc_now()
                     self.registry.update(session)
                 self._mark_attempt_terminal(session, AttemptState.COMPLETED)
                 results[session.session_id] = {"state": session.state.value,
-                                               "transitioned": "process_gone"}
+                                               "transitioned": "process_gone",
+                                               "exit_code": session.exit_code}
                 self._emit("session.reconciled", {"session_id": session.session_id,
                                                   "state": session.state.value,
-                                                  "transitioned": "process_gone"})
+                                                  "transitioned": "process_gone",
+                                                  "exit_code": session.exit_code})
             elif live.matches(fp):
                 if session.state is not SessionState.RUNNING:
                     session.state = SessionState.RUNNING
@@ -350,6 +362,34 @@ class ControlPlaneService:
         return results
 
     # -- job operations -----------------------------------------------------
+
+    def _reconcile_exit_code(self, session: ManagedSession) -> int | None:
+        """Recover the real exit code during restart reconciliation.
+
+        Prefers the owned systemd scope (ExecMainStatus); falls back to the
+        acceptance fixture status file (deterministic test path). Returns None
+        when neither is available (truthful: unknown, not assumed 0)."""
+        if session.scope_id and session.scope_id.endswith(".scope"):
+            try:
+                r = subprocess.run(
+                    ["systemctl", "--user", "show", session.scope_id,
+                     "-p", "ExecMainStatus", "--value"],
+                    capture_output=True, text=True, timeout=10)
+                raw = r.stdout.strip()
+                if raw.isdigit():
+                    return int(raw)
+            except (OSError, subprocess.TimeoutExpired):
+                pass
+        if session.worktree:
+            p = Path(session.worktree) / "fixture-status.json"
+            if p.is_file():
+                try:
+                    data = json.loads(p.read_text(encoding="utf-8"))
+                    ec = data.get("exit_code")
+                    return int(ec) if ec is not None else None
+                except (ValueError, OSError):
+                    return None
+        return None
 
     def resolve_repo(self, repo: str) -> Path:
         """Resolve a stable repo id to its canonical path (allowlist).
@@ -1052,17 +1092,35 @@ class ControlPlaneService:
                     "session_id": self._session_id_for_attempt((j.get("attempts") or [None])[0]),
                 })
 
+        _running_rows = sorted(running, key=lambda x: x.get("started_at", ""),
+                               reverse=True)[:limit if limit else None]
+        _terminal_rows = sorted(terminal, key=lambda x: x.get("updated_at", ""),
+                                reverse=True)[:limit if limit else None]
         return {
             "counts": {"queued": len(queued), "running": len(running),
                        "terminal": len(terminal)},
             "queued": sorted(queued, key=lambda x: x.get("created_at", ""),
                              reverse=True)[:limit if limit else None],
-            "running": sorted(running, key=lambda x: x.get("started_at", ""),
-                              reverse=True)[:limit if limit else None],
-            "terminal": sorted(terminal, key=lambda x: x.get("updated_at", ""),
-                               reverse=True)[:limit if limit else None],
+            "running": _running_rows,
+            "terminal": _terminal_rows,
             "server_time_utc": now.isoformat(),
         }
+
+    def console_human(self, limit: int | None = None) -> str:
+        """T17: human projection rendered from the SAME reconciled data as the
+        console JSON (single source of truth, never direct state scraping)."""
+        view = self.console_view(limit=limit)
+        lines = [f"Control Plane @ {view.get('server_time_utc')}"]
+        lines.append(f"  running={len(view.get('running', []))} "
+                     f"terminal={len(view.get('terminal', []))}")
+        for s in view.get("running", []):
+            lines.append(f"  RUNNING {s.get('session_id')} "
+                         f"task={s.get('task_id')} attempt={s.get('attempt_id')} "
+                         f"scope={s.get('scope_id')} pid={s.get('pid')}")
+        for j in view.get("terminal", []):
+            lines.append(f"  TERMINAL {j.get('state')} task={j.get('task_id')} "
+                         f"exit={j.get('exit_code')}")
+        return "\n".join(lines)
 
     def _session_id_for_attempt(self, attempt_id: str) -> str:
         if not attempt_id:
