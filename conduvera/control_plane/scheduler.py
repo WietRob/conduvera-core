@@ -169,6 +169,8 @@ class AttemptDescriptor:
     claim_lease_until: str = ""
     exit_code: int | None = None
     terminal_reason: str = ""
+    admission_reason: str = ""
+    admission_retry_after: str = ""
     result_refs: list[str] = field(default_factory=list)
     idem_key: str = ""
     
@@ -182,6 +184,8 @@ class AttemptDescriptor:
                 "retained_at": self.retained_at, "claim_owner": self.claim_owner,
                 "claim_lease_until": self.claim_lease_until,
                 "exit_code": self.exit_code, "terminal_reason": self.terminal_reason,
+                "admission_reason": self.admission_reason,
+                "admission_retry_after": self.admission_retry_after,
                 "result_refs": list(self.result_refs), "idem_key": self.idem_key}
 
     @classmethod
@@ -199,6 +203,8 @@ class AttemptDescriptor:
             claim_lease_until=d.get("claim_lease_until", ""),
             exit_code=d.get("exit_code"),
             terminal_reason=d.get("terminal_reason", ""),
+            admission_reason=d.get("admission_reason", ""),
+            admission_retry_after=d.get("admission_retry_after", ""),
             result_refs=list(d.get("result_refs", [])),
             idem_key=d.get("idem_key", ""),
         )
@@ -331,6 +337,17 @@ class Scheduler:
             a = self.store.get_attempt(attempt_id)
             if a is None or a.state is not AttemptState.QUEUED:
                 return None
+            # Phase E: a local attempt held by the admission gate has a retry
+            # timestamp; do not hot-loop it until the local GPU lane may be ready.
+            if a.admission_retry_after:
+                try:
+                    import datetime as _dt
+                    until = _dt.datetime.fromisoformat(a.admission_retry_after)
+                    now = _dt.datetime.now(_dt.timezone.utc)
+                    if until.replace(tzinfo=_dt.timezone.utc) > now:
+                        return None
+                except ValueError:
+                    pass
             a.state = AttemptState.CLAIMED
             a.claim_owner = dispatcher_id
             a.claim_lease_until = _utc_now()

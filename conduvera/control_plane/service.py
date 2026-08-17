@@ -58,6 +58,12 @@ from conduvera.control_plane.scheduler import (
     _utc_now,
 )
 from conduvera.control_plane.worktree import WorktreeManager, WorktreeError
+from conduvera.control_plane.local_admission import (
+    is_local_route,
+    check as local_admission_check,
+    READY as LOCAL_ADMISSION_READY,
+    retry_backoff_s as local_admission_retry_backoff,
+)
 
 REGISTRY_SCHEMA_VERSION = 1
 
@@ -320,6 +326,7 @@ class ControlPlaneService:
             live = _live_fingerprint(fp.pid)
             if live is None:
                 if session.state not in (SessionState.CANCELLED,
+                                         SessionState.CANCEL_REQUESTED,
                                          SessionState.COMPLETED,
                                          SessionState.FAILED, SessionState.LOST):
                     # T10: before marking terminal, recover the real exit code
@@ -539,6 +546,33 @@ class ControlPlaneService:
             return {"success": False, "message": "job missing", "code": "JOB_MISSING"}
         harness = job.harness
         task_id = job.task_id
+        # Phase E: local GPU/ODS admission gate. A local route must be READY
+        # (correct ODS mode + llama-server healthy + served context >= contract)
+        # before we create a worktree or start a session. If not READY we hold
+        # the attempt in the queue (visible) — never start optimistically, never
+        # silently cloud-fallback.
+        route = job.model_binding.get("route", "workload/local")
+        if is_local_route(route):
+            state, reason = local_admission_check(route)
+            if state != LOCAL_ADMISSION_READY:
+                holds = 1 + (int(attempt.admission_reason.startswith("ADMISSION_HOLD"))
+                             if attempt.admission_reason else 0)
+                attempt.admission_reason = f"ADMISSION_HOLD#{holds} {state}: {reason}"
+                import datetime as _dt
+                attempt.admission_retry_after = (
+                    _dt.datetime.now(_dt.timezone.utc) +
+                    _dt.timedelta(seconds=local_admission_retry_backoff(holds))
+                ).isoformat()
+                self.scheduler.store.save_attempt(attempt)
+                self.scheduler.release_claim(attempt.attempt_id)
+                self._emit("session.queued", {"job_id": job.job_id,
+                                              "attempt_id": attempt.attempt_id,
+                                              "task_id": task_id,
+                                              "state": state, "reason": reason,
+                                              "admission": True})
+                return {"success": False, "held": True, "state": state,
+                        "reason": reason, "code": "LOCAL_ADMISSION_BLOCKED",
+                        "detail": {"state": state, "reason": reason}}
         # real Git worktree from the exact base commit (allowlisted repo)
         try:
             repo_path = self.resolve_repo(job.repo)
@@ -874,7 +908,8 @@ class ControlPlaneService:
                     "session_id": session_id}
         live = _live_fingerprint(fp.pid)
         if live is None:
-            if session.state not in (SessionState.CANCELLED, SessionState.COMPLETED,
+            if session.state not in (SessionState.CANCELLED, SessionState.CANCEL_REQUESTED,
+                                     SessionState.COMPLETED,
                                      SessionState.FAILED, SessionState.LOST):
                 session.state = SessionState.COMPLETED
                 session.ended_at = _utc_now()
@@ -899,6 +934,12 @@ class ControlPlaneService:
                     "cancel rejected: session is not MANAGED (control_rights=none)",
                     "code": "EXTERNAL_SESSION_NOT_CONTROLLABLE",
                     "ownership_class": session.ownership_class.value}
+        # Phase G: mark cancel-requested BEFORE the kill so the concurrent
+        # monitor never re-classifies the dying process as FAILED. Restore the
+        # prior state if neither kill path succeeds.
+        prior_state = session.state
+        session.state = SessionState.CANCEL_REQUESTED
+        self.registry.update(session)
         result = self.gateway.cancel_session(
             adapter_id=session.harness_descriptor or "hermes",
             session_id=session.adapter_session_id or session_id,
@@ -933,6 +974,9 @@ class ControlPlaneService:
                     return {"success": True, "state": "CANCELLED",
                             "session_id": session_id,
                             "message": f"cancelled via scope {session.scope_id}"}
+        # Neither kill path succeeded: revert the cancel-requested marker.
+        session.state = prior_state
+        self.registry.update(session)
         return {"success": False, "message": result.message, "detail": dict(result.detail)}
 
     def _mark_attempt_terminal(
