@@ -402,3 +402,139 @@ class TestBuildroomBridge:
                           prompt="PONG")
         assert not r["ok"]
         assert r["error"]["code"] == "SERVICE_DOWN"
+
+
+class TestCancelRestartSafe:
+    """FIX-4 — CANCEL_REQUESTED restart-safe invariant.
+
+    Invariants under test:
+      * CANCEL_REQUESTED + process gone -> Session CANCELLED -> Attempt
+        CANCELLED -> Job CANCELLED (session.cancelled emitted exactly once).
+      * CANCEL_REQUESTED + process still alive after restart -> retains
+        CANCEL_REQUESTED (never returns to RUNNING).
+      * Repeated cancel on CANCELLED -> idempotent success.
+    Uses a cloud-route model_binding so the local preflight gate is skipped and
+    the test stays hermetic (no live ODS dependency).
+    """
+
+    def _make_session(self, svc, gw, reg, config, base, task="C1", attempt="c1"):
+        r = svc.submit_job(task_id=task, attempt_id=attempt, harness="hermes_scoped",
+                           repo="fixture", base_commit=base,
+                           model_binding={"route": "provider/openai/gpt-5.6-sol"},
+                           prompt="PONG")
+        assert r["success"], r
+        assert _dispatch(svc, attempt)["success"]
+        sid = svc.scheduler.store.get_attempt(attempt).session_id
+        return reg.get(sid)
+
+    def test_cancel_requested_gone_finalizes_cancelled(self, service):
+        svc, gw, reg, config, base = service
+        s = self._make_session(svc, gw, reg, config, base, "C1", "c1")
+        s.state = SessionState.CANCEL_REQUESTED
+        s.fingerprint = ProcessFingerprint(pid=999999, start_time="0", boot_id="b", command="c")
+        reg.update(s)
+        events = []
+        orig = svc._emit
+        svc._emit = lambda t, p: (events.append(t), orig(t, p))
+        res = svc.reconcile()
+        got = reg.get(s.session_id)
+        assert got.state is SessionState.CANCELLED
+        assert res[s.session_id]["transitioned"] == "process_gone_cancelled"
+        attempt = svc.scheduler.store.get_attempt("c1")
+        assert attempt.state.value == "CANCELLED" and attempt.terminal
+        assert svc.scheduler.store.get_job(attempt.job_id).state.value == "CANCELLED"
+        assert events.count("session.cancelled") == 1
+
+    def test_reconcile_cancel_requested_exactly_once_evidence(self, service):
+        svc, gw, reg, config, base = service
+        s = self._make_session(svc, gw, reg, config, base, "C2", "c2")
+        s.state = SessionState.CANCEL_REQUESTED
+        s.fingerprint = ProcessFingerprint(pid=999999, start_time="0", boot_id="b", command="c")
+        reg.update(s)
+        events = []
+        svc._emit = lambda t, p: events.append(t)
+        svc.reconcile()
+        svc.reconcile()  # repeated reconcile must not re-emit
+        assert events.count("session.cancelled") == 1
+        assert reg.get(s.session_id).state is SessionState.CANCELLED
+
+    def test_cancel_requested_alive_never_returns_running(self, service):
+        svc, gw, reg, config, base = service
+        s = self._make_session(svc, gw, reg, config, base, "C3", "c3")
+        s.state = SessionState.CANCEL_REQUESTED
+        pid = os.getpid()
+        from conduvera.harness.managed_session import (_process_start_time, _boot_id, _process_cmd)
+        s.fingerprint = ProcessFingerprint(pid=pid, start_time=_process_start_time(pid),
+                                           boot_id=_boot_id(), command=_process_cmd(pid))
+        reg.update(s)
+        svc.reconcile()
+        got = reg.get(s.session_id)
+        assert got.state is SessionState.CANCEL_REQUESTED  # never RUNNING
+
+    def test_cancel_idempotent_on_cancelled(self, service):
+        svc, gw, reg, config, base = service
+        s = self._make_session(svc, gw, reg, config, base, "C4", "c4")
+        s.state = SessionState.CANCELLED
+        reg.update(s)
+        r1 = svc.cancel(s.session_id)
+        r2 = svc.cancel(s.session_id)
+        assert r1["success"] and r1["state"] == "CANCELLED"
+        assert r2["success"] and r2["state"] == "CANCELLED"
+
+
+class TestRunAuthoritative:
+    """FIX-5 — `conduvera run` is authoritative:
+      * policy is a strict enum — a typo fails, never selects cloud;
+      * console_view exposes admission_reason for QUEUED attempts;
+      * console_view terminal rows carry evidence/worktree/scope.
+    """
+
+    def test_validate_policy_rejects_typo(self):
+        from typer import BadParameter
+        from conduvera.cli.commands.control_plane import _validate_policy
+        assert _validate_policy("local-first") == "local-first"
+        assert _validate_policy("cloud") == "cloud"
+        with pytest.raises(BadParameter):
+            _validate_policy("local-firstt")
+        with pytest.raises(BadParameter):
+            _validate_policy("CLOUD")
+
+    def test_console_view_exposes_admission_reason(self, service):
+        svc, gw, reg, config, base = service
+        # a queued attempt with an admission reason
+        svc.submit_job(task_id="Q1", attempt_id="q1", harness="hermes_scoped",
+                       repo="fixture", base_commit=base,
+                       model_binding={"route": "workload/local"}, prompt="P")
+        a = svc.scheduler.store.get_attempt("q1")
+        a.admission_reason = "ADMISSION_HOLD#1 WAITING_FOR_LOCAL_GPU: llama down"
+        svc.scheduler.store.save_attempt(a)
+        view = svc.console_view()
+        rows = [q for q in view["queued"] if q.get("attempt_id") == "q1"]
+        assert rows and rows[0]["admission_reason"].startswith("ADMISSION_HOLD#1")
+
+    def test_console_view_terminal_carries_evidence_worktree_scope(self, service):
+        svc, gw, reg, config, base = service
+        r = svc.submit_job(task_id="T1", attempt_id="t1", harness="hermes_scoped",
+                           repo="fixture", base_commit=base,
+                           model_binding={"route": "provider/openai/gpt-5.6-sol"},
+                           prompt="P")
+        assert r["success"]
+        assert _dispatch(svc, "t1")["success"]
+        s = reg.get(svc.scheduler.store.get_attempt("t1").session_id)
+        s.state = SessionState.COMPLETED
+        s.worktree = str(config.worktree_base / "t1-wt")
+        s.scope_id = "conduvera-test.scope"
+        reg.update(s)
+        from conduvera.control_plane.scheduler import AttemptState, JobState
+        a = svc.scheduler.store.get_attempt("t1")
+        a.terminal = True
+        a.state = AttemptState.COMPLETED
+        a.terminal_reason = "done"
+        svc.scheduler.store.save_attempt(a)
+        job = svc.scheduler.store.get_job(a.job_id)
+        job.state = JobState.COMPLETED
+        svc.scheduler.store.save_job(job)
+        view = svc.console_view()
+        rows = [t for t in view["terminal"] if t.get("attempt_id") == "t1"]
+        assert rows and rows[0]["worktree"] == str(config.worktree_base / "t1-wt")
+        assert rows[0]["scope_id"] == "conduvera-test.scope"

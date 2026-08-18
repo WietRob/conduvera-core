@@ -293,8 +293,13 @@ class Scheduler:
     ):
         self.store = store
         self.global_limit = global_limit
-        self.per_harness = per_harness_limits or {
-            "hermes_scoped": 2, "codex_cli": 2, "opencode_cli": 1, "hermes": 2}
+        # Canonical per-harness defaults. Caller-provided overrides MERGE on
+        # top of these (they never replace the map), so every existing harness
+        # keeps its prior limit when one harness is tightened.
+        self.per_harness = {"hermes_scoped": 2, "codex_cli": 2,
+                            "opencode_cli": 1, "hermes": 2}
+        if per_harness_limits:
+            self.per_harness.update(per_harness_limits)
         self.retention_s = retention_s
 
     def running_counts(self) -> tuple[int, dict[str, int]]:

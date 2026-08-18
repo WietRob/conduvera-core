@@ -95,46 +95,49 @@ def submit(
     _emit(result, json_output)
 
 
+_VALID_POLICIES = ("local-first", "cloud")
+
+
+def _validate_policy(value: str) -> str:
+    if value not in _VALID_POLICIES:
+        raise typer.BadParameter(
+            f"policy must be one of {_VALID_POLICIES} (got {value!r}); "
+            "a typo never selects a route")
+    return value
+
+
 @control_app.command("run")
 def run(
     goal: str = typer.Argument(..., help="the bounded engineering goal"),
     repo: str = typer.Option("conduvera-core", "--repo", help="allowlisted repo id"),
-    policy: str = typer.Option("local-first", "--policy", help="local-first|cloud"),
+    policy: str = typer.Option("local-first", "--policy", callback=_validate_policy,
+                               help="strict enum: local-first|cloud (typo fails)"),
     harness: str = typer.Option("hermes_scoped", "--harness", help="harness"),
     timeout: float = typer.Option(180.0, "--timeout", help="job timeout seconds"),
-    base_commit: str = typer.Option("", "--base-commit", help="explicit base commit (default repo HEAD)"),
+    base_commit: str = typer.Option("", "--base-commit",
+                                    help="explicit base commit (default: server resolves repo HEAD)"),
     wait_s: float = typer.Option(180.0, "--wait", help="max seconds to wait for a terminal state"),
     poll_s: float = typer.Option(3.0, "--poll", help="console poll interval"),
-    json_output: bool = typer.Option(False, "--json", help="JSON output"),
+    json_output: bool = typer.Option(False, "--json", help="emit exactly one JSON document"),
 ) -> None:
-    """Daily operator entry point: run one bounded local-first goal end to end.
+    """Daily operator entry point: run one bounded goal end to end.
 
-    policy=local-first -> route workload/local (the local RTX 5090 model lane).
-    Prints the operator surface: goal/job/attempt, harness, logical route,
-    live model identity, context (served/verified), GPU mode + reservation,
-    worktree/scope, lifecycle, evidence, and any admission/fallback reason.
+    policy is a STRICT enum: 'local-first' (route workload/local) or 'cloud'
+    (route workload/architect). A typo fails — it never silently selects cloud.
+    All operator-surface data comes from the Control-Plane console API and the
+    ODS authority (route-capability contract + llama-server for model identity).
+    --json emits EXACTLY one JSON document. Cloud runs never show local model
+    identity or local GPU state. Exit code is nonzero for failed, timed-out or
+    unresolved runs. base_commit is resolved by the server (no client repo
+    path authority).
     """
     import datetime as _dt
-    import subprocess as _sp
     from pathlib import Path as _Path
 
-    repo_paths = {
-        "conduvera-core": _Path.home() / "projects/matrix-os",
-        "conduvera-adapter": _Path.home() / "projects/conduvera-hermes-adapter",
-        "conduvera-platform": _Path.home() / "projects/conduvera-platform",
-        "conduit-fixture": _Path.home() / "projects/conduit-fixture",
-    }
     route = "workload/local" if policy == "local-first" else "workload/architect"
     _ts = _dt.datetime.now()
     task_id = f"run-{_ts.strftime('%Y%m%d-%H%M%S')}"
     attempt_id = f"a{_ts.strftime('%H%M%S%f')}"  # UNIQUE per submit (global dedup)
-    if not base_commit:
-        rp = repo_paths.get(repo, _Path.home() / "projects" / repo)
-        base_commit = _sp.run(["git", "-C", str(rp), "rev-parse", "HEAD"],
-                              capture_output=True, text=True).stdout.strip()
-        if not base_commit:
-            base_commit = _sp.run(["git", "-C", str(rp), "rev-parse", "--verify", "HEAD"],
-                                  capture_output=True, text=True).stdout.strip()
 
     start = _call("start", {
         "task_id": task_id, "attempt_id": attempt_id, "harness": harness,
@@ -144,11 +147,33 @@ def run(
     })
     if not start.get("ok"):
         _emit(start, json_output)
-        return
+        raise typer.Exit(1)
     job_id = start.get("result", {}).get("job_id", "")
-    print(f"[run] submitted task={task_id} job={job_id} route={route} harness={harness}")
 
-    # -- gather live operator surface (read-only ODS observations) --
+    # -- poll the Control-Plane console (authoritative) until terminal --
+    terminal = None
+    queued_row = None
+    waited = 0.0
+    while waited < wait_s:
+        cons = _call("console", {})
+        r = cons.get("result", {})
+        # capture admission_reason while QUEUED (FIX-5)
+        if queued_row is None:
+            for q in r.get("queued", []):
+                if q.get("job_id") == job_id:
+                    queued_row = q
+                    break
+        for t in r.get("terminal", []):
+            if t.get("job_id") == job_id:
+                terminal = t
+                break
+        if terminal:
+            break
+        import time as _t
+        _t.sleep(min(poll_s, 5.0))
+        waited += poll_s
+
+    # -- ODS authority for model identity/context (local-first ONLY) --
     def _get(url, timeout=3):
         try:
             import urllib.request
@@ -157,83 +182,95 @@ def run(
         except Exception:
             return 0, b""
 
-    model_id, served, verified, gpu_mode = "unknown", "?", "?", "?"
-    st, body = _get("http://127.0.0.1:11434/v1/models")
-    if st == 200:
+    model_id, served, verified, gpu_mode = None, None, None, None
+    if policy == "local-first":
+        st, body = _get("http://127.0.0.1:11434/v1/models")
+        if st == 200:
+            try:
+                model_id = json.loads(body)["data"][0]["id"]
+            except Exception:
+                pass
         try:
-            model_id = json.loads(body)["data"][0]["id"]
+            import yaml as _y
+            c = _y.safe_load(open(_Path.home()/".local/share/ai-stack/route-capabilities.yaml"))
+            for r_ in c.get("routes", []):
+                if route in ([r_.get("route")] + r_.get("aliases", [])):
+                    served = r_.get("served_context")
+                    verified = r_.get("verified_context")
+                    gpu_mode = r_.get("gpu_mode")
+                    break
         except Exception:
             pass
-    try:
-        import yaml as _y
-        c = _y.safe_load(open(_Path.home()/".local/share/ai-stack/route-capabilities.yaml"))
-        for r_ in c.get("routes", []):
-            if route in ([r_.get("route")] + r_.get("aliases", [])):
-                served = r_.get("served_context"); verified = r_.get("verified_context")
-                gpu_mode = r_.get("gpu_mode"); break
-    except Exception:
-        pass
-    try:
-        gpu_mode = _Path.home()/".local/share/ai-stack/active-mode"
-        gpu_mode = gpu_mode.read_text().strip() if gpu_mode.exists() else gpu_mode
-    except Exception:
-        pass
-    try:
-        gpu = _sp.run(["nvidia-smi", "--query-gpu=memory.used,memory.free", "--format=csv,noheader"],
-                      capture_output=True, text=True).stdout.strip()
-    except Exception:
-        gpu = "n/a"
+        try:
+            _m = _Path.home()/".local/share/ai-stack/active-mode"
+            gpu_mode = _m.read_text().strip() if _m.exists() else gpu_mode
+        except Exception:
+            pass
 
-    # -- poll console until terminal --
-    terminal = None
-    waited = 0.0
-    while waited < wait_s:
-        cons = _call("console", {})
-        r = cons.get("result", {})
-        for t in r.get("terminal", []):
-            if t.get("job_id") == job_id:
-                terminal = t
-                break
-        if terminal:
-            break
-        import time as _t
-        _t.sleep(min(poll_s, 5.0)); waited += poll_s
+    lifecycle = terminal.get("state", "NOT_TERMINAL") if terminal else "NOT_TERMINAL"
+    # FIX-5: classify evidence — 'evidence:' prefixed refs are validated
+    # EvidenceBundles; the rest are stdout/stderr log paths.
+    evidence_bundles, logs = [], []
+    for e in (terminal.get("evidence") or [] if terminal else []):
+        if isinstance(e, str) and e.startswith("evidence:"):
+            evidence_bundles.append(e)
+        else:
+            logs.append(e)
 
     surface = {
         "goal": goal, "job_id": job_id, "attempt_id": attempt_id,
-        "harness": harness, "route": route, "model_identity": model_id,
+        "harness": harness, "route": route, "policy": policy,
+        "lifecycle": lifecycle,
+        "exit_code": terminal.get("exit_code") if terminal else None,
+        "reason": terminal.get("terminal_reason", "") if terminal else (
+            f"queued; {queued_row.get('admission_reason','waiting')}" if queued_row else "waiting"),
+        "admission_reason": queued_row.get("admission_reason", "") if queued_row else "",
+        "worktree": terminal.get("worktree", "") if terminal else "",
+        "scope_id": terminal.get("scope_id", "") if terminal else "",
+        "session_id": terminal.get("session_id", "") if terminal else "",
+        "evidence_bundles": evidence_bundles,
+        "logs": logs,
+        # local-first only: model identity + context from the ODS authority
+        "model_identity": model_id,
         "served_context": served, "verified_context": verified,
-        "gpu_mode": gpu_mode, "gpu_reservation": gpu,
-        "lifecycle": terminal.get("state", "RUNNING_OR_QUEUED") if terminal else "NOT_TERMINAL",
-        "exit_code": terminal.get("exit") if terminal else None,
-        "reason": terminal.get("reason", "") if terminal else "waiting",
-        "evidence": list(terminal.get("evidence", [])) if terminal else [],
-        "worktree": _Path.home()/f".local/state/conduvera/worktrees/{task_id}-{attempt_id}",
+        "gpu_mode": gpu_mode,
+        "gpu_usage_informational": None,  # never claimed as a reservation
     }
-    # Evidence state: also surface the real worktree artefacts (stdout/stderr).
-    wt_dir = _Path.home()/f".local/state/conduvera/worktrees/{task_id}-{attempt_id}"
-    if wt_dir.is_dir():
-        art = sorted([p.name for p in wt_dir.glob("mxs_*") if p.suffix in (".txt", ".json")])
-        if art:
-            surface["evidence"] = surface["evidence"] + [str(wt_dir/a) for a in art]
     if json_output:
-        typer.echo(json.dumps({"ok": True, "result": surface}, indent=2))
-        return
-    print("\n=== OPERATOR CONSOLE — local-first run ===")
-    print(f"  goal            : {goal}")
-    print(f"  job/attempt     : {job_id} / {attempt_id}")
-    print(f"  harness/route   : {harness} -> {route}  (policy={policy})")
-    print(f"  model identity  : {model_id}")
-    print(f"  context         : served={served} verified={verified}")
-    print(f"  gpu mode/res    : {gpu_mode} | {gpu}")
-    print(f"  lifecycle       : {surface['lifecycle']}  exit={surface['exit_code']}  reason={surface['reason']}")
-    print(f"  worktree        : {surface['worktree']}")
-    if surface["evidence"]:
-        print(f"  evidence        : {len(surface['evidence'])} artefact(s)")
-        for e in surface["evidence"][:4]:
-            print(f"                    {e}")
+        # EXACTLY one JSON document — nothing else on stdout.
+        typer.echo(json.dumps({"ok": True, "result": surface}))
     else:
-        print("  evidence        : (none yet)")
+        print("\n=== OPERATOR CONSOLE — %s run ===" % policy)
+        print(f"  goal            : {goal}")
+        print(f"  job/attempt     : {job_id} / {attempt_id}")
+        print(f"  harness/route   : {harness} -> {route}  (policy={policy})")
+        if policy == "local-first":
+            print(f"  model identity  : {model_id}")
+            print(f"  context         : served={served} verified={verified}")
+            print(f"  gpu mode        : {gpu_mode}  (informational; not a reservation)")
+        else:
+            print("  model identity  : (cloud run — no local state shown)")
+        print(f"  lifecycle       : {lifecycle}  exit={surface['exit_code']}  reason={surface['reason']}")
+        if surface["worktree"]:
+            print(f"  worktree        : {surface['worktree']}  scope={surface['scope_id']}")
+        if surface["admission_reason"]:
+            print(f"  admission       : {surface['admission_reason']}")
+        if evidence_bundles:
+            print(f"  EvidenceBundles : {len(evidence_bundles)}")
+            for e in evidence_bundles[:4]:
+                print(f"                    {e}")
+        if logs:
+            print(f"  logs            : {len(logs)}")
+            for e in logs[:2]:
+                print(f"                    {e}")
+        if not evidence_bundles and not logs:
+            print("  evidence        : (none yet)")
+
+    # FIX-5: nonzero exit for failed / timed-out / unresolved runs.
+    if lifecycle in ("FAILED", "TIMED_OUT"):
+        raise typer.Exit(1)
+    if lifecycle == "NOT_TERMINAL":
+        raise typer.Exit(2)
 
 
 @control_app.command("list")

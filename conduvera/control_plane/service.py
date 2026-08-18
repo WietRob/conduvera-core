@@ -325,10 +325,24 @@ class ControlPlaneService:
                 continue
             live = _live_fingerprint(fp.pid)
             if live is None:
-                if session.state not in (SessionState.CANCELLED,
-                                         SessionState.CANCEL_REQUESTED,
-                                         SessionState.COMPLETED,
-                                         SessionState.FAILED, SessionState.LOST):
+                if session.state is SessionState.CANCEL_REQUESTED:
+                    # FIX-4 invariant: CANCEL_REQUESTED + process gone
+                    #   -> Session CANCELLED -> Attempt CANCELLED -> Job CANCELLED
+                    # Finalize exactly once (subsequent reconciles see CANCELLED
+                    # and are idempotent, so session.cancelled is emitted once).
+                    session.state = SessionState.CANCELLED
+                    session.ended_at = _utc_now()
+                    self.registry.update(session)
+                    self._mark_attempt_terminal(session, AttemptState.CANCELLED)
+                    self._emit("session.cancelled", {"session_id": session.session_id,
+                                                     "task_id": session.task_id,
+                                                     "attempt_id": session.attempt_id,
+                                                     "reconciled": True})
+                    results[session.session_id] = {
+                        "state": "CANCELLED", "transitioned": "process_gone_cancelled"}
+                elif session.state not in (SessionState.CANCELLED,
+                                           SessionState.COMPLETED,
+                                           SessionState.FAILED, SessionState.LOST):
                     # T10: before marking terminal, recover the real exit code
                     # from the owned scope (or acceptance fixture) so an exact
                     # nonzero exit survives a restart and reaches evidence.
@@ -340,35 +354,48 @@ class ControlPlaneService:
                         else SessionState.COMPLETED)
                     session.ended_at = _utc_now()
                     self.registry.update(session)
-                # Owner invariant: Session and Attempt must use their
-                # corresponding terminal states (COMPLETED<->COMPLETED,
-                # FAILED<->FAILED, CANCELLED<->CANCELLED). Never FAILED
-                # Session with COMPLETED Attempt.
-                attempt_state = {
-                    SessionState.COMPLETED: AttemptState.COMPLETED,
-                    SessionState.FAILED: AttemptState.FAILED,
-                    SessionState.CANCELLED: AttemptState.CANCELLED,
-                    SessionState.LOST: AttemptState.FAILED,  # fail-closed
-                }.get(session.state, AttemptState.FAILED)
-                self._mark_attempt_terminal(session, attempt_state)
-                results[session.session_id] = {"state": session.state.value,
-                                               "transitioned": "process_gone",
-                                               "exit_code": session.exit_code,
-                                               "attempt_state": attempt_state.value}
-                self._emit("session.reconciled", {"session_id": session.session_id,
-                                                  "state": session.state.value,
-                                                  "transitioned": "process_gone",
-                                                  "exit_code": session.exit_code,
-                                                  "attempt_state": attempt_state.value})
+                    # Owner invariant: Session and Attempt must use their
+                    # corresponding terminal states (COMPLETED<->COMPLETED,
+                    # FAILED<->FAILED, CANCELLED<->CANCELLED).
+                    attempt_state = {
+                        SessionState.COMPLETED: AttemptState.COMPLETED,
+                        SessionState.FAILED: AttemptState.FAILED,
+                        SessionState.CANCELLED: AttemptState.CANCELLED,
+                        SessionState.LOST: AttemptState.FAILED,  # fail-closed
+                    }.get(session.state, AttemptState.FAILED)
+                    self._mark_attempt_terminal(session, attempt_state)
+                    results[session.session_id] = {"state": session.state.value,
+                                                   "transitioned": "process_gone",
+                                                   "exit_code": session.exit_code,
+                                                   "attempt_state": attempt_state.value}
+                    self._emit("session.reconciled", {"session_id": session.session_id,
+                                                      "state": session.state.value,
+                                                      "transitioned": "process_gone",
+                                                      "exit_code": session.exit_code,
+                                                      "attempt_state": attempt_state.value})
+                else:
+                    # already terminal (COMPLETED/FAILED/CANCELLED/LOST) — idempotent
+                    results[session.session_id] = {"state": session.state.value,
+                                                   "transitioned": "already_terminal"}
             elif live.matches(fp):
-                if session.state is not SessionState.RUNNING:
+                if session.state is SessionState.CANCEL_REQUESTED:
+                    # FIX-4 invariant: a cancel in flight must never return to
+                    # RUNNING after restart. Retry the owned-scope kill or
+                    # retain CANCEL_REQUESTED.
+                    self._retry_cancel_owned_scope(session)
+                    results[session.session_id] = {"state": "CANCEL_REQUESTED",
+                                                   "transitioned": "retry_cancel"}
+                elif session.state is not SessionState.RUNNING:
                     session.state = SessionState.RUNNING
                     self.registry.update(session)
-                results[session.session_id] = {"state": "RUNNING",
-                                               "transitioned": "rediscovered"}
-                self._emit("session.reconciled", {"session_id": session.session_id,
-                                                  "state": "RUNNING",
-                                                  "transitioned": "rediscovered"})
+                    results[session.session_id] = {"state": "RUNNING",
+                                                   "transitioned": "rediscovered"}
+                    self._emit("session.reconciled", {"session_id": session.session_id,
+                                                      "state": "RUNNING",
+                                                      "transitioned": "rediscovered"})
+                else:
+                    results[session.session_id] = {"state": "RUNNING",
+                                                   "transitioned": "rediscovered"}
             else:
                 session.state = SessionState.LOST
                 session.ended_at = _utc_now()
@@ -379,6 +406,21 @@ class ControlPlaneService:
                                                   "state": "LOST",
                                                   "transitioned": "pid_reuse"})
         return results
+
+    def _retry_cancel_owned_scope(self, session) -> None:
+        """FIX-4: re-issue cancellation against the owned systemd scope while a
+        session is CANCEL_REQUESTED (e.g. after a control-plane restart). Never
+        touches a foreign process; if no owned scope is resolvable, the session
+        simply retains CANCEL_REQUESTED until the process is observed gone."""
+        if session.scope_id and session.scope_id.endswith(".scope"):
+            fp = session.fingerprint
+            if fp is not None and fp.pid > 0:
+                try:
+                    subprocess.run(["systemctl", "--user", "kill", session.scope_id,
+                                    "-s", "SIGKILL"],
+                                   capture_output=True, timeout=15)
+                except (OSError, subprocess.TimeoutExpired):
+                    pass
 
     # -- job operations -----------------------------------------------------
 
@@ -468,9 +510,18 @@ class ControlPlaneService:
             return {"success": False, "message": f"duplicate attempt {attempt_id}",
                     "code": "DUPLICATE_ATTEMPT", "attempt_id": attempt_id}
         try:
-            self.resolve_repo(repo)
+            repo_path = self.resolve_repo(repo)
         except ValueError as exc:
             return {"success": False, "message": str(exc), "code": "REPO_NOT_ALLOWED"}
+        # FIX-5: an empty base_commit is resolved server-side from the repo
+        # HEAD (authoritative); the client never owns repo->path resolution.
+        if not base_commit:
+            try:
+                r = subprocess.run(["git", "-C", str(repo_path), "rev-parse", "HEAD"],
+                                   capture_output=True, text=True, timeout=15)
+                base_commit = r.stdout.strip()
+            except (OSError, subprocess.TimeoutExpired):
+                pass
         # normalize path components (task/attempt -> safe identifiers)
         try:
             task_id_safe, attempt_id_safe = _normalize_identifiers(
@@ -934,6 +985,13 @@ class ControlPlaneService:
                     "cancel rejected: session is not MANAGED (control_rights=none)",
                     "code": "EXTERNAL_SESSION_NOT_CONTROLLABLE",
                     "ownership_class": session.ownership_class.value}
+        # FIX-4 idempotency: cancel on an already-terminal session is a no-op
+        # success (never re-kills, never re-emits session.cancelled).
+        if session.state in (SessionState.CANCELLED, SessionState.COMPLETED,
+                             SessionState.FAILED, SessionState.LOST):
+            return {"success": True, "state": session.state.value,
+                    "session_id": session_id,
+                    "message": f"already {session.state.value}"}
         # Phase G: mark cancel-requested BEFORE the kill so the concurrent
         # monitor never re-classifies the dying process as FAILED. Restore the
         # prior state if neither kill path succeeds.
@@ -1095,6 +1153,9 @@ class ControlPlaneService:
                     "payload_ref": j.get("payload_ref", ""),
                     "content_sha256": j.get("content_sha256", ""),
                     "base_commit": j.get("base_commit", ""),
+                    # FIX-5: expose the local preflight admission reason while
+                    # the attempt is QUEUED so the operator sees why it is held.
+                    "admission_reason": a.admission_reason,
                     "created_at": j.get("created_at", ""),
                     ** _elapsed_deadline(j.get("created_at", ""),
                                          float(j.get("timeout_s", 180.0))),
@@ -1129,13 +1190,17 @@ class ControlPlaneService:
                 })
 
         # --- terminal ---
+        session_by_id = {s.get("session_id"): s for s in sessions}
         terminal = []
         for j in jobs:
             if j.get("state") in ("COMPLETED", "FAILED", "CANCELLED",
                                   "TIMED_OUT"):
+                _aid = (j.get("attempts") or [None])[0]
+                _sid = self._session_id_for_attempt(str(_aid) if _aid else "")
+                _s = session_by_id.get(_sid, {})
                 terminal.append({
                     "job_id": j["job_id"], "task_id": j.get("task_id", ""),
-                    "attempt_id": (j.get("attempts") or [None])[0],
+                    "attempt_id": _aid,
                     "state": j.get("state"),
                     "terminal_reason": j.get("terminal_reason", ""),
                     "exit_code": j.get("exit_code"),
@@ -1145,7 +1210,13 @@ class ControlPlaneService:
                     "content_sha256": j.get("content_sha256", ""),
                     "created_at": j.get("created_at", ""),
                     "updated_at": j.get("updated_at", ""),
-                    "session_id": self._session_id_for_attempt((j.get("attempts") or [None])[0]),
+                    "session_id": _sid,
+                    # FIX-5: authoritative worktree/scope/evidence from the
+                    # session, not guessed paths. EvidenceBundles are refs that
+                    # start with 'evidence:'; stdout/stderr paths are logs.
+                    "worktree": _s.get("worktree", ""),
+                    "scope_id": _s.get("scope_id", ""),
+                    "evidence": list(j.get("result_refs", [])),
                 })
 
         _running_rows = sorted(running, key=lambda x: x.get("started_at", ""),
