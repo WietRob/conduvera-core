@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from conduvera.harness.adapters import _hermes_env, _HERMES_FIXTURE_CONFIG
+from conduvera.harness.adapters import _hermes_env
 
 
 def test_hermes_env_binds_terminal_cwd_to_worktree(tmp_path):
