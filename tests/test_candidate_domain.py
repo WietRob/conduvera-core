@@ -329,3 +329,50 @@ class TestCanonicalOperations:
         assert c["canonical_patch_sha256"] != \
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
+
+class TestEmptyAndSourceIntegrity:
+    """Phase E + Phase D (worktree fidelity delivery gates)."""
+
+    def test_empty_changeset_rejected(self, tmp_path):
+        """Phase E: a code-change candidate with no worktree diff must fail."""
+        import pytest
+        store, ev, svc = _mk(tmp_path)
+        wt = tmp_path / "wts" / "empty"
+        base = _git_init(wt)  # commits a.txt; no further changes
+        with pytest.raises(CandidateError) as exc:
+            svc.build_candidate(
+                job_id="j", attempt_id="a", session_id="s", delivery_id="d",
+                repo_id="r", github_repository="R/r", base_branch="main",
+                base_commit=base, worktree=str(wt), evidence_refs=[],
+                named_tests=[], named_gates=[])
+        assert exc.value.code == "EMPTY_CHANGESET"
+
+    def test_source_repo_snapshot_unchanged_matches(self, tmp_path):
+        """Phase D: a dispatch-time source snapshot matches an unchanged repo."""
+        from conduvera.control_plane.service import (
+            _source_repo_snapshot, _source_repo_matches_snapshot)
+        src = tmp_path / "src"
+        _git_init(src)
+        snap = _source_repo_snapshot(src)
+        assert snap != "{}"
+        assert _source_repo_matches_snapshot(src, snap) is True
+
+    def test_source_repo_snapshot_detects_mutation(self, tmp_path):
+        """Phase D: mutating the source repo after the snapshot must fail."""
+        from conduvera.control_plane.service import (
+            _source_repo_snapshot, _source_repo_matches_snapshot)
+        src = tmp_path / "src"
+        _git_init(src)
+        snap = _source_repo_snapshot(src)
+        # mutate the source repo (uncommitted change)
+        (src / "a.txt").write_text("MUTATED\n")
+        assert _source_repo_matches_snapshot(src, snap) is False
+
+    def test_source_repo_snapshot_missing_fails_closed(self, tmp_path):
+        """Phase D: no recorded snapshot is unproven -> fail closed."""
+        from conduvera.control_plane.service import _source_repo_matches_snapshot
+        src = tmp_path / "src"
+        _git_init(src)
+        assert _source_repo_matches_snapshot(src, "") is False
+        assert _source_repo_matches_snapshot(src, "{}") is False
+

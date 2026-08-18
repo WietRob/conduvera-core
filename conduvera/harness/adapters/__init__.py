@@ -55,6 +55,11 @@ class HarnessSpec:
     start_args_builder: Callable[[str, dict[str, Any]], list[str]] | None = None
     doctor_cmd: tuple[str, ...] | None = None
     extra_env: dict[str, str] | None = None
+    # Per-spawn environment builder: given (prompt, config-with-worktree) it may
+    # create session-local files and return env overrides (e.g. HERMES_HOME /
+    # HERMES_PROFILE / HERMES_CONFIG) so the harness is bound to the registered
+    # worktree. This is structural binding — never natural-language.
+    env_builder: Callable[[str, dict[str, Any]], dict[str, str]] | None = None
     allowlist_extra: tuple[str, ...] = ()
     npx_package: str | None = None
     # When True the harness reads its task prompt from STDIN (verified for
@@ -97,7 +102,11 @@ def _use_scope() -> bool:
     probe unit may collide). Falling back to a raw process group must never
     silently run the harness outside the dedicated worktree, so the scope
     path (which pins --working-directory) is preferred whenever available.
-    """
+    CONDUVERA_DISABLE_SCOPES=1 forces the process-group fallback (which still
+    enforces the worktree boundary via the shell-free cwd executor) when the
+    host cannot reliably run transient user scopes (e.g. bus unavailable)."""
+    if os.environ.get("CONDUVERA_DISABLE_SCOPES") == "1":
+        return False
     if _SCOPE_AVAILABLE:
         return True
     return _systemd_scope_available()
@@ -260,6 +269,11 @@ class ScopedProcessAdapter:
         env = dict(os.environ)
         for k, v in (self._spec.extra_env or {}).items():
             env[k] = v
+        if self._spec.env_builder is not None:
+            # A per-spawn env builder (e.g. hermes allowlist) replaces the env
+            # wholesale so the child never inherits provider tokens / a stray
+            # TERMINAL_CWD from the parent.
+            env = dict(self._spec.env_builder(prompt, cfg))
 
         try:
             with open(stdout_path, "w", encoding="utf-8") as out, \
@@ -525,7 +539,78 @@ class ScopedProcessAdapter:
 
 
 def _hermes_args(prompt: str, config: dict[str, Any]) -> list[str]:
-    return ["-z", prompt]
+    # --profile is REQUIRED: Hermes does not honour the HERMES_PROFILE env for
+    # one-shot (-z) runs; without it the worker silently uses a default profile
+    # (no local route) instead of the isolated worktree-bound fixture profile.
+    # --in registers the session working directory natively (Hermes creates its
+    # session state.db relative to it), which both binds the worktree and avoids
+    # the "No connected db" failure seen when only terminal.cwd is set.
+    args = ["--oneshot", prompt, "--profile", "fixture-live"]
+    wt = config.get("worktree")
+    if wt:
+        args += ["--in", str(wt)]
+    return args
+
+
+_HERMES_FIXTURE_CONFIG = """model:
+  default: {route}
+  provider: custom:litellm
+  context_length: 65536
+providers:
+  litellm:
+    api: http://127.0.0.1:4000/v1
+    name: litellm
+    key_env: LITELLM_API_KEY
+    transport: chat_completions
+terminal:
+  backend: local
+  cwd: {worktree}
+agent:
+  verify_on_stop: false
+display:
+  tool_progress: none
+_config_version: 33
+"""
+
+
+def _hermes_env(prompt: str, config: dict[str, Any]) -> dict[str, str]:
+    """Return an ALLOWLISTED environment for the spawned Hermes worker plus the
+    session-local HERMES_* pointers.
+
+    The full parent environment is NOT forwarded (it can carry provider tokens /
+    TERMINAL_CWD / default model pointers that break the local LiteLLM route).
+    Only PATH/HOME/LITELLM_API_KEY + locale fields pass through, matching the
+    standalone adapter's secret-safe allowlist.
+
+    Worktree fidelity (Phase B): the absolute registered worktree is injected
+    structurally into terminal.cwd. Hermes bridges terminal.cwd -> TERMINAL_CWD
+    at startup, so every tool (terminal/read_file/write_file/patch/search_files/
+    execute_code) resolves into the task worktree — never the parent project
+    root or a stray session record.
+    """
+    wt = Path(str(config.get("worktree", ""))).expanduser().resolve()
+    route = str(config.get("route", "workload/local"))
+    home = wt / "hermes-home" / "profiles" / "fixture-live"
+    home.mkdir(parents=True, exist_ok=True)
+    (home / "config.yaml").write_text(
+        _HERMES_FIXTURE_CONFIG.format(route=route, worktree=str(wt)),
+        encoding="utf-8",
+    )
+    allow = {
+        "PATH", "HOME", "LITELLM_API_KEY", "LANG", "LC_ALL", "LC_CTYPE",
+        "TZ", "USER", "LOGNAME", "SHELL", "TERM", "PYTHONPATH",
+        "CONDUVERA_STATE_DIR",
+    }
+    env = {k: v for k, v in os.environ.items() if k in allow and v is not None}
+    env.setdefault("PATH", "/usr/local/bin:/usr/bin:/bin")
+    env.setdefault("HOME", str(Path.home()))
+    # PYTHONPATH must reach the shell-free cwd_exec wrapper subprocess so it can
+    # import conduvera.harness.cwd_exec. It is harmless for the Hermes child.
+    env.setdefault("PYTHONPATH", str(Path(__file__).resolve().parent.parent.parent))
+    env["HERMES_HOME"] = str(wt / "hermes-home")
+    env["HERMES_PROFILE"] = "fixture-live"
+    env["HERMES_CONFIG"] = str(home / "config.yaml")
+    return env
 
 
 def _codex_args(prompt: str, config: dict[str, Any]) -> list[str]:
@@ -614,7 +699,8 @@ def pi_cli_adapter() -> ScopedProcessAdapter:
 
 def hermes_scoped_adapter() -> ScopedProcessAdapter:
     return ScopedProcessAdapter(
-        spec=HarnessSpec(binary="hermes", start_args_builder=_hermes_args),
+        spec=HarnessSpec(binary="hermes", start_args_builder=_hermes_args,
+                         env_builder=_hermes_env),
         task_timeout_s=180.0,
     )
 

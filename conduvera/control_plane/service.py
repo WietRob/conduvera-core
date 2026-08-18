@@ -212,6 +212,39 @@ def _live_fingerprint(pid: int) -> ProcessFingerprint | None:
     )
 
 
+def _source_repo_snapshot(repo_path) -> str:
+    """JSON snapshot {head, porcelain_hash} of the source repo at dispatch time.
+
+    Used by the Phase D delivery gate to prove the source repository was not
+    mutated outside the registered task worktree. Empty JSON on any failure
+    (fail-closed: the delivery gate treats a missing snapshot as unproven)."""
+    import hashlib as _hl
+    try:
+        head = subprocess.run(["git", "-C", str(repo_path), "rev-parse", "HEAD"],
+                              capture_output=True, text=True, timeout=15).stdout.strip()
+        porcelain = subprocess.run(["git", "-C", str(repo_path), "status", "--porcelain"],
+                                   capture_output=True, text=True, timeout=15).stdout
+        return json.dumps({"head": head, "porcelain_hash": _hl.sha256(porcelain.encode()).hexdigest()})
+    except (OSError, subprocess.TimeoutExpired):
+        return "{}"
+
+
+def _source_repo_matches_snapshot(repo_path, snapshot_json: str) -> bool:
+    """True if the source repo is unchanged vs the dispatch-time snapshot."""
+    try:
+        snap = json.loads(snapshot_json or "{}")
+        if not snap.get("head") or not snap.get("porcelain_hash"):
+            return False  # no snapshot recorded -> unproven (fail-closed)
+        head = subprocess.run(["git", "-C", str(repo_path), "rev-parse", "HEAD"],
+                              capture_output=True, text=True, timeout=15).stdout.strip()
+        porcelain = subprocess.run(["git", "-C", str(repo_path), "status", "--porcelain"],
+                                   capture_output=True, text=True, timeout=15).stdout
+        import hashlib as _hl
+        return head == snap["head"] and _hl.sha256(porcelain.encode()).hexdigest() == snap["porcelain_hash"]
+    except (OSError, subprocess.TimeoutExpired, ValueError):
+        return False  # fail-closed
+
+
 class ControlPlaneService:
     """Persistent harness control plane (in-process runtime for the daemon)."""
 
@@ -627,6 +660,9 @@ class ControlPlaneService:
         # real Git worktree from the exact base commit (allowlisted repo)
         try:
             repo_path = self.resolve_repo(job.repo)
+            # Phase D: snapshot the source repo at dispatch time so the delivery
+            # gate can prove it was not mutated outside the task worktree.
+            attempt.source_snapshot = _source_repo_snapshot(repo_path)
             binding = self.worktrees.create(
                 repo_path=repo_path, base_commit=job.base_commit,
                 task_id=task_id, attempt_id=attempt.attempt_id,

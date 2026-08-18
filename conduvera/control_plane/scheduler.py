@@ -171,6 +171,10 @@ class AttemptDescriptor:
     terminal_reason: str = ""
     admission_reason: str = ""
     admission_retry_after: str = ""
+    # Phase D: source-repo integrity snapshot captured at dispatch time, so the
+    # delivery gate can prove the source repository was not mutated outside the
+    # task worktree. {"head": ..., "porcelain_hash": ...} or empty.
+    source_snapshot: str = ""
     result_refs: list[str] = field(default_factory=list)
     idem_key: str = ""
     
@@ -186,6 +190,7 @@ class AttemptDescriptor:
                 "exit_code": self.exit_code, "terminal_reason": self.terminal_reason,
                 "admission_reason": self.admission_reason,
                 "admission_retry_after": self.admission_retry_after,
+                "source_snapshot": self.source_snapshot,
                 "result_refs": list(self.result_refs), "idem_key": self.idem_key}
 
     @classmethod
@@ -205,6 +210,7 @@ class AttemptDescriptor:
             terminal_reason=d.get("terminal_reason", ""),
             admission_reason=d.get("admission_reason", ""),
             admission_retry_after=d.get("admission_retry_after", ""),
+            source_snapshot=d.get("source_snapshot", ""),
             result_refs=list(d.get("result_refs", [])),
             idem_key=d.get("idem_key", ""),
         )

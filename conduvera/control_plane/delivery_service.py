@@ -452,6 +452,33 @@ class DeliveryService:
         bound = self._bound_elsewhere(record.get("delivery_id") or "", wt)
         if bound:
             reasons.append({"code": "DELIVERY_ALREADY_BOUND", "message": bound})
+        # 13. source-repo integrity (Phase D): the source repository must be
+        #     unchanged vs the dispatch-time snapshot. A worker that edited or
+        #     searched outside the registered worktree is a hard acceptance
+        #     failure — block the candidate and preserve forensic evidence.
+        src_path = self._repo_allowlist.get(repo_id) if (
+            repo_id and repo_id in self._repo_allowlist) else None
+        snapshot = ""
+        if src_path is not None and self.service is not None:
+            try:
+                _a = self.service.scheduler.store.get_attempt(attempt_id)
+                if _a is not None:
+                    snapshot = _a.source_snapshot or ""
+            except Exception:
+                snapshot = ""
+        if src_path is not None and snapshot:
+            from conduvera.control_plane.service import _source_repo_matches_snapshot
+            if not _source_repo_matches_snapshot(src_path, snapshot):
+                import subprocess as _sp
+                forensics = ""
+                try:
+                    forensics = _sp.run(["git", "-C", str(src_path), "status", "--porcelain"],
+                                        capture_output=True, text=True, timeout=15).stdout
+                except Exception:
+                    forensics = ""
+                reasons.append({"code": "SOURCE_REPO_MUTATED",
+                                "message": f"source repository {repo_id} mutated outside the task worktree",
+                                "forensics": forensics[:2000]})
         return reasons
 
     # -- gate helpers ------------------------------------------------------
