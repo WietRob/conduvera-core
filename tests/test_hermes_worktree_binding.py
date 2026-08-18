@@ -29,7 +29,7 @@ def test_hermes_env_binds_terminal_cwd_to_worktree(tmp_path):
 def test_hermes_env_uses_workload_local_route(tmp_path):
     wt = tmp_path / "task-wt"
     wt.mkdir()
-    env = _hermes_env("prompt", {"worktree": str(wt), "route": "workload/local"})
+    _hermes_env("prompt", {"worktree": str(wt), "route": "workload/local"})
     cfg = (wt / "hermes-home" / "profiles" / "fixture-live" / "config.yaml").read_text()
     assert "default: workload/local" in cfg
     assert "custom:litellm" in cfg
