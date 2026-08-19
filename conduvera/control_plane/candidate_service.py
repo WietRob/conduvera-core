@@ -298,6 +298,14 @@ class PublishCandidateService:
             raise CandidateError("FORBIDDEN_PATH",
                                  "forbidden path(s): " + ", ".join(d["path"] for d in denied))
 
+        # Phase E (worktree fidelity): a PublishCandidate must carry a real,
+        # non-empty changeset. Logs/prose alone never become a candidate.
+        if not files:
+            raise CandidateError(
+                "EMPTY_CHANGESET",
+                "worktree has no file changes relative to base_commit "
+                f"{base_commit}; cannot publish a candidate from logs alone")
+
         # exact hashes (DOD canonical manifest)
         index_tree = _git("write-tree", cwd=wt)
         worktree_tree = _git("rev-parse", "HEAD^{tree}", cwd=wt)
@@ -362,6 +370,9 @@ class PublishCandidateService:
         ".curaops/control/",
         "outbox.jsonl",
         "control-plane.sock",
+        # pure runtime artefacts — never code changes, always excluded
+        "__pycache__/", ".pyc", ".pytest_cache/", ".mypy_cache/", ".ruff_cache/",
+        ".hermes/", "hermes-home/",
     )
 
     def _decide(self, rel: str, status: str) -> dict:

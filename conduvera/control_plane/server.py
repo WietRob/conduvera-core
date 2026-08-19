@@ -40,11 +40,17 @@ def build_service(state_dir: str | None = None) -> ControlPlaneService:
         # B5/multi-session: under the isolated acceptance service let the
         # fixture harness run up to the global concurrency so two controlled
         # MANAGED sessions can coexist simultaneously (never changes the
-        # normal per-harness default of 1).
+        # normal per-harness defaults).
+        # Phase E LOCAL_ROUTE_PREFLIGHT: in normal mode cap the local harness to
+        # ONE concurrent slot (matches llama-server --parallel 1) so two
+        # Conduvera sessions can never overcommit the single local GPU.
+        # The Scheduler MERGES these overrides into its canonical per-harness
+        # defaults — codex_cli/opencode_cli/hermes keep their prior limits.
         per_harness_limits=(
             {"acceptance_fixture_cli": int(os.environ.get(
                 "CONDUVERA_GLOBAL_CONCURRENCY", "4"))}
-            if os.environ.get("CONDUVERA_ACCEPTANCE_MODE") == "1" else None),
+            if os.environ.get("CONDUVERA_ACCEPTANCE_MODE") == "1"
+            else {"hermes_scoped": 1}),
     )
     from conduvera.control_plane.outbox import EventOutbox
     svc.set_outbox(EventOutbox(config.outbox_path, webhook_url=None))

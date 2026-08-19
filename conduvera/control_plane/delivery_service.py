@@ -73,6 +73,15 @@ FORBIDDEN_PATH_PARTS = (
     "control-plane.sock", "outbox.jsonl",
 )
 
+# Pure runtime / session artefacts: excluded from the candidate changeset, never
+# blocking. A worker running pytest / imports naturally leaves __pycache__/*.pyc;
+# the isolated hermes runtime may leave .hermes or mxs_ logs. These are not code
+# changes and must not block a PublishCandidate.
+_RUNTIME_EXCLUDE_PARTS = (
+    "__pycache__/", ".pyc", ".pytest_cache/", ".mypy_cache/", ".ruff_cache/",
+    "mxs_", ".stdout.txt", ".stderr.txt", ".hermes/", "hermes-home/",
+)
+
 SECRET_PATTERNS = (
     re.compile(r"(?i)(api[_-]?key|secret|token|password|passwd|credential)\s*[=:]\s*\S{8,}"),
     re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}"),
@@ -452,6 +461,33 @@ class DeliveryService:
         bound = self._bound_elsewhere(record.get("delivery_id") or "", wt)
         if bound:
             reasons.append({"code": "DELIVERY_ALREADY_BOUND", "message": bound})
+        # 13. source-repo integrity (Phase D): the source repository must be
+        #     unchanged vs the dispatch-time snapshot. A worker that edited or
+        #     searched outside the registered worktree is a hard acceptance
+        #     failure — block the candidate and preserve forensic evidence.
+        src_path = self._repo_allowlist.get(repo_id) if (
+            repo_id and repo_id in self._repo_allowlist) else None
+        snapshot = ""
+        if src_path is not None and self.service is not None:
+            try:
+                _a = self.service.scheduler.store.get_attempt(attempt_id)
+                if _a is not None:
+                    snapshot = _a.source_snapshot or ""
+            except Exception:
+                snapshot = ""
+        if src_path is not None and snapshot:
+            from conduvera.control_plane.service import _source_repo_matches_snapshot
+            if not _source_repo_matches_snapshot(src_path, snapshot):
+                import subprocess as _sp
+                forensics = ""
+                try:
+                    forensics = _sp.run(["git", "-C", str(src_path), "status", "--porcelain"],
+                                        capture_output=True, text=True, timeout=15).stdout
+                except Exception:
+                    forensics = ""
+                reasons.append({"code": "SOURCE_REPO_MUTATED",
+                                "message": f"source repository {repo_id} mutated outside the task worktree",
+                                "forensics": forensics[:2000]})
         return reasons
 
     # -- gate helpers ------------------------------------------------------
@@ -510,11 +546,11 @@ class DeliveryService:
         found = []
         for f in changes:
             low = f.lower()
-            # session-log runtime artefacts (mxs_*.stdout/stderr.txt) are
-            # excluded, not blocked — they never enter the commit (candidate
-            # manifest) and remain recorded in the EvidenceBundle
-            if low.startswith("mxs_") and (low.endswith(".stdout.txt")
-                                           or low.endswith(".stderr.txt")):
+            # Pure runtime / session artefacts are EXCLUDED (never block the
+            # candidate; they are not code changes): mxs_* stdout/stderr,
+            # __pycache__/*.pyc from pytest/import, pytest/mypy/ruff caches,
+            # and any .hermes runtime tree.
+            if any(r in low for r in _RUNTIME_EXCLUDE_PARTS):
                 continue
             if any(part in low for part in FORBIDDEN_PATH_PARTS):
                 found.append({"code": "FORBIDDEN_PATH",
