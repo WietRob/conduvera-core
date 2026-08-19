@@ -370,6 +370,9 @@ class PublishCandidateService:
         ".curaops/control/",
         "outbox.jsonl",
         "control-plane.sock",
+        # pure runtime artefacts — never code changes, always excluded
+        "__pycache__/", ".pyc", ".pytest_cache/", ".mypy_cache/", ".ruff_cache/",
+        ".hermes/", "hermes-home/",
     )
 
     def _decide(self, rel: str, status: str) -> dict:

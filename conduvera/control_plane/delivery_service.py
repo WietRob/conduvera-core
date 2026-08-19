@@ -73,6 +73,15 @@ FORBIDDEN_PATH_PARTS = (
     "control-plane.sock", "outbox.jsonl",
 )
 
+# Pure runtime / session artefacts: excluded from the candidate changeset, never
+# blocking. A worker running pytest / imports naturally leaves __pycache__/*.pyc;
+# the isolated hermes runtime may leave .hermes or mxs_ logs. These are not code
+# changes and must not block a PublishCandidate.
+_RUNTIME_EXCLUDE_PARTS = (
+    "__pycache__/", ".pyc", ".pytest_cache/", ".mypy_cache/", ".ruff_cache/",
+    "mxs_", ".stdout.txt", ".stderr.txt", ".hermes/", "hermes-home/",
+)
+
 SECRET_PATTERNS = (
     re.compile(r"(?i)(api[_-]?key|secret|token|password|passwd|credential)\s*[=:]\s*\S{8,}"),
     re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}"),
@@ -537,11 +546,11 @@ class DeliveryService:
         found = []
         for f in changes:
             low = f.lower()
-            # session-log runtime artefacts (mxs_*.stdout/stderr.txt) are
-            # excluded, not blocked — they never enter the commit (candidate
-            # manifest) and remain recorded in the EvidenceBundle
-            if low.startswith("mxs_") and (low.endswith(".stdout.txt")
-                                           or low.endswith(".stderr.txt")):
+            # Pure runtime / session artefacts are EXCLUDED (never block the
+            # candidate; they are not code changes): mxs_* stdout/stderr,
+            # __pycache__/*.pyc from pytest/import, pytest/mypy/ruff caches,
+            # and any .hermes runtime tree.
+            if any(r in low for r in _RUNTIME_EXCLUDE_PARTS):
                 continue
             if any(part in low for part in FORBIDDEN_PATH_PARTS):
                 found.append({"code": "FORBIDDEN_PATH",

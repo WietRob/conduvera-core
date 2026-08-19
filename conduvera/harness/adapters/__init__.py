@@ -586,11 +586,21 @@ def _hermes_env(prompt: str, config: dict[str, Any]) -> dict[str, str]:
     structurally into terminal.cwd. Hermes bridges terminal.cwd -> TERMINAL_CWD
     at startup, so every tool (terminal/read_file/write_file/patch/search_files/
     execute_code) resolves into the task worktree — never the parent project
-    root or a stray session record.
+    root or a stray session record. The isolated HERMES_HOME (state.db etc.)
+    lives OUTSIDE the worktree so runtime state never pollutes the candidate
+    changeset.
     """
     wt = Path(str(config.get("worktree", ""))).expanduser().resolve()
     route = str(config.get("route", "workload/local"))
-    home = wt / "hermes-home" / "profiles" / "fixture-live"
+    attempt = str(config.get("attempt_id", "")) or "a"
+    state_dir = Path(str(os.environ.get("CONDUVERA_STATE_DIR", ""))).expanduser()
+    if not state_dir.is_absolute():
+        state_dir = Path.home() / ".local" / "state" / "conduvera"
+    # hermes-home lives OUTSIDE the worktree (state dir), per attempt, so the
+    # task worktree contains ONLY the code change.
+    hh_root = state_dir / "hermes-home" / f"{attempt}-{wt.name}"
+    hh_root.mkdir(parents=True, exist_ok=True)
+    home = hh_root / "profiles" / "fixture-live"
     home.mkdir(parents=True, exist_ok=True)
     (home / "config.yaml").write_text(
         _HERMES_FIXTURE_CONFIG.format(route=route, worktree=str(wt)),
@@ -604,10 +614,21 @@ def _hermes_env(prompt: str, config: dict[str, Any]) -> dict[str, str]:
     env = {k: v for k, v in os.environ.items() if k in allow and v is not None}
     env.setdefault("PATH", "/usr/local/bin:/usr/bin:/bin")
     env.setdefault("HOME", str(Path.home()))
+    # The fixture profile's provider uses key_env=LITELLM_API_KEY. The parent
+    # service env may only expose LITELLM_MASTER_KEY / LITELLM_KEY (not
+    # LITELLM_API_KEY), in which case hermes would send the "no-key-required"
+    # sentinel -> LiteLLM no_db_connection. Guarantee a valid key in the worker
+    # env by deriving LITELLM_API_KEY from the available LiteLLM key.
+    if "LITELLM_API_KEY" not in env:
+        for _src in ("LITELLM_MASTER_KEY", "LITELLM_KEY"):
+            _v = os.environ.get(_src)
+            if _v:
+                env["LITELLM_API_KEY"] = _v
+                break
     # PYTHONPATH must reach the shell-free cwd_exec wrapper subprocess so it can
     # import conduvera.harness.cwd_exec. It is harmless for the Hermes child.
     env.setdefault("PYTHONPATH", str(Path(__file__).resolve().parent.parent.parent))
-    env["HERMES_HOME"] = str(wt / "hermes-home")
+    env["HERMES_HOME"] = str(hh_root)
     env["HERMES_PROFILE"] = "fixture-live"
     env["HERMES_CONFIG"] = str(home / "config.yaml")
     return env
