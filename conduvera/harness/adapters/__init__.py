@@ -555,7 +555,7 @@ def _hermes_args(prompt: str, config: dict[str, Any]) -> list[str]:
 _HERMES_FIXTURE_CONFIG = """model:
   default: {route}
   provider: custom:litellm
-  context_length: 65536
+  context_length: 131072
 providers:
   litellm:
     api: http://127.0.0.1:4000/v1
